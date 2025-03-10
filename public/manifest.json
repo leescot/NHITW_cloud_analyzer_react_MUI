@@ -1,0 +1,36 @@
+{
+  "manifest_version": 3,
+  "name": "健保雲端資料擷取器2.0",
+  "version": "1.0",
+  "description": "健保雲端資料擷取器, beta version 1.0",
+  "permissions": ["webRequest", "storage", "scripting", "clipboardWrite"],
+  "host_permissions": ["https://medcloud2.nhi.gov.tw/*"],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "icons": {
+        "16": "images/icon16.png",
+        "48": "images/icon48.png",
+        "128": "images/icon128.png"
+    },
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "images/icon16.png",
+      "19": "images/icon19.png",
+      "38": "images/icon38.png",
+      "48": "images/icon48.png",
+      "128": "images/icon128.png"
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://medcloud2.nhi.gov.tw/imu/*",
+        "http://localhost:3000/*"
+      ],
+      "js": ["content.js"],
+      "run_at": "document_end"
+    }
+  ]
+}
