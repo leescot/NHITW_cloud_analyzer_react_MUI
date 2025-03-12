@@ -16,6 +16,9 @@ import InfoIcon from '@mui/icons-material/Info';
 import DownloadIcon from '@mui/icons-material/Download';
 import BugReportIcon from '@mui/icons-material/BugReport';
 
+// 引入標籤顏色工具函數
+import { getTabColor, getTabSelectedColor } from '../utils/tabColorUtils';
+
 // 導入拆分出的組件
 import DataStatusTab from './settings/DataStatusTab';
 import GeneralDisplaySettings from './settings/GeneralDisplaySettings';
@@ -117,6 +120,17 @@ const PopupSettings = () => {
     patientSummary: { status: 'none', count: 0 }
   });
   
+  // 添加一般顯示設定狀態
+  const [generalDisplaySettings, setGeneralDisplaySettings] = useState({
+    useColorfulTabs: false,
+    titleTextSize: 'medium',
+    contentTextSize: 'medium',
+    noteTextSize: 'small',
+    floatingIconPosition: 'top-right',
+    alwaysOpenOverviewTab: true,
+    autoOpenPage: false
+  });
+  
   // 新增下載狀態與通知
   const [downloading, setDownloading] = useState(false);
   const [snackbar, setSnackbar] = useState({
@@ -142,6 +156,19 @@ const PopupSettings = () => {
     
     // 立即更新資料狀態
     updateDataStatus(setDataStatus);
+    
+    // 加載一般顯示設定
+    chrome.storage.sync.get({
+      useColorfulTabs: false,
+      titleTextSize: 'medium',
+      contentTextSize: 'medium',
+      noteTextSize: 'small',
+      floatingIconPosition: 'top-right',
+      alwaysOpenOverviewTab: true,
+      autoOpenPage: false
+    }, (items) => {
+      setGeneralDisplaySettings(items);
+    });
     
     // 監聽來自 background 的消息，用於更新數據狀態
     const handleMessage = (message) => {
@@ -191,9 +218,36 @@ const PopupSettings = () => {
           indicatorColor="primary"
           textColor="primary"
         >
-          <Tab icon={<SettingsIcon />} label="設定" />
-          <Tab icon={<InfoIcon />} label="資料狀態" />
-          <Tab icon={<BugReportIcon />} label="測試模式" />
+          <Tab 
+            icon={<SettingsIcon />} 
+            label="設定" 
+            sx={{
+              color: getTabColor(generalDisplaySettings, "settings"),
+              "&.Mui-selected": {
+                color: getTabSelectedColor(generalDisplaySettings, "settings"),
+              },
+            }}
+          />
+          <Tab 
+            icon={<InfoIcon />} 
+            label="資料狀態" 
+            sx={{
+              color: getTabColor(generalDisplaySettings, "dataStatus"),
+              "&.Mui-selected": {
+                color: getTabSelectedColor(generalDisplaySettings, "dataStatus"),
+              },
+            }}
+          />
+          <Tab 
+            icon={<BugReportIcon />} 
+            label="測試模式" 
+            sx={{
+              color: getTabColor(generalDisplaySettings, "testMode"),
+              "&.Mui-selected": {
+                color: getTabSelectedColor(generalDisplaySettings, "testMode"),
+              },
+            }}
+          />
         </Tabs>
       </AppBar>
       {/* Settings Tab */}

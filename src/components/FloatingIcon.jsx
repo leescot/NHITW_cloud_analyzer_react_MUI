@@ -50,6 +50,9 @@ import {
   handleDataFetchCompletedSettingsChange,
 } from "../utils/settingsManager";
 
+// 引入標籤顏色工具函數
+import { getTabColor, getTabSelectedColor } from "../utils/tabColorUtils";
+
 // import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import Snackbar from "@mui/material/Snackbar";
 // import VisibilityIcon from '@mui/icons-material/Visibility';
@@ -443,9 +446,9 @@ const FloatingIcon = () => {
                   iconPosition="start"
                   sx={{
                     padding: "6px 10px",
-                    color: "#2196f3", // Always blue since overview always has content
+                    color: getTabColor(generalDisplaySettings, "overview"),
                     "&.Mui-selected": {
-                      color: "#0d47a1", // Darker blue when selected
+                      color: getTabSelectedColor(generalDisplaySettings, "overview"),
                     },
                   }}
                 />
@@ -456,10 +459,10 @@ const FloatingIcon = () => {
                   sx={{
                     padding: "6px 10px",
                     color:
-                      groupedMedications.length > 0 ? "#2196f3" : "#9e9e9e", // (3) Gray if no data
+                      groupedMedications.length > 0 ? getTabColor(generalDisplaySettings, "medication") : "#9e9e9e",
                     "&.Mui-selected": {
                       color:
-                        groupedMedications.length > 0 ? "#0d47a1" : "#616161", // Darker color when selected
+                        groupedMedications.length > 0 ? getTabSelectedColor(generalDisplaySettings, "medication") : "#616161",
                     },
                   }}
                 />
@@ -470,10 +473,10 @@ const FloatingIcon = () => {
                     minWidth: "40px", // Narrower width for icon-only tab
                     padding: "6px 6px",
                     color:
-                      groupedMedications.length > 0 ? "#2196f3" : "#9e9e9e", // (3) Gray if no data
+                      groupedMedications.length > 0 ? getTabColor(generalDisplaySettings, "medication") : "#9e9e9e",
                     "&.Mui-selected": {
                       color:
-                        groupedMedications.length > 0 ? "#0d47a1" : "#616161", // Darker color when selected
+                        groupedMedications.length > 0 ? getTabSelectedColor(generalDisplaySettings, "medication") : "#616161",
                     },
                   }}
                 />
@@ -484,10 +487,10 @@ const FloatingIcon = () => {
                   sx={{
                     padding: "6px 10px",
                     color:
-                      groupedChineseMeds.length > 0 ? "#2196f3" : "#9e9e9e", // (3) Gray if no data
+                      groupedChineseMeds.length > 0 ? getTabColor(generalDisplaySettings, "chineseMed") : "#9e9e9e",
                     "&.Mui-selected": {
                       color:
-                        groupedChineseMeds.length > 0 ? "#0d47a1" : "#616161", // Darker color when selected
+                        groupedChineseMeds.length > 0 ? getTabSelectedColor(generalDisplaySettings, "chineseMed") : "#616161",
                     },
                   }}
                 />
@@ -497,9 +500,9 @@ const FloatingIcon = () => {
                   iconPosition="start"
                   sx={{
                     padding: "6px 10px",
-                    color: groupedLabs.length > 0 ? "#2196f3" : "#9e9e9e", // (3) Gray if no data
+                    color: groupedLabs.length > 0 ? getTabColor(generalDisplaySettings, "lab") : "#9e9e9e",
                     "&.Mui-selected": {
-                      color: groupedLabs.length > 0 ? "#0d47a1" : "#616161", // Darker color when selected
+                      color: groupedLabs.length > 0 ? getTabSelectedColor(generalDisplaySettings, "lab") : "#616161",
                     },
                   }}
                 />
@@ -509,9 +512,9 @@ const FloatingIcon = () => {
                   sx={{
                     minWidth: "40px", // Narrower width for icon-only tab
                     padding: "6px 6px",
-                    color: groupedLabs.length > 0 ? "#2196f3" : "#9e9e9e", // (3) Gray if no data
+                    color: groupedLabs.length > 0 ? getTabColor(generalDisplaySettings, "lab") : "#9e9e9e",
                     "&.Mui-selected": {
-                      color: groupedLabs.length > 0 ? "#0d47a1" : "#616161", // Darker color when selected
+                      color: groupedLabs.length > 0 ? getTabSelectedColor(generalDisplaySettings, "lab") : "#616161",
                     },
                   }}
                 />
@@ -528,15 +531,15 @@ const FloatingIcon = () => {
                       imagingData.withReport.length +
                         imagingData.withoutReport.length >
                       0
-                        ? "#2196f3"
-                        : "#9e9e9e", // (3) Gray if no data
+                        ? getTabColor(generalDisplaySettings, "imaging")
+                        : "#9e9e9e",
                     "&.Mui-selected": {
                       color:
                         imagingData.withReport.length +
                           imagingData.withoutReport.length >
                         0
-                          ? "#0d47a1"
-                          : "#616161", // Darker color when selected
+                          ? getTabSelectedColor(generalDisplaySettings, "imaging")
+                          : "#616161",
                     },
                   }}
                 />
@@ -546,9 +549,9 @@ const FloatingIcon = () => {
                   iconPosition="start"
                   sx={{
                     padding: "6px 10px",
-                    color: medDaysData.length > 0 ? "#2196f3" : "#9e9e9e", // (3) Gray if no data
+                    color: medDaysData.length > 0 ? getTabColor(generalDisplaySettings, "medDays") : "#9e9e9e",
                     "&.Mui-selected": {
-                      color: medDaysData.length > 0 ? "#0d47a1" : "#616161", // Darker color when selected
+                      color: medDaysData.length > 0 ? getTabSelectedColor(generalDisplaySettings, "medDays") : "#616161",
                     },
                   }}
                 />
@@ -558,9 +561,9 @@ const FloatingIcon = () => {
                   iconPosition="start"
                   sx={{
                     padding: "6px 10px",
-                    color: "#2196f3", // Always blue for help tab since it always has content
+                    color: getTabColor(generalDisplaySettings, "help"),
                     "&.Mui-selected": {
-                      color: "#0d47a1", // Darker blue when selected
+                      color: getTabSelectedColor(generalDisplaySettings, "help"),
                     },
                   }}
                 />

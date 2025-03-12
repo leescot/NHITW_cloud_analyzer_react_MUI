@@ -25,6 +25,7 @@ const GeneralDisplaySettings = () => {
   const [noteTextSize, setNoteTextSize] = useState('small');
   const [floatingIconPosition, setFloatingIconPosition] = useState('top-right');
   const [alwaysOpenOverviewTab, setAlwaysOpenOverviewTab] = useState(true);
+  const [useColorfulTabs, setUseColorfulTabs] = useState(false);
   
   // Load settings from storage
   useEffect(() => {
@@ -34,7 +35,8 @@ const GeneralDisplaySettings = () => {
       contentTextSize: 'medium',
       noteTextSize: 'small',
       floatingIconPosition: 'top-right',
-      alwaysOpenOverviewTab: true
+      alwaysOpenOverviewTab: true,
+      useColorfulTabs: false
     }, (items) => {
       setAutoOpenPage(items.autoOpenPage);
       setTitleTextSize(items.titleTextSize);
@@ -42,6 +44,7 @@ const GeneralDisplaySettings = () => {
       setNoteTextSize(items.noteTextSize);
       setFloatingIconPosition(items.floatingIconPosition);
       setAlwaysOpenOverviewTab(items.alwaysOpenOverviewTab);
+      setUseColorfulTabs(items.useColorfulTabs);
     });
   }, []);
   
@@ -65,7 +68,8 @@ const GeneralDisplaySettings = () => {
             contentTextSize: contentTextSize,
             noteTextSize: noteTextSize,
             floatingIconPosition: floatingIconPosition,
-            alwaysOpenOverviewTab: alwaysOpenOverviewTab
+            alwaysOpenOverviewTab: alwaysOpenOverviewTab,
+            useColorfulTabs: useColorfulTabs
           }
         });
       }
@@ -92,7 +96,8 @@ const GeneralDisplaySettings = () => {
             contentTextSize: contentTextSize,
             noteTextSize: noteTextSize,
             floatingIconPosition: floatingIconPosition,
-            alwaysOpenOverviewTab: alwaysOpenOverviewTab
+            alwaysOpenOverviewTab: alwaysOpenOverviewTab,
+            useColorfulTabs: useColorfulTabs
           }
         });
       }
@@ -119,7 +124,8 @@ const GeneralDisplaySettings = () => {
             contentTextSize: newValue,
             noteTextSize: noteTextSize,
             floatingIconPosition: floatingIconPosition,
-            alwaysOpenOverviewTab: alwaysOpenOverviewTab
+            alwaysOpenOverviewTab: alwaysOpenOverviewTab,
+            useColorfulTabs: useColorfulTabs
           }
         });
       }
@@ -146,7 +152,8 @@ const GeneralDisplaySettings = () => {
             contentTextSize: contentTextSize,
             noteTextSize: newValue,
             floatingIconPosition: floatingIconPosition,
-            alwaysOpenOverviewTab: alwaysOpenOverviewTab
+            alwaysOpenOverviewTab: alwaysOpenOverviewTab,
+            useColorfulTabs: useColorfulTabs
           }
         });
       }
@@ -173,7 +180,8 @@ const GeneralDisplaySettings = () => {
             contentTextSize: contentTextSize,
             noteTextSize: noteTextSize,
             floatingIconPosition: newValue,
-            alwaysOpenOverviewTab: alwaysOpenOverviewTab
+            alwaysOpenOverviewTab: alwaysOpenOverviewTab,
+            useColorfulTabs: useColorfulTabs
           }
         });
       }
@@ -200,7 +208,36 @@ const GeneralDisplaySettings = () => {
             contentTextSize: contentTextSize,
             noteTextSize: noteTextSize,
             floatingIconPosition: floatingIconPosition,
-            alwaysOpenOverviewTab: newValue
+            alwaysOpenOverviewTab: newValue,
+            useColorfulTabs: useColorfulTabs
+          }
+        });
+      }
+    });
+  };
+  
+  // Handle colorful tabs toggle
+  const handleColorfulTabsChange = (event) => {
+    const newValue = event.target.checked;
+    setUseColorfulTabs(newValue);
+    chrome.storage.sync.set({ useColorfulTabs: newValue });
+    
+    // Notify FloatingIcon component of the change
+    chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+      if (tabs[0]) {
+        chrome.tabs.sendMessage(tabs[0].id, {
+          action: "settingChanged",
+          settingType: "generalDisplay",
+          setting: "useColorfulTabs",
+          value: newValue,
+          allSettings: {
+            autoOpenPage: autoOpenPage,
+            titleTextSize: titleTextSize,
+            contentTextSize: contentTextSize,
+            noteTextSize: noteTextSize,
+            floatingIconPosition: floatingIconPosition,
+            alwaysOpenOverviewTab: alwaysOpenOverviewTab,
+            useColorfulTabs: newValue
           }
         });
       }
@@ -233,8 +270,20 @@ const GeneralDisplaySettings = () => {
             }
             label="開啟頁面固定顯示總覽頁面"
           />
-                    
           <FormHelperText>每次開啟時會固定顯示「總覽」頁面</FormHelperText>
+          
+          <FormControlLabel
+            control={
+              <Switch
+                checked={useColorfulTabs}
+                onChange={handleColorfulTabsChange}
+                name="useColorfulTabs"
+                color="primary"
+              />
+            }
+            label="使用彩色標籤"
+          />
+          <FormHelperText>開啟後各功能標籤會以不同顏色顯示，關閉則全部使用淺藍色</FormHelperText>
           
           {/* <FormControlLabel
             control={
@@ -319,4 +368,4 @@ const GeneralDisplaySettings = () => {
   );
 };
 
-export default GeneralDisplaySettings; 
+export default GeneralDisplaySettings;

@@ -50,7 +50,8 @@ export const loadAllSettings = async () => {
       contentTextSize: DEFAULT_SETTINGS.general.contentTextSize,
       noteTextSize: DEFAULT_SETTINGS.general.noteTextSize,
       floatingIconPosition: DEFAULT_SETTINGS.general.floatingIconPosition,
-      alwaysOpenOverviewTab: DEFAULT_SETTINGS.general.alwaysOpenOverviewTab
+      alwaysOpenOverviewTab: DEFAULT_SETTINGS.general.alwaysOpenOverviewTab,
+      useColorfulTabs: DEFAULT_SETTINGS.general.useColorfulTabs
     }, (items) => {
       // 組織所有設置到一個結構化對象
       const allSettings = {
@@ -92,7 +93,8 @@ export const loadAllSettings = async () => {
           contentTextSize: items.contentTextSize,
           noteTextSize: items.noteTextSize,
           floatingIconPosition: items.floatingIconPosition,
-          alwaysOpenOverviewTab: items.alwaysOpenOverviewTab
+          alwaysOpenOverviewTab: items.alwaysOpenOverviewTab,
+          useColorfulTabs: items.useColorfulTabs
         }
       };
       
@@ -331,7 +333,8 @@ const handleGeneralDisplaySettingsChange = (event, updateGeneralDisplaySettings)
       contentTextSize: event.detail.allSettings.contentTextSize,
       noteTextSize: event.detail.allSettings.noteTextSize,
       floatingIconPosition: event.detail.allSettings.floatingIconPosition,
-      alwaysOpenOverviewTab: event.detail.allSettings.alwaysOpenOverviewTab
+      alwaysOpenOverviewTab: event.detail.allSettings.alwaysOpenOverviewTab,
+      useColorfulTabs: event.detail.allSettings.useColorfulTabs
     };
     
     // 更新設置
