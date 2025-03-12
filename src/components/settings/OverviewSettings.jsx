@@ -32,49 +32,9 @@ import ArrowCircleUpIcon from '@mui/icons-material/ArrowCircleUp';
 import ArrowCircleDownIcon from '@mui/icons-material/ArrowCircleDown';
 import ImageIcon from '@mui/icons-material/Image';
 
-/**
- * DEFAULT_LAB_TESTS - 關注檢驗清單的預設配置
- * 
- * 這是新使用者初次使用或重置設定時將顯示的預設檢驗項目清單。
- * 此配置將存儲在 Chrome 的 storage.sync 中作為 focusedLabTests 設定。
- * 
- * 每個項目的格式:
- * - orderCode: 檢驗的代碼 (例如: 09001C)
- * - displayName: 在界面上顯示的名稱
- * - enabled: 是否預設啟用此項目
- * 
- * 注意: 
- * 1. 僅修改此處不會影響現有使用者的設定，因為他們的配置已存儲在 Chrome storage 中
- * 2. 若要更新所有使用者的設定，需要實現版本升級機制
- * 3. 新增或修改項目時，確保 orderCode 的唯一性
- */
-export const DEFAULT_LAB_TESTS = [
-  { orderCode: '08011C-WBC', displayName: 'WBC', enabled: false },
-  { orderCode: '08011C-Hb', displayName: 'Hb', enabled: true },
-  { orderCode: '08011C-Platelet', displayName: 'Platelet', enabled: false },
-  { orderCode: '09002C', displayName: 'BUN', enabled: true },
-  { orderCode: '09015C', displayName: 'Cr & GFR', enabled: true },
-  { orderCode: '09040C', displayName: 'UPCR', enabled: true },
-  { orderCode: '12111C', displayName: 'UACR', enabled: true },
-  { orderCode: '09038C', displayName: 'Alb', enabled: true },
-  { orderCode: '09005C', displayName: 'Glucose', enabled: true },
-  { orderCode: '09006C', displayName: 'HbA1c', enabled: true },
-  { orderCode: '09001C', displayName: 'Chol', enabled: true },
-  { orderCode: '09004C', displayName: 'TG', enabled: true },
-  { orderCode: '09043C', displayName: 'HDL', enabled: true },
-  { orderCode: '09044C', displayName: 'LDL', enabled: true },
-  { orderCode: '09021C', displayName: 'Na', enabled: true },
-  { orderCode: '09022C', displayName: 'K', enabled: true },
-  { orderCode: '09011C', displayName: 'Ca', enabled: false },
-  { orderCode: '09012C', displayName: 'P', enabled: false },
-  { orderCode: '09013C', displayName: 'U.A', enabled: true },
-  { orderCode: '09025C', displayName: 'GOT', enabled: true },
-  { orderCode: '09026C', displayName: 'GPT', enabled: true },
-  { orderCode: '09027C', displayName: 'Alk-P', enabled: false },
-  { orderCode: '09029C', displayName: 'Bil(T)', enabled: false },
-  { orderCode: '09030C', displayName: 'Bil(D)', enabled: false },
-  { orderCode: '09031C', displayName: 'r-GT', enabled: false }
-];
+// 導入從配置文件中移出的常數
+import { DEFAULT_LAB_TESTS } from '../../config/labTests';
+import { DEFAULT_IMAGE_TESTS } from '../../config/imageTests';
 
 /**
  * FALLBACK_LAB_TESTS - 極簡版的檢驗項目配置
@@ -118,41 +78,18 @@ export const resetLabTestsToDefault = (callback = () => {}) => {
       chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
         if (tabs[0]) {
           chrome.tabs.sendMessage(tabs[0].id, {
-            action: "settingChanged",
+            action: "dataFetchCompleted",
+            settingsChanged: true,
             settingType: "overview",
             setting: "focusedLabTests",
             value: DEFAULT_LAB_TESTS
           });
         }
+        callback();
       });
-      
-      // 執行回調
-      callback();
     }
   );
 };
-
-/**
- * DEFAULT_IMAGE_TESTS - 關注影像檢查清單的預設配置
- * 
- * 這是新使用者初次使用或重置設定時將顯示的預設影像檢查項目清單。
- * 此配置將存儲在 Chrome 的 storage.sync 中作為 focusedImageTests 設定。
- * 
- * 每個項目的格式:
- * - orderCode: 檢查的代碼 (例如: 33072B)
- * - displayName: 在界面上顯示的名稱
- * - enabled: 是否預設啟用此項目
- */
-export const DEFAULT_IMAGE_TESTS = [
-  { orderCode: '33085B,33084B', displayName: '磁振造影(MRI)', enabled: true },
-  { orderCode: '33072B,33070B', displayName: '電腦斷層(CT)', enabled: true },
-  { orderCode: '19009C,19001C', displayName: '腹部超音波', enabled: true },
-  { orderCode: '19009C', displayName: '其他超音波', enabled: true },
-  { orderCode: '18006C', displayName: '心臟超音波', enabled: true },
-  { orderCode: '28016C', displayName: '胃鏡', enabled: true },
-  { orderCode: '32001C', displayName: 'CXR', enabled: false },
-  { orderCode: '18001C', displayName: 'EKG', enabled: false },
-];
 
 /**
  * FALLBACK_IMAGE_TESTS - 極簡版的影像檢查配置
@@ -166,7 +103,7 @@ export const FALLBACK_IMAGE_TESTS = [
 ];
 
 /**
- * 重置用戶的影像檢查項目設定為預設值
+ * 重置用戶的影像檢查設定為預設值
  */
 export const resetImageTestsToDefault = (callback = () => {}) => {
   chrome.storage.sync.set(
@@ -176,16 +113,15 @@ export const resetImageTestsToDefault = (callback = () => {}) => {
       chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
         if (tabs[0]) {
           chrome.tabs.sendMessage(tabs[0].id, {
-            action: "settingChanged",
+            action: "dataFetchCompleted",
+            settingsChanged: true,
             settingType: "overview",
             setting: "focusedImageTests",
             value: DEFAULT_IMAGE_TESTS
           });
         }
+        callback();
       });
-      
-      // 執行回調
-      callback();
     }
   );
 };

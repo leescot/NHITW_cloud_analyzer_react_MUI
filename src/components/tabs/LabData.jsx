@@ -1,11 +1,77 @@
-import React from "react";
-import { Typography, Box, Divider, IconButton, Tooltip, Paper, Grid } from "@mui/material";
+import React, { useState } from "react";
+import { Typography, Box, Divider, IconButton, Tooltip, Paper, Grid, Snackbar } from "@mui/material";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import TypographySizeWrapper from "../utils/TypographySizeWrapper";
 
-const LabData = ({ groupedLabs, settings, labSettings, handleCopyLabData, generalDisplaySettings }) => {
+const LabData = ({ groupedLabs, settings, labSettings, generalDisplaySettings }) => {
   console.log("LabData rendering with lab settings:", labSettings);
   
+  // 添加 snackbar 狀態
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+
+  // 關閉 snackbar 的函數
+  const handleSnackbarClose = () => {
+    setSnackbarOpen(false);
+  };
+
+  // 複製檢驗數據的函數 - 從 FloatingIcon 移過來
+  const handleCopyLabData = (group) => {
+    let formattedText = `${group.date} - ${group.hosp}\n`;
+
+    // Changed default behavior to horizontal format
+    if (labSettings.copyFormat === "vertical") {
+      // Vertical format: each lab item on a new line
+      group.labs.forEach((lab) => {
+        // Use order_name as fallback if itemName is null
+        const displayName = lab.itemName || lab.orderName;
+        let labLine = `${displayName}: ${lab.value}`;
+        if (labSettings.showUnit && lab.unit) {
+          labLine += ` ${lab.unit}`;
+        }
+        if (labSettings.showReference) {
+          if (lab.referenceMin !== null) {
+            labLine += ` (${lab.referenceMin}${lab.referenceMax !== null ? `-${lab.referenceMax}` : ''})`;
+          } else if (lab.consultValue) {
+            labLine += ` (${lab.consultValue.min}-${lab.consultValue.max})`;
+          }
+        }
+        formattedText += `${labLine}\n`;
+      });
+    } else {
+      // Horizontal format: lab items on the same line, separated by spaces
+      let labItems = group.labs.map((lab) => {
+        // Use order_name as fallback if itemName is null
+        const displayName = lab.itemName || lab.orderName;
+        let labText = `${displayName}: ${lab.value}`;
+        if (labSettings.showUnit && lab.unit) {
+          labText += ` ${lab.unit}`;
+        }
+        if (labSettings.showReference) {
+          if (lab.referenceMin !== null) {
+            labText += ` (${lab.referenceMin}${lab.referenceMax !== null ? `-${lab.referenceMax}` : ''})`;
+          } else if (lab.consultValue) {
+            labText += ` (${lab.consultValue.min}-${lab.consultValue.max})`;
+          }
+        }
+        return labText;
+      });
+      formattedText += labItems.join(" | ");
+    }
+    
+    navigator.clipboard
+      .writeText(formattedText)
+      .then(() => {
+        setSnackbarMessage("檢驗資料已複製到剪貼簿");
+        setSnackbarOpen(true);
+      })
+      .catch((err) => {
+        console.error("Failed to copy lab data: ", err);
+        setSnackbarMessage("複製失敗，請重試");
+        setSnackbarOpen(true);
+      });
+  };
+
   // 確定欄數設置 (可以根據需要調整)
   const getColumnCount = () => {
     switch(labSettings.displayFormat) {
@@ -251,6 +317,13 @@ const LabData = ({ groupedLabs, settings, labSettings, handleCopyLabData, genera
           </Box>
         ))
       )}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={2000}
+        onClose={handleSnackbarClose}
+        message={snackbarMessage}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      />
     </>
   );
 };

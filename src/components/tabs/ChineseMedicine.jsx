@@ -1,14 +1,56 @@
-import React from "react";
-import { Box, Divider, IconButton, Tooltip } from "@mui/material";
+import React, { useState } from "react";
+import { Box, Divider, IconButton, Tooltip, Snackbar } from "@mui/material";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import TypographySizeWrapper from "../utils/TypographySizeWrapper";
+import { chineseMedProcessor } from "../../utils/chineseMedProcessor";
 
 const ChineseMedicine = ({
   groupedChineseMeds,
   chineseMedSettings,
-  handleCopyChineseMedications,
   generalDisplaySettings,
 }) => {
+  // 添加 snackbar 狀態
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+
+  // 關閉 snackbar 的函數
+  const handleSnackbarClose = () => {
+    setSnackbarOpen(false);
+  };
+
+  // 複製中藥的函數 - 從 FloatingIcon 移過來
+  const handleCopyChineseMedications = (medications, group) => {
+    if (chineseMedSettings.copyFormat === "none") {
+      return;
+    }
+
+    const groupInfo = {
+      date: group.date,
+      hosp: group.hosp,
+      icd_code: group.icd_code,
+      icd_name: group.icd_name,
+      showDiagnosis: chineseMedSettings.showDiagnosis,
+      showEffectName: chineseMedSettings.showEffectName,
+    };
+
+    const formattedText = chineseMedProcessor.formatChineseMedList(
+      medications,
+      chineseMedSettings.copyFormat,
+      groupInfo
+    );
+    navigator.clipboard
+      .writeText(formattedText)
+      .then(() => {
+        setSnackbarMessage("中藥清單已複製到剪貼簿");
+        setSnackbarOpen(true);
+      })
+      .catch((err) => {
+        console.error("Failed to copy Chinese medications: ", err);
+        setSnackbarMessage("複製失敗，請重試");
+        setSnackbarOpen(true);
+      });
+  };
+
   return (
     <>
       {groupedChineseMeds.length === 0 ? (
@@ -101,6 +143,13 @@ const ChineseMedicine = ({
           </Box>
         ))
       )}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={2000}
+        onClose={handleSnackbarClose}
+        message={snackbarMessage}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      />
     </>
   );
 };

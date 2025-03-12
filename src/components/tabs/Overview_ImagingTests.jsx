@@ -36,7 +36,9 @@ import TypographySizeWrapper from "../utils/TypographySizeWrapper";
 import DescriptionIcon from '@mui/icons-material/Description';
 import PhotoLibraryIcon from '@mui/icons-material/PhotoLibrary';
 import VisibilityIcon from '@mui/icons-material/Visibility';
-import { DEFAULT_IMAGE_TESTS } from '../settings/OverviewSettings';
+
+// 導入從配置文件中移出的常數
+import { DEFAULT_IMAGE_TESTS } from '../../config/imageTests';
 
 // 處理 orderName，移除括號內的內容和分號
 const formatOrderName = (orderName) => {

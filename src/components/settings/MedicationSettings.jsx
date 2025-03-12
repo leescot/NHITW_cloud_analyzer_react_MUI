@@ -40,15 +40,8 @@ import AddIcon from "@mui/icons-material/Add";
 import ColorLensIcon from "@mui/icons-material/ColorLens";
 import { handleSettingChange } from "../../utils/settingsHelper";
 
-// 預設的 ATC5 群組
-const DEFAULT_ATC5_GROUPS = {
-  NSAID: ['M01AA', 'M01AB', 'M01AC', 'M01AE', 'M01AG', 'M01AH'],
-  ACEI: ['C09AA', 'C09BA', 'C09BB', 'C09BX'],
-  ARB: ['C09CA', 'C09DA', 'C09DB', 'C09DX'],
-  STATIN: ['C10AA', 'C10BA', 'C10BX'],
-  SGLT2: ['A10BK', 'A10BD15', 'A10BD16', 'A10BD19', 'A10BD20', 'A10BD21', 'A10BD25', 'A10BD27', 'A10BD29', 'A10BD30'],
-  GLP1: ['A10BJ', 'A10AE54', 'A10AE56'],
-};
+// 導入預設配置
+import { DEFAULT_ATC5_GROUPS, DEFAULT_ATC5_COLOR_GROUPS } from "../../config/medicationGroups";
 
 const MedicationSettings = () => {
   const [settings, setSettings] = useState({
@@ -59,11 +52,7 @@ const MedicationSettings = () => {
     copyFormat: "nameWithDosageVertical",
     enableATC5Colors: true,
     atc5Groups: DEFAULT_ATC5_GROUPS,
-    atc5ColorGroups: {
-      red: ['NSAID'],
-      orange: ['ARB','ACEI','STATIN'],
-      green: [],
-    },
+    atc5ColorGroups: DEFAULT_ATC5_COLOR_GROUPS,
   });
 
   // Dialog states
@@ -91,11 +80,7 @@ const MedicationSettings = () => {
         copyFormat: "nameWithDosageVertical",
         enableATC5Colors: true,
         atc5Groups: DEFAULT_ATC5_GROUPS,
-        atc5ColorGroups: {
-          red: ['NSAID'],
-          orange: ['ARB','ACEI','STATIN'],
-          green: [],
-        },
+        atc5ColorGroups: DEFAULT_ATC5_COLOR_GROUPS,
       },
       (items) => {
         setSettings({

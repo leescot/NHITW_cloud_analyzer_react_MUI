@@ -1,15 +1,56 @@
-import React from "react";
-import { Typography, Box, Divider, IconButton, Tooltip } from "@mui/material";
+import React, { useState } from "react";
+import { Typography, Box, Divider, IconButton, Tooltip, Snackbar } from "@mui/material";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import TypographySizeWrapper from "../utils/TypographySizeWrapper";
+import { medicationProcessor } from "../../utils/medicationProcessor";
 
 const MedicationList = ({
   groupedMedications,
   settings,
   copyFormat,
-  handleCopyMedications,
   generalDisplaySettings,
 }) => {
+  // 添加 snackbar 狀態
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+
+  // 關閉 snackbar 的函數
+  const handleSnackbarClose = () => {
+    setSnackbarOpen(false);
+  };
+
+  // 複製藥物的函數 - 從 FloatingIcon 移過來
+  const handleCopyMedications = (medications, group) => {
+    if (settings.copyFormat === "none") {
+      return;
+    }
+
+    const groupInfo = {
+      date: group.date,
+      hosp: group.hosp,
+      icd_code: group.icd_code,
+      icd_name: group.icd_name,
+      showDiagnosis: settings.showDiagnosis,
+    };
+
+    const formattedText = medicationProcessor.formatMedicationList(
+      medications,
+      settings.copyFormat,
+      groupInfo
+    );
+    navigator.clipboard
+      .writeText(formattedText)
+      .then(() => {
+        setSnackbarMessage("藥物清單已複製到剪貼簿");
+        setSnackbarOpen(true);
+      })
+      .catch((err) => {
+        console.error("Failed to copy medications: ", err);
+        setSnackbarMessage("複製失敗，請重試");
+        setSnackbarOpen(true);
+      });
+  };
+
   // 判斷藥物所屬顏色的函數
   const getMedicationColor = (medication) => {
     if (!settings.enableATC5Colors) return null;
@@ -225,6 +266,13 @@ const MedicationList = ({
           </Box>
         ))
       )}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={2000}
+        onClose={handleSnackbarClose}
+        message={snackbarMessage}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      />
     </>
   );
 };

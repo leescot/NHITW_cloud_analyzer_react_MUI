@@ -24,7 +24,10 @@ import Overview_AllergyRecords from "./Overview_AllergyRecords";
 import Overview_SurgeryRecords from "./Overview_SurgeryRecords";
 import Overview_DischargeRecords from "./Overview_DischargeRecords";
 import Overview_ImagingTests from "./Overview_ImagingTests";
-import { DEFAULT_LAB_TESTS, DEFAULT_IMAGE_TESTS } from '../settings/OverviewSettings';
+
+// 導入從配置文件中移出的常數
+import { DEFAULT_LAB_TESTS } from '../../config/labTests';
+import { DEFAULT_IMAGE_TESTS } from '../../config/imageTests';
 
 const Overview = ({ 
   dashboardData, 
