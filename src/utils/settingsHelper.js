@@ -10,7 +10,7 @@ export const updateDataStatus = (setDataStatus) => {
       // Add any missing entries with default values
       const expectedKeys = [
         'medication', 'labData', 'chineseMed', 'imaging', 
-        'allergy', 'surgery', 'discharge', 'medDays'
+        'allergy', 'surgery', 'discharge', 'medDays', 'patientSummary'
       ];
       
       expectedKeys.forEach(key => {
@@ -35,7 +35,8 @@ const getStatusKeyFromStorageKey = (storageKey) => {
     'allergyData': 'allergy',
     'surgeryData': 'surgery',
     'dischargeData': 'discharge',
-    'medDaysData': 'medDays'
+    'medDaysData': 'medDays',
+    'patientSummaryData': 'patientSummary'
   };
   return mapping[storageKey] || storageKey;
 };

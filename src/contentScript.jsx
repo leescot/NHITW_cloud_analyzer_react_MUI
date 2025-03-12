@@ -27,13 +27,43 @@ function injectLegacyContent() {
     });
   });
 
-  // Also load the legacy content
-  import("./legacyContent.js")
-    .then(() => {
-      console.log("Legacy content script loaded");
+  // 加載測試模式模組
+  let testModeModule = null;
+  import("./modules/testMode.js")
+    .then((module) => {
+      console.log("測試模式模組已加載");
+      testModeModule = module;
     })
     .catch((error) => {
-      console.error("Error loading legacy content:", error);
+      console.error("加載測試模式模組時出錯:", error);
+    });
+
+  // 加載舊版內容腳本 (使用新的導出文件)
+  import("./legacyContentExport.js")
+    .then((module) => {
+      console.log("舊版內容腳本導出模組已加載");
+      // 初始化舊版內容腳本
+      if (typeof module.initLegacyContent === 'function') {
+        module.initLegacyContent();
+      }
+    })
+    .catch((error) => {
+      console.error("加載舊版內容腳本導出模組時出錯:", error);
+      
+      // 如果新的導出模組加載失敗，嘗試直接加載舊版內容腳本
+      import("./legacyContent.js")
+        .then((module) => {
+          console.log("直接加載舊版內容腳本成功");
+          // 嘗試初始化，但舊版可能沒有導出 initLegacyContent 函數
+          if (typeof module.initLegacyContent === 'function') {
+            module.initLegacyContent();
+          } else {
+            console.log("舊版內容腳本沒有導出 initLegacyContent 函數");
+          }
+        })
+        .catch((err) => {
+          console.error("直接加載舊版內容腳本也失敗:", err);
+        });
     });
 
   // 在您現有的 message 監聽器中添加對 dataForExtension 消息的處理
@@ -87,10 +117,36 @@ function injectLegacyContent() {
             detail: { type: event.data.dataType },
           });
           window.dispatchEvent(customEvent);
+          
+          // 通知 background.js 更新數據狀態
+          chrome.runtime.sendMessage({ action: "updateDataStatus" }, (response) => {
+            console.log("數據狀態更新回應:", response);
+          });
         }, 100);
       }
     } catch (error) {
       console.error("擴充功能處理數據消息時出錯:", error);
     }
+  });
+  
+  // 監聽來自 background.js 的消息
+  chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+    console.log("Content script 收到消息:", message);
+    
+    // 處理測試數據載入消息
+    if (testModeModule && (message.action === "testDataLoaded" || message.action === "testDataTypeLoaded")) {
+      return testModeModule.handleTestDataMessage(message);
+    }
+    
+    // 處理數據狀態更新消息
+    if (message.action === "dataStatusUpdated") {
+      console.log("收到數據狀態更新消息");
+      // 觸發 UI 更新事件
+      window.dispatchEvent(new CustomEvent('dataStatusUpdated', { detail: null }));
+      sendResponse({ status: "received" });
+      return true;
+    }
+    
+    return false;
   });
 })();
