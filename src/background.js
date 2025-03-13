@@ -4,1009 +4,494 @@
 // 添加開發模式設定
 let devMode = false;
 let currentTestDataId = '';
-// 根據環境使用不同的 API 端點
-let vercelApiBaseUrl = 'http://localhost:3000/api';
+let vercelApiBaseUrl = 'https://nhitw-mock-api.vercel.app/api';
 
-// 初始化時獲取設定
+// 初始化設定
 chrome.storage.sync.get(['devMode', 'currentTestDataId', 'useLocalApi'], (result) => {
   devMode = result.devMode || false;
   currentTestDataId = result.currentTestDataId || '';
-  // 如果設定為使用本地 API，則使用 localhost，否則使用 Vercel 部署的 API
   vercelApiBaseUrl = result.useLocalApi ? 'http://localhost:3000/api' : 'https://nhitw-mock-api.vercel.app/api';
   console.log('初始化開發模式設定:', devMode, currentTestDataId, '使用 API:', vercelApiBaseUrl);
 });
 
-// Modify currentSessionData to include new data types
+// 臨時會話資料
 let currentSessionData = {
   medicationData: null,
   labData: null,
   chinesemedData: null,
   imagingData: null,
-  allergyData: null,     // New
-  surgeryData: null,     // New
-  dischargeData: null,   // New
-  medDaysData: null,     // New
-  patientSummaryData: null, // Patient summary data
+  allergyData: null,
+  surgeryData: null,
+  dischargeData: null,
+  medDaysData: null,
+  patientSummaryData: null,
   token: null,
   currentUserSession: null
 };
 
-const API_ENDPOINTS = {
-  allergy: "medcloud2.nhi.gov.tw/imu/api/imue0040/imue0040s02/get-data",
-  surgery: "medcloud2.nhi.gov.tw/imu/api/imue0020/imue0020s02/get-data",
-  discharge: "medcloud2.nhi.gov.tw/imu/api/imue0070/imue0070s02/get-data",
-  medDays: "medcloud2.nhi.gov.tw/imu/api/imue0120/imue0120s01/pres-med-day",
-  patientSummary: "medcloud2.nhi.gov.tw/imu/api/imue2000/imue2000s01/get-summary"  // New endpoint
-};
-
-// 添加開發模式 API 端點
-const DEV_API_ENDPOINTS = {
-  medication: "nhitw-mock-api.vercel.app/api/data/current?type=medication",
-  labdata: "nhitw-mock-api.vercel.app/api/data/current?type=labdata",
-  chinesemed: "nhitw-mock-api.vercel.app/api/data/current?type=chinesemed",
-  imaging: "nhitw-mock-api.vercel.app/api/data/current?type=imaging",
-  allergy: "nhitw-mock-api.vercel.app/api/data/current?type=allergy",
-  surgery: "nhitw-mock-api.vercel.app/api/data/current?type=surgery",
-  discharge: "nhitw-mock-api.vercel.app/api/data/current?type=discharge",
-  medDays: "nhitw-mock-api.vercel.app/api/data/current?type=medDays",
-  patientSummary: "nhitw-mock-api.vercel.app/api/data/current?type=patientSummary"
+// API 端點映射
+const apiEndpoints = {
+  allergy: 'medcloud2.nhi.gov.tw/imu/api/imue0040/imue0040s02/get-data',
+  surgery: 'medcloud2.nhi.gov.tw/imu/api/imue0020/imue0020s02/get-data',
+  discharge: 'medcloud2.nhi.gov.tw/imu/api/imue0070/imue0070s02/get-data',
+  medDays: 'medcloud2.nhi.gov.tw/imu/api/imue0120/imue0120s01/pres-med-day',
+  patientSummary: 'medcloud2.nhi.gov.tw/imu/api/imue2000/imue2000s01/get-summary',
+  medication: 'medcloud2.nhi.gov.tw/imu/api/imue0008/imue0008s02/get-data',
+  labdata: 'medcloud2.nhi.gov.tw/imu/api/imue0060/imue0060s02/get-data',
+  chinesemed: 'medcloud2.nhi.gov.tw/imu/api/imue0090/imue0090s02/get-data',
+  imaging: 'medcloud2.nhi.gov.tw/imu/api/imue0130/imue0130s02/get-data'
 };
 
 // 獲取當前使用的 API 端點
 function getApiEndpoint(type) {
-  if (devMode) {
-    return DEV_API_ENDPOINTS[type] || API_ENDPOINTS[type];
+  if (type in apiEndpoints) {
+    return apiEndpoints[type];
+  } else {
+    console.error(`未知的 API 類型: ${type}`);
+    return null;
   }
-  return API_ENDPOINTS[type];
 }
 
-// Add listeners for new endpoints
-Object.entries(API_ENDPOINTS).forEach(([type, endpoint]) => {
-  chrome.webRequest.onBeforeRequest.addListener(
-    function(details) {
-      if (details.method === "GET" && details.url.includes(endpoint)) {
-        console.log(`Detected ${type} API request:`, details.url);
-        chrome.tabs.sendMessage(details.tabId, {
-          action: "apiCallDetected",
-          url: details.url,
-          type: type
-        });
-      }
-      return { cancel: false };
-    },
-    { urls: [`https://${endpoint}*`] },
-    ["requestBody"]
-  );
+// 檢查當前環境
+function isRealEnvironment(url) {
+  return url && url.includes('medcloud2.nhi.gov.tw');
+}
 
-  chrome.webRequest.onCompleted.addListener(
-    function(details) {
-      if (details.method === "GET" && details.url.includes(endpoint)) {
-        console.log(`Completed ${type} API request:`, details.url);
-        chrome.tabs.sendMessage(details.tabId, {
-          action: "apiCallCompleted",
-          url: details.url,
-          statusCode: details.statusCode,
-          type: type
-        });
-      }
-    },
-    { urls: [`https://${endpoint}*`] },
-    ["responseHeaders"]
-  );
-});
+function isTestEnvironment(url) {
+  return url && (url.includes('nhitw-mock-api.vercel.app') || url.includes('localhost'));
+}
 
-
-chrome.webRequest.onBeforeRequest.addListener(
-  function(details) {
-    if (details.method === "GET" && 
-        details.url.includes("medcloud2.nhi.gov.tw/imu/api/imue0090/imue0090s02/get-data")) {
-      // console.log("Detected Chinese medicine API request:", details.url);
-      chrome.tabs.sendMessage(details.tabId, {
-        action: "apiCallDetected",
-        url: details.url,
-        type: "chinesemed"
-      });
+// 安全地發送訊息到標籤頁
+function sendMessageToTab(tabId, message, callback) {
+  // 首先檢查標籤頁是否存在
+  chrome.tabs.get(tabId, (tab) => {
+    if (chrome.runtime.lastError) {
+      console.warn(`無法發送訊息到標籤頁 ${tabId}: ${chrome.runtime.lastError.message}`);
+      if (callback) callback({ error: chrome.runtime.lastError.message });
+      return;
     }
-    return { cancel: false };
-  },
-  { urls: ["https://medcloud2.nhi.gov.tw/imu/api/imue0090/imue0090s02/get-data*"] },
-  ["requestBody"]
-);
-
-chrome.webRequest.onBeforeRequest.addListener(
-  function(details) {
-    if (details.method === "GET" && 
-        details.url.includes("medcloud2.nhi.gov.tw/imu/api/imue0130/imue0130s02/get-data")) {
-      // console.log("Detected imaging API request:", details.url);
-      chrome.tabs.sendMessage(details.tabId, {
-        action: "apiCallDetected",
-        url: details.url,
-        type: "imaging"
-      });
+    
+    // 檢查標籤頁是否已完成載入
+    if (tab.status !== 'complete') {
+      console.warn(`標籤頁 ${tabId} 尚未完成載入，等待後再嘗試發送訊息`);
+      // 等待一段時間後再嘗試
+      setTimeout(() => {
+        sendMessageToTab(tabId, message, callback);
+      }, 500);
+      return;
     }
-    return { cancel: false };
-  },
-  { urls: ["https://medcloud2.nhi.gov.tw/imu/api/imue0130/imue0130s02/get-data*"] },
-  ["requestBody"]
-);
-
-// Add completion listeners for new APIs
-chrome.webRequest.onCompleted.addListener(
-  function(details) {
-    if (details.method === "GET" && 
-        details.url.includes("medcloud2.nhi.gov.tw/imu/api/imue0090/imue0090s02/get-data")) {
-      // console.log("Completed Chinese medicine API request:", details.url);
-      chrome.tabs.sendMessage(details.tabId, {
-        action: "apiCallCompleted",
-        url: details.url,
-        statusCode: details.statusCode,
-        type: "chinesemed"
+    
+    // 嘗試發送訊息
+    try {
+      chrome.tabs.sendMessage(tabId, message, (response) => {
+        if (chrome.runtime.lastError) {
+          console.warn(`發送訊息到標籤頁 ${tabId} 失敗: ${chrome.runtime.lastError.message}`);
+          // 如果是連接錯誤，可能是 content script 尚未載入，嘗試重新注入
+          if (chrome.runtime.lastError.message.includes("Receiving end does not exist")) {
+            console.log(`嘗試重新注入 content script 到標籤頁 ${tabId}`);
+            // 這裡不實際重新注入，只是提供一個回應
+            if (callback) callback({ status: "retry", message: "接收端不存在，可能需要重新載入頁面" });
+          } else {
+            if (callback) callback({ error: chrome.runtime.lastError.message });
+          }
+          return;
+        }
+        
+        if (callback) callback(response || { status: "success" });
       });
+    } catch (error) {
+      console.error(`發送訊息到標籤頁 ${tabId} 時發生異常:`, error);
+      if (callback) callback({ error: error.message });
     }
-  },
-  { urls: ["https://medcloud2.nhi.gov.tw/imu/api/imue0090/imue0090s02/get-data*"] },
-  ["responseHeaders"]
-);
+  });
+}
 
-chrome.webRequest.onCompleted.addListener(
-  function(details) {
-    if (details.method === "GET" && 
-        details.url.includes("medcloud2.nhi.gov.tw/imu/api/imue0130/imue0130s02/get-data")) {
-      // console.log("Completed imaging API request:", details.url);
-      chrome.tabs.sendMessage(details.tabId, {
-        action: "apiCallCompleted",
-        url: details.url,
-        statusCode: details.statusCode,
-        type: "imaging"
+// 通知所有測試環境標籤頁數據已載入
+function notifyTestTabsDataLoaded(message, dataType, storageKey, callback) {
+  // 查詢所有測試環境標籤頁
+  chrome.tabs.query({}, (tabs) => {
+    const testTabs = tabs.filter(tab => isTestEnvironment(tab.url));
+    
+    if (testTabs.length === 0) {
+      console.log("找不到測試環境標籤頁，無法通知數據載入");
+      if (callback) callback({ status: "warning", message: "找不到測試環境標籤頁" });
+      return;
+    }
+    
+    console.log(`找到 ${testTabs.length} 個測試環境標籤頁，開始通知數據載入`);
+    
+    // 記錄成功通知的標籤頁數量
+    let successCount = 0;
+    let errorCount = 0;
+    
+    // 對每個測試環境標籤頁發送訊息
+    testTabs.forEach((tab, index) => {
+      sendMessageToTab(tab.id, message, (response) => {
+        if (response && response.error) {
+          console.warn(`通知標籤頁 ${tab.id} 失敗:`, response.error);
+          errorCount++;
+        } else {
+          console.log(`成功通知標籤頁 ${tab.id}`);
+          successCount++;
+        }
+        
+        // 當所有標籤頁都已處理完畢時，調用回調函數
+        if (successCount + errorCount === testTabs.length && callback) {
+          callback({
+            status: errorCount === 0 ? "success" : "partial",
+            message: `已通知 ${successCount} 個標籤頁，${errorCount} 個失敗`,
+            successCount,
+            errorCount
+          });
+        }
       });
-    }
-  },
-  { urls: ["https://medcloud2.nhi.gov.tw/imu/api/imue0130/imue0130s02/get-data*"] },
-  ["responseHeaders"]
-);
+    });
+  });
+}
 
-chrome.webRequest.onBeforeRequest.addListener(
-  function(details) {
-    if (details.method === "GET" && 
-        details.url.includes("medcloud2.nhi.gov.tw/imu/api/imue0008/imue0008s02/get-data")) {
-      // console.log("Detected medication history API request:", details.url);
-      chrome.tabs.sendMessage(details.tabId, {
-        action: "apiCallDetected",
-        url: details.url,
-        type: "medication"
-      });
-    }
-    return { cancel: false };
-  },
-  { urls: ["https://medcloud2.nhi.gov.tw/imu/api/imue0008/imue0008s02/get-data*"] },
-  ["requestBody"]
-);
+// 設置 webRequest 監聽器
+function setupWebRequestListeners() {
+  // 為每種 API 類型設置監聽器
+  Object.entries(apiEndpoints).forEach(([type, endpoint]) => {
+    // 監聽請求
+    chrome.webRequest.onBeforeRequest.addListener(
+      function(details) {
+        if (details.method === 'GET' && details.url.includes(endpoint)) {
+          console.log(`偵測到 ${type} API 請求:`, details.url);
+          
+          // 通知 content script
+          chrome.tabs.sendMessage(details.tabId, {
+            action: "apiCallDetected",
+            url: details.url,
+            type: type
+          });
+        }
+        return { cancel: false };
+      },
+      { urls: [`https://${endpoint}*`] },
+      ["requestBody"]
+    );
+    
+    // 監聽回應
+    chrome.webRequest.onCompleted.addListener(
+      function(details) {
+        if (details.method === 'GET' && details.url.includes(endpoint)) {
+          console.log(`完成 ${type} API 請求:`, details.url);
+          
+          // 通知 content script
+          chrome.tabs.sendMessage(details.tabId, {
+            action: "apiCallCompleted",
+            url: details.url,
+            statusCode: details.statusCode,
+            type: type
+          });
+        }
+      },
+      { urls: [`https://${endpoint}*`] },
+      ["responseHeaders"]
+    );
+  });
+}
 
-// 監聽檢驗資料 API 請求
-chrome.webRequest.onBeforeRequest.addListener(
-  function(details) {
-    if (details.method === "GET" && 
-        details.url.includes("medcloud2.nhi.gov.tw/imu/api/imue0060/imue0060s02/get-data")) {
-      // console.log("Detected lab data API request:", details.url);
-      chrome.tabs.sendMessage(details.tabId, {
-        action: "apiCallDetected",
-        url: details.url,
-        type: "labdata"
-      });
-    }
-    return { cancel: false };
-  },
-  { urls: ["https://medcloud2.nhi.gov.tw/imu/api/imue0060/imue0060s02/get-data*"] },
-  ["requestBody"]
-);
+// 初始化時設置監聽器
+setupWebRequestListeners();
 
-// 監聽藥歷 API 請求完成
-chrome.webRequest.onCompleted.addListener(
-  function(details) {
-    if (details.method === "GET" && 
-        details.url.includes("medcloud2.nhi.gov.tw/imu/api/imue0008/imue0008s02/get-data")) {
-      // console.log("Completed medication history API request:", details.url, "Status:", details.statusCode);
-      
-      chrome.tabs.sendMessage(details.tabId, {
-        action: "apiCallCompleted",
-        url: details.url,
-        statusCode: details.statusCode,
-        type: "medication"
-      });
-    }
-  },
-  { urls: ["https://medcloud2.nhi.gov.tw/imu/api/imue0008/imue0008s02/get-data*"] },
-  ["responseHeaders"]
-);
-
-// 監聽檢驗資料 API 請求完成
-chrome.webRequest.onCompleted.addListener(
-  function(details) {
-    if (details.method === "GET" && 
-        details.url.includes("medcloud2.nhi.gov.tw/imu/api/imue0060/imue0060s02/get-data")) {
-      // console.log("Completed lab data API request:", details.url, "Status:", details.statusCode);
-      
-      chrome.tabs.sendMessage(details.tabId, {
-        action: "apiCallCompleted",
-        url: details.url,
-        statusCode: details.statusCode,
-        type: "labdata"
-      });
-    }
-  },
-  { urls: ["https://medcloud2.nhi.gov.tw/imu/api/imue0060/imue0060s02/get-data*"] },
-  ["responseHeaders"]
-);
-
-// Monitor patient summary API requests
-chrome.webRequest.onBeforeRequest.addListener(
-  function(details) {
-    if (details.method === "GET" && 
-        details.url.includes("medcloud2.nhi.gov.tw/imu/api/imue2000/imue2000s01/get-summary")) {
-      // console.log("Detected patient summary API request:", details.url);
-      chrome.tabs.sendMessage(details.tabId, {
-        action: "apiCallDetected",
-        url: details.url,
-        type: "patientSummary"
-      });
-    }
-    return { cancel: false };
-  },
-  { urls: ["https://medcloud2.nhi.gov.tw/imu/api/imue2000/imue2000s01/get-summary*"] },
-  ["requestBody"]
-);
-
-chrome.webRequest.onCompleted.addListener(
-  function(details) {
-    if (details.method === "GET" && 
-        details.url.includes("medcloud2.nhi.gov.tw/imu/api/imue2000/imue2000s01/get-summary")) {
-      // console.log("Completed patient summary API request:", details.url);
-      chrome.tabs.sendMessage(details.tabId, {
-        action: "apiCallCompleted",
-        url: details.url,
-        statusCode: details.statusCode,
-        type: "patientSummary"
-      });
-    }
-  },
-  { urls: ["https://medcloud2.nhi.gov.tw/imu/api/imue2000/imue2000s01/get-summary*"] },
-  ["responseHeaders"]
-);
-
-// 監聽來自 content script 的訊息
+// 處理來自 content script 的消息
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    // 處理開發模式設定更新
-    if (message.action === "updateDevMode") {
-      devMode = message.value;
-      chrome.storage.sync.set({ devMode: message.value });
-      console.log(`開發模式已${message.value ? '啟用' : '禁用'}`);
-      sendResponse({ status: "success" });
-      return true;
-    }
-    
-    // 處理 API 來源更新
-    if (message.action === "updateApiSource") {
-      const useLocalApi = message.value;
-      vercelApiBaseUrl = useLocalApi ? 'http://localhost:3000/api' : 'https://nhitw-mock-api.vercel.app/api';
-      console.log(`API 來源已更新為: ${vercelApiBaseUrl}`);
-      sendResponse({ status: "success" });
-      return true;
-    }
-    
-    // 處理測試數據列表請求
-    if (message.action === "fetchTestDataList") {
-      fetch(`${vercelApiBaseUrl}/data/list`)
-        .then(res => res.json())
-        .then(data => {
-          sendResponse({ status: "success", data: data });
+  // 處理開發模式設定更新
+  if (message.action === "updateDevMode") {
+    devMode = message.value;
+    chrome.storage.sync.set({ devMode: message.value });
+    console.log("開發模式已更新:", devMode);
+    sendResponse({ status: "success" });
+    return true;
+  }
+
+  // 處理當前測試數據 ID 更新
+  if (message.action === "updateCurrentTestDataId") {
+    currentTestDataId = message.value;
+    chrome.storage.sync.set({ currentTestDataId: message.value });
+    console.log("當前測試數據 ID 已更新:", currentTestDataId);
+    sendResponse({ status: "success" });
+    return true;
+  }
+
+  // 處理 API 端點設定更新
+  if (message.action === "updateApiEndpoint") {
+    vercelApiBaseUrl = message.useLocalApi ? 'http://localhost:3000/api' : 'https://nhitw-mock-api.vercel.app/api';
+    chrome.storage.sync.set({ useLocalApi: message.useLocalApi });
+    console.log("API 端點已更新:", vercelApiBaseUrl);
+    sendResponse({ status: "success" });
+    return true;
+  }
+
+  // 處理測試數據載入請求
+  if (message.action === "loadTestData") {
+    // 檢查是否為開發模式且有設定測試數據 ID
+    if (devMode && currentTestDataId) {
+      console.log("正在載入測試數據...");
+      
+      // 定義所有可能的數據類型及其對應的存儲鍵
+      const dataTypes = {
+        'medication': 'medicationData',
+        'labdata': 'labData',
+        'chinesemed': 'chinesemedData',
+        'imaging': 'imagingData',
+        'allergy': 'allergyData',
+        'surgery': 'surgeryData',
+        'discharge': 'dischargeData',
+        'medDays': 'medDaysData',
+        'patientSummary': 'patientSummaryData'
+      };
+      
+      // 構建請求 URL
+      const url = `${vercelApiBaseUrl}/data/${currentTestDataId}`;
+      console.log("請求 URL:", url);
+      
+      // 發送請求獲取測試數據
+      fetch(url)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          return response.json();
         })
-        .catch(err => {
-          console.error('獲取測試數據列表失敗:', err);
-          sendResponse({ status: "error", error: err.message });
-        });
-      return true;
-    }
-    
-    // 處理 popup 數據狀態更新
-    if (message.action === "updatePopupDataStatus") {
-      // 向所有打開的 popup 發送消息，通知它們更新數據狀態
-      chrome.runtime.sendMessage({ action: "refreshDataStatus" });
-      sendResponse({ status: "success" });
-      return true;
-    }
-    
-    // 處理測試數據 ID 更新
-    if (message.action === "updateTestDataId") {
-      currentTestDataId = message.value;
-      chrome.storage.sync.set({ currentTestDataId: message.value });
-      console.log("測試數據 ID 已更新:", message.value);
-      sendResponse({ status: "test_data_id_updated" });
-      return true;
-    }
-    
-    // 處理測試模式下的數據載入請求
-    if (message.action === "loadTestData") {
-      if (devMode && currentTestDataId) {
-        console.log("正在載入測試數據...");
-        
-        // 定義所有可能的數據類型及其對應的存儲鍵
-        const dataTypes = {
-          'medication': 'medicationData',
-          'labdata': 'labData',
-          'lab': 'labData',
-          'chinesemed': 'chinesemedData',
-          'imaging': 'imagingData',
-          'allergy': 'allergyData',
-          'surgery': 'surgeryData',
-          'discharge': 'dischargeData',
-          'medDays': 'medDaysData',
-          'patientSummary': 'patientSummaryData'
-        };
-        
-        // 構建請求 URL，請求所有數據類型
-        const requestUrl = `${vercelApiBaseUrl}/data/${currentTestDataId}`;
-        
-        // 發送請求到 Vercel API 獲取測試數據
-        fetch(requestUrl)
-          .then(res => {
-            if (!res.ok) {
-              throw new Error(`API 請求失敗: ${res.status} ${res.statusText}`);
+        .then(data => {
+          console.log("測試數據載入成功:", data);
+          
+          // 保存數據到 Chrome 存儲
+          const storageData = {};
+          
+          // 處理每種數據類型
+          Object.entries(dataTypes).forEach(([type, storageKey]) => {
+            if (data[type]) {
+              storageData[storageKey] = data[type];
+              console.log(`保存 ${type} 數據到存儲`);
             }
-            return res.json();
-          })
-          .then(data => {
-            console.log("測試數據載入成功:", data);
-            const loadedDataTypes = [];
+          });
+          
+          // 保存數據
+          chrome.storage.local.set(storageData, () => {
+            console.log("所有測試數據已保存到 Chrome 存儲");
             
-            // 處理各種數據類型
-            Object.entries(dataTypes).forEach(([apiKey, storageKey]) => {
-              if (data[apiKey]) {
-                currentSessionData[storageKey] = data[apiKey];
-                chrome.storage.local.set({ [storageKey]: data[apiKey] });
-                loadedDataTypes.push(apiKey);
-                console.log(`已載入 ${apiKey} 數據`);
+            // 通知 content script 數據已載入
+            chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
+              if (tabs.length > 0) {
+                // 使用安全的訊息發送函數
+                sendMessageToTab(tabs[0].id, {
+                  action: "testDataLoaded",
+                  dataTypes: Object.keys(storageData)
+                }, (response) => {
+                  // 即使通知 content script 失敗，也要回應原始請求
+                  sendResponse({
+                    status: "test_data_loaded",
+                    dataTypes: Object.keys(storageData)
+                  });
+                });
+              } else {
+                // 沒有活動標籤頁，但仍然回應原始請求
+                sendResponse({
+                  status: "test_data_loaded",
+                  dataTypes: Object.keys(storageData)
+                });
               }
             });
+          });
+        })
+        .catch(error => {
+          console.error("載入測試數據時出錯:", error);
+          sendResponse({
+            status: "error",
+            error: `載入測試數據時出錯: ${error.message}`
+          });
+        });
+      
+      return true; // 保持通道開啟以進行非同步回應
+    } else {
+      sendResponse({
+        status: "error",
+        error: "未啟用開發模式或未設定測試數據 ID"
+      });
+      return false;
+    }
+  }
+
+  // 處理特定類型測試數據載入請求
+  if (message.action === "getTestData" && message.dataType) {
+    if (devMode && currentTestDataId) {
+      console.log(`正在獲取 ${message.dataType} 測試數據...`);
+      
+      // 構建請求 URL，只請求特定類型的數據
+      const url = `${vercelApiBaseUrl}/data/${currentTestDataId}?type=${message.dataType}`;
+      
+      // 發送請求獲取測試數據
+      fetch(url)
+        .then(response => {
+          if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+          }
+          return response.json();
+        })
+        .then(data => {
+          console.log(`${message.dataType} 測試數據載入成功:`, data);
+          
+          // 根據數據類型確定存儲鍵
+          let storageKey;
+          switch(message.dataType) {
+            case 'medication':
+              storageKey = 'medicationData';
+              break;
+            case 'labdata':
+              storageKey = 'labData';
+              break;
+            case 'chinesemed':
+              storageKey = 'chinesemedData';
+              break;
+            case 'imaging':
+              storageKey = 'imagingData';
+              break;
+            case 'allergy':
+              storageKey = 'allergyData';
+              break;
+            case 'surgery':
+              storageKey = 'surgeryData';
+              break;
+            case 'discharge':
+              storageKey = 'dischargeData';
+              break;
+            case 'medDays':
+              storageKey = 'medDaysData';
+              break;
+            case 'patientSummary':
+              storageKey = 'patientSummaryData';
+              break;
+            default:
+              throw new Error(`未知的數據類型: ${message.dataType}`);
+          }
+          
+          // 保存數據到 Chrome 存儲
+          const storageData = {};
+          storageData[storageKey] = data[message.dataType];
+          
+          chrome.storage.local.set(storageData, () => {
+            console.log(`${message.dataType} 測試數據已保存到 Chrome 存儲`);
             
-            // 如果沒有載入任何數據，拋出錯誤
-            if (loadedDataTypes.length === 0) {
-              throw new Error('沒有找到任何可用的測試數據');
-            }
-            
-            chrome.action.setBadgeText({ text: "✓" });
-            chrome.action.setBadgeBackgroundColor({ color: "#4CAF50" });
-            
-            // 通知所有標籤頁更新數據
-            chrome.tabs.query({}, (tabs) => {
-              tabs.forEach(tab => {
-                if (tab.url && (tab.url.includes('nhi.gov.tw') || tab.url.includes('localhost'))) {
-                  console.log(`嘗試向標籤頁 ${tab.id} 發送測試數據載入消息`);
-                  chrome.tabs.sendMessage(tab.id, { 
-                    action: "testDataLoaded",
-                    dataTypes: loadedDataTypes
-                  }).catch(err => console.log(`無法傳送訊息到標籤頁 ${tab.id}:`, err));
-                }
+            // 通知所有測試環境標籤頁數據已載入
+            notifyTestTabsDataLoaded({
+              action: "testDataTypeLoaded",
+              dataType: message.dataType,
+              storageKey: storageKey
+            }, message.dataType, storageKey, (notifyResult) => {
+              // 回應原始請求
+              sendResponse({
+                status: "success",
+                message: `${message.dataType} 測試數據已載入`,
+                notifyResult
               });
-            });
-            
-            // 顯示通知
-            chrome.notifications.create({
-              type: 'basic',
-              iconUrl: 'images/icon128.png',
-              title: '測試數據已載入',
-              message: `已成功載入 ${loadedDataTypes.length} 種測試數據`,
-              buttons: [
-                { title: '確定' }
-              ],
-              priority: 2
-            });
-            
-            sendResponse({ 
-              status: "test_data_loaded", 
-              dataTypes: loadedDataTypes
-            });
-          })
-          .catch(err => {
-            console.error("測試數據載入失敗:", err);
-            chrome.action.setBadgeText({ text: "!" });
-            chrome.action.setBadgeBackgroundColor({ color: "#F44336" });
-            
-            sendResponse({ 
-              status: "error", 
-              error: err.message 
             });
           });
-        
-        return true;
-      } else {
-        sendResponse({ 
-          status: "error", 
-          error: "開發模式未啟用或未選擇測試數據" 
+        })
+        .catch(error => {
+          console.error(`載入 ${message.dataType} 測試數據時出錯:`, error);
+          sendResponse({
+            status: "error",
+            error: error.message
+          });
         });
-        return true;
-      }
+      
+      return true; // 保持通道開啟以進行非同步回應
+    } else {
+      sendResponse({
+        status: "error",
+        error: "未啟用開發模式或未設定測試數據 ID"
+      });
+      return false;
     }
+  }
+
+  // 處理數據狀態更新請求
+  if (message.action === "updateDataStatus") {
+    console.log("收到數據狀態更新請求");
     
-    // 處理獲取特定類型測試數據的請求
-    if (message.action === "getTestData" && message.dataType) {
-      if (devMode && currentTestDataId) {
-        console.log(`正在獲取 ${message.dataType} 測試數據...`);
+    // 獲取當前標籤頁
+    chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
+      if (tabs.length > 0) {
+        const currentTab = tabs[0];
         
-        // 構建請求 URL，只請求特定類型的數據
-        const requestUrl = `${vercelApiBaseUrl}/data/current?type=${message.dataType}&id=${currentTestDataId}`;
-        
-        fetch(requestUrl)
-          .then(res => {
-            if (!res.ok) {
-              throw new Error(`API 請求失敗: ${res.status} ${res.statusText}`);
-            }
-            return res.json();
-          })
-          .then(data => {
-            console.log(`${message.dataType} 測試數據獲取成功:`, data);
-            
-            // 根據數據類型設置存儲鍵
-            let storageKey;
-            switch(message.dataType) {
-              case 'medication': storageKey = 'medicationData'; break;
-              case 'labdata': storageKey = 'labData'; break;
-              case 'lab': storageKey = 'labData'; break;
-              case 'chinesemed': storageKey = 'chinesemedData'; break;
-              case 'imaging': storageKey = 'imagingData'; break;
-              case 'allergy': storageKey = 'allergyData'; break;
-              case 'surgery': storageKey = 'surgeryData'; break;
-              case 'discharge': storageKey = 'dischargeData'; break;
-              case 'medDays': storageKey = 'medDaysData'; break;
-              case 'patientSummary': storageKey = 'patientSummaryData'; break;
-              default: storageKey = `${message.dataType}Data`;
-            }
-            
-            // 更新存儲
-            if (data[message.dataType]) {
-              currentSessionData[storageKey] = data[message.dataType];
-              chrome.storage.local.set({ [storageKey]: data[message.dataType] });
-              
-              // 通知所有標籤頁更新特定類型的數據
-              chrome.tabs.query({}, (tabs) => {
-                tabs.forEach(tab => {
-                  if (tab.url && (tab.url.includes('nhi.gov.tw') || tab.url.includes('localhost'))) {
-                    console.log(`嘗試向標籤頁 ${tab.id} 發送 ${message.dataType} 數據載入消息`);
-                    chrome.tabs.sendMessage(tab.id, { 
-                      action: "testDataTypeLoaded",
-                      dataType: message.dataType,
-                      storageKey: storageKey
-                    }).catch(err => console.log(`無法傳送訊息到標籤頁 ${tab.id}:`, err));
-                  }
-                });
-              });
-              
-              // 顯示通知
-              chrome.notifications.create({
-                type: 'basic',
-                iconUrl: 'images/icon128.png',
-                title: '測試數據已載入',
-                message: `已成功載入 ${message.dataType} 測試數據`,
-                buttons: [
-                  { title: '確定' }
-                ],
-                priority: 2
-              });
-              
-              sendResponse({ 
-                status: "success", 
-                data: data[message.dataType]
+        // 檢查當前環境
+        if (isRealEnvironment(currentTab.url) || isTestEnvironment(currentTab.url)) {
+          // 使用安全的訊息發送函數
+          sendMessageToTab(currentTab.id, {
+            action: "dataStatusUpdated"
+          }, (response) => {
+            // 回應原始請求
+            if (response && !response.error) {
+              console.log("數據狀態更新通知已發送，回應:", response);
+              sendResponse({
+                status: "success",
+                message: "數據狀態已更新"
               });
             } else {
-              throw new Error(`找不到 ${message.dataType} 測試數據`);
+              console.log("數據狀態更新通知發送失敗:", response?.error);
+              sendResponse({
+                status: "error",
+                error: response?.error || "無法通知內容腳本"
+              });
             }
-          })
-          .catch(err => {
-            console.error(`${message.dataType} 測試數據獲取失敗:`, err);
-            sendResponse({ 
-              status: "error", 
-              error: err.message 
-            });
           });
-        
-        return true;
+        } else {
+          console.log("當前不在支援的環境中，不發送數據狀態更新通知");
+          sendResponse({
+            status: "error",
+            error: "當前不在支援的環境中"
+          });
+        }
       } else {
-        sendResponse({ 
-          status: "error", 
-          error: "開發模式未啟用或未選擇測試數據" 
-        });
-        return true;
-      }
-    }
-
-    // Add handlers for new data types
-    const dataHandlers = {
-      saveAllergyData: 'allergyData',
-      saveSurgeryData: 'surgeryData',
-      saveDischargeData: 'dischargeData',
-      saveMedDaysData: 'medDaysData',
-      savePatientSummaryData: 'patientSummaryData'  // Add handler for patient summary
-    };
-
-    if (message.action === 'openPopup') {
-      chrome.action.openPopup(); // 開啟 popup（需 Chrome 版本支援）
-    }
-
-    if (Object.keys(dataHandlers).includes(message.action)) {
-      const dataType = dataHandlers[message.action];
-      // console.log(`Background script received ${dataType} to save`);
-      currentSessionData[dataType] = message.data;
-      currentSessionData.currentUserSession = message.userSession || currentSessionData.currentUserSession;
-      
-      chrome.storage.local.set({ 
-        [dataType]: message.data,
-        currentUserSession: message.userSession || currentSessionData.currentUserSession
-      }, function() {
-        // console.log(`${dataType} saved to storage`);
-        chrome.action.setBadgeText({ text: "✓" });
-        chrome.action.setBadgeBackgroundColor({ color: "#4CAF50" });
-        
-        if (message.data && message.data.rObject && Array.isArray(message.data.rObject)) {
-          sendResponse({ 
-            status: "saved", 
-            recordCount: message.data.rObject.length 
-          });
-        } else {
-          sendResponse({ 
-            status: "saved", 
-            recordCount: 0,
-            error: "Invalid data format" 
-          });
-        }
-      });
-      return true;
-    }
-
-    // Add handlers for new data types
-    if (message.action === "saveChineseMedData") {
-      // console.log("Background script received Chinese medicine data to save");
-      currentSessionData.chinesemedData = message.data;
-      currentSessionData.currentUserSession = message.userSession || currentSessionData.currentUserSession;
-      
-      chrome.storage.local.set({ 
-        chinesemedData: message.data,
-        currentUserSession: message.userSession || currentSessionData.currentUserSession
-      }, function() {
-        // console.log("Chinese medicine data saved to storage");
-        chrome.action.setBadgeText({ text: "✓" });
-        chrome.action.setBadgeBackgroundColor({ color: "#4CAF50" });
-        
-        if (message.data && message.data.rObject && Array.isArray(message.data.rObject)) {
-          sendResponse({ 
-            status: "saved", 
-            recordCount: message.data.rObject.length 
-          });
-        } else {
-          sendResponse({ 
-            status: "saved", 
-            recordCount: 0,
-            error: "Invalid data format" 
-          });
-        }
-      });
-      return true;
-    }
-    
-    if (message.action === "saveImagingData") {
-      // console.log("Background script received imaging data to save");
-      currentSessionData.imagingData = message.data;
-      currentSessionData.currentUserSession = message.userSession || currentSessionData.currentUserSession;
-      
-      chrome.storage.local.set({ 
-        imagingData: message.data,
-        currentUserSession: message.userSession || currentSessionData.currentUserSession
-      }, function() {
-        // console.log("Imaging data saved to storage");
-        chrome.action.setBadgeText({ text: "✓" });
-        chrome.action.setBadgeBackgroundColor({ color: "#4CAF50" });
-        
-        if (message.data && message.data.rObject && Array.isArray(message.data.rObject)) {
-          sendResponse({ 
-            status: "saved", 
-            recordCount: message.data.rObject.length 
-          });
-        } else {
-          sendResponse({ 
-            status: "saved", 
-            recordCount: 0,
-            error: "Invalid data format" 
-          });
-        }
-      });
-      return true;
-    }
-
-  // 處理用戶會話變更，清空臨時資料
-  if (message.action === "userSessionChanged") {
-    // console.log("User session changed, resetting temporary data");
-    currentSessionData = {
-      medicationData: null,
-      labData: null,
-      token: null,
-      currentUserSession: message.userSession
-    };
-    
-    chrome.storage.local.remove([
-      'medicationData', 
-      'labData', 
-      'currentUserSession'
-    ], function() {
-      // console.log("Storage data cleared due to user session change");
-      chrome.action.setBadgeText({ text: "" });
-    });
-    
-    sendResponse({ status: "session_reset" });
-    return true;
-  }
-
-  // 處理清除會話資料請求
-  if (message.action === "clearSessionData") {
-    // console.log("Clearing session data");
-    currentSessionData = {
-      medicationData: null,
-      labData: null,
-      token: null,
-      currentUserSession: null
-    };
-    sendResponse({ status: "cleared" });
-    return true;
-  }
-  
-  // 處理用戶會話變更，清空臨時資料
-  if (message.userSession && message.userSession !== currentSessionData.currentUserSession) {
-    // console.log("User session changed, resetting temporary data");
-    currentSessionData = {
-      medicationData: null,
-      labData: null,
-      token: null,
-      currentUserSession: message.userSession
-    };
-  }
-  
-  if (message.action === "saveMedicationData") {
-    // console.log("Background script received medication data to save:", 
-    //             message.data && message.data.rObject ? 
-    //             `${message.data.rObject.length} records` : 
-    //             "Invalid data format");
-    
-    // 儲存到當前會話的臨時資料中
-    currentSessionData.medicationData = message.data;
-    currentSessionData.currentUserSession = message.userSession || currentSessionData.currentUserSession;
-    
-    // 同時儲存到 storage 便於 popup 讀取
-    chrome.storage.local.set({ 
-      medicationData: message.data,
-      currentUserSession: message.userSession || currentSessionData.currentUserSession
-    }, function() {
-      // console.log("Medication data saved to storage");
-      chrome.action.setBadgeText({ text: "✓" });
-      chrome.action.setBadgeBackgroundColor({ color: "#4CAF50" });
-      
-      if (message.data && message.data.rObject && Array.isArray(message.data.rObject)) {
-        sendResponse({ 
-          status: "saved", 
-          recordCount: message.data.rObject.length 
-        });
-      } else {
-        sendResponse({ 
-          status: "saved", 
-          recordCount: 0,
-          error: "Invalid data format" 
+        console.log("找不到當前標籤頁");
+        sendResponse({
+          status: "error",
+          error: "找不到當前標籤頁"
         });
       }
-    });
-    return true; // 保持通道開啟
-  }
-  
-  // 處理檢驗資料的保存請求
-  if (message.action === "saveLabData") {
-    // console.log("Background script received lab data to save:", 
-    //             message.data && message.data.rObject ? 
-    //             `${message.data.rObject.length} records` : 
-    //             "Invalid data format");
-    
-    // 儲存到當前會話的臨時資料中
-    currentSessionData.labData = message.data;
-    currentSessionData.currentUserSession = message.userSession || currentSessionData.currentUserSession;
-    
-    // 同時儲存到 storage 便於 popup 讀取
-    chrome.storage.local.set({ 
-      labData: message.data,
-      currentUserSession: message.userSession || currentSessionData.currentUserSession
-    }, function() {
-      // console.log("Lab data saved to storage");
-      chrome.action.setBadgeText({ text: "✓" });
-      chrome.action.setBadgeBackgroundColor({ color: "#4CAF50" });
-      
-      if (message.data && message.data.rObject && Array.isArray(message.data.rObject)) {
-        sendResponse({ 
-          status: "saved", 
-          recordCount: message.data.rObject.length 
-        });
-      } else {
-        sendResponse({ 
-          status: "saved", 
-          recordCount: 0,
-          error: "Invalid data format" 
-        });
-      }
-    });
-    return true; // 保持通道開啟
-  }
-  
-  // 儲存令牌（只儲存到臨時會話）
-  if (message.action === "saveToken") {
-    // console.log("Background script received token to save");
-    currentSessionData.token = message.token;
-    currentSessionData.currentUserSession = message.userSession || currentSessionData.currentUserSession;
-    sendResponse({ status: "token_saved" });
-    return true;
-  }
-  
-  // 讀取臨時會話的資料
-  if (message.action === "getSessionData") {
-    // console.log("Background script received request for session data");
-    sendResponse({ 
-      status: "success",
-      data: currentSessionData
-    });
-    return true;
-  }
-  
-  if (message.action === "getDataStatus") {
-    console.log("處理 getDataStatus 請求");
-    chrome.storage.local.get([
-      'medicationData', 
-      'labData', 
-      'chinesemedData', 
-      'imagingData',
-      'allergyData',
-      'surgeryData',
-      'dischargeData',
-      'medDaysData',
-      'patientSummaryData'
-    ], (result) => {
-      console.log("STORAGE DATA DEBUG:", result);
-      const dataStatus = {};
-      
-      // 處理每種數據類型，支援多種可能的數據格式
-      // 藥歷數據
-      if (result.medicationData) {
-        if (result.medicationData.rObject) {
-          dataStatus.medication = {
-            status: 'fetched',
-            count: result.medicationData.rObject.length
-          };
-        } else if (Array.isArray(result.medicationData)) {
-          dataStatus.medication = {
-            status: 'fetched',
-            count: result.medicationData.length
-          };
-        } else {
-          dataStatus.medication = {
-            status: 'fetched',
-            count: 1
-          };
-        }
-      } else {
-        dataStatus.medication = { status: 'none', count: 0 };
-      }
-      
-      // 檢驗數據
-      if (result.labData) {
-        if (result.labData.rObject) {
-          dataStatus.labData = {
-            status: 'fetched',
-            count: result.labData.rObject.length
-          };
-        } else if (Array.isArray(result.labData)) {
-          dataStatus.labData = {
-            status: 'fetched',
-            count: result.labData.length
-          };
-        } else {
-          dataStatus.labData = {
-            status: 'fetched',
-            count: 1
-          };
-        }
-      } else {
-        dataStatus.labData = { status: 'none', count: 0 };
-      }
-      
-      // 中醫用藥數據
-      if (result.chinesemedData) {
-        if (result.chinesemedData.rObject) {
-          dataStatus.chineseMed = {
-            status: 'fetched',
-            count: result.chinesemedData.rObject.length
-          };
-        } else if (Array.isArray(result.chinesemedData)) {
-          dataStatus.chineseMed = {
-            status: 'fetched',
-            count: result.chinesemedData.length
-          };
-        } else {
-          dataStatus.chineseMed = {
-            status: 'fetched',
-            count: 1
-          };
-        }
-      } else {
-        dataStatus.chineseMed = { status: 'none', count: 0 };
-      }
-      
-      // 影像數據
-      if (result.imagingData) {
-        console.log("IMAGING DEBUG:", result.imagingData);
-        if (result.imagingData.rObject) {
-          dataStatus.imaging = {
-            status: 'fetched',
-            count: result.imagingData.rObject.length
-          };
-        } else if (Array.isArray(result.imagingData)) {
-          dataStatus.imaging = {
-            status: 'fetched',
-            count: result.imagingData.length
-          };
-        } else {
-          dataStatus.imaging = {
-            status: 'fetched',
-            count: 1
-          };
-        }
-      } else {
-        console.log("IMAGING NOT FOUND OR INVALID FORMAT:", result.imagingData);
-        dataStatus.imaging = { status: 'none', count: 0 };
-      }
-      
-      // 過敏數據
-      if (result.allergyData) {
-        if (result.allergyData.rObject) {
-          dataStatus.allergy = {
-            status: 'fetched',
-            count: result.allergyData.rObject.length
-          };
-        } else if (Array.isArray(result.allergyData)) {
-          dataStatus.allergy = {
-            status: 'fetched',
-            count: result.allergyData.length
-          };
-        } else {
-          dataStatus.allergy = {
-            status: 'fetched',
-            count: 1
-          };
-        }
-      } else {
-        dataStatus.allergy = { status: 'none', count: 0 };
-      }
-      
-      // 手術數據
-      if (result.surgeryData) {
-        if (result.surgeryData.rObject) {
-          dataStatus.surgery = {
-            status: 'fetched',
-            count: result.surgeryData.rObject.length
-          };
-        } else if (Array.isArray(result.surgeryData)) {
-          dataStatus.surgery = {
-            status: 'fetched',
-            count: result.surgeryData.length
-          };
-        } else {
-          dataStatus.surgery = {
-            status: 'fetched',
-            count: 1
-          };
-        }
-      } else {
-        dataStatus.surgery = { status: 'none', count: 0 };
-      }
-      
-      // 出院數據
-      if (result.dischargeData) {
-        if (result.dischargeData.rObject) {
-          dataStatus.discharge = {
-            status: 'fetched',
-            count: result.dischargeData.rObject.length
-          };
-        } else if (Array.isArray(result.dischargeData)) {
-          dataStatus.discharge = {
-            status: 'fetched',
-            count: result.dischargeData.length
-          };
-        } else {
-          dataStatus.discharge = {
-            status: 'fetched',
-            count: 1
-          };
-        }
-      } else {
-        dataStatus.discharge = { status: 'none', count: 0 };
-      }
-      
-      // 用藥天數數據
-      if (result.medDaysData) {
-        if (result.medDaysData.rObject) {
-          dataStatus.medDays = {
-            status: 'fetched',
-            count: result.medDaysData.rObject.length
-          };
-        } else if (Array.isArray(result.medDaysData)) {
-          dataStatus.medDays = {
-            status: 'fetched',
-            count: result.medDaysData.length
-          };
-        } else {
-          dataStatus.medDays = {
-            status: 'fetched',
-            count: 1
-          };
-        }
-      } else {
-        dataStatus.medDays = { status: 'none', count: 0 };
-      }
-      
-      // 病患摘要數據
-      if (result.patientSummaryData) {
-        if (result.patientSummaryData.rObject) {
-          dataStatus.patientSummary = {
-            status: 'fetched',
-            count: result.patientSummaryData.rObject.length
-          };
-        } else if (result.patientSummaryData.robject) {
-          // 處理可能的大小寫差異
-          dataStatus.patientSummary = {
-            status: 'fetched',
-            count: result.patientSummaryData.robject.length
-          };
-        } else if (Array.isArray(result.patientSummaryData)) {
-          dataStatus.patientSummary = {
-            status: 'fetched',
-            count: result.patientSummaryData.length
-          };
-        } else {
-          dataStatus.patientSummary = {
-            status: 'fetched',
-            count: 1
-          };
-        }
-      } else {
-        dataStatus.patientSummary = { status: 'none', count: 0 };
-      }
-      
-      console.log("回傳的數據狀態:", dataStatus);
-      sendResponse({ dataStatus });
     });
     
     return true; // 保持通道開啟以進行非同步回應
   }
-  
-  // 處理數據狀態更新請求
-  if (message.action === "updateDataStatus") {
-    console.log("收到數據狀態更新請求");
-    // 通知所有標籤頁更新數據狀態
-    chrome.tabs.query({}, (tabs) => {
-      tabs.forEach(tab => {
-        if (tab.url && (tab.url.includes('nhi.gov.tw') || tab.url.includes('localhost'))) {
-          chrome.tabs.sendMessage(tab.id, { 
-            action: "dataStatusUpdated"
-          }).catch(err => console.log(`無法傳送訊息到標籤頁 ${tab.id}:`, err));
+
+  // 處理獲取測試數據列表請求
+  if (message.action === "fetchTestDataList") {
+    console.log("收到獲取測試數據列表請求");
+    
+    // 構建請求 URL
+    const url = `${vercelApiBaseUrl}/data/list`;
+    console.log("請求測試數據列表 URL:", url);
+    
+    // 發送請求獲取測試數據列表
+    fetch(url)
+      .then(response => {
+        if (!response.ok) {
+          throw new Error(`HTTP error! status: ${response.status}`);
         }
+        return response.json();
+      })
+      .then(data => {
+        console.log("測試數據列表獲取成功:", data);
+        
+        // 回應請求
+        sendResponse({
+          status: "success",
+          data: data
+        });
+      })
+      .catch(error => {
+        console.error("獲取測試數據列表時出錯:", error);
+        sendResponse({
+          status: "error",
+          error: error.message
+        });
       });
-    });
     
-    // 更新擴充功能圖標
-    chrome.action.setBadgeText({ text: "✓" });
-    chrome.action.setBadgeBackgroundColor({ color: "#4CAF50" });
-    
-    sendResponse({ status: "data_status_updated" });
-    return true;
+    return true; // 保持通道開啟以進行非同步回應
   }
 
   // 處理清除數據請求

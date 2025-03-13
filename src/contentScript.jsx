@@ -27,44 +27,78 @@ function injectLegacyContent() {
     });
   });
 
-  // 加載測試模式模組
-  let testModeModule = null;
-  import("./modules/testMode.js")
-    .then((module) => {
-      console.log("測試模式模組已加載");
-      testModeModule = module;
-    })
-    .catch((error) => {
-      console.error("加載測試模式模組時出錯:", error);
-    });
+  // 首先判斷當前環境
+  const isRealEnvironment = window.location.href.includes("medcloud2.nhi.gov.tw");
+  const isTestEnvironment = window.location.href.includes("nhitw-mock-api.vercel.app") || 
+                           window.location.href.includes("localhost");
+  
+  console.log("當前環境:", isRealEnvironment ? "真實環境" : (isTestEnvironment ? "測試環境" : "未知環境"));
 
-  // 加載舊版內容腳本 (使用新的導出文件)
-  import("./legacyContentExport.js")
-    .then((module) => {
-      console.log("舊版內容腳本導出模組已加載");
-      // 初始化舊版內容腳本
-      if (typeof module.initLegacyContent === 'function') {
-        module.initLegacyContent();
-      }
-    })
-    .catch((error) => {
-      console.error("加載舊版內容腳本導出模組時出錯:", error);
-      
-      // 如果新的導出模組加載失敗，嘗試直接加載舊版內容腳本
-      import("./legacyContent.js")
-        .then((module) => {
-          console.log("直接加載舊版內容腳本成功");
-          // 嘗試初始化，但舊版可能沒有導出 initLegacyContent 函數
-          if (typeof module.initLegacyContent === 'function') {
-            module.initLegacyContent();
-          } else {
-            console.log("舊版內容腳本沒有導出 initLegacyContent 函數");
-          }
-        })
-        .catch((err) => {
-          console.error("直接加載舊版內容腳本也失敗:", err);
-        });
-    });
+  // 在真實環境中，優先載入舊版內容腳本
+  if (isRealEnvironment) {
+    console.log("在真實環境中載入舊版內容腳本");
+    import("./legacyContent.js")
+      .then((module) => {
+        console.log("舊版內容腳本載入成功");
+        // 如果有導出 initLegacyContent 函數，則調用它
+        if (typeof module.initLegacyContent === 'function') {
+          module.initLegacyContent();
+        }
+      })
+      .catch((error) => {
+        console.error("載入舊版內容腳本時出錯:", error);
+      });
+  } else {
+    // 在測試環境中，先加載測試模式模組
+    let testModeModule = null;
+    import("./modules/testMode.js")
+      .then((module) => {
+        console.log("測試模式模組已加載");
+        testModeModule = module;
+        
+        // 在測試環境中，使用導出模組
+        import("./legacyContentExport.js")
+          .then((module) => {
+            console.log("舊版內容腳本導出模組已加載");
+            // 初始化舊版內容腳本
+            if (typeof module.initLegacyContent === 'function') {
+              module.initLegacyContent();
+            }
+          })
+          .catch((error) => {
+            console.error("加載舊版內容腳本導出模組時出錯:", error);
+            
+            // 如果新的導出模組加載失敗，嘗試直接加載舊版內容腳本
+            import("./legacyContent.js")
+              .then((module) => {
+                console.log("直接加載舊版內容腳本成功");
+                // 嘗試初始化，但舊版可能沒有導出 initLegacyContent 函數
+                if (typeof module.initLegacyContent === 'function') {
+                  module.initLegacyContent();
+                } else {
+                  console.log("舊版內容腳本沒有導出 initLegacyContent 函數");
+                }
+              })
+              .catch((err) => {
+                console.error("直接加載舊版內容腳本也失敗:", err);
+              });
+          });
+      })
+      .catch((error) => {
+        console.error("加載測試模式模組時出錯:", error);
+        // 測試模式加載失敗時，嘗試直接加載舊版內容腳本
+        import("./legacyContent.js")
+          .then((module) => {
+            console.log("直接加載舊版內容腳本成功");
+            if (typeof module.initLegacyContent === 'function') {
+              module.initLegacyContent();
+            }
+          })
+          .catch((err) => {
+            console.error("直接加載舊版內容腳本也失敗:", err);
+          });
+      });
+  }
 
   // 在您現有的 message 監聽器中添加對 dataForExtension 消息的處理
   window.addEventListener("message", (event) => {
@@ -134,8 +168,24 @@ function injectLegacyContent() {
     console.log("Content script 收到消息:", message);
     
     // 處理測試數據載入消息
-    if (testModeModule && (message.action === "testDataLoaded" || message.action === "testDataTypeLoaded")) {
-      return testModeModule.handleTestDataMessage(message);
+    if (message.action === "testDataLoaded" || message.action === "testDataTypeLoaded") {
+      // 嘗試使用測試模式模組處理消息
+      try {
+        // 動態導入測試模式模組
+        import("./modules/testMode.js").then(module => {
+          if (typeof module.handleTestDataMessage === 'function') {
+            module.handleTestDataMessage(message);
+          }
+          sendResponse({ status: "received" });
+        }).catch(error => {
+          console.error("動態導入測試模式模組失敗:", error);
+          sendResponse({ status: "error", message: error.message });
+        });
+      } catch (error) {
+        console.error("處理測試數據消息時出錯:", error);
+        sendResponse({ status: "error", message: error.message });
+      }
+      return true; // 保持通道開啟以進行非同步回應
     }
     
     // 處理數據狀態更新消息

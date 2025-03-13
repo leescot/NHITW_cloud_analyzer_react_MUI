@@ -105,7 +105,7 @@ const TestModeSettings = () => {
     const newId = event.target.value;
     setSelectedDataId(newId);
     chrome.storage.sync.set({ currentTestDataId: newId });
-    chrome.runtime.sendMessage({ action: "updateTestDataId", value: newId });
+    chrome.runtime.sendMessage({ action: "updateCurrentTestDataId", value: newId });
   };
 
   // 切換數據類型選擇
