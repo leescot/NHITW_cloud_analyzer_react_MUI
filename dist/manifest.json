@@ -6,7 +6,8 @@
   "permissions": ["webRequest", "storage", "scripting", "clipboardWrite", "notifications"],
   "host_permissions": [
     "https://medcloud2.nhi.gov.tw/*",
-    "https://nhitw-mock-api.vercel.app/*"
+    "https://nhitw-mock-api.vercel.app/*",
+    "http://localhost:3000/*"
   ],
   "background": {
     "service_worker": "background.js"
@@ -30,8 +31,8 @@
     {
       "matches": [
         "https://medcloud2.nhi.gov.tw/imu/*",
-        "http://localhost:3000/*",
-        "https://nhitw-mock-api.vercel.app/*"
+        "https://nhitw-mock-api.vercel.app/*",
+        "http://localhost:3000/*"
       ],
       "js": ["content.js"],
       "run_at": "document_end"
