@@ -109,17 +109,14 @@ const ChineseMedicine = ({
                   textSizeType="content"
                   generalDisplaySettings={generalDisplaySettings}
                 >
-                  {med.name} {med.isMulti && "(複方)"}
+                  {med.name} {med.isMulti && "(複方)"}{" "}
                   <TypographySizeWrapper
                     component="span"
                     textSizeType="content"
                     generalDisplaySettings={generalDisplaySettings}
                     sx={{ color: "text.secondary", ml: 1 }}
                   >
-                    {med.perDosage === "SPECIAL"
-                      ? `總量${med.dosage}`
-                      : `${med.perDosage}#`}{" "}
-                    {med.frequency} / {med.days}天
+                    {med.dailyDosage}g {med.frequency}
                   </TypographySizeWrapper>
                   {chineseMedSettings.showEffectName && med.sosc_name && (
                     <TypographySizeWrapper

@@ -78,6 +78,19 @@ export const chineseMedProcessor = {
     };
   },
 
+  // 計算每日劑量 (order_qty / day)
+  calculateDailyDosage(dosage, days) {
+    if (!dosage || !days) return '';
+    
+    try {
+      const dailyDosage = Math.round((parseFloat(dosage) / parseInt(days)) * 10) / 10;
+      return dailyDosage.toString();
+    } catch (error) {
+      console.error('Error calculating daily dosage:', error);
+      return '';
+    }
+  },
+
   // Add calculation for per-dose amount
   calculatePerDosage(dosage, frequency, days) {
     if (!dosage || !frequency || !days) return '';
@@ -126,6 +139,7 @@ export const chineseMedProcessor = {
   // Update formatChineseMedData
   formatChineseMedData(med) {
     const perDosage = this.calculatePerDosage(med.order_qty, med.drug_fre, med.day);
+    const dailyDosage = this.calculateDailyDosage(med.order_qty, med.day);
     
     return {
       name: med.drug_perscrn_name?.trim() || med.cdrug_name?.trim(),
@@ -136,7 +150,8 @@ export const chineseMedProcessor = {
       type: med.cdrug_dose_name,
       isMulti: med.drug_multi_mark === 'Y',
       sosc_name: med.cdrug_sosc_name || '',
-      perDosage: perDosage // Add the per-dose calculation
+      perDosage: perDosage, // Add the per-dose calculation
+      dailyDosage: dailyDosage // Add the daily dosage calculation
     };
   },
 
@@ -163,23 +178,23 @@ export const chineseMedProcessor = {
     }
     
     const getMedicationText = (med) => {
-      const dosageText = med.perDosage === 'SPECIAL' 
+      const nameText = `${med.name}${med.isMulti ? ' (複方)' : ''}`;
+      const newFormatText = `${med.dailyDosage}g ${med.frequency}`;
+      const oldDosageText = med.perDosage === 'SPECIAL' 
         ? `總量${med.dosage}` 
         : `${med.perDosage}#`;
-      
-      const nameText = `${med.name}${med.isMulti ? ' (複方)' : ''}`;
-      const usageText = `${dosageText} ${med.frequency} / ${med.days}天`;
+      const oldUsageText = `${oldDosageText} ${med.frequency} / ${med.days}天`;
       const effectText = med.sosc_name && groupInfo.showEffectName ? ` - ${med.sosc_name}` : '';
       
       switch (format) {
         case 'nameVertical':
           return nameText;
         case 'nameWithDosageVertical':
-          return `${nameText} ${usageText}${effectText}`;
+          return `${nameText} ${newFormatText}${effectText}`;
         case 'nameHorizontal':
           return nameText;
         case 'nameWithDosageHorizontal':
-          return `${nameText} ${usageText}${effectText}`;
+          return `${nameText} ${newFormatText}${effectText}`;
         default:
           return nameText;
       }
