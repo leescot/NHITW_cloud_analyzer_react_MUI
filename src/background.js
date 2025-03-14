@@ -37,7 +37,7 @@ const apiEndpoints = {
   medDays: 'medcloud2.nhi.gov.tw/imu/api/imue0120/imue0120s01/pres-med-day',
   patientSummary: 'medcloud2.nhi.gov.tw/imu/api/imue2000/imue2000s01/get-summary',
   medication: 'medcloud2.nhi.gov.tw/imu/api/imue0008/imue0008s02/get-data',
-  labdata: 'medcloud2.nhi.gov.tw/imu/api/imue0060/imue0060s02/get-data',
+  lab: 'medcloud2.nhi.gov.tw/imu/api/imue0060/imue0060s02/get-data',
   chinesemed: 'medcloud2.nhi.gov.tw/imu/api/imue0090/imue0090s02/get-data',
   imaging: 'medcloud2.nhi.gov.tw/imu/api/imue0130/imue0130s02/get-data'
 };
@@ -234,7 +234,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       // 定義所有可能的數據類型及其對應的存儲鍵
       const dataTypes = {
         'medication': 'medicationData',
-        'labdata': 'labData',
+        'lab': 'labData',
         'chinesemed': 'chinesemedData',
         'imaging': 'imagingData',
         'allergy': 'allergyData',
@@ -341,7 +341,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
             case 'medication':
               storageKey = 'medicationData';
               break;
-            case 'labdata':
+            case 'lab':
               storageKey = 'labData';
               break;
             case 'chinesemed':
@@ -577,7 +577,6 @@ function saveDataToStorage(type, data, userSession) {
   // Map data type to storage key
   const storageKeys = {
     'medication': 'medicationData',
-    'labdata': 'labData',
     'lab': 'labData',
     'chinesemed': 'chinesemedData',
     'imaging': 'imagingData',

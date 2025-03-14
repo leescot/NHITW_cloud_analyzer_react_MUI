@@ -153,7 +153,7 @@ export function handleTestDataMessage(message) {
           case 'medication':
             window.lastInterceptedMedicationData = data[message.storageKey];
             break;
-          case 'labdata':
+          case 'lab':
             window.lastInterceptedLabData = data[message.storageKey];
             break;
           case 'chinesemed':

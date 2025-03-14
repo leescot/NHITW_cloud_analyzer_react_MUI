@@ -105,7 +105,34 @@ const TestModeSettings = () => {
     const newId = event.target.value;
     setSelectedDataId(newId);
     chrome.storage.sync.set({ currentTestDataId: newId });
-    chrome.runtime.sendMessage({ action: "updateCurrentTestDataId", value: newId });
+    chrome.runtime.sendMessage({ action: "updateCurrentTestDataId", value: newId }, (response) => {
+      // 清除舊數據
+      chrome.runtime.sendMessage({ action: "clearData" }, () => {
+        // 如果有選擇測試數據 ID，自動重新載入所有選定的數據類型
+        if (newId) {
+          setLoading(true);
+          setLoadStatus('自動載入中...');
+          
+          chrome.runtime.sendMessage({ action: "loadTestData" }, (response) => {
+            setLoading(false);
+            
+            if (response && response.status === "test_data_loaded") {
+              setLoadStatus(`成功載入 ${response.dataTypes.length} 種數據`);
+              
+              // 通知 popup 更新數據狀態
+              chrome.runtime.sendMessage({ action: "updatePopupDataStatus" });
+            } else {
+              setLoadStatus(response?.error || '載入失敗');
+            }
+            
+            // 5秒後清除狀態訊息
+            setTimeout(() => {
+              setLoadStatus('');
+            }, 5000);
+          });
+        }
+      });
+    });
   };
 
   // 切換數據類型選擇
