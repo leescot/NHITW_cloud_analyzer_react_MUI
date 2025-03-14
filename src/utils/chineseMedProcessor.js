@@ -74,8 +74,22 @@ export const chineseMedProcessor = {
       icd_code: med.icd_code,
       icd_name: med.icd_cname,
       hosp: med.hosp.split(';')[0],
+      days: med.day,
       medications: []
     };
+  },
+
+  // 計算每日劑量 (order_qty / day)
+  calculateDailyDosage(dosage, days) {
+    if (!dosage || !days) return '';
+    
+    try {
+      const dailyDosage = Math.round((parseFloat(dosage) / parseInt(days)) * 10) / 10;
+      return dailyDosage.toString();
+    } catch (error) {
+      console.error('Error calculating daily dosage:', error);
+      return '';
+    }
   },
 
   // Add calculation for per-dose amount
@@ -126,6 +140,7 @@ export const chineseMedProcessor = {
   // Update formatChineseMedData
   formatChineseMedData(med) {
     const perDosage = this.calculatePerDosage(med.order_qty, med.drug_fre, med.day);
+    const dailyDosage = this.calculateDailyDosage(med.order_qty, med.day);
     
     return {
       name: med.drug_perscrn_name?.trim() || med.cdrug_name?.trim(),
@@ -136,7 +151,8 @@ export const chineseMedProcessor = {
       type: med.cdrug_dose_name,
       isMulti: med.drug_multi_mark === 'Y',
       sosc_name: med.cdrug_sosc_name || '',
-      perDosage: perDosage // Add the per-dose calculation
+      perDosage: perDosage, // Add the per-dose calculation
+      dailyDosage: dailyDosage // Add the daily dosage calculation
     };
   },
 
@@ -156,36 +172,43 @@ export const chineseMedProcessor = {
       return '';
     }
     
-    // Format the header with date, hospital and diagnosis
-    let header = `${groupInfo.date} - ${groupInfo.hosp}`;
+    // Format the header with date, hospital, days and diagnosis
+    let header = `${groupInfo.date} - ${groupInfo.hosp} ${groupInfo.days}天`;
     if (groupInfo.showDiagnosis && groupInfo.icd_code && groupInfo.icd_name) {
       header += ` [${groupInfo.icd_code} ${groupInfo.icd_name}]`;
     }
     
+    // 先依照每日劑量降序排序藥品
+    const sortedMedications = [...medications].sort((a, b) => {
+      const dosageA = parseFloat(a.dailyDosage) || 0;
+      const dosageB = parseFloat(b.dailyDosage) || 0;
+      return dosageB - dosageA; // 降序排列
+    });
+    
     const getMedicationText = (med) => {
-      const dosageText = med.perDosage === 'SPECIAL' 
+      const nameText = `${med.name}`;
+      const newFormatText = `${med.dailyDosage}g ${med.frequency}`;
+      const oldDosageText = med.perDosage === 'SPECIAL' 
         ? `總量${med.dosage}` 
         : `${med.perDosage}#`;
-      
-      const nameText = `${med.name}${med.isMulti ? ' (複方)' : ''}`;
-      const usageText = `${dosageText} ${med.frequency} / ${med.days}天`;
+      const oldUsageText = `${oldDosageText} ${med.frequency} / ${med.days}天`;
       const effectText = med.sosc_name && groupInfo.showEffectName ? ` - ${med.sosc_name}` : '';
       
       switch (format) {
         case 'nameVertical':
           return nameText;
         case 'nameWithDosageVertical':
-          return `${nameText} ${usageText}${effectText}`;
+          return `${nameText} ${newFormatText}${effectText}`;
         case 'nameHorizontal':
           return nameText;
         case 'nameWithDosageHorizontal':
-          return `${nameText} ${usageText}${effectText}`;
+          return `${nameText} ${newFormatText}${effectText}`;
         default:
           return nameText;
       }
     };
     
-    const medicationTexts = medications.map(med => getMedicationText(med));
+    const medicationTexts = sortedMedications.map(med => getMedicationText(med));
     
     // Format the full output with header
     if (format.includes('Horizontal')) {
@@ -193,5 +216,43 @@ export const chineseMedProcessor = {
     } else {
       return `${header}\n${medicationTexts.join('\n')}`;
     }
+  },
+  
+  getChineseMedicationCopyText(medications, groupInfo) {
+    const sortedMedications = [...medications].sort((a, b) => {
+      return b.dailyDosage - a.dailyDosage;
+    });
+    
+    const getMedicationText = (med) => {
+      const nameText = `${med.name}`;
+      const newFormatText = `${med.dailyDosage}g ${med.frequency}`;
+      const oldDosageText = med.perDosage === 'SPECIAL' 
+        ? `總量${med.dosage}` 
+        : `${med.perDosage}#`;
+      const oldUsageText = `${oldDosageText} ${med.frequency} / ${med.days}天`;
+      const effectText = med.sosc_name && groupInfo.showEffectName ? ` - ${med.sosc_name}` : '';
+      
+      switch (groupInfo.copyFormat) {
+        case 'new':
+          return `${nameText} ${newFormatText}${effectText}`;
+        case 'old':
+          return `${nameText} ${oldUsageText}${effectText}`;
+        case 'both':
+          return `${nameText} ${newFormatText} (${oldUsageText})${effectText}`;
+        default:
+          return '';
+      }
+    };
+    
+    // 診斷資訊
+    const diagnosisText = groupInfo.icd_code ? ` ${groupInfo.icd_code} ${groupInfo.icd_name}` : '';
+    
+    // 標題行
+    const headerText = `${groupInfo.date} - ${groupInfo.hosp}${diagnosisText} ${groupInfo.days}天\n`;
+    
+    // 藥品行
+    const medicationLines = sortedMedications.map(med => getMedicationText(med)).join('\n');
+    
+    return headerText + medicationLines;
   }
 }; 
