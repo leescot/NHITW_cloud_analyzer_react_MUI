@@ -63,6 +63,6 @@ export const DEFAULT_SETTINGS = {
     noteTextSize: "small",
     floatingIconPosition: "middle-right",
     alwaysOpenOverviewTab: true,
-    useColorfulTabs: false,
+    useColorfulTabs: true,
   },
 };

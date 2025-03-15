@@ -27,78 +27,59 @@ function injectLegacyContent() {
     });
   });
 
-  // 首先判斷當前環境
-  const isRealEnvironment = window.location.href.includes("medcloud2.nhi.gov.tw");
-  const isTestEnvironment = window.location.href.includes("nhitw-mock-api.vercel.app") || 
-                           window.location.href.includes("localhost");
-  
-  console.log("當前環境:", isRealEnvironment ? "真實環境" : (isTestEnvironment ? "測試環境" : "未知環境"));
+  // Also load the legacy content
+  import("./legacyContent.js")
+    .then(() => {
+      console.log("Legacy content script loaded");
+    })
+    .catch((error) => {
+      console.error("Error loading legacy content:", error);
+    });
 
-  // 在真實環境中，優先載入舊版內容腳本
-  if (isRealEnvironment) {
-    console.log("在真實環境中載入舊版內容腳本");
-    import("./legacyContent.js")
-      .then((module) => {
-        console.log("舊版內容腳本載入成功");
-        // 如果有導出 initLegacyContent 函數，則調用它
-        if (typeof module.initLegacyContent === 'function') {
-          module.initLegacyContent();
+  // Import local data handler
+  import("./localDataHandler.js")
+    .then((localDataHandler) => {
+      console.log("Local data handler loaded");
+      
+      // 設置消息監聽器處理本地資料載入
+      chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+        // 處理載入本地資料的請求
+        if (message.action === "loadLocalData") {
+          console.log("Received loadLocalData request");
+          
+          // 使用本地資料處理器處理資料
+          const result = localDataHandler.processLocalData(
+            message.data,
+            message.filename
+          );
+          
+          // 發送處理結果
+          sendResponse(result);
+          return true; // 保持消息通道開啟以進行非同步回應
         }
-      })
-      .catch((error) => {
-        console.error("載入舊版內容腳本時出錯:", error);
-      });
-  } else {
-    // 在測試環境中，先加載測試模式模組
-    let testModeModule = null;
-    import("./modules/testMode.js")
-      .then((module) => {
-        console.log("測試模式模組已加載");
-        testModeModule = module;
         
-        // 在測試環境中，使用導出模組
-        import("./legacyContentExport.js")
-          .then((module) => {
-            console.log("舊版內容腳本導出模組已加載");
-            // 初始化舊版內容腳本
-            if (typeof module.initLegacyContent === 'function') {
-              module.initLegacyContent();
-            }
-          })
-          .catch((error) => {
-            console.error("加載舊版內容腳本導出模組時出錯:", error);
-            
-            // 如果新的導出模組加載失敗，嘗試直接加載舊版內容腳本
-            import("./legacyContent.js")
-              .then((module) => {
-                console.log("直接加載舊版內容腳本成功");
-                // 嘗試初始化，但舊版可能沒有導出 initLegacyContent 函數
-                if (typeof module.initLegacyContent === 'function') {
-                  module.initLegacyContent();
-                } else {
-                  console.log("舊版內容腳本沒有導出 initLegacyContent 函數");
-                }
-              })
-              .catch((err) => {
-                console.error("直接加載舊版內容腳本也失敗:", err);
-              });
-          });
-      })
-      .catch((error) => {
-        console.error("加載測試模式模組時出錯:", error);
-        // 測試模式加載失敗時，嘗試直接加載舊版內容腳本
-        import("./legacyContent.js")
-          .then((module) => {
-            console.log("直接加載舊版內容腳本成功");
-            if (typeof module.initLegacyContent === 'function') {
-              module.initLegacyContent();
-            }
-          })
-          .catch((err) => {
-            console.error("直接加載舊版內容腳本也失敗:", err);
-          });
+        // 處理清除本地資料的請求
+        if (message.action === "clearLocalData") {
+          console.log("Received clearLocalData request");
+          
+          // 清除本地資料
+          const result = localDataHandler.clearLocalData();
+          
+          // 發送處理結果
+          sendResponse(result);
+          return true;
+        }
+        
+        // 處理獲取患者資料的請求
+        if (message.action === "getPatientData") {
+          // 這部分保持原有的實現邏輯
+          // ...
+        }
       });
-  }
+    })
+    .catch((error) => {
+      console.error("Error loading local data handler:", error);
+    });
 
   // 在您現有的 message 監聽器中添加對 dataForExtension 消息的處理
   window.addEventListener("message", (event) => {
@@ -151,52 +132,18 @@ function injectLegacyContent() {
             detail: { type: event.data.dataType },
           });
           window.dispatchEvent(customEvent);
-          
-          // 通知 background.js 更新數據狀態
-          chrome.runtime.sendMessage({ action: "updateDataStatus" }, (response) => {
-            console.log("數據狀態更新回應:", response);
-          });
         }, 100);
+      }
+      
+      // 處理本地數據清除消息
+      if (event.data && event.data.type === "localDataCleared") {
+        console.log("收到本地數據清除消息");
+        
+        // 可以添加一些清除本地數據的邏輯
+        // ...
       }
     } catch (error) {
       console.error("擴充功能處理數據消息時出錯:", error);
     }
-  });
-  
-  // 監聽來自 background.js 的消息
-  chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    console.log("Content script 收到消息:", message);
-    
-    // 處理測試數據載入消息
-    if (message.action === "testDataLoaded" || message.action === "testDataTypeLoaded") {
-      // 嘗試使用測試模式模組處理消息
-      try {
-        // 動態導入測試模式模組
-        import("./modules/testMode.js").then(module => {
-          if (typeof module.handleTestDataMessage === 'function') {
-            module.handleTestDataMessage(message);
-          }
-          sendResponse({ status: "received" });
-        }).catch(error => {
-          console.error("動態導入測試模式模組失敗:", error);
-          sendResponse({ status: "error", message: error.message });
-        });
-      } catch (error) {
-        console.error("處理測試數據消息時出錯:", error);
-        sendResponse({ status: "error", message: error.message });
-      }
-      return true; // 保持通道開啟以進行非同步回應
-    }
-    
-    // 處理數據狀態更新消息
-    if (message.action === "dataStatusUpdated") {
-      console.log("收到數據狀態更新消息");
-      // 觸發 UI 更新事件
-      window.dispatchEvent(new CustomEvent('dataStatusUpdated', { detail: null }));
-      sendResponse({ status: "received" });
-      return true;
-    }
-    
-    return false;
   });
 })();

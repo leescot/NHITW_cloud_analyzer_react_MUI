@@ -111,8 +111,6 @@ export const handleAllData = async (dataSources, settings, setters) => {
       );
       setters.setPatientSummaryData(processedPatientSummary);
       results.patientSummary = processedPatientSummary;
-    } else {
-      console.log("Lab Data - No patient summary data found");
     }
 
     // 處理儀表板數據 (dashboard)

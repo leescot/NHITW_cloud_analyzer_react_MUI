@@ -1,13 +1,14 @@
 {
   "manifest_version": 3,
   "name": "健保雲端資料擷取器2.0",
-  "version": "1.0.0311",
-  "description": "健保雲端資料擷取器, beta version 1.0",
-  "permissions": ["webRequest", "storage", "scripting", "clipboardWrite", "notifications"],
+  "version": "1.0.0315",
+  "description": "健保雲端資料擷取器, 整合版 version 1.0",
+  "permissions": ["webRequest", "storage", "scripting", "clipboardWrite"],
   "host_permissions": [
     "https://medcloud2.nhi.gov.tw/*",
-    "https://nhitw-mock-api.vercel.app/*",
-    "http://localhost:3000/*"
+    "http://localhost:3000/*",
+    "http://localhost:5173/*"
+
   ],
   "background": {
     "service_worker": "background.js"
@@ -31,11 +32,17 @@
     {
       "matches": [
         "https://medcloud2.nhi.gov.tw/imu/*",
-        "https://nhitw-mock-api.vercel.app/*",
-        "http://localhost:3000/*"
+        "http://localhost:3000/*",
+        "http://localhost:5173/*"
       ],
       "js": ["content.js"],
       "run_at": "document_end"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": ["test.html", "localDataProcessor.js"],
+      "matches": ["<all_urls>"]
     }
   ]
 }

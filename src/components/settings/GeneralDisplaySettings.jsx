@@ -36,7 +36,7 @@ const GeneralDisplaySettings = () => {
       noteTextSize: 'small',
       floatingIconPosition: 'top-right',
       alwaysOpenOverviewTab: true,
-      useColorfulTabs: false
+      useColorfulTabs: true
     }, (items) => {
       setAutoOpenPage(items.autoOpenPage);
       setTitleTextSize(items.titleTextSize);
