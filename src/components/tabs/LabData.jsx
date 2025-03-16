@@ -80,6 +80,79 @@ const LabData = ({ groupedLabs, settings, labSettings, generalDisplaySettings })
     setSnackbarOpen(false);
   };
 
+  // 檢查是否有匹配的自定義項目的輔助函數
+  const hasMatchingCustomItems = (group) => {
+    if (!completeLabSettings.customCopyItems || !Array.isArray(completeLabSettings.customCopyItems)) {
+      return false;
+    }
+
+    // 取得所有啟用的檢驗項目代碼
+    const enabledOrderCodes = completeLabSettings.customCopyItems
+      .filter(item => item.enabled)
+      .map(item => item.orderCode);
+    
+    if (enabledOrderCodes.length === 0) {
+      return false;
+    }
+
+    // 檢查是否有任何一個檢驗項目符合條件
+    return group.labs.some(lab => {
+      // 特殊處理 08011C (WBC, Hb, Platelet)
+      if (lab.orderCode === '08011C') {
+        if (enabledOrderCodes.includes('08011C-WBC') && 
+            (lab.itemName?.toLowerCase().includes('wbc') || 
+             lab.itemName?.toLowerCase().includes('白血球'))) {
+          return true;
+        }
+        if (enabledOrderCodes.includes('08011C-Hb') && 
+            (lab.itemName?.toLowerCase().includes('hb') || 
+             lab.itemName?.toLowerCase().includes('hgb') || 
+             lab.itemName?.toLowerCase().includes('血色素') || 
+             lab.itemName?.toLowerCase().includes('血紅素'))) {
+          return true;
+        }
+        if (enabledOrderCodes.includes('08011C-Platelet') && 
+            (lab.itemName?.toLowerCase().includes('plt') || 
+             lab.itemName?.toLowerCase().includes('platelet') || 
+             lab.itemName?.toLowerCase().includes('血小板'))) {
+          return true;
+        }
+      }
+      // 特殊處理 09015C (Cr 和 GFR)
+      else if (lab.orderCode === '09015C') {
+        if (enabledOrderCodes.includes('09015C')) {
+          return true;
+        }
+      }
+      // 特殊處理 09040C (UPCR)
+      else if (lab.orderCode === '09040C') {
+        if (enabledOrderCodes.includes('09040C') && 
+            (lab.abbrName === 'UPCR' || 
+             (lab.itemName && (lab.itemName.includes('UPCR') || 
+                               lab.itemName.includes('蛋白/肌酸酐比值') ||
+                               lab.itemName.includes('protein/Creatinine'))))) {
+          return true;
+        }
+      }
+      // 特殊處理 12111C (UACR)
+      else if (lab.orderCode === '12111C') {
+        if (enabledOrderCodes.includes('12111C') && 
+            (lab.abbrName === 'UACR' || 
+             (lab.itemName && (lab.itemName.toLowerCase().includes('u-acr') || 
+                              lab.itemName.toLowerCase().includes('albumin/creatinine') ||
+                              lab.itemName.toLowerCase().includes('/cre'))))) {
+          return true;
+        }
+      }
+      // 標準處理其他項目
+      else if (enabledOrderCodes.includes(lab.orderCode)) {
+        return true;
+      }
+      
+      return false;
+    });
+  };
+
   // 複製所有檢驗數據的函數
   const handleCopyAllLabData = (group) => {
     let formattedText = `${group.date} - ${group.hosp}\n`;
@@ -465,7 +538,9 @@ const LabData = ({ groupedLabs, settings, labSettings, generalDisplaySettings })
                 {completeLabSettings.enableCustomCopy ? (
                   <>
                     <CopyAllButton onClick={() => handleCopyAllLabData(group)} style={copyButtonStyle} showLabel={true} />
-                    <CopySelectedButton onClick={() => handleCopySelectedLabData(group)} style={copyButtonStyle} />
+                    {hasMatchingCustomItems(group) && (
+                      <CopySelectedButton onClick={() => handleCopySelectedLabData(group)} style={copyButtonStyle} />
+                    )}
                   </>
                 ) : (
                   <CopyAllButton onClick={() => handleCopyAllLabData(group)} style={copyButtonStyle} showLabel={false} />
