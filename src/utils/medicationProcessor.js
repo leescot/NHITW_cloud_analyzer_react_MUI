@@ -101,6 +101,9 @@ export const medicationProcessor = {
       QOD: 0.5,   // 新增 QOD (every other day)
       ONCE: 1,    // 新增 ONCE (equivalent to STAT)
       PRNB: 2,    // 新增 PRNB (PRN BID)
+      QW: 0.14,   // 新增 QW (once a week) - approximately 1/7
+      BIW: 0.29,  // 新增 BIW (twice a week) - approximately 2/7
+      TIW: 0.43,  // 新增 TIW (three times a week) - approximately 3/7
     };
 
     // 修改正則表達式，確保包含所有在 frequencyMap 中的頻次
@@ -120,11 +123,11 @@ export const medicationProcessor = {
     // QOD 特殊處理 - 確保同時支援正則表達式匹配和特殊邏輯
     if (frequency.includes("QOD") || frequency.includes("Q2D")) {
       totalDoses = Math.ceil(parseInt(days) / 2);
-    } else if (frequency.includes("TIW")) {
+    } else if (freq === "TIW" || frequency.includes("TIW")) {
       totalDoses = Math.ceil(parseInt(days) / 7) * 3;
-    } else if (frequency.includes("BIW")) {
+    } else if (freq === "BIW" || frequency.includes("BIW")) {
       totalDoses = Math.ceil(parseInt(days) / 7) * 2;
-    } else if (frequency.includes("QW")) {
+    } else if (freq === "QW" || frequency.includes("QW")) {
       totalDoses = Math.ceil(parseInt(days) / 7);
     } else if (frequency.includes("PRN") || frequency.includes("需要時") || freq === "PRN" || freq === "PRNB") {
       return "SPECIAL";
@@ -143,6 +146,41 @@ export const medicationProcessor = {
 
     if (singleDose < threshold) {
       return "SPECIAL";
+    }
+
+    // For TIW, BIW, QW cases, do more precise calculation
+    if (freq === "TIW" || frequency.includes("TIW")) {
+      // For a 30-day month, there are about 4.29 weeks (30/7)
+      // For TIW, that's about 12.87 doses per month
+      // If total is 26 and doses are ~13, then should be 2 pills per dose
+      const numWeeks = Math.ceil(parseInt(days) / 7);
+      const estimatedDoses = numWeeks * 3; // For TIW
+      const perDose = Math.round(totalDosage / estimatedDoses);
+      
+      // Only return if it's a clean number
+      if (validUnits.includes(perDose)) {
+        return perDose.toString();
+      }
+    }
+    
+    if (freq === "BIW" || frequency.includes("BIW")) {
+      const numWeeks = Math.ceil(parseInt(days) / 7);
+      const estimatedDoses = numWeeks * 2; // For BIW
+      const perDose = Math.round(totalDosage / estimatedDoses);
+      
+      if (validUnits.includes(perDose)) {
+        return perDose.toString();
+      }
+    }
+    
+    if (freq === "QW" || frequency.includes("QW")) {
+      const numWeeks = Math.ceil(parseInt(days) / 7);
+      const estimatedDoses = numWeeks; // For QW
+      const perDose = Math.round(totalDosage / estimatedDoses);
+      
+      if (validUnits.includes(perDose)) {
+        return perDose.toString();
+      }
     }
 
     const roundedDose = Math.round(singleDose * 4) / 4;

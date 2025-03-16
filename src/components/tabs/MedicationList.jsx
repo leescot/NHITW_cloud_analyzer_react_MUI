@@ -360,7 +360,7 @@ const MedicationList = ({
               沒有找到用藥資料
             </TypographySizeWrapper>
           ) : (
-            settings.separateShortTermMeds && (selectedVisitType === "門診+急診" || selectedVisitType === "門診") ? (
+            settings.separateShortTermMeds && (selectedVisitType === "門診+急診" || selectedVisitType === "門診" || (selectedVisitType === "" && availableVisitTypes.length === 1 && availableVisitTypes.includes("門診"))) ? (
               // 兩欄顯示 - 分為長期和短期用藥
               <Grid container spacing={2}>
                 {/* 左欄：長期用藥（含有>=14天的藥物） */}

@@ -43,7 +43,7 @@ const Overview = ({
   imagingData = { withReport: [], withoutReport: [] },
   settings = {},
   overviewSettings = { 
-    medicationTrackingDays: 90, 
+    medicationTrackingDays: 180, 
     labTrackingDays: 90, 
     imageTrackingDays: 90,
     focusedLabTests: DEFAULT_LAB_TESTS,
@@ -69,7 +69,6 @@ const Overview = ({
             groupedMedications={groupedMedications}
             groupedChineseMeds={groupedChineseMeds}
             generalDisplaySettings={generalDisplaySettings}
-            trackingDays={overviewSettings.medicationTrackingDays}
           />
           
           {/* 重點藥物 */}

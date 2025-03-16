@@ -214,31 +214,31 @@ const LoadDataTab = ({ localDataStatus, setSnackbar }) => {
   };
 
   // 清除本地資料
-  const handleClearLocalData = () => {
-    // 獲取當前標籤頁
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      if (tabs && tabs[0] && tabs[0].id) {
-        // 傳送訊息給內容腳本清除資料
-        chrome.tabs.sendMessage(tabs[0].id, {
-          action: "clearLocalData"
-        }, (response) => {
-          if (response && response.success) {
-            setSnackbar({
-              open: true,
-              message: '已清除本地資料',
-              severity: 'success'
-            });
-          } else {
-            setSnackbar({
-              open: true,
-              message: '清除資料失敗',
-              severity: 'error'
-            });
-          }
-        });
-      }
-    });
-  };
+  // const handleClearLocalData = () => {
+  //   // 獲取當前標籤頁
+  //   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+  //     if (tabs && tabs[0] && tabs[0].id) {
+  //       // 傳送訊息給內容腳本清除資料
+  //       chrome.tabs.sendMessage(tabs[0].id, {
+  //         action: "clearLocalData"
+  //       }, (response) => {
+  //         if (response && response.success) {
+  //           setSnackbar({
+  //             open: true,
+  //             message: '已清除本地資料',
+  //             severity: 'success'
+  //           });
+  //         } else {
+  //           setSnackbar({
+  //             open: true,
+  //             message: '清除資料失敗',
+  //             severity: 'error'
+  //           });
+  //         }
+  //       });
+  //     }
+  //   });
+  // };
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
@@ -261,9 +261,9 @@ const LoadDataTab = ({ localDataStatus, setSnackbar }) => {
         >
           {downloading ? '下載中...' : '下載 JSON 資料檔'}
         </Button>
-        <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+        {/* <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
           從健保雲端系統下載的資料可用於後續分析或載入到其他裝置上
-        </Typography>
+        </Typography> */}
       </Paper>
 
       {/* 資料狀態顯示 */}
@@ -289,7 +289,7 @@ const LoadDataTab = ({ localDataStatus, setSnackbar }) => {
               />
             ))}
           </Box>
-          <Button
+          {/* <Button
             variant="outlined"
             color="error"
             startIcon={<DeleteIcon />}
@@ -297,11 +297,11 @@ const LoadDataTab = ({ localDataStatus, setSnackbar }) => {
             sx={{ mt: 2 }}
           >
             清除本地資料
-          </Button>
+          </Button> */}
         </Paper>
       ) : (
         <Alert severity="info" sx={{ mb: 2 }}>
-          目前尚未載入本地資料，請選擇 JSON 檔案並點擊「載入檔案」按鈕。
+          請選擇 JSON 檔案並點擊「載入檔案」
         </Alert>
       )}
 
