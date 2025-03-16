@@ -18,6 +18,7 @@ export const loadAllSettings = async () => {
       showDiagnosis: DEFAULT_SETTINGS.western.showDiagnosis,
       showATC5Name: DEFAULT_SETTINGS.western.showATC5Name,
       copyFormat: DEFAULT_SETTINGS.western.copyFormat,
+      separateShortTermMeds: DEFAULT_SETTINGS.western.separateShortTermMeds,
       
       // ATC5 Color settings
       enableATC5Colors: DEFAULT_SETTINGS.atc5.enableColors,
@@ -36,6 +37,8 @@ export const loadAllSettings = async () => {
       enableLabAbbrev: DEFAULT_SETTINGS.lab.enableAbbrev,
       highlightAbnormalLab: DEFAULT_SETTINGS.lab.highlightAbnormal,
       labCopyFormat: DEFAULT_SETTINGS.lab.copyFormat,
+      enableCustomCopy: DEFAULT_SETTINGS.lab.enableCustomCopy,
+      customCopyItems: DEFAULT_SETTINGS.lab.customCopyItems,
       
       // Overview settings
       medicationTrackingDays: DEFAULT_SETTINGS.overview.medicationTrackingDays,
@@ -61,6 +64,7 @@ export const loadAllSettings = async () => {
           showDiagnosis: items.showDiagnosis,
           showATC5Name: items.showATC5Name,
           copyFormat: items.copyFormat,
+          separateShortTermMeds: items.separateShortTermMeds,
         },
         atc5: {
           enableColors: items.enableATC5Colors,
@@ -79,6 +83,8 @@ export const loadAllSettings = async () => {
           enableAbbrev: items.enableLabAbbrev,
           highlightAbnormal: items.highlightAbnormalLab,
           copyFormat: items.labCopyFormat,
+          enableCustomCopy: items.enableCustomCopy,
+          customCopyItems: items.customCopyItems,
         },
         overview: {
           medicationTrackingDays: items.medicationTrackingDays,
@@ -243,6 +249,8 @@ const handleLabSettingsChange = (event, currentSettings, updateCallback, callbac
       enableAbbrev: event.detail.allSettings.enableLabAbbrev,
       highlightAbnormal: event.detail.allSettings.highlightAbnormalLab,
       copyFormat: event.detail.allSettings.labCopyFormat,
+      enableCustomCopy: event.detail.allSettings.enableCustomCopy,
+      customCopyItems: event.detail.allSettings.customCopyItems,
     };
 
     // 更新設置並重新處理數據

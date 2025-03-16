@@ -87,8 +87,8 @@ const getAbbreviation = (orderCode, unit, itemName) => {
     }
     
     // 如果沒有匹配的情況，返回一個默認縮寫
-    console.log(`Unknown 09040C item: ${itemName}`); // 記錄未識別的項目，方便日後改進
-    return "UrineTest"; // 設置一個更通用的默認縮寫，避免所有項目都被縮寫為 Cr(Urine)
+    // console.log(`Unknown 09040C item: ${itemName}`); // 記錄未識別的項目，方便日後改進
+    return "T.Protein"; // 設置一個更通用的默認縮寫，避免所有項目都被縮寫為 Cr(Urine)
   }
   
   // 特殊處理 12111C（尿液微量白蛋白相關）

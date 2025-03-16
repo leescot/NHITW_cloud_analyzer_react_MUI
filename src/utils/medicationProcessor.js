@@ -179,14 +179,19 @@ export const medicationProcessor = {
             const processedRecords = {};
 
             data.rObject.forEach((record) => {
-              const key = `${record.PER_DATE || record.drug_date}_${
-                record.HOSP_NAME || record.hosp
-              }`;
+              // Extract hospital name and visit type from the hosp field
+              const hospParts = (record.HOSP_NAME || record.hosp || "").split(";");
+              const hospitalName = hospParts[0] || "";
+              const visitType = hospParts.length > 1 ? hospParts[1] || "" : "";
+              
+              // Create a unique key that includes date, hospital, visit type, and ICD code
+              const key = `${record.PER_DATE || record.drug_date}_${hospitalName}_${visitType}_${record.ICD_CODE || record.icd_code || ""}`;
 
               if (!processedRecords[key]) {
                 processedRecords[key] = {
                   date: record.PER_DATE || record.drug_date,
-                  hosp: (record.HOSP_NAME || record.hosp || "").split(";")[0],
+                  hosp: hospitalName,
+                  visitType: visitType, // Add the new visitType field
                   icd_code: record.ICD_CODE || record.icd_code,
                   icd_name: record.ICD_NAME || record.icd_cname,
                   medications: [],
@@ -257,8 +262,11 @@ export const medicationProcessor = {
       return "";
     }
 
-    // Format the header with date, hospital and diagnosis
+    // Format the header with date, hospital, visit type and diagnosis
     let header = `${groupInfo.date} - ${groupInfo.hosp}`;
+    if (groupInfo.visitType) {
+      header += ` (${groupInfo.visitType})`;
+    }
     if (groupInfo.showDiagnosis && groupInfo.icd_code && groupInfo.icd_name) {
       header += ` [${groupInfo.icd_code} ${groupInfo.icd_name}]`;
     }

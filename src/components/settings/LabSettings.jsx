@@ -11,13 +11,48 @@ import {
   Select,
   MenuItem,
   Divider,
-  Box
+  Box,
+  Button,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  List,
+  ListItem,
+  ListItemText,
+  Checkbox,
+  ListItemIcon
 } from '@mui/material';
 import ScienceIcon from '@mui/icons-material/Science';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ViewColumnIcon from '@mui/icons-material/ViewColumn';
 import CategoryIcon from '@mui/icons-material/Category';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { handleSettingChange } from '../../utils/settingsHelper';
+import { DEFAULT_LAB_COPY_ITEMS } from '../../config/labTests';
+
+/**
+ * 重置用戶的檢驗複製項目設定為預設值
+ */
+export const resetLabCopyItemsToDefault = (callback = () => {}) => {
+  chrome.storage.sync.set(
+    { customCopyItems: DEFAULT_LAB_COPY_ITEMS }, 
+    () => {
+      // 通知其他組件設定已更改
+      chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+        if (tabs[0]) {
+          chrome.tabs.sendMessage(tabs[0].id, {
+            action: "settingChanged",
+            settingType: "lab",
+            setting: "customCopyItems",
+            value: DEFAULT_LAB_COPY_ITEMS
+          });
+        }
+        callback();
+      });
+    }
+  );
+};
 
 const LabSettings = () => {
   const [settings, setSettings] = useState({
@@ -26,8 +61,13 @@ const LabSettings = () => {
     showLabReference: false,
     enableLabAbbrev: true,
     highlightAbnormalLab: true,
-    labCopyFormat: 'horizontal'
+    labCopyFormat: 'horizontal',
+    enableCustomCopy: false,
+    customCopyItems: DEFAULT_LAB_COPY_ITEMS
   });
+  
+  const [customCopyDialogOpen, setCustomCopyDialogOpen] = useState(false);
+  const [tempCustomCopyItems, setTempCustomCopyItems] = useState([]);
 
   useEffect(() => {
     // Load lab settings
@@ -37,7 +77,9 @@ const LabSettings = () => {
       showLabReference: false,
       enableLabAbbrev: true,
       highlightAbnormalLab: true,
-      labCopyFormat: 'horizontal'
+      labCopyFormat: 'horizontal',
+      enableCustomCopy: false,
+      customCopyItems: DEFAULT_LAB_COPY_ITEMS
     }, (items) => {
       setSettings({
         labDisplayFormat: items.labDisplayFormat,
@@ -45,10 +87,69 @@ const LabSettings = () => {
         showLabReference: items.showLabReference,
         enableLabAbbrev: items.enableLabAbbrev,
         highlightAbnormalLab: items.highlightAbnormalLab,
-        labCopyFormat: items.labCopyFormat
+        labCopyFormat: items.labCopyFormat,
+        enableCustomCopy: items.enableCustomCopy,
+        customCopyItems: items.customCopyItems
       });
     });
   }, []);
+  
+  // 打開自訂複製項目對話框
+  const handleOpenCustomCopyDialog = () => {
+    setTempCustomCopyItems([...settings.customCopyItems]);
+    setCustomCopyDialogOpen(true);
+  };
+  
+  // 關閉自訂複製項目對話框
+  const handleCloseCustomCopyDialog = () => {
+    setCustomCopyDialogOpen(false);
+  };
+  
+  // 保存自訂複製項目設置
+  const handleSaveCustomCopyItems = () => {
+    const updatedSettings = {
+      ...settings,
+      customCopyItems: tempCustomCopyItems
+    };
+    
+    setSettings(updatedSettings);
+    chrome.storage.sync.set({ customCopyItems: tempCustomCopyItems }, () => {
+      // 發送消息給其他組件更新
+      chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+        if (tabs[0]) {
+          chrome.tabs.sendMessage(tabs[0].id, {
+            action: "settingChanged",
+            settingType: "lab",
+            setting: "customCopyItems",
+            value: tempCustomCopyItems
+          });
+        }
+      });
+    });
+    
+    setCustomCopyDialogOpen(false);
+  };
+  
+  // 重置自訂複製項目到默认设置
+  const handleResetCustomCopyItems = () => {
+    // Create a fresh deep copy of the default items
+    const resetItems = JSON.parse(JSON.stringify(DEFAULT_LAB_COPY_ITEMS));
+    
+    // Update state with reset items
+    setTempCustomCopyItems([]);  // Clear first
+    
+    // Use setTimeout to ensure the update happens in a separate render cycle
+    setTimeout(() => {
+      setTempCustomCopyItems(resetItems);
+    }, 50);
+  };
+  
+  // 切換自訂複製項目啟用狀態
+  const handleToggleCustomCopyItem = (index) => {
+    const updatedItems = [...tempCustomCopyItems];
+    updatedItems[index].enabled = !updatedItems[index].enabled;
+    setTempCustomCopyItems(updatedItems);
+  };
 
   return (
     <Accordion>
@@ -103,6 +204,29 @@ const LabSettings = () => {
           }
           label="開啟異常值變色"
         />
+        
+        <FormControlLabel
+          control={
+            <Switch
+              checked={settings.enableCustomCopy}
+              onChange={(e) => handleSettingChange('enableCustomCopy', e.target.checked, setSettings, 'enableCustomCopy', 'labsettings')}
+            />
+          }
+          label="開啟自訂複製項目功能"
+        />
+
+        {settings.enableCustomCopy && (
+          <Button
+            variant="outlined"
+            color="primary"
+            startIcon={<ContentCopyIcon />}
+            onClick={handleOpenCustomCopyDialog}
+            fullWidth
+            sx={{ mt: 1, mb: 1 }}
+          >
+            選擇要複製的檢驗項目
+          </Button>
+        )}
 
         <Divider sx={{ my: 1.5 }} />
         
@@ -149,10 +273,55 @@ const LabSettings = () => {
           >
             <MenuItem value="vertical">直式格式 (每項檢驗獨立一行)</MenuItem>
             <MenuItem value="horizontal">橫式格式 (檢驗項目並排顯示)</MenuItem>
-            <MenuItem value="byType">分類格式 (按檢驗類型分組)</MenuItem>
           </Select>
         </FormControl>
         
+        {/* 自訂複製項目對話框 */}
+        <Dialog 
+          open={customCopyDialogOpen} 
+          onClose={handleCloseCustomCopyDialog}
+          fullWidth
+          maxWidth="sm"
+          keepMounted={false}
+        >
+          <DialogTitle>選擇要複製的檢驗項目</DialogTitle>
+          <DialogContent>
+            <Typography variant="body2" color="text.secondary" paragraph>
+              勾選需要複製到剪貼簿的檢驗項目。只有勾選的項目會在複製操作時被包含。
+            </Typography>
+            <List sx={{ width: '100%' }}>
+              {tempCustomCopyItems.map((item, index) => (
+                <ListItem key={`${item.orderCode}-${index}`} divider>
+                  <ListItemIcon>
+                    <Checkbox
+                      edge="start"
+                      checked={item.enabled}
+                      onChange={() => handleToggleCustomCopyItem(index)}
+                    />
+                  </ListItemIcon>
+                  <ListItemText 
+                    primary={`${item.displayName}`} 
+                  />
+                </ListItem>
+              ))}
+            </List>
+          </DialogContent>
+          <DialogActions>
+            <Button onClick={handleCloseCustomCopyDialog} color="primary">
+              取消
+            </Button>
+            <Button 
+              onClick={handleResetCustomCopyItems} 
+              color="secondary"
+              sx={{ mr: 'auto' }}
+            >
+              重置為預設
+            </Button>
+            <Button onClick={handleSaveCustomCopyItems} color="primary" variant="contained">
+              保存
+            </Button>
+          </DialogActions>
+        </Dialog>
       </AccordionDetails>
     </Accordion>
   );

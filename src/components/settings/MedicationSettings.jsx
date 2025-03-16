@@ -50,6 +50,7 @@ const MedicationSettings = () => {
     showGenericName: false,
     showATC5Name: false,
     copyFormat: "nameWithDosageVertical",
+    separateShortTermMeds: false,
     enableATC5Colors: true,
     atc5Groups: DEFAULT_ATC5_GROUPS,
     atc5ColorGroups: DEFAULT_ATC5_COLOR_GROUPS,
@@ -78,6 +79,7 @@ const MedicationSettings = () => {
         showGenericName: false,
         showATC5Name: false,
         copyFormat: "nameWithDosageVertical",
+        separateShortTermMeds: false,
         enableATC5Colors: true,
         atc5Groups: DEFAULT_ATC5_GROUPS,
         atc5ColorGroups: DEFAULT_ATC5_COLOR_GROUPS,
@@ -89,6 +91,7 @@ const MedicationSettings = () => {
           showGenericName: items.showGenericName,
           showATC5Name: items.showATC5Name,
           copyFormat: items.copyFormat,
+          separateShortTermMeds: items.separateShortTermMeds,
           enableATC5Colors: items.enableATC5Colors,
           atc5Groups: items.atc5Groups,
           atc5ColorGroups: items.atc5ColorGroups,
@@ -291,6 +294,18 @@ const MedicationSettings = () => {
             />
           }
           label="顯示ATC5分類名稱"
+        />
+
+        <FormControlLabel
+          control={
+            <Switch
+              checked={settings.separateShortTermMeds}
+              onChange={(e) =>
+                handleLocalSettingChange("separateShortTermMeds", e.target.checked)
+              }
+            />
+          }
+          label="短天數藥物分欄顯示"
         />
 
         <FormControlLabel

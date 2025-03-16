@@ -1,10 +1,75 @@
 import React, { useState } from "react";
 import { Typography, Box, Divider, IconButton, Tooltip, Paper, Grid, Snackbar } from "@mui/material";
+import { styled } from '@mui/material/styles';
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import TypographySizeWrapper from "../utils/TypographySizeWrapper";
 
+// 方法：使用相對定位和絕對定位為圖標添加文字
+const IconWithTextOverlay = styled(Box)(({ theme }) => ({
+  position: 'relative',
+  display: 'inline-flex',
+  alignItems: 'center',
+  justifyContent: 'center',
+}));
+
+const TextOverlay = styled(Typography)(({ theme }) => ({
+  position: 'absolute',
+  fontSize: '9px',
+  fontWeight: 'bold',
+  color: theme.palette.primary.contrastText,
+  backgroundColor: theme.palette.primary.main,
+  padding: '1px 2px',
+  borderRadius: '2px',
+  lineHeight: 1,
+  right: 0,
+  bottom: 0
+}));
+
+// 複製全部按鈕
+const CopyAllButton = ({ onClick, style, showLabel = true }) => {
+  return (
+    <Tooltip title="複製全部檢驗資料">
+      <IconButton onClick={onClick} size="small" sx={style}>
+        <IconWithTextOverlay>
+          <ContentCopyIcon fontSize="small" color="primary" />
+          {showLabel && (
+            <TextOverlay sx={{ backgroundColor: 'primary.main' }}>All</TextOverlay>
+          )}
+        </IconWithTextOverlay>
+      </IconButton>
+    </Tooltip>
+  );
+};
+
+// 複製選定項目按鈕
+const CopySelectedButton = ({ onClick, style }) => {
+  return (
+    <Tooltip title="複製選擇的檢驗項目">
+      <IconButton onClick={onClick} size="small" sx={style}>
+        <IconWithTextOverlay>
+          <ContentCopyIcon fontSize="small" color="secondary" />
+          <TextOverlay sx={{ backgroundColor: 'secondary.main' }}>Sel</TextOverlay>
+        </IconWithTextOverlay>
+      </IconButton>
+    </Tooltip>
+  );
+};
+
 const LabData = ({ groupedLabs, settings, labSettings, generalDisplaySettings }) => {
   console.log("LabData rendering with lab settings:", labSettings);
+  
+  // Ensure all required properties exist in labSettings with defaults
+  const completeLabSettings = {
+    displayFormat: 'byType',
+    showUnit: false,
+    showReference: false,
+    enableAbbrev: true, 
+    highlightAbnormal: true,
+    copyFormat: 'horizontal',
+    enableCustomCopy: false,
+    customCopyItems: [],
+    ...labSettings
+  };
   
   // 添加 snackbar 狀態
   const [snackbarOpen, setSnackbarOpen] = useState(false);
@@ -15,21 +80,21 @@ const LabData = ({ groupedLabs, settings, labSettings, generalDisplaySettings })
     setSnackbarOpen(false);
   };
 
-  // 複製檢驗數據的函數 - 從 FloatingIcon 移過來
-  const handleCopyLabData = (group) => {
+  // 複製所有檢驗數據的函數
+  const handleCopyAllLabData = (group) => {
     let formattedText = `${group.date} - ${group.hosp}\n`;
 
     // Changed default behavior to horizontal format
-    if (labSettings.copyFormat === "vertical") {
+    if (completeLabSettings.copyFormat === "vertical") {
       // Vertical format: each lab item on a new line
       group.labs.forEach((lab) => {
-        // Use order_name as fallback if itemName is null
-        const displayName = lab.itemName || lab.orderName;
+        // Prefer abbrName over itemName if available
+        const displayName = lab.abbrName || lab.itemName || lab.orderName;
         let labLine = `${displayName}: ${lab.value}`;
-        if (labSettings.showUnit && lab.unit) {
+        if (completeLabSettings.showUnit && lab.unit) {
           labLine += ` ${lab.unit}`;
         }
-        if (labSettings.showReference) {
+        if (completeLabSettings.showReference) {
           if (lab.referenceMin !== null) {
             labLine += ` (${lab.referenceMin}${lab.referenceMax !== null ? `-${lab.referenceMax}` : ''})`;
           } else if (lab.consultValue) {
@@ -39,15 +104,15 @@ const LabData = ({ groupedLabs, settings, labSettings, generalDisplaySettings })
         formattedText += `${labLine}\n`;
       });
     } else {
-      // Horizontal format: lab items on the same line, separated by spaces
+      // Horizontal format: lab items on the same line, separated by spaces (changed from |)
       let labItems = group.labs.map((lab) => {
-        // Use order_name as fallback if itemName is null
-        const displayName = lab.itemName || lab.orderName;
+        // Prefer abbrName over itemName if available
+        const displayName = lab.abbrName || lab.itemName || lab.orderName;
         let labText = `${displayName}: ${lab.value}`;
-        if (labSettings.showUnit && lab.unit) {
+        if (completeLabSettings.showUnit && lab.unit) {
           labText += ` ${lab.unit}`;
         }
-        if (labSettings.showReference) {
+        if (completeLabSettings.showReference) {
           if (lab.referenceMin !== null) {
             labText += ` (${lab.referenceMin}${lab.referenceMax !== null ? `-${lab.referenceMax}` : ''})`;
           } else if (lab.consultValue) {
@@ -56,13 +121,13 @@ const LabData = ({ groupedLabs, settings, labSettings, generalDisplaySettings })
         }
         return labText;
       });
-      formattedText += labItems.join(" | ");
+      formattedText += labItems.join(" ");
     }
     
     navigator.clipboard
       .writeText(formattedText)
       .then(() => {
-        setSnackbarMessage("檢驗資料已複製到剪貼簿");
+        setSnackbarMessage("所有檢驗資料已複製到剪貼簿");
         setSnackbarOpen(true);
       })
       .catch((err) => {
@@ -72,9 +137,155 @@ const LabData = ({ groupedLabs, settings, labSettings, generalDisplaySettings })
       });
   };
 
+  // 複製自訂項目的函數
+  const handleCopySelectedLabData = (group) => {
+    if (!completeLabSettings.customCopyItems || !Array.isArray(completeLabSettings.customCopyItems)) {
+      setSnackbarMessage("未找到自訂複製項目清單");
+      setSnackbarOpen(true);
+      return;
+    }
+
+    // 取得所有啟用的檢驗項目代碼
+    const enabledOrderCodes = completeLabSettings.customCopyItems
+      .filter(item => item.enabled)
+      .map(item => item.orderCode);
+    
+    if (enabledOrderCodes.length === 0) {
+      setSnackbarMessage("未選擇任何要複製的檢驗項目");
+      setSnackbarOpen(true);
+      return;
+    }
+
+    // 篩選符合條件的檢驗項目
+    const filteredLabs = [];
+    
+    group.labs.forEach(lab => {
+      // 特殊處理 08011C (WBC, Hb, Platelet)
+      if (lab.orderCode === '08011C') {
+        // 檢查是否有 WBC、Hb、或 Platelet 相關的項目
+        if (enabledOrderCodes.includes('08011C-WBC') && 
+            (lab.itemName?.toLowerCase().includes('wbc') || 
+             lab.itemName?.toLowerCase().includes('白血球'))) {
+          filteredLabs.push({...lab, orderCode: '08011C-WBC'});
+        }
+        if (enabledOrderCodes.includes('08011C-Hb') && 
+            (lab.itemName?.toLowerCase().includes('hb') || 
+             lab.itemName?.toLowerCase().includes('hgb') || 
+             lab.itemName?.toLowerCase().includes('血色素') || 
+             lab.itemName?.toLowerCase().includes('血紅素'))) {
+          filteredLabs.push({...lab, orderCode: '08011C-Hb'});
+        }
+        if (enabledOrderCodes.includes('08011C-Platelet') && 
+            (lab.itemName?.toLowerCase().includes('plt') || 
+             lab.itemName?.toLowerCase().includes('platelet') || 
+             lab.itemName?.toLowerCase().includes('血小板'))) {
+          filteredLabs.push({...lab, orderCode: '08011C-Platelet'});
+        }
+      }
+      // 特殊處理 09015C (Cr 和 GFR)
+      else if (lab.orderCode === '09015C') {
+        if (enabledOrderCodes.includes('09015C')) {
+          if (lab.abbrName === 'GFR' || 
+              (lab.itemName && (lab.itemName.includes('GFR') || 
+                                lab.itemName.includes('腎絲球過濾率') || 
+                                lab.itemName.includes('Ccr')))) {
+            filteredLabs.push({...lab, displayName: 'GFR'});
+          } else {
+            filteredLabs.push({...lab, displayName: 'Cr'});
+          }
+        }
+      }
+      // 特殊處理 09040C (UPCR)
+      else if (lab.orderCode === '09040C') {
+        if (enabledOrderCodes.includes('09040C') && 
+            (lab.abbrName === 'UPCR' || 
+             (lab.itemName && (lab.itemName.includes('UPCR') || 
+                               lab.itemName.includes('蛋白/肌酸酐比值') ||
+                               lab.itemName.includes('protein/Creatinine'))))) {
+          filteredLabs.push({...lab, displayName: 'UPCR'});
+        }
+      }
+      // 特殊處理 12111C (UACR)
+      else if (lab.orderCode === '12111C') {
+        if (enabledOrderCodes.includes('12111C') && 
+            (lab.abbrName === 'UACR' || 
+             (lab.itemName && (lab.itemName.toLowerCase().includes('u-acr') || 
+                              lab.itemName.toLowerCase().includes('albumin/creatinine') ||
+                              lab.itemName.toLowerCase().includes('/cre'))))) {
+          filteredLabs.push({...lab, displayName: 'UACR'});
+        }
+      }
+      // 標準處理其他項目
+      else if (enabledOrderCodes.includes(lab.orderCode)) {
+        filteredLabs.push(lab);
+      }
+    });
+
+    if (filteredLabs.length === 0) {
+      setSnackbarMessage("在當前檢驗中未找到指定的項目");
+      setSnackbarOpen(true);
+      return;
+    }
+
+    // 生成複製文本
+    let formattedText = `${group.date} - ${group.hosp}\n`;
+
+    // 根據複製格式處理
+    if (completeLabSettings.copyFormat === "vertical") {
+      // 直式格式
+      filteredLabs.forEach((lab) => {
+        // Prefer abbrName over displayName, itemName, and orderName
+        const displayName = lab.displayName || lab.abbrName || lab.itemName || lab.orderName;
+        let labLine = `${displayName}: ${lab.value}`;
+        if (completeLabSettings.showUnit && lab.unit) {
+          labLine += ` ${lab.unit}`;
+        }
+        if (completeLabSettings.showReference) {
+          if (lab.referenceMin !== null) {
+            labLine += ` (${lab.referenceMin}${lab.referenceMax !== null ? `-${lab.referenceMax}` : ''})`;
+          } else if (lab.consultValue) {
+            labLine += ` (${lab.consultValue.min}-${lab.consultValue.max})`;
+          }
+        }
+        formattedText += `${labLine}\n`;
+      });
+    } else {
+      // 橫式格式
+      let labItems = filteredLabs.map((lab) => {
+        // Prefer abbrName over displayName, itemName, and orderName
+        const displayName = lab.displayName || lab.abbrName || lab.itemName || lab.orderName;
+        let labText = `${displayName}: ${lab.value}`;
+        if (completeLabSettings.showUnit && lab.unit) {
+          labText += ` ${lab.unit}`;
+        }
+        if (completeLabSettings.showReference) {
+          if (lab.referenceMin !== null) {
+            labText += ` (${lab.referenceMin}${lab.referenceMax !== null ? `-${lab.referenceMax}` : ''})`;
+          } else if (lab.consultValue) {
+            labText += ` (${lab.consultValue.min}-${lab.consultValue.max})`;
+          }
+        }
+        return labText;
+      });
+      formattedText += labItems.join(" ");
+    }
+    
+    navigator.clipboard
+      .writeText(formattedText)
+      .then(() => {
+        setSnackbarMessage("指定檢驗項目已複製到剪貼簿");
+        setSnackbarOpen(true);
+      })
+      .catch((err) => {
+        console.error("Failed to copy selected lab data: ", err);
+        setSnackbarMessage("複製失敗，請重試");
+        setSnackbarOpen(true);
+      });
+  };
+
   // 確定欄數設置 (可以根據需要調整)
   const getColumnCount = () => {
-    switch(labSettings.displayFormat) {
+    switch(completeLabSettings.displayFormat) {
       case "twoColumn": return 2;
       case "threeColumn": return 3;
       case "byType": return 0; // 特殊情況，按類型分群
@@ -83,7 +294,7 @@ const LabData = ({ groupedLabs, settings, labSettings, generalDisplaySettings })
   };
 
   const getStatusColor = (lab) => {
-    if (!lab || !labSettings?.highlightAbnormal) return "inherit";
+    if (!lab || !completeLabSettings?.highlightAbnormal) return "inherit";
     
     if (lab.valueStatus === "high") return "#f44336"; // 紅色
     if (lab.valueStatus === "low") return "#3d8c40";  // 綠色 (之前是藍色)
@@ -102,14 +313,14 @@ const LabData = ({ groupedLabs, settings, labSettings, generalDisplaySettings })
         marginBottom: "4px"
       }}
     >
-      {labSettings.enableAbbrev ? (lab.abbrName || lab.itemName) : lab.itemName}{" "}
+      {completeLabSettings.enableAbbrev ? (lab.abbrName || lab.itemName) : lab.itemName}{" "}
       <span style={{ fontWeight: 'medium' }}>
         {lab.value}
       </span>
-      {labSettings.showUnit && lab.unit && (
+      {completeLabSettings.showUnit && lab.unit && (
         <span style={{ color: "gray" }}>{` ${lab.unit}`}</span>
       )}
-      {labSettings.showReference &&
+      {completeLabSettings.showReference &&
         lab.referenceMin !== null && (
           <span style={{ color: "gray", fontSize: "0.8em" }}>
             {" "}
@@ -165,7 +376,7 @@ const LabData = ({ groupedLabs, settings, labSettings, generalDisplaySettings })
       }
       
       // 創建唯一標識 - 使用項目名稱和數值組合
-      const uniqueKey = `${labSettings.enableAbbrev ? (lab.abbrName || lab.itemName) : lab.itemName}_${lab.value}`;
+      const uniqueKey = `${completeLabSettings.enableAbbrev ? (lab.abbrName || lab.itemName) : lab.itemName}_${lab.value}`;
       
       // 如果這個組合還沒出現過，添加到結果中
       if (!processedLabsByType[type].has(uniqueKey)) {
@@ -210,6 +421,9 @@ const LabData = ({ groupedLabs, settings, labSettings, generalDisplaySettings })
     );
   };
 
+  // 複製按鈕樣式
+  const copyButtonStyle = { ml: 1 };
+  
   return (
     <>
       {groupedLabs.length === 0 ? (
@@ -247,23 +461,23 @@ const LabData = ({ groupedLabs, settings, labSettings, generalDisplaySettings })
                   </TypographySizeWrapper>
                 )}
               
-                <Tooltip title="複製檢驗資料">
-                  <IconButton
-                    size="small"
-                    onClick={() => handleCopyLabData(group)}
-                    sx={{ ml: 1 }}
-                  >
-                    <ContentCopyIcon fontSize="small" />
-                  </IconButton>
-                </Tooltip>
+                {/* 複製按鈕 - 根據設定決定顯示一個還是兩個 */}
+                {completeLabSettings.enableCustomCopy ? (
+                  <>
+                    <CopyAllButton onClick={() => handleCopyAllLabData(group)} style={copyButtonStyle} showLabel={true} />
+                    <CopySelectedButton onClick={() => handleCopySelectedLabData(group)} style={copyButtonStyle} />
+                  </>
+                ) : (
+                  <CopyAllButton onClick={() => handleCopyAllLabData(group)} style={copyButtonStyle} showLabel={false} />
+                )}
               </TypographySizeWrapper>
             </Box>
 
             {/* 根據設置選擇顯示格式 */}
-            {labSettings.displayFormat === "byType" ? (
+            {completeLabSettings.displayFormat === "byType" ? (
               // 按類型分組顯示
               renderByType(group.labs)
-            ) : labSettings.displayFormat === "horizontal" ? (
+            ) : completeLabSettings.displayFormat === "horizontal" ? (
               // 橫式布局 - 所有檢驗連續顯示在同一行
               <Box sx={{ ml: 2, mb: 1 }}>
                 <TypographySizeWrapper 
@@ -274,16 +488,16 @@ const LabData = ({ groupedLabs, settings, labSettings, generalDisplaySettings })
                   <div style={{ display: 'flex', flexWrap: 'wrap' }}>
                     {group.labs.map((lab, labIndex) => (
                       <span key={labIndex} style={{ marginRight: '12px' }}>
-                        {labSettings.enableAbbrev
+                        {completeLabSettings.enableAbbrev
                           ? lab.abbrName || lab.itemName
                           : lab.itemName}{" "}
                         <span style={{ fontWeight: 'medium', color: getStatusColor(lab) }}>
                           {lab.value}
                         </span>
-                        {labSettings.showUnit && lab.unit && (
+                        {completeLabSettings.showUnit && lab.unit && (
                           <span style={{ color: "gray" }}>{` ${lab.unit}`}</span>
                         )}
-                        {labSettings.showReference &&
+                        {completeLabSettings.showReference &&
                           lab.referenceMin !== null && (
                             <span style={{ color: "gray", fontSize: "0.8em" }}>
                               {" "}

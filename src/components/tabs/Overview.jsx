@@ -13,10 +13,11 @@
  * This file serves as the integration point for all the separate components.
  */
 
-import React, { useMemo } from "react";
+import React, { useMemo, useEffect } from "react";
 import { Grid, Box } from "@mui/material";
 
 // Import individual components
+import Overview_RecentDiagnosis from "./Overview_RecentDiagnosis";
 import Overview_ImportantMedications from "./Overview_ImportantMedications";
 import Overview_LabTests from "./Overview_LabTests";
 import Overview_PatientSummary from "./Overview_PatientSummary";
@@ -36,6 +37,7 @@ const Overview = ({
   dischargeData, 
   patientSummaryData,
   groupedMedications = [],
+  groupedChineseMeds = [],
   groupedLabs = [],
   labData,
   imagingData = { withReport: [], withoutReport: [] },
@@ -60,8 +62,17 @@ const Overview = ({
     <Box sx={{ p: 0 }}>
       <Grid container spacing={1}>
         {/* 三欄式布局 */}
-        {/* 重點藥物 - 左欄 (1/3) - If no data, reduce width */}
+        {/* 左欄 (1/3) - 包含診斷與重點藥物 */}
         <Grid item xs={12} md={hasMedications ? 4.5 : 3}>
+          {/* 近期就醫診斷 */}
+          <Overview_RecentDiagnosis 
+            groupedMedications={groupedMedications}
+            groupedChineseMeds={groupedChineseMeds}
+            generalDisplaySettings={generalDisplaySettings}
+            trackingDays={overviewSettings.medicationTrackingDays}
+          />
+          
+          {/* 重點藥物 */}
           <Overview_ImportantMedications 
             groupedMedications={groupedMedications} 
             settings={settings}

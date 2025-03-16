@@ -8,7 +8,7 @@ import {
   DEFAULT_ATC5_GROUPS,
   DEFAULT_ATC5_COLOR_GROUPS,
 } from "./medicationGroups";
-import { DEFAULT_LAB_TESTS } from "./labTests";
+import { DEFAULT_LAB_TESTS, DEFAULT_LAB_COPY_ITEMS } from "./labTests";
 import { DEFAULT_IMAGE_TESTS } from "./imageTests";
 
 // 整合預設設定
@@ -20,6 +20,7 @@ export const DEFAULT_SETTINGS = {
     showDiagnosis: true,
     showATC5Name: false,
     copyFormat: "nameWithDosageVertical",
+    separateShortTermMeds: false,
   },
 
   // ATC5 藥物分類設定
@@ -44,6 +45,8 @@ export const DEFAULT_SETTINGS = {
     enableAbbrev: true,
     highlightAbnormal: true,
     copyFormat: "horizontal",
+    enableCustomCopy: false,
+    customCopyItems: DEFAULT_LAB_COPY_ITEMS,
   },
 
   // 總覽頁面設定

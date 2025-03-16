@@ -135,7 +135,7 @@ export const handleAllData = async (dataSources, settings, setters) => {
  * @returns {Object} - 包含所有數據源的對象
  */
 export const collectDataSources = () => {
-  return {
+  const sources = {
     medication: window.lastInterceptedMedicationData,
     labData: window.lastInterceptedLabData,
     chinesemed: window.lastInterceptedChineseMedData,
@@ -147,6 +147,8 @@ export const collectDataSources = () => {
     patientsummary: window.lastInterceptedPatientSummaryData,
     patientSummary: window.lastInterceptedPatientSummaryData || window.lastInterceptedPatientSummaryData
   };
+  
+  return sources;
 };
 
 /**

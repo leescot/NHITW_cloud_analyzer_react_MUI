@@ -1,23 +1,29 @@
 export const chineseMedProcessor = {
   // 處理中藥資料的主要函數
   processChineseMedData(data) {
-    // console.log('Starting to process Chinese medicine data:', data);
-    
     if (!data || !data.rObject || !Array.isArray(data.rObject)) {
-      console.log('Invalid Chinese medicine data format:', data);
       return [];
     }
 
     try {
       // 將資料依照日期和 ICD 代碼分組
       const grouped = this.groupChineseMedsByDateAndICD(data.rObject);
-      // console.log('Grouped Chinese medicine data:', grouped);
 
       // 轉換為陣列並依日期排序
       const sortedGroups = this.sortGroupedData(grouped);
-      // console.log('Final sorted Chinese medicine groups:', sortedGroups);
 
-      return sortedGroups;
+      // Verify that we have valid data structures before returning them
+      // Each group should have visitType, icd_code, and icd_name for the Overview_RecentDiagnosis component
+      const validatedGroups = sortedGroups.map(group => {
+        // Make sure the group has all required fields
+        if (!group.visitType) {
+          group.visitType = "門診"; // Default to outpatient
+        }
+        
+        return group;
+      });
+
+      return validatedGroups;
     } catch (error) {
       console.error('Error processing Chinese medicine data:', error);
       console.error('Error details:', error.stack);
@@ -28,25 +34,19 @@ export const chineseMedProcessor = {
   // 將中藥資料依照日期和 ICD 代碼分組
   groupChineseMedsByDateAndICD(medications) {
     return medications.reduce((acc, med) => {
-      // console.log('Processing single Chinese medicine:', med);
-      
       // 從 func_date 取得日期並格式化
       const date = this.formatDate(med.func_date);
       if (!date || !med.icd_code) {
-        // console.log('Skipping item due to missing date or ICD code:', med);
         return acc;
       }
 
       const key = `${date}_${med.icd_code}`;
-      // console.log('Generated key:', key);
       
       if (!acc[key]) {
         acc[key] = this.createNewGroup(med, date);
-        // console.log('Created new group for key:', key);
       }
 
       acc[key].medications.push(this.formatChineseMedData(med));
-      // console.log('Added Chinese medicine to group:', key);
 
       return acc;
     }, {});
@@ -69,14 +69,27 @@ export const chineseMedProcessor = {
 
   // 創建新的分組
   createNewGroup(med, formattedDate) {
-    return {
+    // Extract visitType from hosp field (between first and second semicolon)
+    const hospParts = med.hosp.split(';');
+    
+    // Ensure we have at least 2 parts (hospital name and visit type)
+    const visitType = hospParts.length > 1 ? hospParts[1].trim() : "門診"; // Default to "門診" if not specified
+    
+    // Ensure the ICD code and name are not null or undefined
+    const icd_code = med.icd_code || '';
+    const icd_name = med.icd_cname || '';
+    
+    const group = {
       date: formattedDate,
-      icd_code: med.icd_code,
-      icd_name: med.icd_cname,
-      hosp: med.hosp.split(';')[0],
+      icd_code: icd_code,
+      icd_name: icd_name,
+      hosp: hospParts[0],  // First part of hosp (hospital name)
       days: med.day,
+      visitType: visitType, // Add the visitType field
       medications: []
     };
+    
+    return group;
   },
 
   // 計算每日劑量 (order_qty / day)

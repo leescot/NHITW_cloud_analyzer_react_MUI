@@ -30,6 +30,7 @@ import {
 import LocalHospitalIcon from "@mui/icons-material/LocalHospital";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import HealingIcon from "@mui/icons-material/Healing";
+import GrassIcon from "@mui/icons-material/Grass";
 // import ReportRoundedIcon from '@mui/icons-material/ReportRounded';
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 
@@ -356,7 +357,7 @@ const FloatingIcon = () => {
       <Dialog
         open={open}
         onClose={handleClose}
-        maxWidth="lg"
+        maxWidth="xl"
         fullWidth
         PaperProps={{
           sx: {
@@ -482,7 +483,7 @@ const FloatingIcon = () => {
                 />
                 <Tab
                   label={`中藥 (${groupedChineseMeds.length})`}
-                  icon={<HealingIcon sx={{ fontSize: "1rem" }} />}
+                  icon={<GrassIcon sx={{ fontSize: "1rem" }} />}
                   iconPosition="start"
                   sx={{
                     padding: "6px 10px",
@@ -635,6 +636,7 @@ const FloatingIcon = () => {
               dischargeData={dischargeData}
               patientSummaryData={patientSummaryData}
               groupedMedications={groupedMedications}
+              groupedChineseMeds={groupedChineseMeds}
               groupedLabs={groupedLabs}
               labData={groupedLabs}
               imagingData={imagingData}

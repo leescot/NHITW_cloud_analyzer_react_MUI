@@ -42,7 +42,7 @@ const getStatusKeyFromStorageKey = (storageKey) => {
 };
 
 // 設定變更處理函數
-export const handleSettingChange = (settingName, value, setLocalState, localStateProp) => {
+export const handleSettingChange = (settingName, value, setLocalState, localStateProp, settingType) => {
   // Update local component state
   if (setLocalState && localStateProp) {
     setLocalState(prev => ({
@@ -61,7 +61,8 @@ export const handleSettingChange = (settingName, value, setLocalState, localStat
         chrome.tabs.sendMessage(tabs[0].id, {
           action: 'settingChanged',
           setting: settingName,
-          value: value
+          value: value,
+          settingType: settingType
         });
       }
     });
