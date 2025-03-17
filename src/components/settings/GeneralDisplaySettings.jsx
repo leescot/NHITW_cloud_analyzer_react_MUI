@@ -285,7 +285,7 @@ const GeneralDisplaySettings = () => {
           />
           <FormHelperText>開啟後各功能標籤會以不同顏色顯示，關閉則全部使用淺藍色</FormHelperText>
           
-          {/* <FormControlLabel
+          <FormControlLabel
             control={
               <Switch
                 checked={autoOpenPage}
@@ -296,7 +296,7 @@ const GeneralDisplaySettings = () => {
             }
             label="自動開啟資料頁面"
           />
-          <FormHelperText>讀卡後進入雲端網站自動開啟資料頁面</FormHelperText> */}
+          <FormHelperText>讀卡後進入雲端網站自動開啟資料頁面</FormHelperText>
           <Divider sx={{ my: 2 }} />
           
           <FormControl fullWidth sx={{ mb: 2 }}>

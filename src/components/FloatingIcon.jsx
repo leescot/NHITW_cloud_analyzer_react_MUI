@@ -108,6 +108,9 @@ import { DEFAULT_ATC5_GROUPS } from "../config/medicationGroups";
 // 刪除未使用的組件和函數，或移動到實際使用它們的地方
 // ImagingTable, getLabStatusColor, getLabValueColor
 
+// Add a global flag to prevent multiple openings
+window.isFloatingIconOpening = false;
+
 const FloatingIcon = () => {
   const [open, setOpen] = useState(false);
   const [tabValue, setTabValue] = useState(0);
@@ -292,8 +295,33 @@ const FloatingIcon = () => {
     handleData();
   }, [appSettings.lab]); // 保留對 lab 設置的依賴，以便在 lab 設置變更時重新處理數據
 
+  // Add a function to be exposed globally for auto-opening
+  useEffect(() => {
+    // Expose the function to open the dialog
+    window.openFloatingIconDialog = () => {
+      if (!open && !window.isFloatingIconOpening) {
+        window.isFloatingIconOpening = true;
+        setOpen(true);
+        console.log('window.openFloatingIconDialog performed once');
+        if (generalDisplaySettings.alwaysOpenOverviewTab) {
+          setTabValue(0); // Always set to Overview tab (index 0) if setting is enabled
+        }
+        // Reset the flag after a short delay to prevent rapid multiple openings
+        setTimeout(() => {
+          window.isFloatingIconOpening = false;
+        }, 1000);
+      }
+    };
+
+    return () => {
+      // Clean up when component unmounts
+      window.openFloatingIconDialog = undefined;
+    };
+  }, [open, generalDisplaySettings]);
+
   const handleClick = () => {
     setOpen(true);
+    console.log('handleClick performed once');
     if (generalDisplaySettings.alwaysOpenOverviewTab) {
       setTabValue(0); // Always set to Overview tab (index 0) if setting is enabled
     }

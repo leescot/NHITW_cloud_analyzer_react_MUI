@@ -14,6 +14,11 @@ window.lastInterceptedDischargeData = null;
 window.lastInterceptedMedDaysData = null;
 window.lastInterceptedPatientSummaryData = null; // 新增病患摘要數據
 
+// 新增: 使用者資訊快取
+let cachedUserInfo = null;
+let lastUserInfoExtractTime = 0;
+const USER_INFO_CACHE_DURATION = 5000; // 5秒內不重複提取令牌
+
 let isMonitoring = false;
 let lastSuccessfulRequestHeaders = null;
 let hasExtractedToken = false;
@@ -21,6 +26,10 @@ let autoFetchTimer = null;
 let retryCount = 0;
 let currentUserSession = null; // 新增: 追蹤目前的使用者會話
 const MAX_RETRIES = 3;
+
+// 新增: 紀錄上次清除資料的時間，用於防止短時間內多次清除
+let lastDataClearTime = 0;
+const DATA_CLEAR_COOLDOWN = 2000; // 2秒內不重複清除資料
 
 let isBatchFetchInProgress = false;
 
@@ -221,7 +230,7 @@ async function checkAndInitUserSession() {
     const userInfo = await extractUserInfo();
     if (!userInfo) {
       console.log('Could not extract user info, treating as new session');
-      clearPreviousData();
+      performClearPreviousData();
       currentPatientId = null;
       return false;
     }
@@ -233,7 +242,7 @@ async function checkAndInitUserSession() {
 
         if (isNewSession) {
           console.log('User session changed from:', storedSession, 'to:', userInfo);
-          clearPreviousData();
+          performClearPreviousData();
           currentPatientId = userInfo; // 更新當前病人標識
           chrome.storage.local.set({ currentUserSession: userInfo }, () => {
             console.log('New user session saved:', userInfo);
@@ -243,14 +252,14 @@ async function checkAndInitUserSession() {
         } else {
           currentUserSession = userInfo;
           currentPatientId = userInfo; // 更新但不清除資料
-          console.log('Same user session:', userInfo);
+          // console.log('Same user session:', userInfo);
           resolve(false); // 表示同一病人
         }
       });
     });
   } catch (error) {
     console.error('Error checking user session:', error);
-    clearPreviousData();
+    performClearPreviousData();
     currentPatientId = null;
     return false;
   }
@@ -258,12 +267,32 @@ async function checkAndInitUserSession() {
 
 // 改進清除之前資料的函數，確保背景腳本也被通知
 function clearPreviousData() {
+  // 直接調用實際執行清除的函數
+  // 不進行去抖動檢查，因為這可能從其他地方直接調用
+  performClearPreviousData();
+}
+
+// 實際執行清除資料的函數，帶有去抖動機制
+function performClearPreviousData() {
+  const currentTime = Date.now();
+  
+  // 如果上次清除時間太近，或者正在進行批次抓取，則跳過
+  if (currentTime - lastDataClearTime < DATA_CLEAR_COOLDOWN || isBatchFetchInProgress) {
+    console.log('Skipping redundant data clear - recent clear or fetch in progress');
+    return;
+  }
+  
+  lastDataClearTime = currentTime;
   console.log('Clearing previous data due to new session or card change');
   
   // 清除擴展儲存數據
   chrome.storage.local.remove(['medicationData', 'labData', 'patientSummaryData'], function() {
     console.log('Previous data cleared from storage');
-    chrome.action.setBadgeText({ text: '' });
+    try {
+      chrome.action.setBadgeText({ text: '' });
+    } catch (e) {
+      // 忽略可能的錯誤，例如在content script中無法訪問chrome.action
+    }
     lastInterceptedMedicationData = null;
     lastInterceptedLabData = null;
     lastInterceptedChineseMedData = null;
@@ -287,6 +316,14 @@ function clearPreviousData() {
 
 // 從頁面提取用戶識別信息
 async function extractUserInfo() {
+  const currentTime = Date.now();
+  
+  // 如果有快取且未過期，直接使用快取
+  if (cachedUserInfo && currentTime - lastUserInfoExtractTime < USER_INFO_CACHE_DURATION) {
+    // console.log('Using cached user info:', cachedUserInfo);
+    return cachedUserInfo;
+  }
+  
   // 方法1: 從 Authorization token 中提取 UserID（優先）
   try {
     const token = extractAuthorizationToken();
@@ -295,10 +332,16 @@ async function extractUserInfo() {
       const userId = payload.UserID; // 提取 UserID（健保卡號）
       if (userId) {
         console.log('Extracted UserID from token:', userId);
-        return `patient_${userId}`; // 返回 patient_${健保卡號}
+        // 更新快取
+        cachedUserInfo = `patient_${userId}`;
+        lastUserInfoExtractTime = currentTime;
+        return cachedUserInfo; // 返回 patient_${健保卡號}
       }
       console.log('No UserID in token, using token prefix');
-      return `token_${token.substring(0, 20)}`; // 備用
+      // 更新快取
+      cachedUserInfo = `token_${token.substring(0, 20)}`;
+      lastUserInfoExtractTime = currentTime;
+      return cachedUserInfo; // 備用
     }
   } catch (error) {
     console.log('Could not extract user info from token:', error);
@@ -310,7 +353,10 @@ async function extractUserInfo() {
     const patientId = urlParams.get('patientId') || urlParams.get('pid');
     if (patientId) {
       console.log('Extracted patient ID from URL:', patientId);
-      return `patient_${patientId}`;
+      // 更新快取
+      cachedUserInfo = `patient_${patientId}`;
+      lastUserInfoExtractTime = currentTime;
+      return cachedUserInfo;
     }
   } catch (error) {
     console.log('Could not extract patient ID from URL:', error);
@@ -322,7 +368,10 @@ async function extractUserInfo() {
     for (const element of patientInfoElements) {
       if (element.textContent && element.textContent.trim()) {
         console.log('Extracted patient info from DOM:', element.textContent.trim());
-        return `dom_${element.textContent.trim()}`;
+        // 更新快取
+        cachedUserInfo = `dom_${element.textContent.trim()}`;
+        lastUserInfoExtractTime = currentTime;
+        return cachedUserInfo;
       }
     }
   } catch (error) {
@@ -331,7 +380,9 @@ async function extractUserInfo() {
 
   // 預設: 時間戳
   console.log('No patient info found, using timestamp');
-  return `session_${Date.now()}`;
+  cachedUserInfo = `session_${Date.now()}`;
+  lastUserInfoExtractTime = currentTime;
+  return cachedUserInfo;
 }
 
 // 監聽 URL 變化
@@ -343,9 +394,13 @@ function observeUrlChanges() {
       lastUrl = window.location.href;
       console.log('URL changed to:', lastUrl);
       
+      // 重置使用者資訊快取，確保頁面變更後重新提取
+      cachedUserInfo = null;
+      lastUserInfoExtractTime = 0;
+      
       if (isOnLoginPage()) {
         console.log('Navigation to login page detected');
-        clearPreviousData();
+        performClearPreviousData();
         return;
       }
       
@@ -994,6 +1049,17 @@ function fetchAllDataTypes() {
     // 發送自訂事件
     const event = new CustomEvent('dataFetchCompleted', { detail: results });
     window.dispatchEvent(event);
+
+    // Check if autoOpenPage is true and open the dialog if it is
+    chrome.storage.sync.get({ autoOpenPage: false }, function(items) {
+      if (items.autoOpenPage && window.openFloatingIconDialog) {
+        // Add a small delay to ensure the data is fully processed
+        setTimeout(() => {
+          console.log('Auto opening floating icon dialog');
+          window.openFloatingIconDialog();
+        }, 500);
+      }
+    });
   })
   .catch(error => {
     console.error('獲取資料時發生錯誤:', error);
@@ -1244,38 +1310,37 @@ function injectFloatingIcon() {
 // 監聽來自背景腳本的消息
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action === "apiCallDetected") {
-    console.log("Background script detected API call:", message.url);
-    const dataType = message.type || 'unknown';
-    console.log(`Data type: ${dataType}`);
+    // 只在debug模式下顯示詳細API呼叫資訊
+    // console.log("Background script detected API call:", message.url);
+    // const dataType = message.type || 'unknown';
+    // console.log(`Data type: ${dataType}`);
     
-    console.log("Checking patient for data fetch");
     checkAndInitUserSession().then((isNewSession) => {
       if (!isNewSession && window.lastInterceptedMedicationData?.rObject) {
-        console.log("Same patient, reusing existing data:", currentPatientId);
+        // 已有資料的情況，不需頻繁紀錄
+        // console.log("Same patient, reusing existing data:", currentPatientId);
         window.dispatchEvent(new CustomEvent('dataFetchCompleted', { detail: null }));
       } else {
-        console.log("New patient or no data, fetching new data:", currentPatientId);
-        isDataFetchingStarted = true;
-        window.nhiDataBeingFetched = true;
-        // 清除資料
-        window.lastInterceptedMedicationData = null;
-        window.lastInterceptedLabData = null;
-        window.lastInterceptedChineseMedData = null;
-        window.lastInterceptedImagingData = null;
-        window.lastInterceptedAllergyData = null;
-        window.lastInterceptedSurgeryData = null;
-        window.lastInterceptedDischargeData = null;
-        window.lastInterceptedMedDaysData = null;
-        console.log("Cleared all previous data for new card");
+        // 新病人或無資料的情況，只顯示一次
+        if (!isBatchFetchInProgress) {
+          console.log("New patient or no data, fetching new data:", currentPatientId);
+        }
         
-        window.medicationDataProcessed = false;
-        window.labDataProcessed = false;
-        hasExtractedToken = false;
-        Object.keys(pendingRequests).forEach(key => pendingRequests[key] = false);
-        
-        setTimeout(() => {
-          fetchAllDataTypes();
-        }, 500);
+        // 只有在一定時間後才清除資料並啟動新的抓取，避免重複清除
+        if (!isBatchFetchInProgress) {
+          // 使用統一的清除資料函數，它已內建去抖動機制
+          performClearPreviousData();
+          
+          // 如果清除資料後再執行抓取
+          setTimeout(() => {
+            isDataFetchingStarted = true;
+            window.nhiDataBeingFetched = true;
+            window.medicationDataProcessed = false;
+            window.labDataProcessed = false;
+            Object.keys(pendingRequests).forEach(key => pendingRequests[key] = false);
+            fetchAllDataTypes();
+          }, 500);
+        }
       }
     });
   }

@@ -1,6 +1,7 @@
 import React, { useState, useEffect } from "react";
-import { Typography, Box, Divider, IconButton, Tooltip, Snackbar, RadioGroup, FormControlLabel, Radio, FormControl, Grid, Paper } from "@mui/material";
+import { Typography, Box, Divider, IconButton, Tooltip, Snackbar, RadioGroup, FormControlLabel, Radio, FormControl, Grid, Paper, TextField, InputAdornment } from "@mui/material";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import SearchIcon from "@mui/icons-material/Search";
 import TypographySizeWrapper from "../utils/TypographySizeWrapper";
 import { medicationProcessor } from "../../utils/medicationProcessor";
 
@@ -22,6 +23,9 @@ const MedicationList = ({
   // 分類藥物為長期和短期用藥
   const [longTermMeds, setLongTermMeds] = useState([]);
   const [shortTermMeds, setShortTermMeds] = useState([]);
+  
+  // 添加搜尋功能狀態
+  const [searchText, setSearchText] = useState("");
   
   // 獲取可用的訪問類型並設置默認選項
   useEffect(() => {
@@ -64,22 +68,47 @@ const MedicationList = ({
     }
   }, [groupedMedications]);
   
-  // 當選擇的訪問類型變化時過濾藥物
+  // 當選擇的訪問類型或搜尋文字變化時過濾藥物
   useEffect(() => {
+    // 先用訪問類型過濾
+    let visitTypeFiltered = [];
+    
     if (!selectedVisitType || selectedVisitType === "顯示所有項目") {
-      setFilteredMedications(groupedMedications);
+      visitTypeFiltered = groupedMedications;
     } else if (selectedVisitType === "門診+急診") {
-      const filtered = groupedMedications.filter(
+      visitTypeFiltered = groupedMedications.filter(
         group => group.visitType === "門診" || group.visitType === "急診"
       );
-      setFilteredMedications(filtered);
     } else {
-      const filtered = groupedMedications.filter(
+      visitTypeFiltered = groupedMedications.filter(
         group => group.visitType === selectedVisitType
       );
-      setFilteredMedications(filtered);
     }
-  }, [selectedVisitType, groupedMedications]);
+    
+    // 如果有搜尋文字，再進一步過濾藥物
+    if (searchText.trim() !== "") {
+      const searchLower = searchText.toLowerCase();
+      
+      // 針對每個藥物組，只保留符合搜尋條件的藥物
+      const searchFiltered = visitTypeFiltered.map(group => {
+        // 深複製組資料，但不包含medications
+        const newGroup = { ...group };
+        
+        // 過濾藥物，只保留符合搜尋條件的
+        newGroup.medications = group.medications.filter(med => 
+          (med.name && med.name.toLowerCase().includes(searchLower)) || 
+          (med.ingredient && med.ingredient.toLowerCase().includes(searchLower))
+        );
+        
+        return newGroup;
+      }).filter(group => group.medications.length > 0); // 只保留有符合藥物的組
+      
+      setFilteredMedications(searchFiltered);
+    } else {
+      // 沒有搜尋文字，只用訪問類型過濾
+      setFilteredMedications(visitTypeFiltered);
+    }
+  }, [selectedVisitType, groupedMedications, searchText]);
   
   // 當過濾後的藥物變化時，將其分為長期和短期用藥
   useEffect(() => {
@@ -105,6 +134,11 @@ const MedicationList = ({
   // 處理訪問類型選擇變化
   const handleVisitTypeChange = (event) => {
     setSelectedVisitType(event.target.value);
+  };
+  
+  // 處理搜尋文字變化
+  const handleSearchChange = (event) => {
+    setSearchText(event.target.value);
   };
 
   // 關閉 snackbar 的函數
@@ -257,10 +291,27 @@ const MedicationList = ({
         </TypographySizeWrapper>
       ) : (
         <>
-          {/* 如果有多種訪問類型，顯示過濾選項 */}
-          {availableVisitTypes.length > 1 && (
-            <Box sx={{ mb: 2 }}>
-              <FormControl component="fieldset">
+          {/* 搜尋欄和訪問類型過濾選項的容器 */}
+          <Box sx={{ mb: 2, display: 'flex', alignItems: 'center', flexWrap: 'wrap' }}>
+            {/* 搜尋欄 */}
+            <TextField
+              size="small"
+              placeholder="可輸入商品名或學名..."
+              value={searchText}
+              onChange={handleSearchChange}
+              sx={{ mb: 1, mr: 2, flexGrow: 1, maxWidth: { xs: '100%', sm: '300px' } }}
+              InputProps={{
+                startAdornment: (
+                  <InputAdornment position="start">
+                    <SearchIcon />
+                  </InputAdornment>
+                ),
+              }}
+            />
+            
+            {/* 如果有多種訪問類型，顯示過濾選項 */}
+            {availableVisitTypes.length > 1 && (
+              <FormControl component="fieldset" sx={{ flexGrow: 2 }}>
                 <RadioGroup
                   row
                   aria-label="visit-type"
@@ -347,8 +398,8 @@ const MedicationList = ({
                   />
                 </RadioGroup>
               </FormControl>
-            </Box>
-          )}
+            )}
+          </Box>
           
           {filteredMedications.length === 0 ? (
             <TypographySizeWrapper 
@@ -357,7 +408,7 @@ const MedicationList = ({
               generalDisplaySettings={generalDisplaySettings}
               color="text.secondary"
             >
-              沒有找到用藥資料
+              沒有找到符合條件的用藥資料
             </TypographySizeWrapper>
           ) : (
             settings.separateShortTermMeds && (selectedVisitType === "門診+急診" || selectedVisitType === "門診" || (selectedVisitType === "" && availableVisitTypes.length === 1 && availableVisitTypes.includes("門診"))) ? (
