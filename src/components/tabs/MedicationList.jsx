@@ -281,19 +281,17 @@ const MedicationList = ({
 
   // Add new function to handle drug image link click
   const handleDrugImageClick = (drugcode) => {
-    // Copy drugcode to clipboard
-    navigator.clipboard.writeText(drugcode)
-      .then(() => {
-        setSnackbarMessage("藥品代碼已複製到剪貼簿");
-        setSnackbarOpen(true);
-        // Open drugtw.com in a new window
-        window.open('https://drugtw.com/', '_blank', 'noopener,noreferrer');
-      })
-      .catch((err) => {
-        console.error("Failed to copy drug code: ", err);
-        setSnackbarMessage("複製失敗，請重試");
-        setSnackbarOpen(true);
-      });
+    if (!drugcode) {
+      setSnackbarMessage("無法獲取藥品代碼");
+      setSnackbarOpen(true);
+      return;
+    }
+    
+    // 打開藥品圖片頁面
+    window.open(`chrome-extension://${chrome.runtime.id}/drug-images.html?code=${drugcode}`, '_blank', 'noopener,noreferrer');
+    
+    setSnackbarMessage("已開啟藥品圖片查看器");
+    setSnackbarOpen(true);
   };
 
   return (
