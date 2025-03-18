@@ -21,6 +21,7 @@ export const DEFAULT_SETTINGS = {
     showATC5Name: false,
     copyFormat: "nameWithDosageVertical",
     separateShortTermMeds: false,
+    showExternalDrugImage: false,
   },
 
   // ATC5 藥物分類設定

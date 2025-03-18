@@ -2,6 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Typography, Box, Divider, IconButton, Tooltip, Snackbar, RadioGroup, FormControlLabel, Radio, FormControl, Grid, Paper, TextField, InputAdornment } from "@mui/material";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import SearchIcon from "@mui/icons-material/Search";
+import ImageIcon from "@mui/icons-material/Image";
 import TypographySizeWrapper from "../utils/TypographySizeWrapper";
 import { medicationProcessor } from "../../utils/medicationProcessor";
 
@@ -220,9 +221,9 @@ const MedicationList = ({
     if (colorGroups.red && colorGroups.red.includes(groupName)) {
       return { name: 'red', color: '#f44336' };
     } else if (colorGroups.orange && colorGroups.orange.includes(groupName)) {
-      return { name: 'orange', color: '#ff9800' };
+      return { name: 'orange', color: '#ed6c02' };
     } else if (colorGroups.green && colorGroups.green.includes(groupName)) {
-      return { name: 'green', color: '#4caf50' };
+      return { name: 'green', color: '#2e7d32' };
     }
     
     return null;
@@ -276,6 +277,23 @@ const MedicationList = ({
       default:
         return "primary.main"; // 預設藍色
     }
+  };
+
+  // Add new function to handle drug image link click
+  const handleDrugImageClick = (drugcode) => {
+    // Copy drugcode to clipboard
+    navigator.clipboard.writeText(drugcode)
+      .then(() => {
+        setSnackbarMessage("藥品代碼已複製到剪貼簿");
+        setSnackbarOpen(true);
+        // Open drugtw.com in a new window
+        window.open('https://drugtw.com/', '_blank', 'noopener,noreferrer');
+      })
+      .catch((err) => {
+        console.error("Failed to copy drug code: ", err);
+        setSnackbarMessage("複製失敗，請重試");
+        setSnackbarOpen(true);
+      });
   };
 
   return (
@@ -507,7 +525,7 @@ const MedicationList = ({
                                       sx={{
                                         color: medicationColor ? medicationColor.color : "text.secondary",
                                         fontStyle: "italic",
-                                        ml: 0.5,
+                                        ml: 0.8,
                                         fontWeight: isBold ? 'bold' : 'normal'
                                       }}
                                     >
@@ -536,13 +554,39 @@ const MedicationList = ({
                                       textSizeType="note"
                                       generalDisplaySettings={generalDisplaySettings}
                                       sx={{ 
-                                        color: "info.main", 
+                                        color: "secondary.light", 
                                         ml: 0.5 
                                       }}
                                     >
                                       {" "}
-                                      (餘 {med.drug_left}天)
+                                      (餘{med.drug_left}天)
                                     </TypographySizeWrapper>
+                                  )}
+                                  {settings.showExternalDrugImage && med.drugcode && (
+                                    <Tooltip title="查看藥物圖片">
+                                      <IconButton
+                                        size="small"
+                                        onClick={() => handleDrugImageClick(med.drugcode)}
+                                        sx={{
+                                          ml: 0.5,
+                                          opacity: 0.5,
+                                          padding: "2px",
+                                          display: "inline-flex",
+                                          verticalAlign: "text-top", // 或嘗試 "middle"
+                                          '&:hover': {
+                                            opacity: 1
+                                          }
+                                        }}
+                                      >
+                                        <ImageIcon sx={{ 
+                                          fontSize: generalDisplaySettings.contentTextSize === 'small' 
+                                            ? "14px" 
+                                            : generalDisplaySettings.contentTextSize === 'medium' 
+                                              ? "16px" 
+                                              : "18px" 
+                                        }} />
+                                      </IconButton>
+                                    </Tooltip>
                                   )}
                                 </TypographySizeWrapper>
                               </Box>
@@ -679,13 +723,39 @@ const MedicationList = ({
                                       textSizeType="note"
                                       generalDisplaySettings={generalDisplaySettings}
                                       sx={{ 
-                                        color: "info.main", 
+                                        color: "secondary.light", 
                                         ml: 0.5 
                                       }}
                                     >
                                       {" "}
-                                      (餘 {med.drug_left}天)
+                                      (餘{med.drug_left}天)
                                     </TypographySizeWrapper>
+                                  )}
+                                  {settings.showExternalDrugImage && med.drugcode && (
+                                    <Tooltip title="查看藥物圖片">
+                                      <IconButton
+                                        size="small"
+                                        onClick={() => handleDrugImageClick(med.drugcode)}
+                                        sx={{
+                                          ml: 0.5,
+                                          opacity: 0.5,
+                                          padding: "2px",
+                                          display: "inline-flex",
+                                          verticalAlign: "text-top", // 或嘗試 "middle"
+                                          '&:hover': {
+                                            opacity: 1
+                                          }
+                                        }}
+                                      >
+                                        <ImageIcon sx={{ 
+                                          fontSize: generalDisplaySettings.contentTextSize === 'small' 
+                                            ? "14px" 
+                                            : generalDisplaySettings.contentTextSize === 'medium' 
+                                              ? "16px" 
+                                              : "18px" 
+                                        }} />
+                                      </IconButton>
+                                    </Tooltip>
                                   )}
                                 </TypographySizeWrapper>
                               </Box>
@@ -800,13 +870,39 @@ const MedicationList = ({
                         textSizeType="note"
                         generalDisplaySettings={generalDisplaySettings}
                         sx={{ 
-                          color: "info.main", 
+                          color: "secondary.light", 
                           ml: 0.5 
                         }}
                       >
                         {" "}
-                        (餘 {med.drug_left}天)
+                        (餘{med.drug_left}天)
                       </TypographySizeWrapper>
+                    )}
+                    {settings.showExternalDrugImage && med.drugcode && (
+                      <Tooltip title="查看藥物圖片">
+                        <IconButton
+                          size="small"
+                          onClick={() => handleDrugImageClick(med.drugcode)}
+                          sx={{
+                            ml: 0.5,
+                            opacity: 0.5,
+                            padding: "2px",
+                            display: "inline-flex",
+                            verticalAlign: "text-top", // 或嘗試 "middle"
+                            '&:hover': {
+                              opacity: 1
+                            }
+                          }}
+                        >
+                          <ImageIcon sx={{ 
+                            fontSize: generalDisplaySettings.contentTextSize === 'small' 
+                              ? "14px" 
+                              : generalDisplaySettings.contentTextSize === 'medium' 
+                                ? "16px" 
+                                : "18px" 
+                          }} />
+                        </IconButton>
+                      </Tooltip>
                     )}
                   </TypographySizeWrapper>
                 </Box>

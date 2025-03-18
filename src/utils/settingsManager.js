@@ -19,6 +19,7 @@ export const loadAllSettings = async () => {
       showATC5Name: DEFAULT_SETTINGS.western.showATC5Name,
       copyFormat: DEFAULT_SETTINGS.western.copyFormat,
       separateShortTermMeds: DEFAULT_SETTINGS.western.separateShortTermMeds,
+      showExternalDrugImage: DEFAULT_SETTINGS.western.showExternalDrugImage,
       
       // ATC5 Color settings
       enableATC5Colors: DEFAULT_SETTINGS.atc5.enableColors,
@@ -65,6 +66,7 @@ export const loadAllSettings = async () => {
           showATC5Name: items.showATC5Name,
           copyFormat: items.copyFormat,
           separateShortTermMeds: items.separateShortTermMeds,
+          showExternalDrugImage: items.showExternalDrugImage,
         },
         atc5: {
           enableColors: items.enableATC5Colors,

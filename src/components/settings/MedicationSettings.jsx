@@ -54,6 +54,7 @@ const MedicationSettings = () => {
     enableATC5Colors: true,
     atc5Groups: DEFAULT_ATC5_GROUPS,
     atc5ColorGroups: DEFAULT_ATC5_COLOR_GROUPS,
+    showExternalDrugImage: false,
   });
 
   // Dialog states
@@ -83,6 +84,7 @@ const MedicationSettings = () => {
         enableATC5Colors: true,
         atc5Groups: DEFAULT_ATC5_GROUPS,
         atc5ColorGroups: DEFAULT_ATC5_COLOR_GROUPS,
+        showExternalDrugImage: false,
       },
       (items) => {
         setSettings({
@@ -95,6 +97,7 @@ const MedicationSettings = () => {
           enableATC5Colors: items.enableATC5Colors,
           atc5Groups: items.atc5Groups,
           atc5ColorGroups: items.atc5ColorGroups,
+          showExternalDrugImage: items.showExternalDrugImage,
         });
         
         // Ensure the default ATC5 groups are properly saved in storage
@@ -318,6 +321,18 @@ const MedicationSettings = () => {
             />
           }
           label="開啟ATC5變色功能"
+        />
+
+        <FormControlLabel
+          control={
+            <Switch
+              checked={settings.showExternalDrugImage}
+              onChange={(e) =>
+                handleLocalSettingChange("showExternalDrugImage", e.target.checked)
+              }
+            />
+          }
+          label="複製藥品碼+外部連結貼上搜尋外觀"
         />
         
         {settings.enableATC5Colors && (

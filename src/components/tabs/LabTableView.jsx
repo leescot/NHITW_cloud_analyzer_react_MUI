@@ -98,8 +98,8 @@ const LabTableView = ({ groupedLabs, labSettings, generalDisplaySettings }) => {
   // 定義根據異常值狀態獲取顏色的函數
   const getStatusColor = (valueStatus, highlightAbnormal) => {
     if (!highlightAbnormal) return "inherit";
-    if (valueStatus === "high") return "#f44336"; // 紅色
-    if (valueStatus === "low") return "#3d8c40"; // 綠色
+    if (valueStatus === "high") return "#c62828"; // 紅色
+    if (valueStatus === "low") return "#2e7d32"; // 綠色
     return "inherit"; // 正常值
   };
 

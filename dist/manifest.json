@@ -1,8 +1,8 @@
 {
   "manifest_version": 3,
   "name": "健保雲端資料擷取器2.0",
-  "version": "1.0.0316",
-  "description": "健保雲端資料擷取器, 整合版 beta, 0316版",
+  "version": "1.0.0318",
+  "description": "健保雲端資料擷取器, 整合版 beta, 0318版",
   "permissions": ["webRequest", "storage", "scripting", "clipboardWrite"],
   "host_permissions": [
     "https://medcloud2.nhi.gov.tw/*",

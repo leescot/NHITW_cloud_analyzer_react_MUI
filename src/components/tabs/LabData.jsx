@@ -369,8 +369,8 @@ const LabData = ({ groupedLabs, settings, labSettings, generalDisplaySettings })
   const getStatusColor = (lab) => {
     if (!lab || !completeLabSettings?.highlightAbnormal) return "inherit";
     
-    if (lab.valueStatus === "high") return "#f44336"; // 紅色
-    if (lab.valueStatus === "low") return "#3d8c40";  // 綠色 (之前是藍色)
+    if (lab.valueStatus === "high") return "#c62828"; // 紅色
+    if (lab.valueStatus === "low") return "#1b5e20";  // 綠色 (之前是藍色)
     return "inherit"; // 正常值
   };
 

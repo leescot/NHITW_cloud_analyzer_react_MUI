@@ -13,12 +13,16 @@ import {
   FormControlLabel,
   FormControl,
   Box,
+  IconButton,
+  Tooltip,
+  Snackbar,
 } from "@mui/material";
+import ImageIcon from "@mui/icons-material/Image";
 import TypographySizeWrapper from "../utils/TypographySizeWrapper";
 
 const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings }) => {
   // 添加過濾選項的狀態
-  const [dayFilter, setDayFilter] = useState("gte7"); // 默認顯示>=7天藥物
+  const [dayFilter, setDayFilter] = useState("gte14"); // 默認顯示>=7天藥物
   // 追蹤是否有 ATC5 顏色藥物
   const [hasATC5ColoredMeds, setHasATC5ColoredMeds] = useState(false);
 
@@ -98,9 +102,9 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
     if (colorGroups.red && colorGroups.red.includes(groupName)) {
       return { name: 'red', color: '#f44336' };
     } else if (colorGroups.orange && colorGroups.orange.includes(groupName)) {
-      return { name: 'orange', color: '#ff9800' };
+      return { name: 'orange', color: '#ed6c02' };
     } else if (colorGroups.green && colorGroups.green.includes(groupName)) {
-      return { name: 'green', color: '#4caf50' };
+      return { name: 'green', color: '#2e7d32' };
     }
     
     return null;
@@ -328,6 +332,32 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
 
   const visibleDates = getVisibleDates(processedData, sortedFilteredMedicines);
 
+  // Add snackbar state
+  const [snackbarOpen, setSnackbarOpen] = useState(false);
+  const [snackbarMessage, setSnackbarMessage] = useState("");
+
+  // Add snackbar close handler
+  const handleSnackbarClose = () => {
+    setSnackbarOpen(false);
+  };
+
+  // Add drug image click handler
+  const handleDrugImageClick = (drugcode) => {
+    // Copy drugcode to clipboard
+    navigator.clipboard.writeText(drugcode)
+      .then(() => {
+        setSnackbarMessage("藥品代碼已複製到剪貼簿");
+        setSnackbarOpen(true);
+        // Open drugtw.com in a new window
+        window.open('https://drugtw.com/', '_blank', 'noopener,noreferrer');
+      })
+      .catch((err) => {
+        console.error("Failed to copy drug code: ", err);
+        setSnackbarMessage("複製失敗，請重試");
+        setSnackbarOpen(true);
+      });
+  };
+
   return (
     <>
       {groupedMedications.length === 0 ? (
@@ -519,16 +549,41 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
                           fontWeight: isBold ? 'bold' : 'normal'
                         }}
                       >
-                        <TypographySizeWrapper
-                          textSizeType="content" 
-                          generalDisplaySettings={generalDisplaySettings}
-                          sx={{
-                            color: medicationColor?.color || 'inherit',
-                            fontWeight: isBold ? 'bold' : 'normal'
-                          }}
-                        >
-                          {name}
-                        </TypographySizeWrapper>
+                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                          <TypographySizeWrapper
+                            textSizeType="content" 
+                            generalDisplaySettings={generalDisplaySettings}
+                            sx={{
+                              color: medicationColor?.color || 'inherit',
+                              fontWeight: isBold ? 'bold' : 'normal'
+                            }}
+                          >
+                            {name}
+                          </TypographySizeWrapper>
+                          {settings.showExternalDrugImage && medNameLookup[name]?.[0]?.drugcode && (
+                            <Tooltip title="查看藥物圖片">
+                              <IconButton
+                                size="small"
+                                onClick={() => handleDrugImageClick(medNameLookup[name][0].drugcode)}
+                                sx={{
+                                  ml: 0.5,
+                                  opacity: 0.5,
+                                  '&:hover': {
+                                    opacity: 1
+                                  }
+                                }}
+                              >
+                                <ImageIcon sx={{ 
+                                  fontSize: generalDisplaySettings.contentTextSize === 'small' 
+                                    ? "14px" 
+                                    : generalDisplaySettings.contentTextSize === 'medium' 
+                                      ? "16px" 
+                                      : "18px" 
+                                }} />
+                              </IconButton>
+                            </Tooltip>
+                          )}
+                        </Box>
                       </TableCell>
                       {visibleDates.map((date) => {
                         const medData = dateMap.get(date);
@@ -612,6 +667,13 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
           </TableContainer>
         </>
       )}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={2000}
+        onClose={handleSnackbarClose}
+        message={snackbarMessage}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      />
     </>
   );
 };

@@ -269,7 +269,8 @@ export const medicationProcessor = {
                 drug_left: parseInt(
                   record.DRUG_LEFT || record.drug_left || "0",
                   10
-                )
+                ),
+                drugcode: record.drug_code || "" // Add the new drugcode field
               });
             });
 
