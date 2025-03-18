@@ -7,8 +7,8 @@
   "host_permissions": [
     "https://medcloud2.nhi.gov.tw/*",
     "http://localhost:3000/*",
-    "http://localhost:5173/*"
-
+    "http://localhost:5173/*",
+    "https://drugtw.com/*"
   ],
   "background": {
     "service_worker": "background.js"
@@ -41,7 +41,7 @@
   ],
   "web_accessible_resources": [
     {
-      "resources": ["test.html", "localDataProcessor.js"],
+      "resources": ["test.html", "localDataProcessor.js", "drug-images.html", "drug-images.js"],
       "matches": ["<all_urls>"]
     }
   ]
