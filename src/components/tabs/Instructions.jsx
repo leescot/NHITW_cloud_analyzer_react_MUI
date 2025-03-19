@@ -1,26 +1,15 @@
 import React, { useState, useEffect } from 'react';
 import { Box, Typography, Paper, Grid, List, ListItem, ListItemText, Divider } from '@mui/material';
 import ReactMarkdown from 'react-markdown';
-// import { pin_chrome_extension } from '../../assets/pic_pin_extension.js';
 
-// 直接導入 JSON 文件
+// 導入的 JSON 圖片數據，目前選用壓縮率高的 webp 格式，轉為 base64 放進 JSON 中
 import imagesData from '../../assets/instruction_image.json';
-// import documentsData from '../../assets/instruction_documents.json';
-
-// 直接使用導入的 JSON 數據
 const images = imagesData;
 
-// 文檔數據結構 - 從 JSON 檔案導入
-// const documents = documentsData;
+// 文檔數據結構 - 每個文檔都有一個 ID, title(顯示在左側的標題) 和 內容
+// 圖片引用方式: IMAGE_PLACEHOLDER(image_id in instruction_image.json, 圖片描述(顯示於下方))
+// 目前無法用 markdown table 格式(要安裝更多套件，為了簡化及避免過度複雜，所以沒有使用)
 
-// 圖片映射對象 - 所有圖片都集中在這裡管理
-// const images = {
-//   pin_chrome_extension: pin_chrome_extension,
-//   // 添加新圖片時，只需在此處添加映射：
-//   // new_image_name: imported_image_variable,
-// };
-
-// 文檔數據結構 - 每個文檔都有一個標題、ID 和內容
 const documents = [
   {
     id: 'getting-started',
@@ -288,6 +277,7 @@ ATC5 變色功能可讓您依照藥物分類為不同藥物設定顏色標示，
 - STATIN (他汀類藥物)：C10AA, C10BA, C10BX
 - SGLT2 (鈉-葡萄糖共同運輸蛋白2抑制劑)：A10BK, A10BD15, A10BD16, A10BD19, A10BD20, A10BD21, A10BD25, A10BD27, A10BD29, A10BD30
 - GLP1 (胰高血糖素樣胜肽-1受體激動劑)：A10BJ, A10AE54, A10AE56
+- 抗凝 (抗血小板+抗凝血濟): B01A
 
 ### 設定群組顏色
 點擊「設定群組顏色」按鈕，您可以：
