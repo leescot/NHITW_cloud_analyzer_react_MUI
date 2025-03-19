@@ -5,7 +5,7 @@ const labCodeAbbreviations = {
   "09001C": "Chol",
   "09002C": "BUN",
   "09004C": "TG",
-  "09005C": "Glu(F)",
+  "09005C": "Glu",
   "09006C": "HbA1c",
   "09011C": "Ca",
   "09012C": "P",

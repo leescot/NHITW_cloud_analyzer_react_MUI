@@ -124,7 +124,7 @@ const Overview_RecentDiagnosis = ({
         });
       } else {
         // Normal diagnosis processing
-        if (group.visitType === "門診") {
+        if (group.visitType === "門診" || group.visitType === "藥局") {
           // Always increment the count by 1 for each record
           outpatientDiagnoses[diagnosisKey] = {
             count: (outpatientDiagnoses[diagnosisKey]?.count || 0) + 1,
@@ -151,6 +151,12 @@ const Overview_RecentDiagnosis = ({
               isChineseMed: false
             });
           }
+        } else {
+          // Default to outpatient for any other visit type (including "藥局" if not caught earlier)
+          outpatientDiagnoses[diagnosisKey] = {
+            count: (outpatientDiagnoses[diagnosisKey]?.count || 0) + 1,
+            isChineseMed: false
+          };
         }
       }
     });
@@ -193,7 +199,7 @@ const Overview_RecentDiagnosis = ({
         });
       } else {
         // Fix: Same approach as with western medications
-        if (group.visitType === "門診") {
+        if (group.visitType === "門診" || group.visitType === "藥局") {
           // Always increment the count by 1 for each record
           const existing = outpatientDiagnoses[diagnosisKey];
           outpatientDiagnoses[diagnosisKey] = {
@@ -222,7 +228,7 @@ const Overview_RecentDiagnosis = ({
             });
           }
         } else {
-          // Default to outpatient for any other visit type
+          // Default to outpatient for any other visit type (including "藥局" if not caught earlier)
           const existing = outpatientDiagnoses[diagnosisKey];
           outpatientDiagnoses[diagnosisKey] = {
             count: (existing?.count || 0) + 1,

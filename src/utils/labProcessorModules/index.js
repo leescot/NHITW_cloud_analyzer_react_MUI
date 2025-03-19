@@ -99,6 +99,11 @@ const labProcessor = {
         };
       }
       
+      // 忽略檢驗值為 "***" 的項目
+      if (lab.assay_value === "***") {
+        return acc; // 跳過此項目，不加入分析範圍
+      }
+      
       // Parse reference values using comprehensive parser
       const consultValue = this.parseReferenceRange(lab.consult_value);
       

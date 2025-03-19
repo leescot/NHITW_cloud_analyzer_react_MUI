@@ -78,7 +78,11 @@ const MedicationList = ({
       visitTypeFiltered = groupedMedications;
     } else if (selectedVisitType === "門診+急診") {
       visitTypeFiltered = groupedMedications.filter(
-        group => group.visitType === "門診" || group.visitType === "急診"
+        group => group.visitType === "門診" || group.visitType === "急診" || group.visitType === "藥局"
+      );
+    } else if (selectedVisitType === "門診") {
+      visitTypeFiltered = groupedMedications.filter(
+        group => group.visitType === "門診" || group.visitType === "藥局"
       );
     } else {
       visitTypeFiltered = groupedMedications.filter(

@@ -283,7 +283,7 @@ const GeneralDisplaySettings = () => {
             }
             label="使用彩色標籤"
           />
-          <FormHelperText>開啟後各功能標籤會以不同顏色顯示，關閉則全部使用淺藍色</FormHelperText>
+          <FormHelperText>頁面標籤會以不同顏色顯示，關閉則使用淺藍色</FormHelperText>
           
           <FormControlLabel
             control={

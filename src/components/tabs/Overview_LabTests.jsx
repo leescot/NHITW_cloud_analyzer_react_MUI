@@ -83,9 +83,9 @@ const Overview_LabTests = ({ groupedLabs = [], labData, overviewSettings = {}, g
       <TypographySizeWrapper variant="h6" gutterBottom generalDisplaySettings={generalDisplaySettings}>
         關注檢驗 - {trackingDays} 天內
       </TypographySizeWrapper>
-      <TypographySizeWrapper variant="caption" color="text.secondary" generalDisplaySettings={generalDisplaySettings}>
+      {/* <TypographySizeWrapper variant="caption" color="text.secondary" generalDisplaySettings={generalDisplaySettings}>
         至多顯示七組資料
-      </TypographySizeWrapper>
+      </TypographySizeWrapper> */}
       {(() => {
         // console.log("Debug - Lab section rendering, data available:", 
           // effectiveLabData && effectiveLabData.length > 0);
@@ -372,9 +372,13 @@ const Overview_LabTests = ({ groupedLabs = [], labData, overviewSettings = {}, g
           
           if (matchingTests.length > 0) {
             // Get unique dates from the tests (sorted from newest to oldest)
+            // const uniqueDates = [...new Set(matchingTests.map(test => test.date))].sort((a, b) => 
+            //   new Date(b) - new Date(a)
+            // ).slice(0, 7); // Show at most 5 most recent dates
+
             const uniqueDates = [...new Set(matchingTests.map(test => test.date))].sort((a, b) => 
               new Date(b) - new Date(a)
-            ).slice(0, 7); // Show at most 5 most recent dates
+            );
             
             // console.log("Debug - Unique dates for table:", uniqueDates);
             
@@ -500,7 +504,16 @@ const Overview_LabTests = ({ groupedLabs = [], labData, overviewSettings = {}, g
                 <Table size="small">
                   <TableHead>
                     <TableRow>
-                      <TableCell>項目</TableCell>
+                      <TableCell 
+                        sx={{ 
+                          position: 'sticky', 
+                          left: 0, 
+                          backgroundColor: 'background.paper',
+                          zIndex: 1
+                        }}
+                      >
+                        項目
+                      </TableCell>
                       {uniqueDates.map(date => (
                         <TableCell key={date} align="right" sx={{ py: 0.1, px: 1 }} >
                           {formatDateShort(date)}
@@ -511,7 +524,18 @@ const Overview_LabTests = ({ groupedLabs = [], labData, overviewSettings = {}, g
                   <TableBody>
                     {sortedTestTypes.map(displayName => (
                       <TableRow key={displayName}>
-                        <TableCell component="th" scope="row" sx={{ py: 0.1, px: 1 }}>
+                        <TableCell 
+                          component="th" 
+                          scope="row" 
+                          sx={{ 
+                            py: 0.1, 
+                            px: 1,
+                            position: 'sticky', 
+                            left: 0,
+                            backgroundColor: 'background.paper',
+                            zIndex: 1
+                          }}
+                        >
                           <TypographySizeWrapper variant="body2" generalDisplaySettings={generalDisplaySettings}>
                             {displayName}
                           </TypographySizeWrapper>

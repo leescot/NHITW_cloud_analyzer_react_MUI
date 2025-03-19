@@ -253,6 +253,12 @@ const LabSettings = () => {
                 <span>三欄呈現 (三欄顯示最大化空間利用)</span>
               </Box>
             </MenuItem>
+            <MenuItem value="fourColumn">
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <ViewColumnIcon sx={{ mr: 1, fontSize: '1.2rem' }} />
+                <span>四欄呈現 (四欄顯示超高空間利用)</span>
+              </Box>
+            </MenuItem>
             <MenuItem value="byType">
               <Box sx={{ display: 'flex', alignItems: 'center' }}>
                 <CategoryIcon sx={{ mr: 1, fontSize: '1.2rem' }} />
@@ -287,7 +293,7 @@ const LabSettings = () => {
           <DialogTitle>選擇要複製的檢驗項目</DialogTitle>
           <DialogContent>
             <Typography variant="body2" color="text.secondary" paragraph>
-              勾選需要複製到剪貼簿的檢驗項目。只有勾選的項目會在複製操作時被包含。
+              此處勾選的項目會在複製操作時自動先勾選。
             </Typography>
             <List sx={{ width: '100%' }}>
               {tempCustomCopyItems.map((item, index) => (

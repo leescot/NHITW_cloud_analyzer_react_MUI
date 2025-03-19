@@ -44,7 +44,7 @@ async function fetchDrugData(code) {
         <p>${drug.drug_name || ''}</p>
         <p>成分: ${drug.ingredient || ''}</p>
         <p>適應症: ${drug.indication || ''}</p>
-        <p>許可證字號: ${drug.license_code || ''}</p>
+        <p>許可證字號: ${drug.url_license ? `<a href="${drug.url_license}" target="_blank">${drug.license_code || ''}</a>` : drug.license_code || ''}</p>
       `;
       
       // 顯示藥品圖片

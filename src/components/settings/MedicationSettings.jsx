@@ -332,7 +332,7 @@ const MedicationSettings = () => {
               }
             />
           }
-          label="複製藥品碼+外部連結貼上搜尋外觀"
+          label="顯示藥物外觀功能(需連接外網)"
         />
         
         {settings.enableATC5Colors && (

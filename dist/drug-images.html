@@ -11,6 +11,7 @@
       padding: 20px;
       background-color: #f5f5f5;
       color: #333;
+      font-size: 18px;
     }
     .container {
       max-width: 1000px;
@@ -24,18 +25,20 @@
       text-align: center;
       color: #1976d2;
       margin-bottom: 20px;
+      font-size: 2em;
     }
     .drug-info {
       margin-bottom: 20px;
       padding-bottom: 15px;
       border-bottom: 1px solid #eee;
+      line-height: 1.5;
     }
     .drug-info p {
-      margin: 5px 0;
+      margin: 8px 0;
     }
     .drug-name {
       font-weight: bold;
-      font-size: 1.2em;
+      font-size: 1.4em;
       color: #333;
     }
     .gallery {
@@ -65,7 +68,7 @@
       transform: scale(1.05);
     }
     .source-name {
-      font-size: 0.8em;
+      font-size: 0.9em;
       color: #666;
       margin-top: 5px;
       text-align: center;
@@ -73,7 +76,7 @@
     .loading {
       text-align: center;
       padding: 40px;
-      font-size: 1.2em;
+      font-size: 1.3em;
       color: #666;
     }
     .error {
@@ -113,6 +116,7 @@
       text-align: center;
       padding: 40px;
       color: #666;
+      font-size: 1.1em;
     }
   </style>
 </head>
@@ -124,6 +128,9 @@
     <div id="loading" class="loading">載入中，請稍候...</div>
     <div id="error" class="error" style="display: none;"></div>
     <div id="no-images" class="no-images" style="display: none;">沒有找到此藥品的圖片</div>
+    <div style="text-align: center; margin-top: 30px; padding-top: 15px; border-top: 1px solid #eee; color: #666; font-size: 0.9em;">
+      資料來源：藥‧臺灣 drugtw.com
+    </div>
   </div>
 
   <div id="imageModal" class="modal">

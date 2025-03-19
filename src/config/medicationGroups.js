@@ -11,11 +11,12 @@ export const DEFAULT_ATC5_GROUPS = {
   STATIN: ['C10AA', 'C10BA', 'C10BX'],
   SGLT2: ['A10BK', 'A10BD15', 'A10BD16', 'A10BD19', 'A10BD20', 'A10BD21', 'A10BD25', 'A10BD27', 'A10BD29', 'A10BD30'],
   GLP1: ['A10BJ', 'A10AE54', 'A10AE56'],
+  抗凝: ['B01A'],
 };
 
 // 定義藥物分類的顏色群組
 export const DEFAULT_ATC5_COLOR_GROUPS = {
-  red: ['NSAID'],
+  red: ['抗凝','NSAID'],
   orange: ['ARB','ACEI','STATIN'],
-  green: [],
+  green: ['SGLT2','GLP1'],
 }; 

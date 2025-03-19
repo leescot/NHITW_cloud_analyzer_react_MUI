@@ -12,6 +12,13 @@
  * 1. 僅修改此處不會影響現有使用者的設定，因為他們的配置已存儲在 Chrome storage 中
  * 2. 若要更新所有使用者的設定，需要實現版本升級機制
  * 3. 新增或修改項目時，確保 orderCode 的唯一性
+ * 
+ * 顯示格式選項:
+ * - vertical: 垂直單欄顯示
+ * - twoColumn: 雙欄顯示
+ * - threeColumn: 三欄顯示
+ * - fourColumn: 四欄顯示
+ * - byType: 依檢驗類型分組顯示
  */
 export const DEFAULT_LAB_TESTS = [
   { orderCode: '08011C-WBC', displayName: 'WBC', enabled: false },
@@ -59,24 +66,24 @@ export const DEFAULT_LAB_COPY_ITEMS = [
   { orderCode: '08011C-WBC', displayName: 'WBC', enabled: false },
   { orderCode: '08011C-Hb', displayName: 'Hb', enabled: false },
   { orderCode: '08011C-Platelet', displayName: 'Platelet', enabled: false },
-  { orderCode: '09002C', displayName: 'BUN', enabled: true },
-  { orderCode: '09015C', displayName: 'Cr & GFR', enabled: true },
+  { orderCode: '09002C', displayName: 'BUN', enabled: false },
+  { orderCode: '09015C', displayName: 'Cr & GFR', enabled: false },
   { orderCode: '09040C', displayName: 'UPCR', enabled: false },
   { orderCode: '12111C', displayName: 'UACR', enabled: false },
   { orderCode: '09038C', displayName: 'Alb', enabled: false },
   { orderCode: '09005C', displayName: 'Glucose', enabled: false },
-  { orderCode: '09006C', displayName: 'HbA1c', enabled: true },
-  { orderCode: '09001C', displayName: 'Chol', enabled: true },
-  { orderCode: '09004C', displayName: 'TG', enabled: true },
-  { orderCode: '09043C', displayName: 'HDL', enabled: true },
-  { orderCode: '09044C', displayName: 'LDL', enabled: true },
+  { orderCode: '09006C', displayName: 'HbA1c', enabled: false },
+  { orderCode: '09001C', displayName: 'Chol', enabled: false },
+  { orderCode: '09004C', displayName: 'TG', enabled: false },
+  { orderCode: '09043C', displayName: 'HDL', enabled: false },
+  { orderCode: '09044C', displayName: 'LDL', enabled: false },
   { orderCode: '09021C', displayName: 'Na', enabled: false },
   { orderCode: '09022C', displayName: 'K', enabled: false },
   { orderCode: '09011C', displayName: 'Ca', enabled: false },
   { orderCode: '09012C', displayName: 'P', enabled: false },
   { orderCode: '09013C', displayName: 'U.A', enabled: false },
-  { orderCode: '09025C', displayName: 'GOT', enabled: true },
-  { orderCode: '09026C', displayName: 'GPT', enabled: true },
+  { orderCode: '09025C', displayName: 'GOT', enabled: false },
+  { orderCode: '09026C', displayName: 'GPT', enabled: false },
   { orderCode: '09027C', displayName: 'Alk-P', enabled: false },
   { orderCode: '09029C', displayName: 'Bil(T)', enabled: false },
   { orderCode: '09030C', displayName: 'Bil(D)', enabled: false },

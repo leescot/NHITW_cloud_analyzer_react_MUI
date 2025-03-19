@@ -57,7 +57,8 @@ export const getMedicationColorGroup = (medication, settings) => {
         return {
           groupName: matchedGroup,
           colorName,
-          color: colorCode
+          color: colorCode,
+          drugcode: medication.drugcode || medication.drug_code || '' // Preserve drugcode
         };
       }
     }
@@ -69,7 +70,8 @@ export const getMedicationColorGroup = (medication, settings) => {
       return {
         groupName: 'OTHER',
         colorName: 'orange',
-        color: 'warning'
+        color: 'warning',
+        drugcode: medication.drugcode || medication.drug_code || '' // Preserve drugcode
       };
     }
     
@@ -118,7 +120,8 @@ export const getMedicationColorGroup = (medication, settings) => {
   return {
     groupName,
     colorName,
-    color: colorCode
+    color: colorCode,
+    drugcode: medication.drugcode || medication.drug_code || '' // Preserve drugcode
   };
 };
 

@@ -14,14 +14,21 @@ import {
   TableHead,
   TableRow,
   alpha,
+  IconButton,
+  Snackbar,
 } from "@mui/material";
 // Import icons for medication categories
 import MedicationIcon from '@mui/icons-material/Medication';
 import LocalPharmacyIcon from '@mui/icons-material/LocalPharmacy';
 import HealingIcon from '@mui/icons-material/Healing';
 import HealthAndSafetyIcon from '@mui/icons-material/HealthAndSafety';
+import ImageIcon from '@mui/icons-material/Image';
 import { isWithinLast90Days, getMedicationColorGroup, formatDate } from "./Overview_utils";
 import TypographySizeWrapper from "../utils/TypographySizeWrapper";
+
+// Import default settings to use as fallbacks
+import { DEFAULT_SETTINGS } from "../../config/defaultSettings";
+import { DEFAULT_ATC5_GROUPS, DEFAULT_ATC5_COLOR_GROUPS } from "../../config/medicationGroups";
 
 const Overview_ImportantMedications = ({ 
   groupedMedications = [], 
@@ -34,23 +41,19 @@ const Overview_ImportantMedications = ({
   
   // Create a safe settings object with defaults if settings are corrupted
   const safeSettings = {
-    simplifyMedicineName: settings.simplifyMedicineName !== undefined ? settings.simplifyMedicineName : true,
-    showGenericName: settings.showGenericName !== undefined ? settings.showGenericName : false,
-    showDiagnosis: settings.showDiagnosis !== undefined ? settings.showDiagnosis : true,
-    showATC5Name: settings.showATC5Name !== undefined ? settings.showATC5Name : false,
-    enableATC5Colors: settings.enableATC5Colors !== undefined ? settings.enableATC5Colors : true,
-    atc5Groups: settings.atc5Groups || {
-      NSAID: ['M01AA', 'M01AB', 'M01AC', 'M01AE', 'M01AG', 'M01AH'],
-      ACEI: ['C09AA', 'C09BA', 'C09BB'],
-      ARB: ['C09CA', 'C09DA', 'C09DB'],
-      STATIN: ['C10AA', 'C10BA', 'C10BX']
-    },
-    atc5ColorGroups: settings.atc5ColorGroups || {
-      red: ['NSAID'],
-      orange: ['ARB', 'ACEI', 'STATIN'],
-      green: []
-    }
+    simplifyMedicineName: settings.simplifyMedicineName !== undefined ? settings.simplifyMedicineName : DEFAULT_SETTINGS.western.simplifyMedicineName,
+    showGenericName: settings.showGenericName !== undefined ? settings.showGenericName : DEFAULT_SETTINGS.western.showGenericName,
+    showDiagnosis: settings.showDiagnosis !== undefined ? settings.showDiagnosis : DEFAULT_SETTINGS.western.showDiagnosis,
+    showATC5Name: settings.showATC5Name !== undefined ? settings.showATC5Name : DEFAULT_SETTINGS.western.showATC5Name,
+    enableATC5Colors: settings.enableATC5Colors !== undefined ? settings.enableATC5Colors : DEFAULT_SETTINGS.atc5.enableColors,
+    showExternalDrugImage: settings.showExternalDrugImage !== undefined ? settings.showExternalDrugImage : DEFAULT_SETTINGS.western.showExternalDrugImage,
+    atc5Groups: settings.atc5Groups || DEFAULT_ATC5_GROUPS,
+    atc5ColorGroups: settings.atc5ColorGroups || DEFAULT_ATC5_COLOR_GROUPS
   };
+  
+  // For debugging
+  // console.log('Settings passed:', settings);
+  // console.log('Safe settings created:', safeSettings);
   
   // Filter out medications from the past tracking days, by color groups, and consolidate same medications
   // Step 1: Extract all medications within the tracking period with their color groups
@@ -74,6 +77,8 @@ const Overview_ImportantMedications = ({
             ...med,
             start_date: dateToCheck,
             hospital: med.hospital || group.hosp,
+            drug_left: med.drug_left || 0,  // Add drug_left property (default to 0 if not present)
+            drugcode: med.drugcode || med.drug_code || '',  // Ensure drugcode is preserved
             colorGroup
           });
         }
@@ -143,6 +148,7 @@ const Overview_ImportantMedications = ({
       groupedByName[key] = {
         name: med.name,
         days: med.days,
+        drugcode: med.drugcode || med.drug_code || '',  // Include drugcode
         colorGroup: med.colorGroup,
         prescriptions: []
       };
@@ -151,7 +157,9 @@ const Overview_ImportantMedications = ({
     groupedByName[key].prescriptions.push({
       date: med.start_date,
       hospital: med.hospital,
-      days: med.days
+      days: med.days,
+      drug_left: med.drug_left || 0,  // Include drug_left in prescriptions
+      drugcode: med.drugcode || med.drug_code || ''  // Include drugcode in prescriptions
     });
   });
   
@@ -192,7 +200,9 @@ const Overview_ImportantMedications = ({
       name: med.name,
       date: med.start_date,
       hospital: med.hospital,
-      days: med.days
+      days: med.days,
+      drug_left: med.drug_left || 0,  // Include drug_left in simplified list
+      drugcode: med.drugcode || med.drug_code || ''  // Include drugcode in simplified list
     })) : [];
   
   // Sort by date (newest first) if we're using the fallback
@@ -207,7 +217,19 @@ const Overview_ImportantMedications = ({
   const tableData = [];
   
   if (hasData) {
-    Object.entries(colorGroupedMeds).forEach(([colorName, colorData]) => {
+    // Define color priority order
+    const colorPriority = ['red', 'orange', 'green'];
+    
+    // Sort colors by priority
+    const sortedColors = Object.entries(colorGroupedMeds)
+      .sort((a, b) => {
+        const indexA = colorPriority.indexOf(a[0]);
+        const indexB = colorPriority.indexOf(b[0]);
+        return (indexA === -1 ? 999 : indexA) - (indexB === -1 ? 999 : indexB);
+      });
+    
+    // Build table data with sorted colors
+    sortedColors.forEach(([colorName, colorData]) => {
       Object.entries(colorData.groups).forEach(([groupName, medications]) => {
         // First medication in group
         if (medications.length > 0) {
@@ -311,6 +333,101 @@ const Overview_ImportantMedications = ({
     );
   };
 
+  // Add state for snackbar
+  const [snackbarOpen, setSnackbarOpen] = React.useState(false);
+  const [snackbarMessage, setSnackbarMessage] = React.useState("");
+
+  // Helper function to format medication name
+  const formatMedicationName = (name) => {
+    if (!name) return null;
+    
+    // Find parenthesized content
+    const regex = /\(([^)]+)\)/g;
+    let match;
+    let lastIndex = 0;
+    const parts = [];
+    
+    while ((match = regex.exec(name)) !== null) {
+      // Add text before the parenthesis
+      if (match.index > lastIndex) {
+        parts.push({
+          text: name.substring(lastIndex, match.index),
+          isParenthesized: false
+        });
+      }
+      
+      // Add parenthesized text
+      parts.push({
+        text: `(${match[1]})`,
+        isParenthesized: true
+      });
+      
+      lastIndex = match.index + match[0].length;
+    }
+    
+    // Add any remaining text after the last parenthesis
+    if (lastIndex < name.length) {
+      parts.push({
+        text: name.substring(lastIndex),
+        isParenthesized: false
+      });
+    }
+    
+    // If no parentheses were found, return the original name
+    if (parts.length === 0) {
+      return <span>{name}</span>;
+    }
+    
+    // Return formatted parts
+    return (
+      <>
+        {parts.map((part, i) => 
+          part.isParenthesized ? (
+            <TypographySizeWrapper
+              key={i}
+              component="span"
+              textSizeType="note"
+              generalDisplaySettings={generalDisplaySettings}
+              sx={{
+                color: "text.secondary",
+              }}
+            >
+              {part.text}
+            </TypographySizeWrapper>
+          ) : (
+            <span key={i}>{part.text}</span>
+          )
+        )}
+      </>
+    );
+  };
+
+  // Add handler for drug image click
+  const handleDrugImageClick = (drugcode) => {
+    // console.log("Opening drug image for drugcode:", drugcode);
+    if (!drugcode) {
+      setSnackbarMessage("無法獲取藥品代碼");
+      setSnackbarOpen(true);
+      return;
+    }
+    
+    try {
+      // Open drug image viewer
+      window.open(`chrome-extension://${chrome.runtime.id}/drug-images.html?code=${drugcode}`, '_blank', 'noopener,noreferrer');
+      
+      setSnackbarMessage("已開啟藥品圖片查看器");
+    } catch (error) {
+      console.error("Error opening drug image:", error);
+      setSnackbarMessage("開啟藥品圖片失敗: " + error.message);
+    }
+    setSnackbarOpen(true);
+  };
+
+  // Handle snackbar close
+  const handleSnackbarClose = () => {
+    setSnackbarOpen(false);
+  };
+
   return (
     <Paper sx={{ p: 2, height: "100%" }}>
       <TypographySizeWrapper variant="h6" gutterBottom generalDisplaySettings={generalDisplaySettings}>
@@ -319,25 +436,25 @@ const Overview_ImportantMedications = ({
       {hasData ? (
         <TableContainer sx={{ maxHeight: 600 }}>
           <Table size="small" stickyHeader>
-            <TableHead>
+            {/* <TableHead>
               <TableRow>
                 <TableCell sx={{ fontWeight: 'bold', width: '15%', textAlign: 'center' }}>
                   <TypographySizeWrapper variant="body1" generalDisplaySettings={generalDisplaySettings}>
-                    分類
+                    　
                   </TypographySizeWrapper>
                 </TableCell>
                 <TableCell sx={{ fontWeight: 'bold', width: '32%' }}>
                   <TypographySizeWrapper variant="body1" generalDisplaySettings={generalDisplaySettings}>
-                    藥物名稱
+                    藥物
                   </TypographySizeWrapper>
                 </TableCell>
                 <TableCell sx={{ fontWeight: 'bold', width: '48%' }}>
                   <TypographySizeWrapper variant="body1" generalDisplaySettings={generalDisplaySettings}>
-                    使用日期資訊
+                    日期+院所
                   </TypographySizeWrapper>
                 </TableCell>
               </TableRow>
-            </TableHead>
+            </TableHead> */}
             <TableBody>
               {tableData.map((row, index) => {
                 // Get color information for this row
@@ -402,7 +519,33 @@ const Overview_ImportantMedications = ({
                           sx={{ fontWeight: 'medium' }}
                           generalDisplaySettings={generalDisplaySettings}
                         >
-                          {row.medication.name}
+                          {formatMedicationName(row.medication.name)}
+                          {safeSettings.showExternalDrugImage && row.medication.drugcode && (
+                            <Tooltip title="查看藥物圖片">
+                              <IconButton
+                                size="small"
+                                onClick={() => handleDrugImageClick(row.medication.drugcode)}
+                                sx={{
+                                  ml: 0.5,
+                                  opacity: 0.5,
+                                  padding: "2px",
+                                  display: "inline-flex",
+                                  verticalAlign: "text-top",
+                                  '&:hover': {
+                                    opacity: 1
+                                  }
+                                }}
+                              >
+                                <ImageIcon sx={{ 
+                                  fontSize: generalDisplaySettings.contentTextSize === 'small' 
+                                    ? "14px" 
+                                    : generalDisplaySettings.contentTextSize === 'medium' 
+                                      ? "16px" 
+                                      : "18px" 
+                                }} />
+                              </IconButton>
+                            </Tooltip>
+                          )}
                         </TypographySizeWrapper>
                         {row.medication.genericName && (
                           <TypographySizeWrapper 
@@ -418,24 +561,74 @@ const Overview_ImportantMedications = ({
                     </TableCell>
                     <TableCell sx={{ py: 0.75 }}>
                       <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
-                        {row.medication.prescriptions.slice(0, 3).map((prescription, i) => (
-                          <Chip 
-                            key={i}
-                            size="small"
-                            label={`${formatDate(prescription.date)}${prescription.hospital ? ` (${prescription.hospital})` : ''}`}
-                            sx={{ 
-                              fontSize: '0.7rem', 
-                              height: '20px',
-                              bgcolor: 'transparent',
-                              border: '1px solid',
-                              borderColor: 'grey.300',
-                            }}
-                          />
-                        ))}
+                        {row.medication.prescriptions.slice(0, 3).map((prescription, i) => {
+                          // Determine if this prescription has remaining medication
+                          const hasRemainingMed = prescription.drug_left > 0;
+                          // Get color information for this row to use for highlighting
+                          const chipColorInfo = (() => {
+                            if (!hasRemainingMed) return null;
+                            
+                            // Find the parent group for this medication to get its color
+                            let parentIndex = index;
+                            while (parentIndex >= 0 && !tableData[parentIndex].isGroupHeader) {
+                              parentIndex--;
+                            }
+                            
+                            if (parentIndex >= 0) {
+                              return getColorInfo(tableData[parentIndex].colorName);
+                            }
+                            
+                            return null;
+                          })();
+                          
+                          return (
+                            <Tooltip 
+                              key={i} 
+                              title={
+                                <>
+                                  {hasRemainingMed ? `餘藥 ${prescription.drug_left} 天` : ''}
+                                  {prescription.days && (hasRemainingMed ? ' | ' : '') + `用藥 ${prescription.days} 天`}
+                                </>
+                              }
+                              placement="top"
+                            >
+                              <Chip 
+                                size="small"
+                                label={
+                                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                    <span>{`${formatDate(prescription.date)}${prescription.hospital ? ` (${prescription.hospital})` : ''}`}</span>
+                                    {hasRemainingMed && (
+                                      <Box component="span" sx={{ 
+                                        display: 'inline-flex', 
+                                        alignItems: 'center',
+                                        ml: 0.5,
+                                        fontSize: '0.65rem',
+                                        color: chipColorInfo?.dark || 'text.secondary'
+                                      }}>
+                                        <LocalPharmacyIcon sx={{ fontSize: '0.75rem', mr: 0.2 }} />
+                                        {prescription.drug_left}天
+                                      </Box>
+                                    )}
+                                  </Box>
+                                }
+                                sx={{ 
+                                  fontSize: '0.7rem', 
+                                  height: 'auto',
+                                  minHeight: '20px',
+                                  bgcolor: hasRemainingMed ? chipColorInfo?.light || 'transparent' : 'transparent',
+                                  border: '1px solid',
+                                  borderColor: hasRemainingMed ? chipColorInfo?.medium || 'grey.300' : 'grey.300',
+                                  py: hasRemainingMed ? 0.2 : 0
+                                }}
+                              />
+                            </Tooltip>
+                          );
+                        })}
                         {row.medication.prescriptions.length > 3 && (
-                          <Tooltip title={row.medication.prescriptions.slice(3).map(p => 
-                            `${formatDate(p.date)}${p.hospital ? ` (${p.hospital})` : ''}`
-                          ).join('\n')}>
+                          <Tooltip title={row.medication.prescriptions.slice(3).map(p => {
+                            const hasRemainingMed = p.drug_left > 0;
+                            return `${formatDate(p.date)}${p.hospital ? ` (${p.hospital})` : ''}${p.days ? ` | 用藥 ${p.days} 天` : ''}${hasRemainingMed ? ` | 餘藥 ${p.drug_left} 天` : ''}`;
+                          }).join('\n')}>
                             <Chip
                               size="small"
                               label={`+${row.medication.prescriptions.length - 3}`}
@@ -466,44 +659,94 @@ const Overview_ImportantMedications = ({
               </TableRow>
             </TableHead>
             <TableBody>
-              {simplifiedMedList.slice(0, 10).map((med, index) => (
-                <TableRow key={index}>
-                  <TableCell sx={{ py: 0.75 }}>
-                    <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-                      <TypographySizeWrapper 
-                        variant="body2" 
-                        sx={{ fontWeight: 'medium' }}
-                        generalDisplaySettings={generalDisplaySettings}
-                      >
-                        {med.name}
-                      </TypographySizeWrapper>
-                      {med.days && (
+              {simplifiedMedList.slice(0, 10).map((med, index) => {
+                const hasRemainingMed = med.drug_left > 0;
+                
+                return (
+                  <TableRow key={index}>
+                    <TableCell sx={{ py: 0.75 }}>
+                      <Box sx={{ display: 'flex', flexDirection: 'column' }}>
                         <TypographySizeWrapper 
-                          variant="caption" 
-                          color="text.secondary" 
-                          sx={{ mt: 0.25 }}
+                          variant="body2" 
+                          sx={{ fontWeight: 'medium' }}
                           generalDisplaySettings={generalDisplaySettings}
                         >
-                          {med.days}天
+                          {formatMedicationName(med.name)}
+                          {safeSettings.showExternalDrugImage && med.drugcode && (
+                            <Tooltip title="查看藥物圖片">
+                              <IconButton
+                                size="small"
+                                onClick={() => handleDrugImageClick(med.drugcode)}
+                                sx={{
+                                  ml: 0.5,
+                                  opacity: 0.5,
+                                  padding: "2px",
+                                  display: "inline-flex",
+                                  verticalAlign: "text-top",
+                                  '&:hover': {
+                                    opacity: 1
+                                  }
+                                }}
+                              >
+                                <ImageIcon sx={{ 
+                                  fontSize: generalDisplaySettings.contentTextSize === 'small' 
+                                    ? "14px" 
+                                    : generalDisplaySettings.contentTextSize === 'medium' 
+                                      ? "16px" 
+                                      : "18px" 
+                                }} />
+                              </IconButton>
+                            </Tooltip>
+                          )}
                         </TypographySizeWrapper>
-                      )}
-                    </Box>
-                  </TableCell>
-                  <TableCell sx={{ py: 0.75 }}>
-                    <Chip 
-                      size="small"
-                      label={`${formatDate(med.date)}${med.hospital ? ` (${med.hospital})` : ''}`}
-                      sx={{ 
-                        fontSize: '0.7rem', 
-                        height: '20px',
-                        bgcolor: 'transparent',
-                        border: '1px solid',
-                        borderColor: 'grey.300',
-                      }}
-                    />
-                  </TableCell>
-                </TableRow>
-              ))}
+                        {med.days && (
+                          <TypographySizeWrapper 
+                            variant="caption" 
+                            color="text.secondary" 
+                            sx={{ mt: 0.25 }}
+                            generalDisplaySettings={generalDisplaySettings}
+                          >
+                            {med.days}天
+                          </TypographySizeWrapper>
+                        )}
+                      </Box>
+                    </TableCell>
+                    <TableCell sx={{ py: 0.75 }}>
+                      <Tooltip title={hasRemainingMed ? `餘藥 ${med.drug_left} 天${med.days ? ` | 用藥 ${med.days} 天` : ''}` : med.days ? `用藥 ${med.days} 天` : ''}>
+                        <Chip 
+                          size="small"
+                          label={
+                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                              <span>{`${formatDate(med.date)}${med.hospital ? ` (${med.hospital})` : ''}`}</span>
+                              {hasRemainingMed && (
+                                <Box component="span" sx={{ 
+                                  display: 'inline-flex', 
+                                  alignItems: 'center',
+                                  ml: 0.5,
+                                  fontSize: '0.65rem',
+                                  color: 'text.secondary'
+                                }}>
+                                  <LocalPharmacyIcon sx={{ fontSize: '0.75rem', mr: 0.2 }} />
+                                  {med.drug_left}天
+                                </Box>
+                              )}
+                            </Box>
+                          }
+                          sx={{ 
+                            fontSize: '0.7rem', 
+                            height: 'auto',
+                            minHeight: '20px',
+                            bgcolor: hasRemainingMed ? alpha('#bdbdbd', 0.2) : 'transparent',
+                            border: '1px solid',
+                            borderColor: 'grey.300',
+                            py: hasRemainingMed ? 0.2 : 0
+                          }}
+                        />
+                      </Tooltip>
+                    </TableCell>
+                  </TableRow>
+                );
+              })}
             </TableBody>
           </Table>
           {simplifiedMedList.length > 10 && (
@@ -536,6 +779,13 @@ const Overview_ImportantMedications = ({
           </TypographySizeWrapper> */}
         </Box>
       )}
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={2000}
+        onClose={handleSnackbarClose}
+        message={snackbarMessage}
+        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+      />
     </Paper>
   );
 };
