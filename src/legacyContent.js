@@ -12,7 +12,11 @@ window.lastInterceptedAllergyData = null;
 window.lastInterceptedSurgeryData = null;
 window.lastInterceptedDischargeData = null;
 window.lastInterceptedMedDaysData = null;
-window.lastInterceptedPatientSummaryData = null; // 新增病患摘要數據
+window.lastInterceptedPatientSummaryData = null; 
+window.lastInterceptedMasterMenuData = null; // 新增主選單數據
+window.lastInterceptedRehabilitationData = null; // 新增復健資料
+window.lastInterceptedAcupunctureData = null; // 新增針灸資料
+window.lastInterceptedSpecialChineseMedCareData = null; // 新增特殊中醫處置資料
 
 // 新增: 使用者資訊快取
 let cachedUserInfo = null;
@@ -44,7 +48,8 @@ let pendingRequests = {
   surgery: false,
   discharge: false,
   medDays: false,
-  patientsummary: false // 新增病患摘要
+  patientsummary: false, // 新增病患摘要
+  masterMenu: false // 新增主選單
 };
 
 // 在頁面加載後自動初始化
@@ -302,6 +307,10 @@ function performClearPreviousData() {
     lastInterceptedDischargeData = null;
     lastInterceptedMedDaysData = null;
     lastInterceptedPatientSummaryData = null;
+    lastInterceptedMasterMenuData = null;
+    lastInterceptedRehabilitationData = null;
+    lastInterceptedAcupunctureData = null;
+    lastInterceptedSpecialChineseMedCareData = null;
   });
   
   // 通知background script清除會話數據
@@ -441,6 +450,10 @@ function setupMonitoring() {
   const DISCHARGE_API_URL_PATTERN = '/imu/api/imue0070/imue0070s02/get-data';
   const MED_DAYS_API_URL_PATTERN = '/imu/api/imue0120/imue0120s01/pres-med-day';
   const PATIENT_SUMMARY_API_URL_PATTERN = '/imu/api/imue2000/imue2000s01/get-summary';
+  const MASTER_MENU_API_URL_PATTERN = '/imu/api/imue1000/imue1000s02/master-menu';
+  const REHABILITATION_API_URL_PATTERN = '/imu/api/imue0080/imue0080s02/get-data';
+  const ACUPUNCTURE_API_URL_PATTERN = '/imu/api/imue0160/imue0160s02/get-data';
+  const SPECIAL_CHINESE_MED_CARE_API_URL_PATTERN = '/imu/api/imue0170/imue0170s02/get-data';
   
   // 設置請求頭捕獲
   captureXhrRequestHeaders();
@@ -475,7 +488,11 @@ function setupMonitoring() {
               originalUrl.includes(SURGERY_API_URL_PATTERN) ||
               originalUrl.includes(DISCHARGE_API_URL_PATTERN) ||
               originalUrl.includes(MED_DAYS_API_URL_PATTERN) ||
-              originalUrl.includes(PATIENT_SUMMARY_API_URL_PATTERN))) {
+              originalUrl.includes(PATIENT_SUMMARY_API_URL_PATTERN) ||
+              originalUrl.includes(MASTER_MENU_API_URL_PATTERN) ||
+              originalUrl.includes(REHABILITATION_API_URL_PATTERN) ||
+              originalUrl.includes(ACUPUNCTURE_API_URL_PATTERN) ||
+              originalUrl.includes(SPECIAL_CHINESE_MED_CARE_API_URL_PATTERN))) {
             console.log(`XHR ${event} event fired for: ${originalUrl}, readyState: ${this.readyState}, status: ${this.status}`);
             
             if (this.readyState === 4 && this.status === 200) {
@@ -484,14 +501,19 @@ function setupMonitoring() {
                 
                 const data = JSON.parse(this.responseText);
                 
+                // For master-menu, log the response data
+                if (originalUrl.includes(MASTER_MENU_API_URL_PATTERN)) {
+                  console.log('Master Menu API Response:', JSON.stringify(data, null, 2));
+                }
+                
                 // 檢查 robject（小寫）或 rObject（大寫），兩者都接受
                 const recordsArray = data.rObject || data.robject;
                 
                 // 強化資料格式檢查
-                if (data && recordsArray && Array.isArray(recordsArray)) {
+                if (data && (recordsArray && Array.isArray(recordsArray) || originalUrl.includes(MASTER_MENU_API_URL_PATTERN))) {
                   // 統一格式
                   const normalizedData = {
-                    rObject: recordsArray,
+                    rObject: originalUrl.includes(MASTER_MENU_API_URL_PATTERN) ? [data] : recordsArray,
                     originalData: data
                   };
                   
@@ -504,7 +526,11 @@ function setupMonitoring() {
                                    originalUrl.includes(SURGERY_API_URL_PATTERN) ? 'surgery' :
                                    originalUrl.includes(DISCHARGE_API_URL_PATTERN) ? 'discharge' :
                                    originalUrl.includes(MED_DAYS_API_URL_PATTERN) ? 'medDays' :
-                                   originalUrl.includes(PATIENT_SUMMARY_API_URL_PATTERN) ? 'patientsummary' : null;
+                                   originalUrl.includes(PATIENT_SUMMARY_API_URL_PATTERN) ? 'patientsummary' :
+                                   originalUrl.includes(MASTER_MENU_API_URL_PATTERN) ? 'masterMenu' :
+                                   originalUrl.includes(REHABILITATION_API_URL_PATTERN) ? 'rehabilitation' :
+                                   originalUrl.includes(ACUPUNCTURE_API_URL_PATTERN) ? 'acupuncture' :
+                                   originalUrl.includes(SPECIAL_CHINESE_MED_CARE_API_URL_PATTERN) ? 'specialChineseMedCare' : null;
                   
                   if (dataType) {
                     switch(dataType) {
@@ -534,6 +560,18 @@ function setupMonitoring() {
                         break;
                       case 'patientsummary':
                         window.lastInterceptedPatientSummaryData = normalizedData;
+                        break;
+                      case 'masterMenu':
+                        window.lastInterceptedMasterMenuData = normalizedData;
+                        break;
+                      case 'rehabilitation':
+                        window.lastInterceptedRehabilitationData = normalizedData;
+                        break;
+                      case 'acupuncture':
+                        window.lastInterceptedAcupunctureData = normalizedData;
+                        break;
+                      case 'specialChineseMedCare':
+                        window.lastInterceptedSpecialChineseMedCareData = normalizedData;
                         break;
                     }
                     
@@ -575,7 +613,11 @@ function setupMonitoring() {
         originalUrl.includes(SURGERY_API_URL_PATTERN) ||
         originalUrl.includes(DISCHARGE_API_URL_PATTERN) ||
         originalUrl.includes(MED_DAYS_API_URL_PATTERN) ||
-        originalUrl.includes(PATIENT_SUMMARY_API_URL_PATTERN))) {
+        originalUrl.includes(PATIENT_SUMMARY_API_URL_PATTERN) ||
+        originalUrl.includes(MASTER_MENU_API_URL_PATTERN) ||
+        originalUrl.includes(REHABILITATION_API_URL_PATTERN) ||
+        originalUrl.includes(ACUPUNCTURE_API_URL_PATTERN) ||
+        originalUrl.includes(SPECIAL_CHINESE_MED_CARE_API_URL_PATTERN))) {
       console.log(`Monitoring XHR request to: ${originalUrl}`);
     }
     
@@ -598,7 +640,11 @@ function setupMonitoring() {
         url.includes(SURGERY_API_URL_PATTERN) ||
         url.includes(DISCHARGE_API_URL_PATTERN) ||
         url.includes(MED_DAYS_API_URL_PATTERN) ||
-        url.includes(PATIENT_SUMMARY_API_URL_PATTERN))) {
+        url.includes(PATIENT_SUMMARY_API_URL_PATTERN) ||
+        url.includes(MASTER_MENU_API_URL_PATTERN) ||
+        url.includes(REHABILITATION_API_URL_PATTERN) ||
+        url.includes(ACUPUNCTURE_API_URL_PATTERN) ||
+        url.includes(SPECIAL_CHINESE_MED_CARE_API_URL_PATTERN))) {
       console.log(`Monitoring fetch request to: ${url}`);
       
       try {
@@ -618,14 +664,19 @@ function setupMonitoring() {
               try {
                 const data = JSON.parse(text);
                 
+                // For master-menu, log the response data
+                if (url.includes(MASTER_MENU_API_URL_PATTERN)) {
+                  console.log('Master Menu API Response:', JSON.stringify(data, null, 2));
+                }
+                
                 // 檢查 robject（小寫）或 rObject（大寫），兩者都接受
                 const recordsArray = data.rObject || data.robject;
                 
                 // 強化資料格式檢查
-                if (data && recordsArray && Array.isArray(recordsArray)) {
+                if (data && (recordsArray && Array.isArray(recordsArray) || url.includes(MASTER_MENU_API_URL_PATTERN))) {
                   // 統一格式
                   const normalizedData = {
-                    rObject: recordsArray,
+                    rObject: url.includes(MASTER_MENU_API_URL_PATTERN) ? [data] : recordsArray,
                     originalData: data
                   };
                   
@@ -638,7 +689,11 @@ function setupMonitoring() {
                                    url.includes(SURGERY_API_URL_PATTERN) ? 'surgery' :
                                    url.includes(DISCHARGE_API_URL_PATTERN) ? 'discharge' :
                                    url.includes(MED_DAYS_API_URL_PATTERN) ? 'medDays' :
-                                   url.includes(PATIENT_SUMMARY_API_URL_PATTERN) ? 'patientsummary' : null;
+                                   url.includes(PATIENT_SUMMARY_API_URL_PATTERN) ? 'patientsummary' :
+                                   url.includes(MASTER_MENU_API_URL_PATTERN) ? 'masterMenu' :
+                                   url.includes(REHABILITATION_API_URL_PATTERN) ? 'rehabilitation' :
+                                   url.includes(ACUPUNCTURE_API_URL_PATTERN) ? 'acupuncture' :
+                                   url.includes(SPECIAL_CHINESE_MED_CARE_API_URL_PATTERN) ? 'specialChineseMedCare' : null;
                   
                   if (dataType) {
                     switch(dataType) {
@@ -668,6 +723,18 @@ function setupMonitoring() {
                         break;
                       case 'patientsummary':
                         window.lastInterceptedPatientSummaryData = normalizedData;
+                        break;
+                      case 'masterMenu':
+                        window.lastInterceptedMasterMenuData = normalizedData;
+                        break;
+                      case 'rehabilitation':
+                        window.lastInterceptedRehabilitationData = normalizedData;
+                        break;
+                      case 'acupuncture':
+                        window.lastInterceptedAcupunctureData = normalizedData;
+                        break;
+                      case 'specialChineseMedCare':
+                        window.lastInterceptedSpecialChineseMedCareData = normalizedData;
                         break;
                     }
                     
@@ -736,10 +803,22 @@ function saveData(data, dataType, source = 'unknown') {
     case 'patientsummary':
       window.lastInterceptedPatientSummaryData = data;
       break;
+    case 'masterMenu':
+      window.lastInterceptedMasterMenuData = data;
+      break;
+    case 'rehabilitation':
+      window.lastInterceptedRehabilitationData = data;
+      break;
+    case 'acupuncture':
+      window.lastInterceptedAcupunctureData = data;
+      break;
+    case 'specialChineseMedCare':
+      window.lastInterceptedSpecialChineseMedCareData = data;
+      break;
   }
 
-  // 確保 data 有效
-  if (!data || !data.rObject) {
+  // 確保 data 有效 (對 masterMenu 類型特殊處理)
+  if (!data || (!data.rObject && dataType !== 'masterMenu')) {
     console.error(`Invalid data for type ${dataType}`);
     return;
   }
@@ -753,7 +832,11 @@ function saveData(data, dataType, source = 'unknown') {
     'surgery': 'saveSurgeryData',
     'discharge': 'saveDischargeData',
     'medDays': 'saveMedDaysData',
-    'patientsummary': 'savePatientSummaryData'
+    'patientsummary': 'savePatientSummaryData',
+    'masterMenu': 'saveMasterMenuData',
+    'rehabilitation': 'saveRehabilitationData',
+    'acupuncture': 'saveAcupunctureData',
+    'specialChineseMedCare': 'saveSpecialChineseMedCareData'
   };
 
   const typeTextMap = {
@@ -765,7 +848,11 @@ function saveData(data, dataType, source = 'unknown') {
     'surgery': '手術記錄',
     'discharge': '出院病摘',
     'medDays': '藥品餘藥',
-    'patientsummary': '病患摘要'
+    'patientsummary': '病患摘要',
+    'masterMenu': '主選單',
+    'rehabilitation': '復健治療',
+    'acupuncture': '針灸治療',
+    'specialChineseMedCare': '特殊中醫處置'
   };
 
   const action = actionMap[dataType];
@@ -781,7 +868,7 @@ function saveData(data, dataType, source = 'unknown') {
     data: data,
     userSession: currentUserSession
   }, response => {
-    console.log(`${dataType} data saved to storage via ${source}:`, response);
+    // console.log(`${dataType} data saved to storage via ${source}:`, response);
     
     if (response && response.status === 'saved') {
       const recordCount = data.rObject.length;
@@ -836,7 +923,11 @@ function captureXhrRequestHeaders() {
         url.includes(SURGERY_API_URL_PATTERN) ||
         url.includes(DISCHARGE_API_URL_PATTERN) ||
         url.includes(MED_DAYS_API_URL_PATTERN) ||
-        url.includes(PATIENT_SUMMARY_API_URL_PATTERN))) {
+        url.includes(PATIENT_SUMMARY_API_URL_PATTERN) ||
+        url.includes(MASTER_MENU_API_URL_PATTERN) ||
+        url.includes(REHABILITATION_API_URL_PATTERN) ||
+        url.includes(ACUPUNCTURE_API_URL_PATTERN) ||
+        url.includes(SPECIAL_CHINESE_MED_CARE_API_URL_PATTERN))) {
       const xhr = this;
       this.addEventListener('loadend', function() {
         if (xhr.status === 200 && xhr._requestHeaders) {
@@ -996,83 +1087,121 @@ function fetchAllDataTypes() {
   isDataFetchingStarted = true;
   window.nhiDataBeingFetched = true;
 
-  // Add new data types to Promise.all
-  Promise.all([
-    enhancedFetchData('medication').catch(err => ({ status: 'error', recordCount: 0, error: err })),
-    enhancedFetchData('labdata').catch(err => ({ status: 'error', recordCount: 0, error: err })),
-    enhancedFetchData('chinesemed').catch(err => ({ status: 'error', recordCount: 0, error: err })),
-    enhancedFetchData('imaging').catch(err => ({ status: 'error', recordCount: 0, error: err })),
-    enhancedFetchData('allergy').catch(err => ({ status: 'error', recordCount: 0, error: err })),
-    enhancedFetchData('surgery').catch(err => ({ status: 'error', recordCount: 0, error: err })),
-    enhancedFetchData('discharge').catch(err => ({ status: 'error', recordCount: 0, error: err })),
-    enhancedFetchData('medDays').catch(err => ({ status: 'error', recordCount: 0, error: err })),
-    enhancedFetchData('patientsummary').catch(err => ({ status: 'error', recordCount: 0, error: err }))
-  ])
-  .then(results => {
-    console.log('所有資料獲取完成，結果:', results);
-    
-    // Create counts object for all data types
-    const counts = {
-      medication: results[0]?.recordCount || 0,
-      labData: results[1]?.recordCount || 0,
-      chineseMed: results[2]?.recordCount || 0,
-      imaging: results[3]?.recordCount || 0,
-      allergy: results[4]?.recordCount || 0,
-      surgery: results[5]?.recordCount || 0,
-      discharge: results[6]?.recordCount || 0,
-      medDays: results[7]?.recordCount || 0,
-      patientSummary: results[8]?.recordCount || 0
-    };
-    
-    // Build notification text
-    const dataCounts = [];
-    if (counts.medication > 0) dataCounts.push(`${counts.medication} 筆藥歷`);
-    if (counts.labData > 0) dataCounts.push(`${counts.labData} 筆檢驗`);
-    if (counts.chineseMed > 0) dataCounts.push(`${counts.chineseMed} 筆中醫`);
-    if (counts.imaging > 0) dataCounts.push(`${counts.imaging} 筆影像`);
-    if (counts.allergy > 0) dataCounts.push(`${counts.allergy} 筆過敏`);
-    if (counts.surgery > 0) dataCounts.push(`${counts.surgery} 筆手術`);
-    if (counts.discharge > 0) dataCounts.push(`${counts.discharge} 筆病摘`);
-    if (counts.medDays > 0) dataCounts.push(`${counts.medDays} 筆餘藥`);
-    if (counts.patientSummary > 0) dataCounts.push(`${counts.patientSummary} 筆摘要`);
-    
-    let notificationText;
-    if (dataCounts.length === 0) {
-      notificationText = "無資料";
-    } else if (dataCounts.length === 1) {
-      notificationText = `已抓到 ${dataCounts[0]}`;
-    } else {
-      const lastItem = dataCounts.pop();
-      notificationText = `已抓到 ${dataCounts.join('、')}及${lastItem}`;
-    }
+  // 先獲取主選單資料(masterMenu)，以判斷有哪些資料可獲取
+  enhancedFetchData('masterMenu')
+    .then(menuResult => {
+      console.log('獲取主選單資料成功，開始處理其他資料');
 
-    // 發送自訂事件
-    const event = new CustomEvent('dataFetchCompleted', { detail: results });
-    window.dispatchEvent(event);
+      // 定義所有要獲取的資料類型
+      const dataTypes = [
+        'medication', 'labdata', 'chinesemed', 'imaging', 
+        'allergy', 'surgery', 'discharge', 'medDays', 'patientsummary',
+        'rehabilitation', 'acupuncture', 'specialChineseMedCare'
+      ];
 
-    // Check if autoOpenPage is true and open the dialog if it is
-    chrome.storage.sync.get({ autoOpenPage: false }, function(items) {
-      if (items.autoOpenPage && window.openFloatingIconDialog) {
-        // Add a small delay to ensure the data is fully processed
-        setTimeout(() => {
-          console.log('Auto opening floating icon dialog');
-          window.openFloatingIconDialog();
-        }, 500);
+      // 根據授權過濾並獲取資料類型
+      const fetchPromises = dataTypes.map(dataType => {
+        if (isDataTypeAuthorized(dataType)) {
+          // console.log(`${dataType} 已授權，開始獲取資料`);
+          return enhancedFetchData(dataType)
+            .catch(err => {
+              console.error(`獲取 ${dataType} 資料時發生錯誤:`, err);
+              return { status: 'error', recordCount: 0, error: err, dataType };
+            });
+        } else {
+          // console.log(`${dataType} 無資料，返回空集合`);
+          // 未授權的資料類型返回空集合
+          return Promise.resolve(createEmptyDataResult(dataType));
+        }
+      });
+
+      // 執行所有請求
+      return Promise.all(fetchPromises);
+    })
+    .catch(err => {
+      console.error('獲取主選單資料失敗:', err);
+      
+      // 如果獲取主選單資料失敗，則使用原本的方式獲取所有資料
+      console.log('切換到無授權檢查模式，嘗試獲取所有資料類型');
+      
+      return Promise.all([
+        enhancedFetchData('medication').catch(err => ({ status: 'error', recordCount: 0, error: err })),
+        enhancedFetchData('labdata').catch(err => ({ status: 'error', recordCount: 0, error: err })),
+        enhancedFetchData('chinesemed').catch(err => ({ status: 'error', recordCount: 0, error: err })),
+        enhancedFetchData('imaging').catch(err => ({ status: 'error', recordCount: 0, error: err })),
+        enhancedFetchData('allergy').catch(err => ({ status: 'error', recordCount: 0, error: err })),
+        enhancedFetchData('surgery').catch(err => ({ status: 'error', recordCount: 0, error: err })),
+        enhancedFetchData('discharge').catch(err => ({ status: 'error', recordCount: 0, error: err })),
+        enhancedFetchData('medDays').catch(err => ({ status: 'error', recordCount: 0, error: err })),
+        enhancedFetchData('patientsummary').catch(err => ({ status: 'error', recordCount: 0, error: err }))
+      ]);
+    })
+    .then(results => {
+      console.log('所有資料獲取完成，結果:', results);
+      
+      // Create counts object for all data types
+      const counts = {
+        medication: results.find(r => r.dataType === 'medication')?.recordCount || 0,
+        labData: results.find(r => r.dataType === 'labdata')?.recordCount || 0,
+        chineseMed: results.find(r => r.dataType === 'chinesemed')?.recordCount || 0,
+        imaging: results.find(r => r.dataType === 'imaging')?.recordCount || 0,
+        allergy: results.find(r => r.dataType === 'allergy')?.recordCount || 0,
+        surgery: results.find(r => r.dataType === 'surgery')?.recordCount || 0,
+        discharge: results.find(r => r.dataType === 'discharge')?.recordCount || 0,
+        medDays: results.find(r => r.dataType === 'medDays')?.recordCount || 0,
+        patientSummary: results.find(r => r.dataType === 'patientsummary')?.recordCount || 0,
+        masterMenu: 1 // 主選單資料已獲取
+      };
+      
+      // Build notification text
+      const dataCounts = [];
+      if (counts.medication > 0) dataCounts.push(`${counts.medication} 筆藥歷`);
+      if (counts.labData > 0) dataCounts.push(`${counts.labData} 筆檢驗`);
+      if (counts.chineseMed > 0) dataCounts.push(`${counts.chineseMed} 筆中醫`);
+      if (counts.imaging > 0) dataCounts.push(`${counts.imaging} 筆影像`);
+      if (counts.allergy > 0) dataCounts.push(`${counts.allergy} 筆過敏`);
+      if (counts.surgery > 0) dataCounts.push(`${counts.surgery} 筆手術`);
+      if (counts.discharge > 0) dataCounts.push(`${counts.discharge} 筆病摘`);
+      if (counts.medDays > 0) dataCounts.push(`${counts.medDays} 筆餘藥`);
+      if (counts.patientSummary > 0) dataCounts.push(`${counts.patientSummary} 筆摘要`);
+      
+      let notificationText;
+      if (dataCounts.length === 0) {
+        notificationText = "無資料";
+      } else if (dataCounts.length === 1) {
+        notificationText = `已抓到 ${dataCounts[0]}`;
+      } else {
+        const lastItem = dataCounts.pop();
+        notificationText = `已抓到 ${dataCounts.join('、')}及${lastItem}`;
       }
-    });
-  })
-  .catch(error => {
-    console.error('獲取資料時發生錯誤:', error);
 
-  })
-  .finally(() => {
-    isBatchFetchInProgress = false;
-    isDataFetchingStarted = false;
-    window.nhiDataBeingFetched = false;
-    Object.keys(pendingRequests).forEach(key => {
-      pendingRequests[key] = false;
+      // 發送自訂事件
+      const event = new CustomEvent('dataFetchCompleted', { detail: results });
+      window.dispatchEvent(event);
+
+      // Check if autoOpenPage is true and open the dialog if it is
+      chrome.storage.sync.get({ autoOpenPage: false }, function(items) {
+        if (items.autoOpenPage && window.openFloatingIconDialog) {
+          // Add a small delay to ensure the data is fully processed
+          setTimeout(() => {
+            console.log('Auto opening floating icon dialog');
+            window.openFloatingIconDialog();
+          }, 500);
+        }
+      });
+    })
+    .catch(error => {
+      console.error('獲取資料時發生錯誤:', error);
+
+    })
+    .finally(() => {
+      isBatchFetchInProgress = false;
+      isDataFetchingStarted = false;
+      window.nhiDataBeingFetched = false;
+      Object.keys(pendingRequests).forEach(key => {
+        pendingRequests[key] = false;
+      });
     });
-  });
 }
 
 function enhancedFetchData(dataType, options = {}) {
@@ -1092,7 +1221,11 @@ function enhancedFetchData(dataType, options = {}) {
     'surgery',
     'discharge',
     'medDays',
-    'patientsummary'
+    'patientsummary',
+    'masterMenu',
+    'rehabilitation',
+    'acupuncture',
+    'specialChineseMedCare'
   ];
   
   if (!validDataTypes.includes(dataType)) {
@@ -1122,7 +1255,11 @@ function enhancedFetchData(dataType, options = {}) {
     'surgery': '手術記錄',
     'discharge': '出院病摘',
     'medDays': '藥品餘藥',
-    'patientsummary': '病患摘要'
+    'patientsummary': '病患摘要',
+    'masterMenu': '主選單',
+    'rehabilitation': '復健治療',
+    'acupuncture': '針灸治療',
+    'specialChineseMedCare': '特殊中醫處置'
   };
 
   // API 路徑對照表
@@ -1135,7 +1272,11 @@ function enhancedFetchData(dataType, options = {}) {
     'surgery': 'imue0020/imue0020s02/get-data',
     'discharge': 'imue0070/imue0070s02/get-data',
     'medDays': 'imue0120/imue0120s01/pres-med-day',
-    'patientsummary': 'imue2000/imue2000s01/get-summary'
+    'patientsummary': 'imue2000/imue2000s01/get-summary',
+    'masterMenu': 'imue1000/imue1000s02/master-menu',
+    'rehabilitation': 'imue0080/imue0080s02/get-data',
+    'acupuncture': 'imue0160/imue0160s02/get-data',
+    'specialChineseMedCare': 'imue0170/imue0170s02/get-data'
   }[dataType];
 
   // 主要的獲取邏輯
@@ -1146,6 +1287,8 @@ function enhancedFetchData(dataType, options = {}) {
       if (dataType === 'patientsummary') {
         apiUrl = `https://medcloud2.nhi.gov.tw/imu/api/${apiPath}?drug_phet=false&drug_hemo=false&ctmri_assay=false&ctmri_dent=true&cli_datetime=` + 
                  encodeURIComponent(new Date().toISOString().substring(0, 19));
+      } else if (dataType === 'masterMenu') {
+        apiUrl = `https://medcloud2.nhi.gov.tw/imu/api/${apiPath}`;
       } else {
         apiUrl = `https://medcloud2.nhi.gov.tw/imu/api/${apiPath}?cli_datetime=` + 
                 encodeURIComponent(new Date().toISOString().substring(0, 19)) + 
@@ -1200,12 +1343,14 @@ function enhancedFetchData(dataType, options = {}) {
       })
       .then(data => {
         const recordsArray = data.rObject || data.robject;
-        if (data && (recordsArray !== undefined || dataType === 'medDays' || dataType === 'patientsummary')) {
+        if (data && (recordsArray !== undefined || dataType === 'medDays' || dataType === 'patientsummary' || dataType === 'masterMenu')) {
           const normalizedData = {
             rObject: dataType === 'medDays' ? 
               (Array.isArray(data) ? data : [data]) : 
               dataType === 'patientsummary' ?
               (Array.isArray(recordsArray) ? recordsArray : (recordsArray ? [recordsArray] : [])) :
+              dataType === 'masterMenu' ?
+              [data] : // For masterMenu, wrap the entire response in an array
               (Array.isArray(recordsArray) ? recordsArray : []),
             originalData: data
           };
@@ -1236,6 +1381,11 @@ function enhancedFetchData(dataType, options = {}) {
               break;
             case 'patientsummary':
               window.lastInterceptedPatientSummaryData = normalizedData;
+              break;
+            case 'masterMenu':
+              window.lastInterceptedMasterMenuData = normalizedData;
+              // Log the master menu data for debugging
+              // console.log('Master Menu data captured:', JSON.stringify(data, null, 2));
               break;
           }
           saveData(normalizedData, dataType, 'direct');
@@ -1279,6 +1429,7 @@ function extractAndSaveToken() {
   
   return false;
 }
+
 // 新增輔助函數來獲取資料類型的中文名稱
 function getTypeText(type) {
   const typeTextMap = {
@@ -1290,9 +1441,113 @@ function getTypeText(type) {
     'surgery': '手術記錄',
     'discharge': '出院病摘',
     'medDays': '藥品餘藥',
-    'patientsummary': '病患摘要'
+    'patientsummary': '病患摘要',
+    'masterMenu': '主選單',
+    'rehabilitation': '復健治療',
+    'acupuncture': '針灸治療',
+    'specialChineseMedCare': '特殊中醫處置'
   };
   return typeTextMap[type] || type;
+}
+
+// 新增: 節點ID與資料類型對應表
+const nodeToDataTypeMap = {
+  '1.1': 'patientsummary',
+  '2.1': 'medication',
+  '2.4': 'medDays',
+  '3.1': 'chinesemed',
+  '3.2': 'acupuncture',
+  '3.3': 'specialChineseMedCare',
+  '5.1': 'allergy',
+  '6.1': 'labdata',
+  '6.2': 'imaging',
+  '7.1': 'surgery',
+  '8.1': 'discharge',
+  '9.1': 'rehabilitation'
+};
+
+// 新增: 檢查資料類型是否有授權
+function isDataTypeAuthorized(dataType) {
+  // 如果尚未獲取主選單資料，預設所有資料類型都有授權
+  if (!window.lastInterceptedMasterMenuData) {
+    return true;
+  }
+
+  try {
+    const masterMenuData = window.lastInterceptedMasterMenuData.originalData;
+    const prsnAuth = masterMenuData.prsnAuth || [];
+    
+    // 反向查找: 從資料類型找到對應的節點ID
+    const nodeIds = Object.entries(nodeToDataTypeMap)
+      .filter(([node, type]) => type === dataType)
+      .map(([node, type]) => node);
+    
+    // 檢查任何對應的節點ID是否在授權列表中
+    return nodeIds.some(nodeId => prsnAuth.includes(nodeId));
+  } catch (error) {
+    console.error('Error checking authorization:', error);
+    // 發生錯誤時，預設有授權
+    return true;
+  }
+}
+
+// 新增: 建立空的資料結果
+function createEmptyDataResult(dataType) {
+  // Create empty data structure
+  const emptyData = {
+    rObject: [],
+    originalData: { rObject: [] }
+  };
+  
+  // Update corresponding window variable to ensure previous data doesn't persist
+  switch(dataType) {
+    case 'medication':
+      window.lastInterceptedMedicationData = emptyData;
+      break;
+    case 'labdata':
+      window.lastInterceptedLabData = emptyData;
+      break;
+    case 'chinesemed':
+      window.lastInterceptedChineseMedData = emptyData;
+      break;
+    case 'imaging':
+      window.lastInterceptedImagingData = emptyData;
+      break;
+    case 'allergy':
+      window.lastInterceptedAllergyData = emptyData;
+      break;
+    case 'surgery':
+      window.lastInterceptedSurgeryData = emptyData;
+      break;
+    case 'discharge':
+      window.lastInterceptedDischargeData = emptyData;
+      break;
+    case 'medDays':
+      window.lastInterceptedMedDaysData = emptyData;
+      break;
+    case 'patientsummary':
+      window.lastInterceptedPatientSummaryData = emptyData;
+      break;
+    case 'masterMenu':
+      window.lastInterceptedMasterMenuData = emptyData;
+      break;
+    case 'rehabilitation':
+      window.lastInterceptedRehabilitationData = emptyData;
+      break;
+    case 'acupuncture':
+      window.lastInterceptedAcupunctureData = emptyData;
+      break;
+    case 'specialChineseMedCare':
+      window.lastInterceptedSpecialChineseMedCareData = emptyData;
+      break;
+  }
+  
+  return {
+    status: 'nodata',
+    recordCount: 0,
+    dataType: dataType,
+    data: emptyData
+  };
 }
 
 // 注入 FloatingIcon
@@ -1346,7 +1601,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   }
   
   if (message.action === "apiCallCompleted") {
-    console.log("API call completed with status:", message.statusCode);
+    // console.log("API call completed with status:", message.statusCode);
     isDataFetchingStarted = false; // 抓取完成後重置
   }
   
@@ -1369,6 +1624,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     window.lastInterceptedDischargeData = null;
     window.lastInterceptedMedDaysData = null;
     window.lastInterceptedPatientSummaryData = null;
+    window.lastInterceptedMasterMenuData = null;
+    window.lastInterceptedRehabilitationData = null;
+    window.lastInterceptedAcupunctureData = null;
+    window.lastInterceptedSpecialChineseMedCareData = null;
     
     sendResponse({ status: "cleared" });
     return true;
@@ -1464,7 +1723,11 @@ chrome.runtime.onMessage.addListener(function(request, sender, sendResponse) {
         surgery: window.lastInterceptedSurgeryData,
         discharge: window.lastInterceptedDischargeData,
         medDays: window.lastInterceptedMedDaysData,
-        patientSummary: window.lastInterceptedPatientSummaryData
+        patientSummary: window.lastInterceptedPatientSummaryData,
+        masterMenu: window.lastInterceptedMasterMenuData,
+        rehabilitation: window.lastInterceptedRehabilitationData,
+        acupuncture: window.lastInterceptedAcupunctureData,
+        specialChineseMedCare: window.lastInterceptedSpecialChineseMedCareData
       };
       
       // 檢查是否有任何資料

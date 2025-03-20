@@ -8,49 +8,39 @@ echo "Current branch: $CURRENT_BRANCH"
 
 # Check if there are any uncommitted changes
 if ! git diff-index --quiet HEAD --; then
-    echo "Error: You have uncommitted changes. Please commit or stash them first."
-    exit 1
+  echo "Error: You have uncommitted changes. Please commit or stash them first."
+  exit 1
 fi
 
 # Get the current version from package.json
-CURRENT_VERSION=$(grep '"version":' package.json | sed 's/.*"version": "\(.*\)".*/\1/')
+CURRENT_VERSION=$(awk -F '"' '/"version":/ {print $4}' package.json)
 echo "Current version in package.json: $CURRENT_VERSION"
 
-# Ask if the user wants to update the version
-read -p "Do you want to update the version in package.json? (y/n): " UPDATE_VERSION
+# Display current version and prompt user for the new version
+read -p "Current version is $CURRENT_VERSION. Enter the new version number (e.g., 1.2.3-alpha.1): " NEW_VERSION
 
-if [[ "$UPDATE_VERSION" =~ ^[Yy]$ ]]; then
-    # Suggest an alpha version increment
-    if [[ "$CURRENT_VERSION" =~ -alpha\.[0-9]+$ ]]; then
-        # It's already an alpha version, suggest incrementing the alpha number
-        ALPHA_NUM=$(echo "$CURRENT_VERSION" | sed 's/.*-alpha\.\([0-9]\+\).*/\1/')
-        NEXT_ALPHA=$((ALPHA_NUM + 1))
-        BASE_VERSION=$(echo "$CURRENT_VERSION" | sed 's/\(.*\)-alpha\.[0-9]\+.*/\1/')
-        SUGGESTED_VERSION="${BASE_VERSION}-alpha.${NEXT_ALPHA}"
-        echo "Suggested next alpha version: $SUGGESTED_VERSION"
-    else
-        # It's not an alpha version, suggest making it one
-        SUGGESTED_VERSION="${CURRENT_VERSION}-alpha.1"
-        echo "Suggested alpha version: $SUGGESTED_VERSION"
-    fi
-    
-    read -p "Enter the new version number [$SUGGESTED_VERSION]: " NEW_VERSION
-    NEW_VERSION=${NEW_VERSION:-$SUGGESTED_VERSION}
-    
-    # Update the version in package.json
-    sed -i "" "s/\(\"version\":\s*\"\)$CURRENT_VERSION\(\"\)/\1$NEW_VERSION\2/" package.json
-    
-    echo "Version updated to $NEW_VERSION"
-    
-    # Commit the version change
-    git add package.json
-    git commit -m "Bump version to $NEW_VERSION"
-    echo "Version change committed"
+# Ensure user provided a version number
+if [[ -z "$NEW_VERSION" ]]; then
+  echo "Error: Version number cannot be empty."
+  exit 1
 fi
+
+# Update the version in package.json using awk
+awk -v new_version="$NEW_VERSION" '{gsub(/"version": "[^"]+"/, "\"version\": \"" new_version "\"")}1' package.json >temp.json && mv temp.json package.json
+
+echo "Version updated to $NEW_VERSION"
+
+# Commit the version change
+git add package.json
+git commit -m "Bump version to $NEW_VERSION"
+echo "Version change committed"
 
 # Switch to alpha-release branch
 echo "Switching to alpha-release branch..."
-git checkout alpha-release || { echo "Failed to switch to alpha-release branch"; exit 1; }
+git checkout alpha-release || {
+  echo "Failed to switch to alpha-release branch"
+  exit 1
+}
 
 # Pull latest changes from alpha-release branch
 echo "Pulling latest changes from alpha-release branch..."
@@ -58,19 +48,19 @@ git pull origin alpha-release || echo "Warning: Failed to pull from alpha-releas
 
 # Merge the current branch into alpha-release
 echo "Merging $CURRENT_BRANCH into alpha-release..."
-git merge $CURRENT_BRANCH || { 
-    echo "Merge conflict occurred. Aborting merge and switching back to $CURRENT_BRANCH"
-    git merge --abort
-    git checkout $CURRENT_BRANCH
-    exit 1
+git merge $CURRENT_BRANCH || {
+  echo "Merge conflict occurred. Aborting merge and switching back to $CURRENT_BRANCH"
+  git merge --abort
+  git checkout $CURRENT_BRANCH
+  exit 1
 }
 
 # Push the alpha-release branch
 echo "Pushing alpha-release branch to remote..."
-git push origin alpha-release || { 
-    echo "Failed to push alpha-release branch. Switching back to $CURRENT_BRANCH"
-    git checkout $CURRENT_BRANCH
-    exit 1
+git push origin alpha-release || {
+  echo "Failed to push alpha-release branch. Switching back to $CURRENT_BRANCH"
+  git checkout $CURRENT_BRANCH
+  exit 1
 }
 
 # Switch back to the original branch
