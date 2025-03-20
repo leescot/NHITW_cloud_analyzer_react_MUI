@@ -9,6 +9,7 @@ yarn.lock
 .pnp.*
 
 # Build outputs
+dist/
 build
 out
 .next
