@@ -1,0 +1,55 @@
+name: Create Release
+
+on:
+  push:
+    branches:
+      - release
+
+jobs:
+  build-and-release:
+    runs-on: ubuntu-latest
+    
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v4
+      
+      - name: Set up Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: '20'
+          cache: 'npm'
+      
+      - name: Install dependencies
+        run: npm ci
+      
+      - name: Build project
+        run: npm run build
+      
+      - name: Get version from package.json
+        id: get_version
+        run: echo "VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
+      
+      - name: Create version tag
+        id: create_tag
+        run: |
+          VERSION=${{ steps.get_version.outputs.VERSION }}
+          TIMESTAMP=$(date +'%Y%m%d%H%M%S')
+          echo "TAG_NAME=v${VERSION}-${TIMESTAMP}" >> $GITHUB_OUTPUT
+      
+      - name: Create Zip Archive
+        run: |
+          cd dist
+          zip -r ../NHITW_cloud_analyzer_${{ steps.create_tag.outputs.TAG_NAME }}.zip .
+          cd ..
+      
+      - name: Create GitHub Release
+        id: create_release
+        uses: softprops/action-gh-release@v1
+        with:
+          tag_name: ${{ steps.create_tag.outputs.TAG_NAME }}
+          name: Release ${{ steps.create_tag.outputs.TAG_NAME }}
+          draft: false
+          prerelease: false
+          files: NHITW_cloud_analyzer_${{ steps.create_tag.outputs.TAG_NAME }}.zip
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
