@@ -12,6 +12,27 @@ if ! git diff-index --quiet HEAD --; then
     exit 1
 fi
 
+# Get the current version from package.json
+CURRENT_VERSION=$(grep '"version":' package.json | sed 's/.*"version": "\(.*\)".*/\1/')
+echo "Current version in package.json: $CURRENT_VERSION"
+
+# Ask if the user wants to update the version
+read -p "Do you want to update the version in package.json? (y/n): " UPDATE_VERSION
+
+if [[ "$UPDATE_VERSION" =~ ^[Yy]$ ]]; then
+    read -p "Enter the new version number: " NEW_VERSION
+    
+    # Update the version in package.json
+    sed -i "" "s/\(\"version\":\s*\"\)$CURRENT_VERSION\(\"\)/\1$NEW_VERSION\2/" package.json
+    
+    echo "Version updated to $NEW_VERSION"
+    
+    # Commit the version change
+    git add package.json
+    git commit -m "Bump version to $NEW_VERSION"
+    echo "Version change committed"
+fi
+
 # Switch to release branch
 echo "Switching to release branch..."
 git checkout release || { echo "Failed to switch to release branch"; exit 1; }

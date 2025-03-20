@@ -12,6 +12,42 @@ if ! git diff-index --quiet HEAD --; then
     exit 1
 fi
 
+# Get the current version from package.json
+CURRENT_VERSION=$(grep '"version":' package.json | sed 's/.*"version": "\(.*\)".*/\1/')
+echo "Current version in package.json: $CURRENT_VERSION"
+
+# Ask if the user wants to update the version
+read -p "Do you want to update the version in package.json? (y/n): " UPDATE_VERSION
+
+if [[ "$UPDATE_VERSION" =~ ^[Yy]$ ]]; then
+    # Suggest an alpha version increment
+    if [[ "$CURRENT_VERSION" =~ -alpha\.[0-9]+$ ]]; then
+        # It's already an alpha version, suggest incrementing the alpha number
+        ALPHA_NUM=$(echo "$CURRENT_VERSION" | sed 's/.*-alpha\.\([0-9]\+\).*/\1/')
+        NEXT_ALPHA=$((ALPHA_NUM + 1))
+        BASE_VERSION=$(echo "$CURRENT_VERSION" | sed 's/\(.*\)-alpha\.[0-9]\+.*/\1/')
+        SUGGESTED_VERSION="${BASE_VERSION}-alpha.${NEXT_ALPHA}"
+        echo "Suggested next alpha version: $SUGGESTED_VERSION"
+    else
+        # It's not an alpha version, suggest making it one
+        SUGGESTED_VERSION="${CURRENT_VERSION}-alpha.1"
+        echo "Suggested alpha version: $SUGGESTED_VERSION"
+    fi
+    
+    read -p "Enter the new version number [$SUGGESTED_VERSION]: " NEW_VERSION
+    NEW_VERSION=${NEW_VERSION:-$SUGGESTED_VERSION}
+    
+    # Update the version in package.json
+    sed -i "" "s/\(\"version\":\s*\"\)$CURRENT_VERSION\(\"\)/\1$NEW_VERSION\2/" package.json
+    
+    echo "Version updated to $NEW_VERSION"
+    
+    # Commit the version change
+    git add package.json
+    git commit -m "Bump version to $NEW_VERSION"
+    echo "Version change committed"
+fi
+
 # Switch to alpha-release branch
 echo "Switching to alpha-release branch..."
 git checkout alpha-release || { echo "Failed to switch to alpha-release branch"; exit 1; }
