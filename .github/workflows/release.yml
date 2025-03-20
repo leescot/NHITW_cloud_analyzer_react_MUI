@@ -33,7 +33,7 @@ jobs:
         id: create_tag
         run: |
           VERSION=${{ steps.get_version.outputs.VERSION }}
-          TIMESTAMP=$(date +'%Y%m%d%H%M%S')
+          TIMESTAMP=$(date +'%Y%m%d')
           echo "TAG_NAME=v${VERSION}-${TIMESTAMP}" >> $GITHUB_OUTPUT
       
       - name: Create Zip Archive
