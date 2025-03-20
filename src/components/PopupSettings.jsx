@@ -14,6 +14,7 @@ import {
 import SettingsIcon from '@mui/icons-material/Settings';
 import InfoIcon from '@mui/icons-material/Info';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
+import HelpIcon from '@mui/icons-material/Help';
 
 // 引入標籤顏色工具函數
 import { getTabColor, getTabSelectedColor } from '../utils/tabColorUtils';
@@ -25,6 +26,7 @@ import MedicationSettings from './settings/MedicationSettings';
 import ChineseMedicationSettings from './settings/ChineseMedicationSettings';
 import LabSettings from './settings/LabSettings';
 import OverviewSettings from './settings/OverviewSettings';
+import AboutTab from './settings/AboutTab';
 import { updateDataStatus } from '../utils/settingsHelper';
 import LoadDataTab from './settings/LoadDataTab';
 
@@ -123,7 +125,7 @@ const PopupSettings = () => {
       chrome.storage.local.set({ developerMode: false });
       
       // 如果當前在開發模式頁面，切換回設定頁面
-      if (activeTab === 2) {
+      if (activeTab === 3) {
         setActiveTab(0);
       }
     }
@@ -263,6 +265,16 @@ const PopupSettings = () => {
               },
             }}
           />
+          <Tab 
+            icon={<HelpIcon />} 
+            label="關於" 
+            sx={{
+              color: getTabColor(generalDisplaySettings, "about"),
+              "&.Mui-selected": {
+                color: getTabSelectedColor(generalDisplaySettings, "about"),
+              },
+            }}
+          />
           {developerMode && (
             <Tab 
               icon={<CloudUploadIcon />} 
@@ -296,8 +308,15 @@ const PopupSettings = () => {
           </Box>
         )}
         
+        {/* About Tab */}
+        {activeTab === 2 && (
+          <Box>
+            <AboutTab />
+          </Box>
+        )}
+        
         {/* Load Data Tab - 只在開發者模式時顯示 */}
-        {activeTab === 2 && developerMode && (
+        {activeTab === 3 && developerMode && (
           <Box>
             <LoadDataTab 
               localDataStatus={localDataStatus} 

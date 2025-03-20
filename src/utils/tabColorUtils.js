@@ -24,6 +24,7 @@ const TAB_COLORS = {
     // PopupSettings 標籤
     settings: { primary: "#0d47a1", dark: "#0d47a1" }, // 深藍色
     dataStatus: { primary: "#e65100", dark: "#e65100" }, // 橙色
+    about: { primary: "#673ab7", dark: "#4a148c" }, // 紫色
     loadData: { primary: "#2e7d32", dark: "#1b5e20" }, // 綠色
     testMode: { primary: "#4a148c", dark: "#4a148c" }, // 紫色
     
