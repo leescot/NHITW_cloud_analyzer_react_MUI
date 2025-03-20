@@ -1,12 +1,13 @@
 {
   "name": "nhi-extractor",
   "private": true,
-  "version": "1.0.0",
+  "version": "1.1.0-alpha.1",
   "type": "module",
   "scripts": {
     "dev": "vite",
     "build": "vite build && node scripts/bundle-content.js && node scripts/copy-files.js",
     "build:zip": "npm run build && node scripts/create-zip.js",
+    "build:alpha": "npm run build && node scripts/create-alpha-zip.js",
     "lint": "eslint .",
     "preview": "vite preview"
   },
