@@ -9,6 +9,8 @@ yarn.lock
 .pnp.*
 
 # Build outputs
+dist
+dist/
 build
 out
 .next
@@ -66,4 +68,4 @@ logs
 # Test files
 __tests__/coverage
 .coverage
-
+zip/
