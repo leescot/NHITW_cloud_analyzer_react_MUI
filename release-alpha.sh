@@ -13,7 +13,7 @@ if ! git diff-index --quiet HEAD --; then
 fi
 
 # Get the current version from package.json
-CURRENT_VERSION=$(grep '"version":' package.json | sed 's/.*"version": "\(.*\)".*/\1/')
+CURRENT_VERSION=$(awk -F '"' '/"version":/ {print $4}' package.json)
 echo "Current version in package.json: $CURRENT_VERSION"
 
 # Display current version and prompt user for the new version
@@ -25,8 +25,8 @@ if [[ -z "$NEW_VERSION" ]]; then
   exit 1
 fi
 
-# Update the version in package.json
-sed -i "" "s/\("version":\s*"\)$CURRENT_VERSION\("\)/\1$NEW_VERSION\2/" package.json
+# Update the version in package.json using awk
+awk -v new_version="$NEW_VERSION" '{gsub(/"version": "[^"]+"/, "\"version\": \"" new_version "\"")}1' package.json >temp.json && mv temp.json package.json
 
 echo "Version updated to $NEW_VERSION"
 
