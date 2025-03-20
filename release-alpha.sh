@@ -1,6 +1,6 @@
 #!/bin/bash
 
-# Script to automate merging current branch into alpha-release branch and pushing
+# Script to automate merging current branch into release branch and pushing
 
 # Store the current branch name
 CURRENT_BRANCH=$(git symbolic-ref --short HEAD)
@@ -16,38 +16,42 @@ fi
 CURRENT_VERSION=$(awk -F '"' '/"version":/ {print $4}' package.json)
 echo "Current version in package.json: $CURRENT_VERSION"
 
-# Display current version and prompt user for the new version
-read -p "Current version is $CURRENT_VERSION. Enter the new version number (e.g., 1.2.3-alpha.1): " NEW_VERSION
+# Ask if the user wants to update the version
+read -p "Do you want to update the version in package.json? (y/n): " UPDATE_VERSION
 
-# Ensure user provided a version number
-if [[ -z "$NEW_VERSION" ]]; then
-  echo "Error: Version number cannot be empty."
-  exit 1
+if [[ "$UPDATE_VERSION" =~ ^[Yy]$ ]]; then
+  read -p "Enter the new version number: " NEW_VERSION
+
+  # Ensure user provided a version number
+  if [[ -z "$NEW_VERSION" ]]; then
+    echo "Error: Version number cannot be empty."
+    exit 1
+  fi
+
+  # Update the version in package.json using awk
+  awk -v new_version="$NEW_VERSION" '{gsub(/"version": "[^"]+"/, "\"version\": \"" new_version "\"")}1' package.json >temp.json && mv temp.json package.json
+
+  echo "Version updated to $NEW_VERSION"
+
+  # Commit the version change
+  git add package.json
+  git commit -m "Bump version to $NEW_VERSION"
+  echo "Version change committed"
 fi
 
-# Update the version in package.json using awk
-awk -v new_version="$NEW_VERSION" '{gsub(/"version": "[^"]+"/, "\"version\": \"" new_version "\"")}1' package.json >temp.json && mv temp.json package.json
-
-echo "Version updated to $NEW_VERSION"
-
-# Commit the version change
-git add package.json
-git commit -m "Bump version to $NEW_VERSION"
-echo "Version change committed"
-
-# Switch to alpha-release branch
-echo "Switching to alpha-release branch..."
-git checkout alpha-release || {
-  echo "Failed to switch to alpha-release branch"
+# Switch to release branch
+echo "Switching to release branch..."
+git checkout release || {
+  echo "Failed to switch to release branch"
   exit 1
 }
 
-# Pull latest changes from alpha-release branch
-echo "Pulling latest changes from alpha-release branch..."
-git pull origin alpha-release || echo "Warning: Failed to pull from alpha-release branch. Continuing..."
+# Pull latest changes from release branch
+echo "Pulling latest changes from release branch..."
+git pull origin release || echo "Warning: Failed to pull from release branch. Continuing..."
 
-# Merge the current branch into alpha-release
-echo "Merging $CURRENT_BRANCH into alpha-release..."
+# Merge the current branch into release
+echo "Merging $CURRENT_BRANCH into release..."
 git merge $CURRENT_BRANCH || {
   echo "Merge conflict occurred. Aborting merge and switching back to $CURRENT_BRANCH"
   git merge --abort
@@ -55,10 +59,10 @@ git merge $CURRENT_BRANCH || {
   exit 1
 }
 
-# Push the alpha-release branch
-echo "Pushing alpha-release branch to remote..."
-git push origin alpha-release || {
-  echo "Failed to push alpha-release branch. Switching back to $CURRENT_BRANCH"
+# Push the release branch
+echo "Pushing release branch to remote..."
+git push origin release || {
+  echo "Failed to push release branch. Switching back to $CURRENT_BRANCH"
   git checkout $CURRENT_BRANCH
   exit 1
 }
@@ -67,5 +71,5 @@ git push origin alpha-release || {
 echo "Switching back to $CURRENT_BRANCH..."
 git checkout $CURRENT_BRANCH || echo "Warning: Failed to switch back to $CURRENT_BRANCH"
 
-echo "Alpha release process completed successfully!"
-echo "GitHub Actions workflow should now be building and creating an alpha release."
+echo "Release process completed successfully!"
+echo "GitHub Actions workflow should now be building and creating a release."
