@@ -9,6 +9,10 @@ jobs:
   build-and-release:
     runs-on: ubuntu-latest
     
+    # Add explicit permissions for releases
+    permissions:
+      contents: write
+    
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
@@ -35,6 +39,11 @@ jobs:
           VERSION=${{ steps.get_version.outputs.VERSION }}
           TIMESTAMP=$(date +'%Y%m%d')
           echo "TAG_NAME=v${VERSION}-${TIMESTAMP}" >> $GITHUB_OUTPUT
+      
+      - name: Create Git Tag
+        run: |
+          git tag ${{ steps.create_tag.outputs.TAG_NAME }}
+          git push origin ${{ steps.create_tag.outputs.TAG_NAME }}
       
       - name: Create Zip Archive
         run: |
