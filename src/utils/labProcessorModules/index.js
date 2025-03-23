@@ -129,8 +129,9 @@ const labProcessor = {
         usingCustomRange = false;
       }
       
-      // 判斷值的狀態 (normal, high, low)
+      // 初始化狀態變數
       let valueStatus = "normal";
+      let isAbnormal = false;
       
       // Skip abnormal marking for labs with [0.000][0.000] reference range unless using custom range
       if ((lab.consult_value && this.isZeroReferenceRange(lab.consult_value) && !usingCustomRange)) {
@@ -165,17 +166,74 @@ const labProcessor = {
         }
       }
       
-      // 為了保持向後兼容
-      const isAbnormal = valueStatus !== "normal";
+      // 設定 isAbnormal 當值狀態不是 normal 時
+      isAbnormal = valueStatus !== "normal";
       
       // 獲取縮寫名稱 - 傳入 itemName 作為新參數
       const abbrName = this.getAbbreviation(lab.order_code, lab.unit_data, lab.assay_item_name);
-      const normalizedValue = this.normalizeValue(lab.assay_value || '');
+      
+      // 檢查是否有多值數據
+      let normalizedValue;
+      let hasMultipleValues = false;
+      let valueRange = null;
+      
+      if (lab._multiValueData && lab._multiValueData.values && lab._multiValueData.values.length > 1) {
+        hasMultipleValues = true;
+        
+        // 將字符串數值轉換為數字以進行計算
+        const numericValues = lab._multiValueData.values.map(val => {
+          const num = parseFloat(val);
+          return isNaN(num) ? null : num;
+        }).filter(val => val !== null);
+        
+        if (numericValues.length > 0) {
+          // 如果有有效數字，計算其範圍
+          const minValue = Math.min(...numericValues);
+          const maxValue = Math.max(...numericValues);
+          
+          valueRange = {
+            min: minValue,
+            max: maxValue,
+            timePoints: lab._multiValueData.timePoints || []
+          };
+          
+          // 合併數值為範圍形式
+          if (minValue === maxValue) {
+            normalizedValue = `${minValue}`;
+          } else {
+            normalizedValue = `${minValue}-${maxValue}`;
+          }
+          
+          // 重新判斷異常狀態（基於範圍的最小值和最大值）
+          if ((lab.consult_value && this.isZeroReferenceRange(lab.consult_value) && !usingCustomRange)) {
+            valueStatus = "normal";
+          } else {
+            if (referenceMax !== null && maxValue > parseFloat(referenceMax)) {
+              valueStatus = "high";
+            } else if (referenceMin !== null && minValue < parseFloat(referenceMin)) {
+              valueStatus = "low";
+            } else {
+              valueStatus = "normal";
+            }
+          }
+          
+          // 更新異常標記
+          isAbnormal = valueStatus !== "normal";
+        } else {
+          // 如果沒有有效數字，使用原始值的連接
+          normalizedValue = lab._multiValueData.values.join(", ");
+        }
+      } else {
+        // 單一值的情況
+        normalizedValue = this.normalizeValue(lab.assay_value || '');
+      }
 
       acc[groupKey].labs.push({
         itemName: lab.assay_item_name || '',
-        value: normalizedValue,  // 使用標準化後的值
+        value: normalizedValue,  // 可能是範圍形式或單一標準化值
         unit: lab.unit_data || '',
+        hasMultipleValues: hasMultipleValues,  // 標記是否有多個數值
+        valueRange: valueRange,      // 數值範圍資訊，包含最小值、最大值和時間點
         type: lab.assay_tp_cname || '',
         orderName: lab.order_name || '',
         orderCode: lab.order_code || '',

@@ -169,7 +169,7 @@ const deduplicateLabData = (labArray) => {
     }
   });
   
-  // 額外的去重步驟：按照日期+醫院+檢驗項目名+數值來再次檢查
+  // 修改後的處理步驟：按照日期+醫院+檢驗項目名來分組，保留多個數值
   const finalDedupedLabs = [];
   const seenItems = new Map();
   
@@ -177,15 +177,37 @@ const deduplicateLabData = (labArray) => {
     const date = lab.real_inspect_date?.replace(/\//g, '-') || lab.recipe_date?.replace(/\//g, '-') || '';
     const hosp = lab.hosp?.split(';')[0] || '';
     const itemName = lab.assay_item_name || '';
+    const orderCode = lab.order_code || '';
     const value = normalizeValue(lab.assay_value || '');
     
-    // 創建一個更簡化的鍵，只關注日期、醫院、項目名稱和數值
-    const simpleKey = `${date}_${hosp}_${itemName}_${value}`;
+    // 獲取時間點信息
+    const timeInfo = lab.real_inspect_date?.split(' ')[1] || 
+                   (lab.case_time ? new Date(lab.case_time).toTimeString().split(' ')[0] : '');
+    
+    // 創建一個簡化的鍵，只關注日期、醫院、檢驗碼和項目名稱（不含數值）
+    const simpleKey = `${date}_${hosp}_${orderCode}_${itemName}`;
     
     // 如果這個簡化鍵還沒見過，添加這個項目
     if (!seenItems.has(simpleKey)) {
+      // 初始化多值數據結構
+      lab._multiValueData = {
+        values: [value],
+        timePoints: [timeInfo]
+      };
       finalDedupedLabs.push(lab);
-      seenItems.set(simpleKey, true);
+      seenItems.set(simpleKey, lab);
+    } else {
+      // 如果已經有同樣的檢驗項目，將新的數值添加到現有項目中
+      const existingLab = seenItems.get(simpleKey);
+      if (!existingLab._multiValueData) {
+        existingLab._multiValueData = {
+          values: [normalizeValue(existingLab.assay_value || '')],
+          timePoints: [existingLab.real_inspect_date?.split(' ')[1] || 
+                      (existingLab.case_time ? new Date(existingLab.case_time).toTimeString().split(' ')[0] : '')]
+        };
+      }
+      existingLab._multiValueData.values.push(value);
+      existingLab._multiValueData.timePoints.push(timeInfo);
     }
   });
   
