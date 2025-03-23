@@ -5,6 +5,7 @@ import {
   List,
   ListItem,
   ListItemText,
+  Box,
 } from "@mui/material";
 import TypographySizeWrapper from "../utils/TypographySizeWrapper";
 
@@ -40,21 +41,23 @@ const Overview_AllergyRecords = ({ allergyData = [], generalDisplaySettings }) =
             <ListItem key={index} sx={{ py: 0.5 }}>
               <ListItemText 
                 primary={
-                  <TypographySizeWrapper 
-                    variant="body1" 
-                    generalDisplaySettings={generalDisplaySettings}
-                  >
-                    {item.drugName || "藥物未知"}
-                  </TypographySizeWrapper>
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                    <TypographySizeWrapper 
+                      variant="body1" 
+                      component="span"
+                      generalDisplaySettings={generalDisplaySettings}
+                    >
+                      {item.drugName || "藥物未知"}
+                    </TypographySizeWrapper>
+                    <TypographySizeWrapper 
+                      variant="caption" 
+                      component="span"
+                      generalDisplaySettings={generalDisplaySettings}
+                    >
+                      {item.symptoms || "症狀未知"}
+                    </TypographySizeWrapper>
+                  </Box>
                 } 
-                secondary={
-                  <TypographySizeWrapper 
-                    variant="caption" 
-                    generalDisplaySettings={generalDisplaySettings}
-                  >
-                    {item.symptoms || "症狀未知"}
-                  </TypographySizeWrapper>
-                }
               />
             </ListItem>
           ))}
@@ -72,4 +75,4 @@ const Overview_AllergyRecords = ({ allergyData = [], generalDisplaySettings }) =
   );
 };
 
-export default Overview_AllergyRecords; 
+export default Overview_AllergyRecords;

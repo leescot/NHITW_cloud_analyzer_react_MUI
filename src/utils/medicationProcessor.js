@@ -45,10 +45,12 @@ export const medicationProcessor = {
       )
       // Clean up spacing around TAB./CAP.
       .replace(/\s+(TAB\.|CAP\.)\s+/, " ")
-      // Remove packaging information
+      // Remove packaging information - updated to handle both half-width and full-width parentheses
       .replace(/\([^)]*箔[^)]*\)/g, "")
-      // Remove non-dosage parenthetical content
+      .replace(/（[^）]*箔[^）]*）/g, "")
+      // Remove non-dosage parenthetical content - updated to handle both half-width and full-width parentheses
       .replace(/\((?!\d+(?:[.,]\d+)?(?:\/\d+(?:[.,]\d+)?)?(?:\/\d+(?:[.,]\d+)?)?)([^)]*)\)/gi, "")
+      .replace(/（(?!\d+(?:[.,]\d+)?(?:\/\d+(?:[.,]\d+)?)?(?:\/\d+(?:[.,]\d+)?)?)([^）]*)）/gi, "")
       // Normalize whitespace
       .replace(/\s+/g, " ")
       // Remove quotes (in case any remain)
@@ -70,7 +72,7 @@ export const medicationProcessor = {
     return simplifiedName.trim();
   },
 
-  // calculatePerDosage 函數的修正版本
+  // Rest of the code remains the same...
   calculatePerDosage(dosage, frequency, days) {
     if (!dosage || !frequency || !days) return "";
 
@@ -78,7 +80,11 @@ export const medicationProcessor = {
       QD: 1,
       QDP: 1,
       QAM: 1,
+      AM: 1,
+      AMPC: 1,
       QPM: 1,
+      QDPM: 1,
+      PM: 1,
       BID: 2,
       BIDP: 2,
       TID: 3,

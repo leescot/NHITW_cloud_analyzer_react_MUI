@@ -57,7 +57,9 @@ const prepareLabTableData = (groupedLabs, selectedType = null) => {
           valueStatus: lab.valueStatus || "normal",
           referenceRange: lab.consultValue,
           referenceMin: lab.referenceMin,
-          referenceMax: lab.referenceMax
+          referenceMax: lab.referenceMax,
+          hasMultipleValues: lab.hasMultipleValues || false,
+          valueRange: lab.valueRange || null
         };
       }
     });
@@ -115,7 +117,9 @@ const prepareLabTableData = (groupedLabs, selectedType = null) => {
           valueStatus: lab.valueStatus || "normal",
           referenceRange: lab.consultValue,
           referenceMin: lab.referenceMin,
-          referenceMax: lab.referenceMax
+          referenceMax: lab.referenceMax,
+          hasMultipleValues: lab.hasMultipleValues || false,
+          valueRange: lab.valueRange || null
         };
       } else {
         // 對於單一測試項目，用 orderCode 分組
@@ -148,7 +152,9 @@ const prepareLabTableData = (groupedLabs, selectedType = null) => {
           valueStatus: lab.valueStatus || "normal",
           referenceRange: lab.consultValue,
           referenceMin: lab.referenceMin,
-          referenceMax: lab.referenceMax
+          referenceMax: lab.referenceMax,
+          hasMultipleValues: lab.hasMultipleValues || false,
+          valueRange: lab.valueRange || null
         };
       }
     });

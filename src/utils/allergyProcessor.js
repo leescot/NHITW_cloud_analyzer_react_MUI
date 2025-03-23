@@ -11,7 +11,7 @@ export const allergyProcessor = {
       // 格式化並排序資料
       const formattedData = data.rObject
         .map(item => this.formatAllergyData(item))
-        .filter(item => item.date) // 過濾掉沒有日期的項目
+        .filter(item => this.isValidAllergyRecord(item)) // 過濾掉不符合條件的項目
         .sort((a, b) => {
           try {
             if (!a.date || !b.date) return 0;
@@ -31,6 +31,24 @@ export const allergyProcessor = {
       console.error('Error details:', error.stack);
       return [];
     }
+  },
+
+  // 判斷是否為有效的過敏記錄
+  isValidAllergyRecord(item) {
+    // 檢查日期
+    if (!item.date) return false;
+    
+    // 檢查 drug_name
+    if (!item.drugName || 
+        item.drugName === '未記錄' || 
+        item.drugName === 'NP' || 
+        item.drugName === 'N.P' || 
+        item.drugName === 'N.P.' || 
+        item.drugName.includes('未過敏')) {
+      return false;
+    }
+    
+    return true;
   },
 
   // 將民國年日期轉換為西元年日期
@@ -55,4 +73,4 @@ export const allergyProcessor = {
       hospital: item.hosp?.split(';')[0] || '未記錄'
     };
   }
-}; 
+};
