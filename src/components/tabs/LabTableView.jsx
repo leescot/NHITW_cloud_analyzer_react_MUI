@@ -18,7 +18,7 @@ import { labProcessor } from '../../utils/labProcessor';
 import TypographySizeWrapper from "../utils/TypographySizeWrapper";
 
 const LabTableView = ({ groupedLabs, labSettings, generalDisplaySettings }) => {
-  console.log("LabTableView rendering with lab settings:", labSettings);
+  // console.log("LabTableView rendering with lab settings:", labSettings);
   // 獲取所有可用的檢驗類型
   const allLabTypes = labProcessor.getAllLabTypes(groupedLabs);
   
@@ -113,7 +113,7 @@ const LabTableView = ({ groupedLabs, labSettings, generalDisplaySettings }) => {
 
   if (dates.length === 0 || items.length === 0) {
     return (
-      <Box sx={{ height: 'calc(100vh - 180px)', display: 'flex', flexDirection: 'column' }}>
+      <Box sx={{ height: 'calc(100vh - 210px)', display: 'flex', flexDirection: 'column' }}>
         <FormControl component="fieldset" sx={{ m: 1, mt: 0.5 }}>
           <RadioGroup
             row
@@ -151,8 +151,8 @@ const LabTableView = ({ groupedLabs, labSettings, generalDisplaySettings }) => {
   }
 
   return (
-    // 外層容器使用固定高度，不設置overflow，讓它顯示整個內容
-    <Box sx={{ height: 'calc(100vh - 180px)', display: 'flex', flexDirection: 'column' }}>
+    // 調整容器高度，減少重疊問題
+    <Box sx={{ height: 'calc(100vh - 220px)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
       {/* 縮小類型選擇器間距 */}
       <FormControl component="fieldset" sx={{ mx: 1, my: 0.5 }}>
         <RadioGroup
@@ -180,13 +180,15 @@ const LabTableView = ({ groupedLabs, labSettings, generalDisplaySettings }) => {
         </RadioGroup>
       </FormControl>
       
-      {/* 表格容器設置為flex-grow: 1並啟用滾動 */}
+      {/* 調整表格容器以確保其適合父容器 */}
       <TableContainer 
         component={Paper} 
         sx={{ 
           width: '100%', 
           flexGrow: 1, 
           overflow: 'auto',
+          // 移除底部空間
+          mb: 0,
           // 確保滾動條在表格內部
           '& ::-webkit-scrollbar': {
             width: '8px',
@@ -304,7 +306,16 @@ const LabTableView = ({ groupedLabs, labSettings, generalDisplaySettings }) => {
                               </TypographySizeWrapper>
                             )}
                             {labSettings.showReference &&
-                              value.referenceMin !== null && (
+                              (value.formattedReference ? (
+                                <TypographySizeWrapper
+                                  component="span"
+                                  textSizeType="note"
+                                  generalDisplaySettings={generalDisplaySettings}
+                                  sx={{ color: "gray" }}
+                                >
+                                  {` (${value.formattedReference})`}
+                                </TypographySizeWrapper>
+                              ) : value.referenceMin !== null ? (
                                 <TypographySizeWrapper
                                   component="span"
                                   textSizeType="note"
@@ -317,7 +328,7 @@ const LabTableView = ({ groupedLabs, labSettings, generalDisplaySettings }) => {
                                       : ""
                                   })`}
                                 </TypographySizeWrapper>
-                              )}
+                              ) : null)}
                           </TypographySizeWrapper>
                         </Box>
                       ) : (

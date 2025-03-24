@@ -302,7 +302,7 @@ const FloatingIcon = () => {
       if (!open && !window.isFloatingIconOpening) {
         window.isFloatingIconOpening = true;
         setOpen(true);
-        console.log('window.openFloatingIconDialog performed once');
+
         if (generalDisplaySettings.alwaysOpenOverviewTab) {
           setTabValue(0); // Always set to Overview tab (index 0) if setting is enabled
         }
@@ -321,7 +321,7 @@ const FloatingIcon = () => {
 
   const handleClick = () => {
     setOpen(true);
-    console.log('handleClick performed once');
+
     if (generalDisplaySettings.alwaysOpenOverviewTab) {
       setTabValue(0); // Always set to Overview tab (index 0) if setting is enabled
     }

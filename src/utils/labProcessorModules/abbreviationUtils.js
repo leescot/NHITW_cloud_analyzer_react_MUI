@@ -36,7 +36,15 @@ const labCodeAbbreviations = {
 const specialLabCodeAbbreviations = {};
 
 // 獲取縮寫的方法 - 考慮更多條件
-const getAbbreviation = (orderCode, unit, itemName) => {
+const getAbbreviation = (orderCode, unitData = '', itemName = '') => {
+  // 檢查是否有 orderCode 和 itemName
+  if (!orderCode || !itemName) return '';
+  
+  // 特殊處理 09043C 和 09044C 中包含 "/HDL" 的項目 - 使用特殊縮寫名稱
+  if ((orderCode === "09043C" || orderCode === "09044C") && itemName.includes("/HDL")) {
+    return "TC/HDL Ratio";  // 使用比值的特殊縮寫名稱
+  }
+  
   // 特殊處理 09015C (肌酐/GFR)
   if (orderCode === "09015C" && itemName) {
     // 檢查是否包含 GFR 相關關鍵詞

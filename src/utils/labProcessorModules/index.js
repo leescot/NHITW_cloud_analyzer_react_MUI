@@ -15,7 +15,8 @@ import {
 
 import { 
   isZeroReferenceRange, 
-  parseReferenceRange 
+  parseReferenceRange,
+  getReferenceRangeDisplayText
 } from './referenceRangeUtils.js';
 
 import { 
@@ -104,8 +105,12 @@ const labProcessor = {
         return acc; // 跳過此項目，不加入分析範圍
       }
       
-      // Parse reference values using comprehensive parser
-      const consultValue = this.parseReferenceRange(lab.consult_value);
+      // Parse reference values using comprehensive parser - pass order_code and hosp
+      const consultValue = this.parseReferenceRange(lab.consult_value, lab.order_code, lab.hosp);
+      
+      // 直接从源数据生成格式化的参考范围 - pass order_code and hosp
+      const formattedReference = getReferenceRangeDisplayText(lab.consult_value, lab.order_code, lab.hosp);
+      // console.log(`${lab.assay_item_name} - formattedReference direct:`, formattedReference);
       
       // 檢查是否有自定義參考範圍
       let referenceMin, referenceMax;
@@ -240,6 +245,7 @@ const labProcessor = {
         consultValue: consultValue,  // Always include the reference values
         referenceMin: referenceMin,  // 參考值下限 (可能是自定義的)
         referenceMax: referenceMax,  // 參考值上限 (可能是自定義的)
+        formattedReference: formattedReference,  // 直接添加格式化的参考范围文本
         isAbnormal: isAbnormal,      // 保留為向後兼容
         valueStatus: valueStatus,    // 新增詳細狀態 (normal, high, low)
         abbrName: abbrName,          // 新增縮寫屬性

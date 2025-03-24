@@ -1,13 +1,11 @@
 {
   "manifest_version": 3,
   "name": "健保雲端資料擷取器2.0",
-  "version": "1.0.0319",
-  "description": "健保雲端資料擷取器, 整合版 beta, 0319版",
+  "version": "1.1.2",
+  "description": "健保雲端資料擷取器，幫忙醫療人員快速瀏覽健保雲端資料",
   "permissions": ["webRequest", "storage", "scripting", "clipboardWrite"],
   "host_permissions": [
-    "https://medcloud2.nhi.gov.tw/*",
-    "http://localhost:3000/*",
-    "http://localhost:5173/*",
+    "https://medcloud2.nhi.gov.tw/imu/IMUE1000/*",
     "https://drugtw.com/*"
   ],
   "background": {
@@ -31,9 +29,7 @@
   "content_scripts": [
     {
       "matches": [
-        "https://medcloud2.nhi.gov.tw/imu/*",
-        "http://localhost:3000/*",
-        "http://localhost:5173/*"
+        "https://medcloud2.nhi.gov.tw/imu/IMUE1000/*"
       ],
       "js": ["content.js"],
       "run_at": "document_end"
@@ -41,8 +37,10 @@
   ],
   "web_accessible_resources": [
     {
-      "resources": ["test.html", "localDataProcessor.js", "drug-images.html", "drug-images.js"],
-      "matches": ["<all_urls>"]
+      "resources": ["drug-images.html", "drug-images.js"],
+      "matches": [
+        "https://medcloud2.nhi.gov.tw/*"
+      ]
     }
   ]
 }

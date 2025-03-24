@@ -56,7 +56,7 @@ const CopySelectedButton = ({ onClick, style }) => {
 };
 
 const LabData = ({ groupedLabs, settings, labSettings, generalDisplaySettings }) => {
-  console.log("LabData rendering with lab settings:", labSettings);
+  // console.log("LabData rendering with lab settings:", labSettings);
   
   // Ensure all required properties exist in labSettings with defaults
   const completeLabSettings = {
@@ -345,6 +345,14 @@ const LabData = ({ groupedLabs, settings, labSettings, generalDisplaySettings })
     const labId = `${groupIndex}-${labIndex}`;
     const isSelected = selectedLabItems[groupIndex]?.[labId] || false;
     
+    // console.log('Rendering lab item:', lab.itemName, {
+    //   formattedReference: lab.formattedReference,
+    //   referenceMin: lab.referenceMin,
+    //   referenceMax: lab.referenceMax,
+    //   consultValue: lab.consultValue,
+    //   _rawConsultValue: lab._rawConsultValue
+    // });
+    
     return (
       <Box sx={{ 
         display: 'flex', 
@@ -386,13 +394,18 @@ const LabData = ({ groupedLabs, settings, labSettings, generalDisplaySettings })
             <span style={{ color: "gray" }}>{` ${lab.unit}`}</span>
           )}
           {completeLabSettings.showReference &&
-            lab.referenceMin !== null && (
+            (lab.formattedReference ? (
+              <span style={{ color: "gray", fontSize: "0.8em" }}>
+                {" "}
+                ({lab.formattedReference})
+              </span>
+            ) : lab.referenceMin !== null ? (
               <span style={{ color: "gray", fontSize: "0.8em" }}>
                 {" "}
                 ({lab.referenceMin}
                 {lab.referenceMax !== null ? `-${lab.referenceMax}` : ""})
               </span>
-            )}
+            ) : null)}
         </TypographySizeWrapper>
       </Box>
     );
@@ -924,13 +937,18 @@ const LabData = ({ groupedLabs, settings, labSettings, generalDisplaySettings })
                             <span style={{ color: "gray" }}>{` ${lab.unit}`}</span>
                           )}
                           {completeLabSettings.showReference &&
-                            lab.referenceMin !== null && (
+                            (lab.formattedReference ? (
+                              <span style={{ color: "gray", fontSize: "0.8em" }}>
+                                {" "}
+                                ({lab.formattedReference})
+                              </span>
+                            ) : lab.referenceMin !== null ? (
                               <span style={{ color: "gray", fontSize: "0.8em" }}>
                                 {" "}
                                 ({lab.referenceMin}
                                 {lab.referenceMax !== null ? `-${lab.referenceMax}` : ""})
                               </span>
-                            )}
+                            ) : null)}
                         </span>
                       ))}
                     </div>
