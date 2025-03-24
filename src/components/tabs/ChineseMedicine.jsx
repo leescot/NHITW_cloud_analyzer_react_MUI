@@ -20,24 +20,40 @@ const ChineseMedicine = ({
 
   // 複製中藥的函數 - 從 FloatingIcon 移過來
   const handleCopyChineseMedications = (medications, group) => {
-    const copyText = chineseMedProcessor.getChineseMedicationCopyText(medications, {
+    if (chineseMedSettings.copyFormat === "none") {
+      return;
+    }
+    
+    // 取得藥品的天數
+    const days = medications && medications.length > 0 ? medications[0].days : "";
+    
+    const groupInfo = {
       date: group.date,
       hosp: group.hosp,
       days: days,
       icd_code: group.icd_code,
       icd_name: group.icd_name,
-      copyFormat: chineseMedSettings.copyFormat,
+      visitType: group.visitType,
+      showDiagnosis: chineseMedSettings.showDiagnosis,
       showEffectName: chineseMedSettings.showEffectName
-    });
+    };
+    
+    const copyText = chineseMedProcessor.formatChineseMedList(
+      medications,
+      chineseMedSettings.copyFormat,
+      groupInfo
+    );
 
-    navigator.clipboard.writeText(copyText).then(() => {
-      setSnackbarMessage("中藥清單已複製到剪貼簿");
-      setSnackbarOpen(true);
-    }).catch((err) => {
-      console.error("Failed to copy Chinese medications: ", err);
-      setSnackbarMessage("複製失敗，請重試");
-      setSnackbarOpen(true);
-    });
+    navigator.clipboard.writeText(copyText)
+      .then(() => {
+        setSnackbarMessage("中藥清單已複製到剪貼簿");
+        setSnackbarOpen(true);
+      })
+      .catch((err) => {
+        console.error("Failed to copy Chinese medications: ", err);
+        setSnackbarMessage("複製失敗，請重試");
+        setSnackbarOpen(true);
+      });
   };
 
   // 依照每日劑量降序排序藥品
@@ -62,9 +78,9 @@ const ChineseMedicine = ({
       ) : (
         groupedChineseMeds.map((group, index) => {
           // 取得組中第一個藥品的天數
-          const days = group.medications && group.medications.length > 0 ? group.medications[0].days : "";
+          const days = group.days || (group.medications && group.medications.length > 0 ? group.medications[0].days : "");
           // 排序藥品
-          const sortedMedications = sortMedicationsByDailyDosage(group.medications);
+          const sortedMedications = sortMedicationsByDailyDosage(group.medications || []);
           
           return (
             <Box key={index} sx={{ mb: 3 }}>

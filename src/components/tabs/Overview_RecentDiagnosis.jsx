@@ -99,21 +99,32 @@ const Overview_RecentDiagnosis = ({
       
       const diagnosisKey = `${normalizedIcdCode}|${group.icd_name}`;
       
-      // Check if this is a vaccine record
+      // 檢查診斷碼和藥物，只有當診斷碼是疫苗相關且至少有一個藥物是J07開頭ATC碼時，才將其視為疫苗記錄
       if (isVaccineCode(normalizedIcdCode)) {
-        // Extract medication names from the group
+        // 檢查是否有J07開頭的疫苗藥物
+        let hasVaccineMedication = false;
         let medicationNames = [];
         
         if (Array.isArray(group.medications) && group.medications.length > 0) {
-          // If there's a medications array, extract names
-          medicationNames = group.medications.map(med => med.name || med.drugName || '').filter(Boolean);
+          // 過濾出有J07開頭ATC碼的藥物
+          const vaccineFilteredMeds = group.medications.filter(med => med.atc_code && med.atc_code.startsWith('J07'));
+          
+          // 如果有J07藥物，則記錄該筆為疫苗記錄
+          if (vaccineFilteredMeds.length > 0) {
+            hasVaccineMedication = true;
+            medicationNames = vaccineFilteredMeds.map(med => med.name || med.drugName || '').filter(Boolean);
+          }
         } else if (group.name || group.drugName) {
-          // If it's a single medication, get its name
-          medicationNames = [group.name || group.drugName];
+          // 單一藥物情況
+          if (group.atc_code && group.atc_code.startsWith('J07')) {
+            hasVaccineMedication = true;
+            medicationNames = [group.name || group.drugName];
+          }
         }
         
-        // Add to vaccine records
-        vaccineRecords.push({
+        // 只有當既有疫苗診斷碼又有J07藥物時，才加入疫苗記錄
+        if (hasVaccineMedication && medicationNames.length > 0) {
+          vaccineRecords.push({
           date: group.date,
           code: normalizedIcdCode,
           name: group.icd_name,
@@ -122,6 +133,7 @@ const Overview_RecentDiagnosis = ({
           key: diagnosisKey,
           isChineseMed: false
         });
+        }
       } else {
         // Normal diagnosis processing
         if (group.visitType === "門診" || group.visitType === "藥局") {
@@ -174,21 +186,32 @@ const Overview_RecentDiagnosis = ({
       const normalizedIcdCode = group.icd_code.toUpperCase();
       const diagnosisKey = `${normalizedIcdCode}|${group.icd_name}`;
       
-      // Check if this is a vaccine record
+      // 檢查診斷碼和藥物，只有當診斷碼是疫苗相關且至少有一個藥物是J07開頭ATC碼時，才將其視為疫苗記錄
       if (isVaccineCode(normalizedIcdCode)) {
-        // Extract medication names from the group
+        // 檢查是否有J07開頭的疫苗藥物
+        let hasVaccineMedication = false;
         let medicationNames = [];
         
         if (Array.isArray(group.medications) && group.medications.length > 0) {
-          // If there's a medications array, extract names
-          medicationNames = group.medications.map(med => med.name || med.drugName || '').filter(Boolean);
+          // 過濾出有J07開頭ATC碼的藥物
+          const vaccineFilteredMeds = group.medications.filter(med => med.atc_code && med.atc_code.startsWith('J07'));
+          
+          // 如果有J07藥物，則記錄該筆為疫苗記錄
+          if (vaccineFilteredMeds.length > 0) {
+            hasVaccineMedication = true;
+            medicationNames = vaccineFilteredMeds.map(med => med.name || med.drugName || '').filter(Boolean);
+          }
         } else if (group.name || group.drugName) {
-          // If it's a single medication, get its name
-          medicationNames = [group.name || group.drugName];
+          // 單一藥物情況
+          if (group.atc_code && group.atc_code.startsWith('J07')) {
+            hasVaccineMedication = true;
+            medicationNames = [group.name || group.drugName];
+          }
         }
         
-        // Add to vaccine records
-        vaccineRecords.push({
+        // 只有當既有疫苗診斷碼又有J07藥物時，才加入疫苗記錄
+        if (hasVaccineMedication && medicationNames.length > 0) {
+          vaccineRecords.push({
           date: group.date,
           code: normalizedIcdCode,
           name: group.icd_name,
@@ -197,6 +220,7 @@ const Overview_RecentDiagnosis = ({
           key: diagnosisKey,
           isChineseMed: true
         });
+        }
       } else {
         // Fix: Same approach as with western medications
         if (group.visitType === "門診" || group.visitType === "藥局") {

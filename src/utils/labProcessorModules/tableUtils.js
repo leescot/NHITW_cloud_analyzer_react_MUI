@@ -57,7 +57,10 @@ const prepareLabTableData = (groupedLabs, selectedType = null) => {
           valueStatus: lab.valueStatus || "normal",
           referenceRange: lab.consultValue,
           referenceMin: lab.referenceMin,
-          referenceMax: lab.referenceMax
+          referenceMax: lab.referenceMax,
+          formattedReference: lab.formattedReference,
+          hasMultipleValues: lab.hasMultipleValues || false,
+          valueRange: lab.valueRange || null
         };
       }
     });
@@ -87,6 +90,45 @@ const prepareLabTableData = (groupedLabs, selectedType = null) => {
       // 使用 itemName 作為備用識別符或用於複合測試
       const itemKey = lab.itemName || lab.orderName || '';
       
+      // 特殊處理 09043C 和 09044C 中包含 "/HDL" 的項目
+      if ((orderCode === "09043C" || orderCode === "09044C") && itemKey.includes("/HDL")) {
+        // 為 HDL 比值創建特殊鍵，添加 "_RATIO" 後綴以區分
+        const specialKey = `${orderCode}_HDLRATIO`;
+        
+        if (!itemMap.has(specialKey)) {
+          itemMap.set(specialKey, {
+            key: specialKey,
+            orderCode: orderCode,
+            orderName: lab.orderName || '',
+            itemName: itemKey,
+            // 為 HDL 比值創建特殊顯示名稱
+            abbrName: "TC/HDL Ratio",
+            type: lab.type || '',
+            isMultiItem: false,
+            values: {}
+          });
+        }
+        
+        // 存儲日期的值
+        const item = itemMap.get(specialKey);
+        const dateKey = `${group.date}_${group.hosp}`;
+        item.values[dateKey] = {
+          value: lab.value,
+          unit: lab.unit,
+          isAbnormal: lab.isAbnormal,
+          valueStatus: lab.valueStatus || "normal",
+          referenceRange: lab.consultValue,
+          referenceMin: lab.referenceMin,
+          referenceMax: lab.referenceMax,
+          formattedReference: lab.formattedReference,
+          hasMultipleValues: lab.hasMultipleValues || false,
+          valueRange: lab.valueRange || null
+        };
+        
+        // 跳過後續處理，因為我們已經單獨處理了這個項目
+        return;
+      }
+      
       // 複合測試特殊處理，如 08011C, 09015C
       if (isMultiItemOrderCode(orderCode)) {
         // 僅使用縮寫作為鍵，不再包含 orderCode 和 itemKey
@@ -115,7 +157,10 @@ const prepareLabTableData = (groupedLabs, selectedType = null) => {
           valueStatus: lab.valueStatus || "normal",
           referenceRange: lab.consultValue,
           referenceMin: lab.referenceMin,
-          referenceMax: lab.referenceMax
+          referenceMax: lab.referenceMax,
+          formattedReference: lab.formattedReference,
+          hasMultipleValues: lab.hasMultipleValues || false,
+          valueRange: lab.valueRange || null
         };
       } else {
         // 對於單一測試項目，用 orderCode 分組
@@ -148,7 +193,10 @@ const prepareLabTableData = (groupedLabs, selectedType = null) => {
           valueStatus: lab.valueStatus || "normal",
           referenceRange: lab.consultValue,
           referenceMin: lab.referenceMin,
-          referenceMax: lab.referenceMax
+          referenceMax: lab.referenceMax,
+          formattedReference: lab.formattedReference,
+          hasMultipleValues: lab.hasMultipleValues || false,
+          valueRange: lab.valueRange || null
         };
       }
     });

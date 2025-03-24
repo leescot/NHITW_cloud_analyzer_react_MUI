@@ -36,7 +36,15 @@ const labCodeAbbreviations = {
 const specialLabCodeAbbreviations = {};
 
 // 獲取縮寫的方法 - 考慮更多條件
-const getAbbreviation = (orderCode, unit, itemName) => {
+const getAbbreviation = (orderCode, unitData = '', itemName = '') => {
+  // 檢查是否有 orderCode 和 itemName
+  if (!orderCode || !itemName) return '';
+  
+  // 特殊處理 09043C 和 09044C 中包含 "/HDL" 的項目 - 使用特殊縮寫名稱
+  if ((orderCode === "09043C" || orderCode === "09044C") && itemName.includes("/HDL")) {
+    return "TC/HDL Ratio";  // 使用比值的特殊縮寫名稱
+  }
+  
   // 特殊處理 09015C (肌酐/GFR)
   if (orderCode === "09015C" && itemName) {
     // 檢查是否包含 GFR 相關關鍵詞
@@ -114,6 +122,47 @@ const getAbbreviation = (orderCode, unit, itemName) => {
     // return "Alb(U)"; // 設置一個更通用的默認縮寫
   }
   
+  // 特殊處理 09041B（血液氣體分析相關）
+  if (orderCode === "09041B" && itemName) {
+    // 水素湯度指數 (pH)
+    if (itemName.toLowerCase() === "ph") {
+      return "pH";
+    }
+    
+    // 二氧化碳分壓 (pCO2)
+    if (itemName.toLowerCase() === "pco2") {
+      return "pCO2";
+    }
+    
+    // 氧分壓 (pO2)
+    if (itemName.toLowerCase() === "po2") {
+      return "pO2";
+    }
+    
+    // 氧飽和度 (sO2)
+    if (itemName.toLowerCase() === "so2") {
+      return "sO2";
+    }
+    
+    // 二氧化碳總量 (tCO2)
+    if (itemName.toLowerCase() === "tco2") {
+      return "tCO2";
+    }
+    
+    // 血液酸鹹比 (BE)
+    if (itemName.toLowerCase() === "abe" || itemName.toLowerCase() === "be") {
+      return "BE";
+    }
+    
+    // 碳酸氯 (HCO3)
+    if (itemName.toLowerCase() === "hco3") {
+      return "HCO3";
+    }
+    
+    // 酸鹹直接返回原始名稱
+    return itemName;
+  }
+  
   // 一般情況直接從簡單對照表查詢
   return labCodeAbbreviations[orderCode] || null;
 };
@@ -128,7 +177,7 @@ const isGFRItem = (itemName) => {
 // Helper function to determine if an order code typically contains multiple items
 const isMultiItemOrderCode = (orderCode) => {
   // 更新包含多項目測試的代碼列表
-  const multiItemCodes = ['08011C', '06012C', '09015C']; // 添加了肌酐檢查 09015C
+  const multiItemCodes = ['08011C', '06012C', '09015C', '09041B']; // 添加了肌酐檢查 09015C 和血液氣體分析 09041B
   return multiItemCodes.includes(orderCode);
 };
 
