@@ -95,41 +95,93 @@ const viewImage = async (imageParams) => {
       return;
     }
 
-    // 發送請求獲取影像數據
-    const response = await fetch("https://medcloud2.nhi.gov.tw/imu/api/imuecommon/imuecommon/get-ctmri2", {
-      method: "POST",
-      headers: {
-        "Accept": "application/json, text/plain, */*",
-        "Content-Type": "application/json;charset=UTF-8",
-        "Authorization": authToken,
-        "X-Requested-With": "XMLHttpRequest"
-      },
-      credentials: "include",
-      body: JSON.stringify({
-        ProcID: "IMUE0130",
-        ClientData: imageParams
-      })
-    });
+    // 發送請求獲取影像數據，先嘗試原始格式
+    try {
+      const response = await fetch("https://medcloud2.nhi.gov.tw/imu/api/imuecommon/imuecommon/get-ctmri2", {
+        method: "POST",
+        headers: {
+          "Accept": "application/json, text/plain, */*",
+          "Content-Type": "application/json;charset=UTF-8",
+          "Authorization": authToken,
+          "X-Requested-With": "XMLHttpRequest"
+        },
+        credentials: "include",
+        body: JSON.stringify({
+          ProcID: "IMUE0130",
+          ClientData: imageParams
+        })
+      });
 
-    if (!response.ok) {
-      throw new Error(`API 請求失敗，狀態碼: ${response.status}`);
+      if (!response.ok) {
+        throw new Error(`API 請求失敗，狀態碼: ${response.status}`);
+      }
+
+      const data = await response.json();
+
+      if (!data || !data.ctmri_url) {
+        throw new Error('API 回應中沒有影像 URL');
+      }
+
+      // 存儲影像數據到 sessionStorage
+      const imgData = {
+        fileName: data.ctmri_url,
+        apiName: "imue0130"
+      };
+      sessionStorage.setItem("ShowImg", JSON.stringify(imgData));
+
+      // 開啟新視窗顯示影像
+      window.open("https://medcloud2.nhi.gov.tw/imu/IMUE1000/ShowImg", "_blank");
+    } catch (firstError) {
+      // 第一次請求失敗，嘗試修改參數格式再試一次
+      try {
+        // 從原始 imageParams 解析出參數
+        const params = imageParams.split('@');
+        if (params.length >= 5) {
+          // 建立新的參數格式，省略 ctmri_mark
+          const modifiedParams = `${params[0]}@${params[1]}@@${params[3]}@${params[4]}`;
+          
+          const retryResponse = await fetch("https://medcloud2.nhi.gov.tw/imu/api/imuecommon/imuecommon/get-ctmri2", {
+            method: "POST",
+            headers: {
+              "Accept": "application/json, text/plain, */*",
+              "Content-Type": "application/json;charset=UTF-8",
+              "Authorization": authToken,
+              "X-Requested-With": "XMLHttpRequest"
+            },
+            credentials: "include",
+            body: JSON.stringify({
+              ProcID: "IMUE0130",
+              ClientData: modifiedParams
+            })
+          });
+
+          if (!retryResponse.ok) {
+            throw new Error(`API 請求失敗，狀態碼: ${retryResponse.status}`);
+          }
+
+          const retryData = await retryResponse.json();
+
+          if (!retryData || !retryData.ctmri_url) {
+            throw new Error('API 回應中沒有影像 URL');
+          }
+
+          // 存儲影像數據到 sessionStorage
+          const imgData = {
+            fileName: retryData.ctmri_url,
+            apiName: "imue0130"
+          };
+          sessionStorage.setItem("ShowImg", JSON.stringify(imgData));
+
+          // 開啟新視窗顯示影像
+          window.open("https://medcloud2.nhi.gov.tw/imu/IMUE1000/ShowImg", "_blank");
+        } else {
+          throw new Error('無效的參數格式');
+        }
+      } catch (secondError) {
+        // 兩次嘗試都失敗，顯示錯誤訊息
+        alert("載入影像時發生錯誤: " + secondError.message);
+      }
     }
-
-    const data = await response.json();
-
-    if (!data || !data.ctmri_url) {
-      throw new Error('API 回應中沒有影像 URL');
-    }
-
-    // 存儲影像數據到 sessionStorage
-    const imgData = {
-      fileName: data.ctmri_url,
-      apiName: "imue0130"
-    };
-    sessionStorage.setItem("ShowImg", JSON.stringify(imgData));
-
-    // 開啟新視窗顯示影像
-    window.open("https://medcloud2.nhi.gov.tw/imu/IMUE1000/ShowImg", "_blank");
   } catch (error) {
     alert("載入影像時發生錯誤: " + error.message);
   }
@@ -444,7 +496,7 @@ const ReportImagingTable = ({ data, generalDisplaySettings }) => {
                 </TableCell>
                 <TableCell align="center">
                   {item.images && item.images.length > 0 ? (
-                    <Stack direction="row" spacing={0.5} justifyContent="center">
+                    <Stack direction="row" spacing={0.5} justifyContent="center" flexWrap="wrap">
                       {item.images.length === 1 ? (
                         <Tooltip title="查看影像">
                           <IconButton 
@@ -458,29 +510,46 @@ const ReportImagingTable = ({ data, generalDisplaySettings }) => {
                           </IconButton>
                         </Tooltip>
                       ) : (
-                        item.images.map((img, imgIndex) => (
-                          <Tooltip key={imgIndex} title={`查看影像 ${imgIndex+1}`}>
-                            <IconButton 
-                              color="primary"
-                              size="small" 
-                              onClick={() => {
-                                viewImage(`${img.ipl_case_seq_no}@${img.read_pos}@${img.ctmri_mark}@${img.file_type}@${img.file_qty}`);
-                              }}
-                            >
-                              {imgIndex === 0 ? (
-                                <PhotoLibraryIcon fontSize="small" />
-                              ) : (
-                                <TypographySizeWrapper 
-                                  variant="caption"
-                                  textSizeType="content"
-                                  generalDisplaySettings={generalDisplaySettings}
-                                  sx={{ fontSize: '0.7rem', fontWeight: 'bold' }}
-                                >
-                                  {imgIndex + 1}
-                                </TypographySizeWrapper>
-                              )}
-                            </IconButton>
-                          </Tooltip>
+                        // Group images into chunks of 5
+                        [...Array(Math.ceil(item.images.length / 5))].map((_, rowIndex) => (
+                          <Box 
+                            key={`row-${rowIndex}`} 
+                            sx={{ 
+                              display: 'flex', 
+                              width: '100%', 
+                              justifyContent: 'center', 
+                              mt: rowIndex > 0 ? 0.5 : 0 
+                            }}
+                          >
+                            {item.images.slice(rowIndex * 5, (rowIndex + 1) * 5).map((img, colIndex) => {
+                              const imgIndex = rowIndex * 5 + colIndex;
+                              return (
+                                <Tooltip key={imgIndex} title={`查看影像 ${imgIndex+1}`}>
+                                  <IconButton 
+                                    color="primary"
+                                    size="small" 
+                                    onClick={() => {
+                                      viewImage(`${img.ipl_case_seq_no}@${img.read_pos}@${img.ctmri_mark}@${img.file_type}@${img.file_qty}`);
+                                    }}
+                                    sx={{ mx: 0.25 }}
+                                  >
+                                    {imgIndex === 0 ? (
+                                      <PhotoLibraryIcon fontSize="small" />
+                                    ) : (
+                                      <TypographySizeWrapper 
+                                        variant="caption"
+                                        textSizeType="content"
+                                        generalDisplaySettings={generalDisplaySettings}
+                                        sx={{ fontSize: '0.7rem', fontWeight: 'bold' }}
+                                      >
+                                        {imgIndex + 1}
+                                      </TypographySizeWrapper>
+                                    )}
+                                  </IconButton>
+                                </Tooltip>
+                              );
+                            })}
+                          </Box>
                         ))
                       )}
                     </Stack>

@@ -1,14 +1,21 @@
 // 資料格式化相關函數
 import { getAbbreviation } from './abbreviationUtils.js';
 import { normalizeValue, getValueStatus } from './valueUtils.js';
-import { parseReferenceRange, isZeroReferenceRange } from './referenceRangeUtils.js';
+import { parseReferenceRange, isZeroReferenceRange, getReferenceRangeDisplayText } from './referenceRangeUtils.js';
 import { checkIfAbnormal } from './valueUtils.js';
 import { hasCustomReferenceRange, getCustomReferenceRange } from './customReferenceRanges.js';
 
 // 格式化單筆檢驗資料
 const formatLabData = (lab) => {
+  // console.log('Processing lab item:', lab.assay_item_name, 'consult_value:', lab.consult_value);
+  
   // 處理參考值範圍
-  const consultValue = parseReferenceRange(lab.consult_value);
+  const consultValue = parseReferenceRange(lab.consult_value, lab.order_code, lab.hosp);
+  // console.log('parsed consultValue:', consultValue);
+  
+  // 格式化參考值範圍用於顯示
+  const formattedReference = getReferenceRangeDisplayText(lab.consult_value, lab.order_code, lab.hosp);
+  // console.log('formattedReference:', formattedReference);
   
   // 檢查是否有自定義參考範圍
   let referenceMin, referenceMax;
@@ -28,6 +35,13 @@ const formatLabData = (lab) => {
     referenceMax = consultValue ? consultValue.max : null;
     lab._usingCustomRange = false;
   }
+  
+  // console.log('Final reference values:', {
+  //   referenceMin,
+  //   referenceMax,
+  //   formattedReference,
+  //   _usingCustomRange: lab._usingCustomRange
+  // });
   
   // 獲取縮寫名稱 - 傳入 itemName
   const abbrName = getAbbreviation(lab.order_code, lab.unit_data, lab.assay_item_name);
@@ -106,6 +120,7 @@ const formatLabData = (lab) => {
     consultValue: consultValue,
     referenceMin: referenceMin,  // 參考值下限 (可能是自定義的)
     referenceMax: referenceMax,  // 參考值上限 (可能是自定義的)
+    formattedReference: formattedReference, // 新增: 格式化後的參考範圍文本
     type: lab.assay_tp_cname,
     orderName: lab.order_name,
     orderCode: lab.order_code || '',

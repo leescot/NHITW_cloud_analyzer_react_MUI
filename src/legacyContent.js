@@ -247,16 +247,16 @@ async function checkAndInitUserSession() {
         const isNewSession = storedSession !== userInfo;
 
         if (isNewSession) {
-          console.log(
-            "User session changed from:",
-            storedSession,
-            "to:",
-            userInfo
-          );
+          // console.log(
+          //   "User session changed from:",
+          //   storedSession,
+          //   "to:",
+          //   userInfo
+          // );
           performClearPreviousData();
           currentPatientId = userInfo; // 更新當前病人標識
           chrome.storage.local.set({ currentUserSession: userInfo }, () => {
-            console.log("New user session saved:", userInfo);
+            // console.log("New user session saved:", userInfo);
             chrome.runtime.sendMessage({
               action: "userSessionChanged",
               userSession: userInfo,
@@ -360,7 +360,7 @@ async function extractUserInfo() {
       const payload = JSON.parse(atob(token.split(".")[1])); // 解碼 JWT payload
       const userId = payload.UserID; // 提取 UserID（健保卡號）
       if (userId) {
-        console.log("Extracted UserID from token:", userId);
+        // console.log("Extracted UserID from token:", userId);
         // 更新快取
         cachedUserInfo = `patient_${userId}`;
         lastUserInfoExtractTime = currentTime;
@@ -443,9 +443,9 @@ function observeUrlChanges() {
         isDataFetchingStarted = false; // 重置狀態
         checkAndInitUserSession().then((isNewSession) => {
           if (isNewSession || !window.lastInterceptedMedicationData?.rObject) {
-            console.log(
-              "New patient or no data due to URL change, fetching..."
-            );
+            // console.log(
+            //   "New patient or no data due to URL change, fetching..."
+            // );
             fetchAllDataTypes();
           } else {
             console.log("Same patient after URL change, reusing data");
@@ -1322,7 +1322,7 @@ function fetchAllDataTypes() {
       ]);
     })
     .then((results) => {
-      console.log("所有資料獲取完成，結果:", results);
+      // console.log("所有資料獲取完成，結果:", results);
 
       // Create counts object for all data types
       const counts = {
@@ -1380,7 +1380,6 @@ function fetchAllDataTypes() {
         if (items.autoOpenPage && window.openFloatingIconDialog) {
           // Add a small delay to ensure the data is fully processed
           setTimeout(() => {
-            console.log("Auto opening floating icon dialog");
             window.openFloatingIconDialog();
           }, 500);
         }
@@ -1793,12 +1792,12 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         );
       } else {
         // 新病人或無資料的情況，只顯示一次
-        if (!isBatchFetchInProgress) {
-          console.log(
-            "New patient or no data, fetching new data:",
-            currentPatientId
-          );
-        }
+        // if (!isBatchFetchInProgress) {
+        //   console.log(
+        //     "New patient or no data, fetching new data:",
+        //     currentPatientId
+        //   );
+        // }
 
         // 只有在一定時間後才清除資料並啟動新的抓取，避免重複清除
         if (!isBatchFetchInProgress) {
