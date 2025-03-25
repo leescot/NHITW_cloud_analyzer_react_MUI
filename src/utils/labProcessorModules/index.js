@@ -233,13 +233,19 @@ const labProcessor = {
         normalizedValue = this.normalizeValue(lab.assay_value || '');
       }
 
+      // 檢查是否需要將 "試管TubeMethod" 更改為 "生化學檢查"
+      let assayType = lab.assay_tp_cname || '';
+      if (assayType === "試管TubeMethod") {
+        assayType = "生化學檢查";
+      }
+
       acc[groupKey].labs.push({
         itemName: lab.assay_item_name || '',
         value: normalizedValue,  // 可能是範圍形式或單一標準化值
         unit: lab.unit_data || '',
         hasMultipleValues: hasMultipleValues,  // 標記是否有多個數值
         valueRange: valueRange,      // 數值範圍資訊，包含最小值、最大值和時間點
-        type: lab.assay_tp_cname || '',
+        type: assayType,
         orderName: lab.order_name || '',
         orderCode: lab.order_code || '',
         consultValue: consultValue,  // Always include the reference values
