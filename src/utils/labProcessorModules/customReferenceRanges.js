@@ -35,6 +35,11 @@ const customReferenceRanges = {
     min: 0,
     max: 100,
     description: "低密度脂蛋白膽固醇 >100 mg/dL 為異常(高)"
+  },
+  "12015C": {
+    min: 0,
+    max: 1,
+    description: "CRP >1 為異常(高)"
   }
 };
 

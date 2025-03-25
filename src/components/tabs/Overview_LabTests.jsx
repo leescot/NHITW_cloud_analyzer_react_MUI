@@ -79,7 +79,7 @@ const Overview_LabTests = ({ groupedLabs = [], labData, overviewSettings = {}, g
   };
 
   return (
-    <Paper sx={{ p: 2, height: "100%" }}>
+    <Paper sx={{ p: 2, height: "auto" }}>
       <TypographySizeWrapper variant="h6" gutterBottom generalDisplaySettings={generalDisplaySettings}>
         關注檢驗 - {trackingDays} 天內
       </TypographySizeWrapper>
