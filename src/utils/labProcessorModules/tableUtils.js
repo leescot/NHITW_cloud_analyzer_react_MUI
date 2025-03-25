@@ -24,6 +24,35 @@ const prepareLabTableData = (groupedLabs, selectedType = null) => {
   // 2. 識別和分組所有實驗室項目
   const itemMap = new Map();
   
+  // 添加自動檢測多項目的功能: 預先分析每個日期內的 order_code 是否有多個不同 itemName
+  const autoDetectedMultiItems = new Set();
+  
+  // 先掃描所有數據，找出每個日期中有多個項目的 order code
+  filteredGroups.forEach(group => {
+    // 對每個日期，記錄每個 order_code 包含的不同 itemName
+    const orderItemsMap = new Map();
+    
+    group.labs.forEach(lab => {
+      const orderCode = lab.orderCode || '';
+      const itemName = lab.itemName || '';
+      
+      if (!orderCode || !itemName) return;
+      
+      if (!orderItemsMap.has(orderCode)) {
+        orderItemsMap.set(orderCode, new Set());
+      }
+      
+      orderItemsMap.get(orderCode).add(itemName);
+    });
+    
+    // 如果某個 order_code 在同一日期中有多個不同的 itemName，標記為多項目
+    orderItemsMap.forEach((itemNames, orderCode) => {
+      if (itemNames.size > 1) {
+        autoDetectedMultiItems.add(orderCode);
+      }
+    });
+  });
+  
   // 提前處理 09040C 和 12111C 的特殊情況
   const specialItems = new Map();
   
@@ -129,10 +158,11 @@ const prepareLabTableData = (groupedLabs, selectedType = null) => {
         return;
       }
       
-      // 複合測試特殊處理，如 08011C, 09015C
-      if (isMultiItemOrderCode(orderCode)) {
+      // 複合測試特殊處理 - 使用預定義的多項目碼或自動檢測到的多項目碼
+      if (isMultiItemOrderCode(orderCode) || autoDetectedMultiItems.has(orderCode)) {
         // 僅使用縮寫作為鍵，不再包含 orderCode 和 itemKey
-        const key = lab.abbrName || itemKey;
+        // 為確保穿剌液採取液檢查等顯示正確，改用更精確的唯一鍵
+        const key = lab.abbrName || (orderCode + '-' + itemKey);
         
         if (!itemMap.has(key)) {
           itemMap.set(key, {

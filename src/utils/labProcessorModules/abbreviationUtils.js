@@ -104,7 +104,8 @@ const getAbbreviation = (orderCode, unitData = '', itemName = '') => {
     // 當 assayitemName = "U-ACR" 或 "Albumin/Creatinine" 或 包含"/CRE"時
     if (itemName.toLowerCase().includes("u-acr") || 
         itemName.toLowerCase().includes("albumin/creatinine") || 
-        itemName.toLowerCase().includes("/cre") ) {
+        itemName.toLowerCase().includes("/cre")|| 
+        itemName.toLowerCase().includes("acr-u") ) {
       return "UACR";
     }
     
@@ -177,7 +178,7 @@ const isGFRItem = (itemName) => {
 // Helper function to determine if an order code typically contains multiple items
 const isMultiItemOrderCode = (orderCode) => {
   // 更新包含多項目測試的代碼列表
-  const multiItemCodes = ['08011C', '06012C', '09015C', '09041B']; // 添加了肌酐檢查 09015C 和血液氣體分析 09041B
+  const multiItemCodes = ['08011C', '06012C', '09015C', '09041B']; // 添加 16002C 腹水分析等穿剌液採取液檢查
   return multiItemCodes.includes(orderCode);
 };
 

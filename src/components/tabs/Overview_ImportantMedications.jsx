@@ -429,12 +429,12 @@ const Overview_ImportantMedications = ({
   };
 
   return (
-    <Paper sx={{ p: 2, height: "100%" }}>
+    <Paper sx={{ p: 2, height: "auto" }}>
       <TypographySizeWrapper variant="h6" gutterBottom generalDisplaySettings={generalDisplaySettings}>
         關注西藥 - {trackingDays} 天內
       </TypographySizeWrapper>
       {hasData ? (
-        <TableContainer sx={{ maxHeight: 600 }}>
+        <TableContainer>
           <Table size="small" stickyHeader>
             {/* <TableHead>
               <TableRow>
@@ -650,7 +650,7 @@ const Overview_ImportantMedications = ({
         </TableContainer>
       ) : hasMedicationsButNoGroups ? (
         // Fallback view using table format for simplified medication list
-        <TableContainer sx={{ maxHeight: 600 }}>
+        <TableContainer>
           <Table size="small" stickyHeader>
             <TableHead>
               <TableRow>
