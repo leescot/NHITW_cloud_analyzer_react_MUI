@@ -67,7 +67,7 @@ const LabData = ({ groupedLabs, settings, labSettings, generalDisplaySettings })
                   (lab.itemName?.toLowerCase().includes('hb') || 
                    lab.itemName?.toLowerCase().includes('hgb') || 
                    lab.itemName?.toLowerCase().includes('血色素') || 
-                   lab.itemName?.toLowerCase().includes('血紅素'))) {
+                   lab.itemName?.toLowerCase().includes('Hemoglobin'))) {
                 isPreselected = true;
               }
               if (enabledOrderCodes.includes('08011C-Platelet') && 

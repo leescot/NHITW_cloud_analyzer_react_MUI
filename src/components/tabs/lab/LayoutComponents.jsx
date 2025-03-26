@@ -16,14 +16,14 @@ export const VerticalLayout = ({
     <Paper 
       elevation={0} 
       sx={{ 
-        p: 1.5, 
+        p: 1.25, 
         mb: 1, 
         backgroundColor: 'rgba(0, 0, 0, 0.03)', 
         borderRadius: 1
       }}
     >
       {labs.map((lab, labIndex) => (
-        <Box key={labIndex} sx={{ mb: 0.5 }}>
+        <Box key={labIndex} sx={{ mb: 0.15 }}>
           <LabItemDisplay
             lab={lab}
             groupIndex={groupIndex}
@@ -132,14 +132,14 @@ export const MultiColumnLayout = ({
             <Paper 
               elevation={0} 
               sx={{ 
-                p: 1.5, 
+                p: 1.25, 
                 mb: 1, 
                 backgroundColor: 'rgba(0, 0, 0, 0.03)', 
                 borderRadius: 1
               }}
             >
               {columnLabs.map((lab, labIndex) => (
-                <Box key={labIndex} sx={{ mb: 0.5 }}>
+                <Box key={labIndex} sx={{ mb: 0.15 }}>
                   <LabItemDisplay
                     lab={lab}
                     groupIndex={groupIndex}

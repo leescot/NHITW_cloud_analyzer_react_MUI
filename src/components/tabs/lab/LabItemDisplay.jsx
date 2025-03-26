@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Checkbox } from "@mui/material";
+import { Box, Checkbox, FormControlLabel } from "@mui/material";
 import TypographySizeWrapper from "../../utils/TypographySizeWrapper";
 import { getStatusColor, formatReferenceRange } from "../../utils/lab/LabUtilities";
 
@@ -29,44 +29,86 @@ const LabItemDisplay = ({
     <Box sx={{ 
       display: 'flex', 
       alignItems: 'center', 
-      mb: 0.5 
+      mb: 0.25 
     }}>
       {enableCustomCopy && 
        (displayFormat !== 'vertical' && 
-        displayFormat !== 'horizontal') && (
-        <Checkbox 
-          checked={isSelected}
-          onChange={() => handleToggleLabItem(groupIndex, labIndex)}
-          size="small"
+        displayFormat !== 'horizontal') ? (
+        <FormControlLabel
+          control={
+            <Checkbox 
+              checked={isSelected}
+              onChange={() => handleToggleLabItem(groupIndex, labIndex)}
+              size="small"
+              disableRipple
+              sx={{ 
+                color: 'rgba(0, 0, 0, 0.25)',
+                '&.Mui-checked': {
+                  color: '#9c64a6', // 淡紫色 (比 secondary.main 更淡)
+                },
+                padding: 0,
+                marginRight: 0.5
+              }}
+            />
+          }
+          label={
+            <TypographySizeWrapper
+              variant="body2"
+              textSizeType="content"
+              generalDisplaySettings={generalDisplaySettings}
+              style={{
+                color: getStatusColor(lab, highlightAbnormal),
+                display: "inline-block",
+                marginBottom: 0,
+                lineHeight: 1.2
+              }}
+            >
+              {enableAbbrev ? (lab.abbrName || lab.itemName) : lab.itemName}{" "}
+              <span style={{ fontWeight: 'medium' }}>
+                {lab.value}
+              </span>
+              {showUnit && lab.unit && (
+                <span style={{ color: "gray" }}>{` ${lab.unit}`}</span>
+              )}
+              {formatReferenceRange(lab, showReference)}
+            </TypographySizeWrapper>
+          }
           sx={{ 
-            p: 0.5, 
-            mr: 0.5,
-            color: 'rgba(0, 0, 0, 0.25)',
-            '&.Mui-checked': {
-              color: '#9c64a6', // 淡紫色 (比 secondary.main 更淡)
-            }
+            m: 0, 
+            p: 0,
+            alignItems: 'center',
+            '& .MuiCheckbox-root': {
+              padding: 0
+            },
+            '& .MuiFormControlLabel-label': {
+              marginTop: 0,
+              marginLeft: 0
+            },
+            marginLeft: 0,
+            paddingLeft: 0
           }}
         />
+      ) : (
+        <TypographySizeWrapper
+          variant="body2"
+          textSizeType="content"
+          generalDisplaySettings={generalDisplaySettings}
+          style={{
+            color: getStatusColor(lab, highlightAbnormal),
+            display: "inline-block",
+            marginBottom: 0
+          }}
+        >
+          {enableAbbrev ? (lab.abbrName || lab.itemName) : lab.itemName}{" "}
+          <span style={{ fontWeight: 'medium' }}>
+            {lab.value}
+          </span>
+          {showUnit && lab.unit && (
+            <span style={{ color: "gray" }}>{` ${lab.unit}`}</span>
+          )}
+          {formatReferenceRange(lab, showReference)}
+        </TypographySizeWrapper>
       )}
-      <TypographySizeWrapper
-        variant="body2"
-        textSizeType="content"
-        generalDisplaySettings={generalDisplaySettings}
-        style={{
-          color: getStatusColor(lab, highlightAbnormal),
-          display: "inline-block",
-          marginBottom: 0
-        }}
-      >
-        {enableAbbrev ? (lab.abbrName || lab.itemName) : lab.itemName}{" "}
-        <span style={{ fontWeight: 'medium' }}>
-          {lab.value}
-        </span>
-        {showUnit && lab.unit && (
-          <span style={{ color: "gray" }}>{` ${lab.unit}`}</span>
-        )}
-        {formatReferenceRange(lab, showReference)}
-      </TypographySizeWrapper>
     </Box>
   );
 };
