@@ -25,9 +25,12 @@ import {
   Paper,
   Grid,
   Chip,
+  Card,
+  CardHeader,
+  CardContent,
+  FormHelperText,
   Radio,
   RadioGroup,
-  Tooltip,
 } from "@mui/material";
 import MedicationIcon from "@mui/icons-material/Medication";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
@@ -37,7 +40,7 @@ import AddIcon from "@mui/icons-material/Add";
 import ColorLensIcon from "@mui/icons-material/ColorLens";
 import { handleSettingChange } from "../../utils/settingsHelper";
 
-// 导入默认配置
+// 導入預設配置
 import { DEFAULT_ATC5_GROUPS, DEFAULT_ATC5_COLOR_GROUPS } from "../../config/medicationGroups";
 
 const MedicationSettings = () => {
@@ -54,18 +57,22 @@ const MedicationSettings = () => {
     showExternalDrugImage: false,
   });
 
-  // 统一的 ATC5 分组对话框
+  // Dialog states
   const [atc5GroupsDialogOpen, setAtc5GroupsDialogOpen] = useState(false);
+  const [colorSettingsDialogOpen, setColorSettingsDialogOpen] = useState(false);
 
-  // ATC5 Group 编辑状态
+  // ATC5 Group editing states
   const [editingGroup, setEditingGroup] = useState(null);
   const [newGroupName, setNewGroupName] = useState("");
   const [newGroupCodes, setNewGroupCodes] = useState("");
-  const [newGroupColor, setNewGroupColor] = useState("none"); // 新增颜色选择
   const [editMode, setEditMode] = useState(false);
+  
+  // Group Colors Dialog states
+  const [selectedGroup, setSelectedGroup] = useState("");
+  const [selectedColor, setSelectedColor] = useState("");
 
   useEffect(() => {
-    // 加载药物设置
+    // Load medication settings
     chrome.storage.sync.get(
       {
         simplifyMedicineName: true,
@@ -97,17 +104,17 @@ const MedicationSettings = () => {
   }, []);
 
   const handleLocalSettingChange = (key, value) => {
-    // 立即更新本地状态以提高 UI 响应性
+    // Update local state immediately for UI responsiveness
     setSettings((prev) => ({
       ...prev,
       [key]: value,
     }));
 
-    // 然后更新 chrome storage
+    // Then update chrome storage
     handleSettingChange(key, value, setSettings);
   };
 
-  // 打开和关闭对话框
+  // Open and close dialogs
   const handleOpenAtc5GroupsDialog = () => {
     setAtc5GroupsDialogOpen(true);
   };
@@ -116,25 +123,23 @@ const MedicationSettings = () => {
     setEditingGroup(null);
     setNewGroupName("");
     setNewGroupCodes("");
-    setNewGroupColor("none");
     setEditMode(false);
     setAtc5GroupsDialogOpen(false);
   };
 
-  // 查找组的颜色
-  const getGroupColor = (groupName) => {
-    if (settings.atc5ColorGroups.red.includes(groupName)) return "red";
-    if (settings.atc5ColorGroups.orange.includes(groupName)) return "orange";
-    if (settings.atc5ColorGroups.green.includes(groupName)) return "green";
-    return "none";
+  const handleOpenColorSettingsDialog = () => {
+    setColorSettingsDialogOpen(true);
   };
 
-  // ATC5 分组管理函数
+  const handleCloseColorSettingsDialog = () => {
+    setColorSettingsDialogOpen(false);
+  };
+
+  // ATC5 Group management functions
   const handleEditGroup = (groupName) => {
     setEditingGroup(groupName);
     setNewGroupName(groupName);
     setNewGroupCodes(settings.atc5Groups[groupName].join(' '));
-    setNewGroupColor(getGroupColor(groupName));
     setEditMode(true);
   };
 
@@ -142,13 +147,13 @@ const MedicationSettings = () => {
     const updatedGroups = { ...settings.atc5Groups };
     delete updatedGroups[groupName];
     
-    // 首先更新 ATC5 分组
+    // First update the ATC5 groups
     handleLocalSettingChange('atc5Groups', updatedGroups);
     
-    // 然后从任何颜色分配中删除已删除的组
+    // Then also remove the deleted group from any color assignments
     const updatedColorGroups = { ...settings.atc5ColorGroups };
     
-    // 检查所有颜色类别并删除组（如果存在）
+    // Check all color categories and remove the group if present
     ['red', 'orange', 'green'].forEach(color => {
       if (updatedColorGroups[color].includes(groupName)) {
         updatedColorGroups[color] = updatedColorGroups[color].filter(
@@ -157,7 +162,7 @@ const MedicationSettings = () => {
       }
     });
     
-    // 更新颜色组分配
+    // Update color group assignments
     handleLocalSettingChange('atc5ColorGroups', updatedColorGroups);
   };
 
@@ -165,7 +170,6 @@ const MedicationSettings = () => {
     setEditingGroup(null);
     setNewGroupName("");
     setNewGroupCodes("");
-    setNewGroupColor("none");
     setEditMode(true);
   };
 
@@ -183,46 +187,15 @@ const MedicationSettings = () => {
     }
     
     const updatedGroups = { ...settings.atc5Groups };
-    const oldGroupName = editingGroup;
     
-    // 更新分组
-    if (oldGroupName && oldGroupName !== newGroupName) {
-      delete updatedGroups[oldGroupName];
+    // 如果是編輯現有群組且名稱已更改，需要刪除舊的
+    if (editingGroup && editingGroup !== newGroupName) {
+      delete updatedGroups[editingGroup];
     }
     
     updatedGroups[newGroupName] = codes;
+    
     handleLocalSettingChange('atc5Groups', updatedGroups);
-    
-    // 更新颜色分配
-    const updatedColorGroups = { ...settings.atc5ColorGroups };
-    
-    // 从所有颜色组中删除旧的组名（如果存在）
-    ['red', 'orange', 'green'].forEach(color => {
-      // 如果是编辑现有组，删除旧的分配
-      if (oldGroupName) {
-        updatedColorGroups[color] = updatedColorGroups[color].filter(
-          group => group !== oldGroupName
-        );
-      }
-      
-      // 如果是编辑现有组且组名已更改，还需删除新名称的任何现有分配
-      if (oldGroupName !== newGroupName) {
-        updatedColorGroups[color] = updatedColorGroups[color].filter(
-          group => group !== newGroupName
-        );
-      }
-    });
-    
-    // 添加新的颜色分配（如果不是"none"）
-    if (newGroupColor !== "none") {
-      updatedColorGroups[newGroupColor] = [
-        ...updatedColorGroups[newGroupColor], 
-        newGroupName
-      ];
-    }
-    
-    handleLocalSettingChange('atc5ColorGroups', updatedColorGroups);
-    
     setEditMode(false);
     setEditingGroup(null);
   };
@@ -232,32 +205,86 @@ const MedicationSettings = () => {
     setEditingGroup(null);
   };
 
-  const handleResetSettings = () => {
-    // 创建默认组的深拷贝
+  // Get available groups that are not assigned to any color
+  const getAvailableGroups = () => {
+    const assignedGroups = [
+      ...settings.atc5ColorGroups.red,
+      ...settings.atc5ColorGroups.orange,
+      ...settings.atc5ColorGroups.green
+    ];
+    
+    return Object.keys(settings.atc5Groups).filter(
+      group => !assignedGroups.includes(group)
+    );
+  };
+
+  const handleColorGroupChange = (color, groups) => {
+    const updatedColorGroups = {
+      ...settings.atc5ColorGroups,
+      [color]: groups
+    };
+    
+    handleLocalSettingChange('atc5ColorGroups', updatedColorGroups);
+  };
+
+  const handleRemoveFromColor = (color, groupToRemove) => {
+    const updatedGroups = settings.atc5ColorGroups[color].filter(
+      group => group !== groupToRemove
+    );
+    handleColorGroupChange(color, updatedGroups);
+  };
+
+  const handleAddGroupToColor = () => {
+    if (!selectedGroup || !selectedColor) return;
+    
+    const updatedGroups = [...settings.atc5ColorGroups[selectedColor], selectedGroup];
+    handleColorGroupChange(selectedColor, updatedGroups);
+    
+    // Reset selection
+    setSelectedGroup("");
+    setSelectedColor("");
+  };
+
+  const handleResetAtc5Groups = () => {
+    // Create deep copies of the default groups
     const groupsCopy = JSON.parse(JSON.stringify(DEFAULT_ATC5_GROUPS));
     const colorGroupsCopy = JSON.parse(JSON.stringify(DEFAULT_ATC5_COLOR_GROUPS));
     
-    // 将两个设置都更新为默认值
+    // Update both settings to defaults
     handleLocalSettingChange('atc5Groups', groupsCopy);
     handleLocalSettingChange('atc5ColorGroups', colorGroupsCopy);
     
-    // 如果打开，关闭编辑模式
+    // Close the edit mode if open
     setEditMode(false);
     setEditingGroup(null);
   };
 
-  // 为更好显示格式化 ATC 代码 - 两列
+  const handleResetColorGroups = () => {
+    // Create deep copies of the default groups
+    const groupsCopy = JSON.parse(JSON.stringify(DEFAULT_ATC5_GROUPS));
+    const colorGroupsCopy = JSON.parse(JSON.stringify(DEFAULT_ATC5_COLOR_GROUPS));
+    
+    // Update both settings to defaults
+    handleLocalSettingChange('atc5Groups', groupsCopy);
+    handleLocalSettingChange('atc5ColorGroups', colorGroupsCopy);
+    
+    // Reset selection
+    setSelectedGroup("");
+    setSelectedColor("");
+  };
+
+  // Helper function to format ATC codes for better display - two columns
   const formatCodesForDisplay = (codes) => {
     if (codes.length === 0) return null;
     
-    // 为两列布局创建代码对
+    // Create pairs of codes for two-column layout
     const rows = [];
     for (let i = 0; i < codes.length; i += 2) {
       if (i + 1 < codes.length) {
-        // 如果我们有一对
+        // If we have a pair
         rows.push([codes[i], codes[i + 1]]);
       } else {
-        // 如果最后有奇数
+        // If we have an odd number at the end
         rows.push([codes[i]]);
       }
     }
@@ -284,55 +311,6 @@ const MedicationSettings = () => {
         ))}
       </Box>
     );
-  };
-
-  // 根据组的颜色获取显示芯片
-  const getColorChip = (groupName) => {
-    const colorMap = {
-      red: { color: "error", label: "紅" },
-      orange: { color: "warning", label: "橘" },
-      green: { color: "success", label: "綠" },
-      none: { color: "default", label: "無" }
-    };
-    
-    const groupColor = getGroupColor(groupName);
-    const { color, label } = colorMap[groupColor];
-    
-    if (groupColor === "none") return null;
-    
-    return (
-      <Chip 
-        size="small" 
-        label={label}
-        color={color}
-        variant="outlined"
-        icon={<ColorLensIcon />}
-        sx={{ ml: 1 }}
-      />
-    );
-  };
-
-  // 颜色选择标签的样式
-  const getColorLabelStyle = (color) => {
-    const baseStyle = { 
-      borderRadius: 1, 
-      px: 1, 
-      py: 0.5, 
-      display: 'flex', 
-      alignItems: 'center',
-      gap: 0.5
-    };
-    
-    switch (color) {
-      case "red":
-        return { ...baseStyle, bgcolor: '#ffebee', color: 'error.main', border: '1px solid', borderColor: 'error.light' };
-      case "orange":
-        return { ...baseStyle, bgcolor: '#fff3e0', color: 'warning.main', border: '1px solid', borderColor: 'warning.light' };
-      case "green":
-        return { ...baseStyle, bgcolor: '#e8f5e9', color: 'success.main', border: '1px solid', borderColor: 'success.light' };
-      default:
-        return { ...baseStyle, bgcolor: 'grey.100', color: 'text.secondary', border: '1px solid', borderColor: 'grey.300' };
-    }
   };
 
   return (
@@ -409,6 +387,17 @@ const MedicationSettings = () => {
           label="短天數藥物分欄顯示"
         />
 
+        <FormControlLabel
+          control={
+            <Switch
+              checked={settings.enableATC5Colors}
+              onChange={(e) =>
+                handleLocalSettingChange("enableATC5Colors", e.target.checked)
+              }
+            />
+          }
+          label="開啟ATC5變色功能"
+        />
 
         <FormControlLabel
           control={
@@ -421,24 +410,20 @@ const MedicationSettings = () => {
           }
           label="顯示藥物外觀功能(需連接外網)"
         />
-        <FormControlLabel
-          control={
-            <Switch
-              checked={settings.enableATC5Colors}
-              onChange={(e) =>
-                handleLocalSettingChange("enableATC5Colors", e.target.checked)
-              }
-            />
-          }
-          label="開啟ATC5變色功能"
-        />
+        
         {settings.enableATC5Colors && (
-          <Box sx={{ mt: 1, mb: 2, ml: 4 }}>
+          <Box sx={{ mt: 1, mb: 2, ml: 4, display: 'flex', gap: 2 }}>
             <Button 
               variant="outlined" 
               onClick={handleOpenAtc5GroupsDialog}
             >
-              設定ATC5群組與顏色
+              設定ATC群組
+            </Button>
+            <Button 
+              variant="outlined" 
+              onClick={handleOpenColorSettingsDialog}
+            >
+              設定群組顏色
             </Button>
           </Box>
         )}
@@ -468,20 +453,17 @@ const MedicationSettings = () => {
           </Select>
         </FormControl>
 
-        {/* 整合后的 ATC5 分组和颜色对话框 */}
+        {/* ATC5 Groups Dialog */}
         <Dialog 
           open={atc5GroupsDialogOpen} 
           onClose={handleCloseAtc5GroupsDialog}
           fullWidth
           maxWidth="md"
         >
-          <DialogTitle>設定ATC群組與顏色</DialogTitle>
+          <DialogTitle>設定ATC群組</DialogTitle>
           <DialogContent dividers>
-            {/* <Typography variant="body1" gutterBottom>
-              設定ATC組合群組與顏色
-            </Typography> */}
-            <Typography variant="body2" gutterBottom sx={{ color: 'text.secondary' }}>
-              每個群組可以選擇一種顏色或不指定顏色(暫不分組)
+            <Typography variant="body1" gutterBottom>
+              設定不同ATC組合標籤群組
             </Typography>
             
             {!editMode ? (
@@ -511,8 +493,7 @@ const MedicationSettings = () => {
                           <Typography variant="subtitle1" fontWeight="medium">
                             {groupName}
                           </Typography>
-                          {getColorChip(groupName)}
-                          <Box sx={{ display: 'flex', ml: 'auto' }}>
+                          <Box sx={{ display: 'flex', ml: 2 }}>
                             <IconButton size="small" onClick={() => handleEditGroup(groupName)}>
                               <EditIcon fontSize="small" />
                             </IconButton>
@@ -551,58 +532,6 @@ const MedicationSettings = () => {
                       placeholder="例如: M01AA M01AB M01AC M01AE M01AG M01AH"
                     />
                   </Grid>
-                  <Grid item xs={12}>
-                    <Typography variant="subtitle1" gutterBottom>
-                      選擇群組顏色:
-                    </Typography>
-                    <RadioGroup
-                      row
-                      value={newGroupColor}
-                      onChange={(e) => setNewGroupColor(e.target.value)}
-                    >
-                      
-                      <FormControlLabel 
-                        value="red"
-                        control={<Radio color="error" />}
-                        label={
-                          <Box component="span" sx={getColorLabelStyle("red")}>
-                            <ColorLensIcon fontSize="small" />
-                            紅
-                          </Box>
-                        }
-                      />
-                      <FormControlLabel 
-                        value="orange"
-                        control={<Radio color="warning" />}
-                        label={
-                          <Box component="span" sx={getColorLabelStyle("orange")}>
-                            <ColorLensIcon fontSize="small" />
-                            橘
-                          </Box>
-                        }
-                      />
-                      <FormControlLabel 
-                        value="green"
-                        control={<Radio color="success" />}
-                        label={
-                          <Box component="span" sx={getColorLabelStyle("green")}>
-                            <ColorLensIcon fontSize="small" />
-                            綠
-                          </Box>
-                        }
-                      />
-                      <FormControlLabel 
-                        value="none"
-                        control={<Radio />}
-                        label={
-                          <Box component="span" sx={getColorLabelStyle("none")}>
-                            {/* <ColorLensIcon fontSize="small" /> */}
-                            不分組
-                          </Box>
-                        }
-                      />
-                    </RadioGroup>
-                  </Grid>
                 </Grid>
                 <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2, gap: 1 }}>
                   <Button onClick={handleCancelEdit}>取消</Button>
@@ -613,7 +542,220 @@ const MedicationSettings = () => {
           </DialogContent>
           <DialogActions sx={{ justifyContent: 'center' }}>
             <Button 
-              onClick={handleResetSettings}
+              onClick={handleResetAtc5Groups}
+              color="secondary"
+            >
+              ATC設定重置為預設
+            </Button>
+          </DialogActions>
+        </Dialog>
+
+        {/* Group Colors Dialog */}
+        <Dialog 
+          open={colorSettingsDialogOpen} 
+          onClose={handleCloseColorSettingsDialog}
+          fullWidth
+          maxWidth="md"
+        >
+          <DialogTitle>設定群組顏色</DialogTitle>
+          <DialogContent dividers>
+            <Typography variant="body1" gutterBottom>
+              為ATC5群組標籤指定顏色
+            </Typography>
+            <Typography variant="body2" sx={{ mb: 3 }}>
+              每個群組只能指定一種顏色（紅、橘、綠）
+            </Typography>
+            
+            {/* Color Cards */}
+            <Grid container spacing={3}>
+              {/* Red Card */}
+              <Grid item xs={12} md={4}>
+                <Card 
+                  variant="outlined" 
+                  sx={{ 
+                    borderColor: 'red',
+                    mb: 2,
+                    '& .MuiCardHeader-root': {
+                      backgroundColor: '#ffebee'
+                    }
+                  }}
+                >
+                  <CardHeader 
+                    title="紅色群組" 
+                    titleTypographyProps={{ color: 'error' }}
+                    avatar={<ColorLensIcon color="error" />}
+                  />
+                  <CardContent>
+                    {settings.atc5ColorGroups.red.length > 0 ? (
+                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                        {settings.atc5ColorGroups.red.map(group => (
+                          <Chip
+                            key={group}
+                            label={group}
+                            onDelete={() => handleRemoveFromColor('red', group)}
+                            color="error"
+                            variant="outlined"
+                          />
+                        ))}
+                      </Box>
+                    ) : (
+                      <Typography color="text.secondary" variant="body2">
+                        尚未指派任何群組
+                      </Typography>
+                    )}
+                  </CardContent>
+                </Card>
+              </Grid>
+              
+              {/* Orange Card */}
+              <Grid item xs={12} md={4}>
+                <Card 
+                  variant="outlined" 
+                  sx={{ 
+                    borderColor: 'orange',
+                    mb: 2,
+                    '& .MuiCardHeader-root': {
+                      backgroundColor: '#fff3e0'
+                    }
+                  }}
+                >
+                  <CardHeader 
+                    title="橘色群組" 
+                    titleTypographyProps={{ color: 'warning.main' }}
+                    avatar={<ColorLensIcon color="warning" />}
+                  />
+                  <CardContent>
+                    {settings.atc5ColorGroups.orange.length > 0 ? (
+                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                        {settings.atc5ColorGroups.orange.map(group => (
+                          <Chip
+                            key={group}
+                            label={group}
+                            onDelete={() => handleRemoveFromColor('orange', group)}
+                            color="warning"
+                            variant="outlined"
+                          />
+                        ))}
+                      </Box>
+                    ) : (
+                      <Typography color="text.secondary" variant="body2">
+                        尚未指派任何群組
+                      </Typography>
+                    )}
+                  </CardContent>
+                </Card>
+              </Grid>
+              
+              {/* Green Card */}
+              <Grid item xs={12} md={4}>
+                <Card 
+                  variant="outlined" 
+                  sx={{ 
+                    borderColor: 'green',
+                    mb: 2,
+                    '& .MuiCardHeader-root': {
+                      backgroundColor: '#e8f5e9'
+                    }
+                  }}
+                >
+                  <CardHeader 
+                    title="綠色群組" 
+                    titleTypographyProps={{ color: 'success.main' }}
+                    avatar={<ColorLensIcon color="success" />}
+                  />
+                  <CardContent>
+                    {settings.atc5ColorGroups.green.length > 0 ? (
+                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                        {settings.atc5ColorGroups.green.map(group => (
+                          <Chip
+                            key={group}
+                            label={group}
+                            onDelete={() => handleRemoveFromColor('green', group)}
+                            color="success"
+                            variant="outlined"
+                          />
+                        ))}
+                      </Box>
+                    ) : (
+                      <Typography color="text.secondary" variant="body2">
+                        尚未指派任何群組
+                      </Typography>
+                    )}
+                  </CardContent>
+                </Card>
+              </Grid>
+            </Grid>
+            
+            {/* Add Group Assignment Controls */}
+            {getAvailableGroups().length > 0 && (
+              <Box sx={{ mt: 4, p: 2, border: '1px dashed #ccc', borderRadius: 1 }}>
+                <Typography variant="h6" gutterBottom>
+                  新增群組指派
+                </Typography>
+                
+                <Grid container spacing={2} alignItems="center">
+                  <Grid item xs={12} sm={5}>
+                    <FormControl fullWidth>
+                      <InputLabel>選擇群組</InputLabel>
+                      <Select
+                        value={selectedGroup}
+                        onChange={(e) => setSelectedGroup(e.target.value)}
+                        label="選擇群組"
+                      >
+                        {getAvailableGroups().map(group => (
+                          <MenuItem key={group} value={group}>
+                            {group}
+                          </MenuItem>
+                        ))}
+                      </Select>
+                      <FormHelperText>選擇要指派的群組</FormHelperText>
+                    </FormControl>
+                  </Grid>
+                  
+                  <Grid item xs={12} sm={5}>
+                    <FormControl>
+                      <Typography sx={{ mb: 1 }}>指派到顏色：</Typography>
+                      <RadioGroup
+                        row
+                        value={selectedColor}
+                        onChange={(e) => setSelectedColor(e.target.value)}
+                      >
+                        <FormControlLabel 
+                          value="red" 
+                          control={<Radio color="error" />} 
+                          label="紅色" 
+                        />
+                        <FormControlLabel 
+                          value="orange" 
+                          control={<Radio color="warning" />} 
+                          label="橘色" 
+                        />
+                        <FormControlLabel 
+                          value="green" 
+                          control={<Radio color="success" />} 
+                          label="綠色" 
+                        />
+                      </RadioGroup>
+                    </FormControl>
+                  </Grid>
+                  
+                  <Grid item xs={12} sm={2}>
+                    <Button
+                      variant="contained"
+                      onClick={handleAddGroupToColor}
+                      disabled={!selectedGroup || !selectedColor}
+                      fullWidth
+                    >
+                      指派
+                    </Button>
+                  </Grid>
+                </Grid>
+              </Box>
+            )}
+          </DialogContent>
+          <DialogActions sx={{ justifyContent: 'center' }}>
+            <Button 
+              onClick={handleResetColorGroups}
               color="secondary"
             >
               ATC設定重置為預設

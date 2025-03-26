@@ -234,39 +234,41 @@ const MedicationList = ({
 
   // 判斷藥物是否應該以粗體顯示的函數
   const shouldBeBold = (medication) => {
-    if (!settings.enableATC5Colors) return false;
+    // if (!settings.enableATC5Colors) return false;
     
-    let atc5Code = medication.atc_code;
+    // let atc5Code = medication.atc_code;
     
-    if (!atc5Code) return false;
+    // if (!atc5Code) return false;
     
-    if (!settings.atc5Groups || Object.keys(settings.atc5Groups).length === 0) {
-      return false;
-    }
+    // if (!settings.atc5Groups || Object.keys(settings.atc5Groups).length === 0) {
+    //   return false;
+    // }
     
-    const group = Object.entries(settings.atc5Groups).find(([groupName, codes]) => {
-      return codes.some(code => {
-        if (code.length === 7) {
-          return atc5Code === code; // Exact match for 7-character codes
-        } else {
-          return atc5Code.startsWith(code); // Prefix match for shorter codes
-        }
-      });
-    });
+    // const group = Object.entries(settings.atc5Groups).find(([groupName, codes]) => {
+    //   return codes.some(code => {
+    //     if (code.length === 7) {
+    //       return atc5Code === code; // Exact match for 7-character codes
+    //     } else {
+    //       return atc5Code.startsWith(code); // Prefix match for shorter codes
+    //     }
+    //   });
+    // });
     
-    if (!group) return false;
+    // if (!group) return false;
     
-    const groupName = group[0];
+    // const groupName = group[0];
     
-    // 檢查群組是否被分配到顏色
-    const colorGroups = settings.atc5ColorGroups || { red: [], orange: [], green: [] };
+    // // 檢查群組是否被分配到顏色
+    // const colorGroups = settings.atc5ColorGroups || { red: [], orange: [], green: [] };
     
-    // 如果藥物屬於任何有顏色的群組（紅色、橘色或綠色），返回 true
-    return (
-      colorGroups.red.includes(groupName) || 
-      colorGroups.orange.includes(groupName) ||
-      colorGroups.green.includes(groupName)
-    );
+    // // 如果藥物屬於任何有顏色的群組（紅色、橘色或綠色），返回 true
+    // return (
+    //   colorGroups.red.includes(groupName) || 
+    //   colorGroups.orange.includes(groupName) ||
+    //   colorGroups.green.includes(groupName)
+    // );
+    // Always return false to disable bold formatting
+    return false;
   };
   
   // 根據看診類型獲取顏色

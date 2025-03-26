@@ -253,7 +253,7 @@ const Overview_LabTests = ({ groupedLabs = [], labData, overviewSettings = {}, g
                 for (const item of lab.items) {
                   if (containsText(item.itemName, ['WBC', '白血球'])) {
                     wbcItem = {...item, orderCode: '08011C-WBC', date, displayName: 'WBC'};
-                  } else if (containsText(item.itemName, ['Hb', 'HGB', '血色素', '血紅素'])) {
+                  } else if (containsText(item.itemName, ['Hb', 'HGB', '血色素', 'Hemoglobin'])) {
                     hbItem = {...item, orderCode: '08011C-Hb', date, displayName: 'Hb'};
                   } else if (containsText(item.itemName, ['PLT', 'Platelet', '血小板'])) {
                     pltItem = {...item, orderCode: '08011C-Platelet', date, displayName: 'PLT'};
@@ -265,7 +265,7 @@ const Overview_LabTests = ({ groupedLabs = [], labData, overviewSettings = {}, g
                 // Check if this lab's itemName matches WBC, Hb, or PLT
                 if (containsText(lab.itemName, ['WBC', '白血球'])) {
                   wbcItem = {...lab, orderCode: '08011C-WBC', date, displayName: 'WBC'};
-                } else if (containsText(lab.itemName, ['Hb', 'HGB', '血色素', '血紅素'])) {
+                } else if (containsText(lab.itemName, ['Hb', 'HGB', '血色素', 'Hemoglobin'])) {
                   hbItem = {...lab, orderCode: '08011C-Hb', date, displayName: 'Hb'};
                 } else if (containsText(lab.itemName, ['PLT', 'Platelet', '血小板'])) {
                   pltItem = {...lab, orderCode: '08011C-Platelet', date, displayName: 'PLT'};
