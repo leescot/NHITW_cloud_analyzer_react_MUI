@@ -7,7 +7,7 @@
     "build": "vite build && node scripts/build.js",
     "build:zip": "vite build && node scripts/build.js --zip",
     "build:alpha": "vite build && node scripts/build.js --alpha",
-    "test": "vite build && node scripts/build.js --test && npm run dev",
+    "test": "vite build && node scripts/build.js --test && node tests/serve.js",
     "dev": "vite",
     "preview": "vite preview",
     "lint": "eslint .",
@@ -33,6 +33,7 @@
     "eslint-plugin-react": "^7.37.4",
     "eslint-plugin-react-hooks": "^5.0.0",
     "eslint-plugin-react-refresh": "^0.4.18",
-    "globals": "^15.14.0"
+    "globals": "^15.14.0",
+    "mime-types": "^3.0.1"
   }
 }

@@ -47,7 +47,10 @@ export default [
     },
   },
   {
-    files: ['scripts/**/*.js'],
+    files: [
+      'scripts/**/*.js',
+      'tests/serve.js',
+    ],
     languageOptions: {
       globals: globals.node,
     },
