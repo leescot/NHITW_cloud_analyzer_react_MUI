@@ -10,15 +10,17 @@ import { build } from 'esbuild';
 const __filename = fileURLToPath(import.meta.url);
 const __dirname = path.dirname(__filename);
 
+const ROOT = path.dirname(__dirname);
+
 async function bundleContentScript() {
   try {
     // Bundle content script
     await build({
-      entryPoints: [path.resolve(__dirname, '../src/contentScript.jsx')],
+      entryPoints: [path.resolve(ROOT, 'src', 'contentScript.jsx')],
       bundle: true,
       format: 'iife',
       target: 'es2020',
-      outfile: path.resolve(__dirname, '../dist/content.js'),
+      outfile: path.resolve(ROOT, 'dist', 'content.js'),
       minify: true,
       sourcemap: false,
       jsx: 'automatic',
@@ -29,11 +31,11 @@ async function bundleContentScript() {
 
     // Bundle background script separately
     await build({
-      entryPoints: [path.resolve(__dirname, '../src/background.js')],
+      entryPoints: [path.resolve(ROOT, 'src', 'background.js')],
       bundle: true,
       format: 'iife',
       target: 'es2020',
-      outfile: path.resolve(__dirname, '../dist/background.js'),
+      outfile: path.resolve(ROOT, 'dist', 'background.js'),
       minify: true,
       sourcemap: false,
       define: {
@@ -48,9 +50,8 @@ async function bundleContentScript() {
   }
 }
 
-// Recursive copy function
+// Copy a file and automatically create parent folders
 function copyFileSync(source, target) {
-  // If target is a directory, create it
   if (!fs.existsSync(path.dirname(target))) {
     fs.mkdirSync(path.dirname(target), { recursive: true });
   }
@@ -65,8 +66,7 @@ function copyFolderSync(source, target) {
   }
 
   if (fs.lstatSync(source).isDirectory()) {
-    const files = fs.readdirSync(source);
-    files.forEach(file => {
+    for (const file of fs.readdirSync(source)) {
       const sourcePath = path.join(source, file);
       const targetPath = path.join(target, file);
 
@@ -75,7 +75,7 @@ function copyFolderSync(source, target) {
       } else {
         copyFileSync(sourcePath, targetPath);
       }
-    });
+    }
   }
 }
 
@@ -83,33 +83,32 @@ function copyExtensionFiles() {
   try {
     // Copy manifest.json to dist
     copyFileSync(
-      path.resolve(__dirname, '../public/manifest.json'),
-      path.resolve(__dirname, '../dist/manifest.json')
+      path.resolve(ROOT, 'public', 'manifest.json'),
+      path.resolve(ROOT, 'dist', 'manifest.json')
     );
 
     // Copy popup.html to dist
     copyFileSync(
-      path.resolve(__dirname, '../public/popup.html'),
-      path.resolve(__dirname, '../dist/popup.html')
+      path.resolve(ROOT, 'public', 'popup.html'),
+      path.resolve(ROOT, 'dist', 'popup.html')
     );
 
     // Create images directory if it doesn't exist
-    const distImagesDir = path.resolve(__dirname, '../dist/images');
+    const distImagesDir = path.resolve(ROOT, 'dist', 'images');
     if (!fs.existsSync(distImagesDir)) {
       fs.mkdirSync(distImagesDir, { recursive: true });
     }
 
     // Check if the images directory exists in public
-    const publicImagesDir = path.resolve(__dirname, '../public/images');
+    const publicImagesDir = path.resolve(ROOT, 'public', 'images');
     if (fs.existsSync(publicImagesDir)) {
       // Copy the images folder
       copyFolderSync(publicImagesDir, distImagesDir);
     } else {
-      console.log('Images directory not found, creating empty directory');
-      // Create placeholder image files
-      ['icon16.png', 'icon48.png', 'icon128.png'].forEach(icon => {
+      console.log('Images directory not found, creating placeholder image files');
+      for (const icon of ['icon16.png', 'icon48.png', 'icon128.png']) {
         fs.writeFileSync(path.resolve(distImagesDir, icon), '');
-      });
+      }
     }
 
     console.log('Extension files copied successfully');
@@ -122,7 +121,7 @@ function copyExtensionFiles() {
 function createZip(filename) {
   try {
     // Create zip directory if it doesn't exist
-    const zipDir = path.resolve(__dirname, '../zip');
+    const zipDir = path.resolve(ROOT, 'zip');
     if (!fs.existsSync(zipDir)) {
       fs.mkdirSync(zipDir, { recursive: true });
     }
@@ -130,7 +129,7 @@ function createZip(filename) {
     const zipFilePath = path.resolve(zipDir, filename);
 
     // Check if dist directory exists
-    const distDir = path.resolve(__dirname, '../dist');
+    const distDir = path.resolve(ROOT, 'dist');
     if (!fs.existsSync(distDir)) {
       console.error('Error: dist directory does not exist. Run build first.');
       process.exit(1);
@@ -198,7 +197,7 @@ Options:
     const dateStr = date.toISOString().split('T')[0].replace(/-/g, '');
 
     // Get version from package.json
-    const packageJson = JSON.parse(fs.readFileSync(path.resolve(__dirname, '../package.json'), 'utf8'));
+    const packageJson = JSON.parse(fs.readFileSync(path.resolve(ROOT, 'package.json'), 'utf8'));
     const version = packageJson.version;
 
     if (args.values.zip) {
