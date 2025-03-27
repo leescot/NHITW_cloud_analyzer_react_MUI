@@ -12,7 +12,7 @@ const __dirname = path.dirname(__filename);
 
 const ROOT = path.dirname(__dirname);
 
-async function bundleContentScript() {
+async function bundleContentScript({sourcemap = false, minify = true} = {}) {
   try {
     // Bundle content script
     await build({
@@ -21,8 +21,8 @@ async function bundleContentScript() {
       format: 'iife',
       target: 'es2020',
       outfile: path.resolve(ROOT, 'dist', 'content.js'),
-      minify: true,
-      sourcemap: false,
+      minify,
+      sourcemap,
       jsx: 'automatic',
       define: {
         'process.env.NODE_ENV': '"production"'
@@ -36,8 +36,8 @@ async function bundleContentScript() {
       format: 'iife',
       target: 'es2020',
       outfile: path.resolve(ROOT, 'dist', 'background.js'),
-      minify: true,
-      sourcemap: false,
+      minify,
+      sourcemap,
       define: {
         'process.env.NODE_ENV': '"production"'
       }
@@ -193,7 +193,7 @@ Options:
   }
 
   if (args.values.test) {
-    await bundleContentScript();
+    await bundleContentScript({sourcemap: true});
     await copyExtensionFiles();
 
     for (const file of ['manifest.json', 'test.html']) {

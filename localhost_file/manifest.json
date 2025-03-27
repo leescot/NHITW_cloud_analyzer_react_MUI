@@ -41,7 +41,7 @@
   ],
   "web_accessible_resources": [
     {
-      "resources": ["test.html", "drug-images.html", "drug-images.js"],
+      "resources": ["test.html", "content.js.map", "drug-images.html", "drug-images.js"],
       "matches": ["<all_urls>"]
     }
   ]
