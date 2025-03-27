@@ -171,6 +171,9 @@ async function main() {
       alpha: {
         type: 'boolean',
       },
+      test: {
+        type: 'boolean',
+      }
     },
     allowPositionals: true,
   });
@@ -183,8 +186,24 @@ Options:
     --help | -h      Display usage help.
     --zip            Build a zip bundle under \`zip/\`.
     --alpha          Build an alpha zip bundle under \`zip/\`.
+    --test           Build and distribute a local test version.
 `;
     process.stdout.write(usage);
+    return;
+  }
+
+  if (args.values.test) {
+    await bundleContentScript();
+    await copyExtensionFiles();
+
+    for (const file of ['manifest.json', 'test.html']) {
+      copyFileSync(
+        path.resolve(ROOT, 'localhost_file', file),
+        path.resolve(ROOT, 'dist', file),
+      );
+    }
+
+    console.log(`Successfully copied local test files`);
     return;
   }
 

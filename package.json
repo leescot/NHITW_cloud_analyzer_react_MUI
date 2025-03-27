@@ -8,6 +8,7 @@
     "build": "vite build && node scripts/build.js",
     "build:zip": "vite build && node scripts/build.js --zip",
     "build:alpha": "vite build && node scripts/build.js --alpha",
+    "test": "vite build && node scripts/build.js --test && npm run dev",
     "lint": "eslint .",
     "preview": "vite preview"
   },
