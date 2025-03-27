@@ -5,9 +5,9 @@
   "type": "module",
   "scripts": {
     "dev": "vite",
-    "build": "vite build && node scripts/bundle-content.js && node scripts/copy-files.js",
-    "build:zip": "npm run build && node scripts/create-zip.js",
-    "build:alpha": "npm run build && node scripts/create-alpha-zip.js",
+    "build": "vite build && node scripts/build.js",
+    "build:zip": "vite build && node scripts/build.js --zip",
+    "build:alpha": "vite build && node scripts/build.js --alpha",
     "lint": "eslint .",
     "preview": "vite preview"
   },
