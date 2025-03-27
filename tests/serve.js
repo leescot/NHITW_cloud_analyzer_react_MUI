@@ -17,6 +17,8 @@ async function serve({root = ROOT, port = PORT, verbose}) {
     // simple routing
     if (pathname === './') {
       pathname = './index.html';
+    } else if (pathname.startsWith('./src/')) {
+      pathname = '../' + pathname.slice(2);
     }
 
     const filePath = path.join(root, pathname);
