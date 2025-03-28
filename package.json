@@ -18,7 +18,7 @@
     "@mui/icons-material": "^6.4.8",
     "@mui/material": "^6.4.8",
     "@vitejs/plugin-react": "^4.3.4",
-    "esbuild": "^0.20.0",
+    "esbuild": "^0.25.1",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
     "react-markdown": "^10.1.0",
