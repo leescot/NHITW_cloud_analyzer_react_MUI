@@ -1,5 +1,5 @@
 // 參考範圍處理相關函數
-import { getCustomReferenceRange } from './customReferenceRanges';
+import { getCustomReferenceRange } from './customReferenceRanges.js';
 
 // Helper function to check if a reference range is of the form [0.000][0.000]
 const isZeroReferenceRange = (referenceStr) => {
