@@ -6,8 +6,8 @@ export const chineseMedProcessor = {
     }
 
     try {
-      // 將資料依照日期和 ICD 代碼分組
-      const grouped = this.groupChineseMedsByDateAndICD(data.rObject);
+      // 將資料分組
+      const grouped = this.groupChineseMeds(data.rObject);
 
       // 轉換為陣列並依日期排序
       const sortedGroups = this.sortGroupedData(grouped);
@@ -21,8 +21,8 @@ export const chineseMedProcessor = {
     }
   },
 
-  // 將中藥資料依照日期和 ICD 代碼分組
-  groupChineseMedsByDateAndICD(medications) {
+  // 將中藥資料分組
+  groupChineseMeds(medications) {
     return medications.reduce((acc, med) => {
       if (!med.icd_code) { return acc; }
 
@@ -30,7 +30,14 @@ export const chineseMedProcessor = {
       const date = this.formatDate(med.func_date);
       if (!date) { return acc; }
 
-      const key = `${date}_${med.icd_code}`;
+      // 日期 > 院所 > ICD > 用藥天數 > 用藥頻率
+      const key = JSON.stringify([
+        date,
+        med.hosp,
+        med.icd_code,
+        med.day,
+        med.drug_fre,
+      ]);
 
       if (!acc[key]) {
         acc[key] = this.createNewGroup(med, date);
@@ -72,7 +79,12 @@ export const chineseMedProcessor = {
       hosp: hospParts[0],  // First part of hosp (hospital name)
       visitType: visitType, // Add the visitType field
       days: med.day,
-      medications: []
+      get dosage() {
+        const value = this.medications.reduce((acc, med) => acc + med.dosage, 0);
+        Object.defineProperty(this, 'dosage', {value});
+        return value;
+      },
+      medications: [],
     };
 
     return group;
@@ -159,9 +171,37 @@ export const chineseMedProcessor = {
   sortGroupedData(grouped) {
     return Object.values(grouped)
       .sort((a, b) => {
-        const dateA = new Date(a.date.replace(/\//g, '-'));
-        const dateB = new Date(b.date.replace(/\//g, '-'));
-        return dateB - dateA;
+        // date
+        let va = new Date(a.date.replace(/\//g, '-'));
+        let vb = new Date(b.date.replace(/\//g, '-'));
+        if (vb > va) { return 1; }
+        if (vb < va) { return -1; }
+
+        // hosp
+        va = a.hosp;
+        vb = b.hosp;
+        if (vb > va) { return 1; }
+        if (vb < va) { return -1; }
+
+        // ICD
+        va = a.icd_code;
+        vb = b.icd_code;
+        if (vb > va) { return 1; }
+        if (vb < va) { return -1; }
+
+        // days
+        va = a.days;
+        vb = b.days;
+        if (vb > va) { return 1; }
+        if (vb < va) { return -1; }
+
+        // dosage
+        va = a.dosage;
+        vb = b.dosage;
+        if (vb > va) { return 1; }
+        if (vb < va) { return -1; }
+
+        return 0;
       });
   },
 

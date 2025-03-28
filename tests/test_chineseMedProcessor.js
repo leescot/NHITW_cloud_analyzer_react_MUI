@@ -146,8 +146,9 @@ describe('utils/chineseMedProcessor', function () {
           "icd_code": "I679",
           "icd_name": "診斷欠明之腦血管疾病",
           "hosp": "測試院所",
-          "days": 7,
           "visitType": "門診",
+          "days": 7,
+          "dosage": 70,
           "medications": [
             {
               "name": "小續命湯",
@@ -180,8 +181,9 @@ describe('utils/chineseMedProcessor', function () {
           "icd_code": "I679",
           "icd_name": "診斷欠明之腦血管疾病",
           "hosp": "測試院所",
-          "days": 7,
           "visitType": "門診",
+          "days": 7,
+          "dosage": 87.5,
           "medications": [
             {
               "name": "小續命湯",
@@ -226,7 +228,172 @@ describe('utils/chineseMedProcessor', function () {
       assert.deepEqual(result, expected);
     });
 
-    it('should group meds by ICD if same date', function () {
+    it('should group meds by hosp if same date', function () {
+      const input = {
+        "rObject": [
+          {
+            "hosp_id": "0000000001",
+            "hosp": "院所甲;門診;0000000001",
+            "icd_cname": "喉嚨痛",
+            "order_code": "A033312",
+            "drug_multi_mark": "Y",
+            "drug_perscrn_name": "止嗽散   ",
+            "cdrug_sosc": "14",
+            "cdrug_sosc_name": "袪痰之劑",
+            "drug_fre": "TIDPC PO",
+            "day": 7,
+            "cdrug_dose_name": "濃縮散劑",
+            "order_qty": 35,
+            "func_date": "2024-07-30T00:00:00",
+            "cure_e_date": null,
+            "func_seq_no": "0005",
+            "icd_code": "R070",
+            "fee_ym": null,
+            "cdrug_name": "“晉安”止嗽散濃縮散",
+            "r": 91
+          },
+          {
+            "hosp_id": "0000000001",
+            "hosp": "院所甲;門診;0000000001",
+            "icd_cname": "喉嚨痛",
+            "order_code": "A035578",
+            "drug_multi_mark": "N",
+            "drug_perscrn_name": "甘草",
+            "cdrug_sosc": null,
+            "cdrug_sosc_name": null,
+            "drug_fre": "TIDPC PO",
+            "day": 7,
+            "cdrug_dose_name": "濃縮顆粒劑",
+            "order_qty": 14,
+            "func_date": "2024-07-30T00:00:00",
+            "cure_e_date": null,
+            "func_seq_no": "0005",
+            "icd_code": "R070",
+            "fee_ym": null,
+            "cdrug_name": "“天明”甘草濃縮細粒",
+            "r": 92
+          },
+          {
+            "cdrug_dose_name": "濃縮散劑",
+            "cdrug_name": "”仙豐”藿香正氣散濃縮散",
+            "cdrug_sosc": "05",
+            "cdrug_sosc_name": "和解之劑",
+            "cure_e_date": null,
+            "day": 7,
+            "drug_fre": "BIDPC",
+            "drug_multi_mark": "Y",
+            "drug_perscrn_name": "藿香正氣散(丸)",
+            "fee_ym": "2024-07-01T00:00:00",
+            "func_date": "2024-07-30T00:00:00",
+            "func_seq_no": "0024",
+            "hosp": "院所乙;門診;0000000002",
+            "hosp_id": "0000000002",
+            "icd_cname": "喉嚨痛",
+            "icd_code": "R070",
+            "order_code": "A034408",
+            "order_qty": 24.5,
+            "r": 107
+          },
+          {
+            "cdrug_dose_name": "濃縮散劑",
+            "cdrug_name": "“仙豐”桔梗濃縮散",
+            "cdrug_sosc": null,
+            "cdrug_sosc_name": null,
+            "cure_e_date": null,
+            "day": 7,
+            "drug_fre": "BIDPC",
+            "drug_multi_mark": "N",
+            "drug_perscrn_name": "桔梗",
+            "fee_ym": "2024-07-01T00:00:00",
+            "func_date": "2024-07-30T00:00:00",
+            "func_seq_no": "0024",
+            "hosp": "院所乙;門診;0000000002",
+            "hosp_id": "0000000002",
+            "icd_cname": "喉嚨痛",
+            "icd_code": "R070",
+            "order_code": "A042851",
+            "order_qty": 3.5,
+            "r": 108
+          }
+        ]
+      };
+      const expected = [
+        {
+          "date": "2024/07/30",
+          "icd_code": "R070",
+          "icd_name": "喉嚨痛",
+          "hosp": "院所甲",
+          "visitType": "門診",
+          "days": 7,
+          "dosage": 49,
+          "medications": [
+            {
+              "name": "止嗽散",
+              "category": "袪痰之劑",
+              "dosage": 35,
+              "frequency": "TIDPC PO",
+              "days": 7,
+              "type": "濃縮散劑",
+              "isMulti": true,
+              "sosc_name": "袪痰之劑",
+              "perDosage": "1.7",
+              "dailyDosage": "5"
+            },
+            {
+              "name": "甘草",
+              "category": null,
+              "dosage": 14,
+              "frequency": "TIDPC PO",
+              "days": 7,
+              "type": "濃縮顆粒劑",
+              "isMulti": false,
+              "sosc_name": "",
+              "perDosage": "0.7",
+              "dailyDosage": "2"
+            }
+          ]
+        },
+        {
+          "date": "2024/07/30",
+          "icd_code": "R070",
+          "icd_name": "喉嚨痛",
+          "hosp": "院所乙",
+          "visitType": "門診",
+          "days": 7,
+          "dosage": 28,
+          "medications": [
+            {
+              "name": "藿香正氣散(丸)",
+              "category": "和解之劑",
+              "dosage": 24.5,
+              "frequency": "BIDPC",
+              "days": 7,
+              "type": "濃縮散劑",
+              "isMulti": true,
+              "sosc_name": "和解之劑",
+              "perDosage": "1.7",
+              "dailyDosage": "3.5"
+            },
+            {
+              "name": "桔梗",
+              "category": null,
+              "dosage": 3.5,
+              "frequency": "BIDPC",
+              "days": 7,
+              "type": "濃縮散劑",
+              "isMulti": false,
+              "sosc_name": "",
+              "perDosage": "0.2",
+              "dailyDosage": "0.5"
+            }
+          ]
+        }
+      ];
+      const result = chineseMedProcessor.processChineseMedData(input);
+      assert.deepEqual(result, expected);
+    });
+
+    it('should group meds by ICD if same date and hosp', function () {
       const input = {
         "rObject": [
           {
@@ -302,6 +469,7 @@ describe('utils/chineseMedProcessor', function () {
           "hosp": "測試院所",
           "visitType": "門診",
           "days": 7,
+          "dosage": 63,
           "medications": [
             {
               "name": "小續命湯",
@@ -324,6 +492,7 @@ describe('utils/chineseMedProcessor', function () {
           "hosp": "測試院所",
           "visitType": "門診",
           "days": 7,
+          "dosage": 7,
           "medications": [
             {
               "name": "延胡索",
@@ -346,6 +515,293 @@ describe('utils/chineseMedProcessor', function () {
           "hosp": "測試院所",
           "visitType": "門診",
           "days": 7,
+          "dosage": 70,
+          "medications": [
+            {
+              "name": "小續命湯",
+              "category": "袪風之劑",
+              "dosage": 70,
+              "frequency": "TIDPC PO",
+              "days": 7,
+              "type": "濃縮顆粒劑",
+              "isMulti": true,
+              "sosc_name": "袪風之劑",
+              "perDosage": "3.3",
+              "dailyDosage": "10"
+            }
+          ]
+        }
+      ];
+      const result = chineseMedProcessor.processChineseMedData(input);
+      assert.deepEqual(result, expected);
+    });
+
+    it('should group meds by days if same date, hosp, and ICD', function () {
+      const input = {
+        "rObject": [
+          {
+            "cdrug_dose_name": "濃縮顆粒劑",
+            "cdrug_name": "“科達”小續命湯濃縮細粒",
+            "cdrug_sosc": "08",
+            "cdrug_sosc_name": "袪風之劑",
+            "cure_e_date": null,
+            "day": 14,
+            "drug_fre": "TIDPC PO",
+            "drug_multi_mark": "Y",
+            "drug_perscrn_name": "小續命湯 ",
+            "fee_ym": null,
+            "func_date": "2025-03-26T00:00:00",
+            "func_seq_no": "0044",
+            "hosp": "測試院所;門診;0000000000",
+            "hosp_id": "0000000000",
+            "icd_cname": "診斷欠明之腦血管疾病",
+            "icd_code": "I679",
+            "order_code": "A031463",
+            "order_qty": 126,
+            "r": 2
+          },
+          {
+            "cdrug_dose_name": "濃縮顆粒劑",
+            "cdrug_name": "“科達”延胡索濃縮細粒",
+            "cdrug_sosc": null,
+            "cdrug_sosc_name": null,
+            "cure_e_date": null,
+            "day": 7,
+            "drug_fre": "TIDPC PO",
+            "drug_multi_mark": "N",
+            "drug_perscrn_name": "延胡索",
+            "fee_ym": null,
+            "func_date": "2025-03-26T00:00:00",
+            "func_seq_no": "0044",
+            "hosp": "測試院所;門診;0000000000",
+            "hosp_id": "0000000000",
+            "icd_cname": "診斷欠明之腦血管疾病",
+            "icd_code": "I679",
+            "order_code": "A032905",
+            "order_qty": 7,
+            "r": 13
+          },
+          {
+            "cdrug_dose_name": "濃縮顆粒劑",
+            "cdrug_name": "“科達”小續命湯濃縮細粒",
+            "cdrug_sosc": "08",
+            "cdrug_sosc_name": "袪風之劑",
+            "cure_e_date": null,
+            "day": 7,
+            "drug_fre": "TIDPC PO",
+            "drug_multi_mark": "Y",
+            "drug_perscrn_name": "小續命湯 ",
+            "fee_ym": null,
+            "func_date": "2025-03-19T00:00:00",
+            "func_seq_no": "0040",
+            "hosp": "測試院所;門診;0000000000",
+            "hosp_id": "0000000000",
+            "icd_cname": "診斷欠明之腦血管疾病",
+            "icd_code": "I679",
+            "order_code": "A031463",
+            "order_qty": 70,
+            "r": 5
+          }
+        ]
+      };
+      const expected = [
+        {
+          "date": "2025/03/26",
+          "icd_code": "I679",
+          "icd_name": "診斷欠明之腦血管疾病",
+          "hosp": "測試院所",
+          "visitType": "門診",
+          "days": 14,
+          "dosage": 126,
+          "medications": [
+            {
+              "name": "小續命湯",
+              "category": "袪風之劑",
+              "dosage": 126,
+              "frequency": "TIDPC PO",
+              "days": 14,
+              "type": "濃縮顆粒劑",
+              "isMulti": true,
+              "sosc_name": "袪風之劑",
+              "perDosage": "3",
+              "dailyDosage": "9"
+            }
+          ]
+        },
+        {
+          "date": "2025/03/26",
+          "icd_code": "I679",
+          "icd_name": "診斷欠明之腦血管疾病",
+          "hosp": "測試院所",
+          "visitType": "門診",
+          "days": 7,
+          "dosage": 7,
+          "medications": [
+            {
+              "name": "延胡索",
+              "category": null,
+              "dosage": 7,
+              "frequency": "TIDPC PO",
+              "days": 7,
+              "type": "濃縮顆粒劑",
+              "isMulti": false,
+              "sosc_name": "",
+              "perDosage": "0.3",
+              "dailyDosage": "1"
+            }
+          ]
+        },
+        {
+          "date": "2025/03/19",
+          "icd_code": "I679",
+          "icd_name": "診斷欠明之腦血管疾病",
+          "hosp": "測試院所",
+          "visitType": "門診",
+          "days": 7,
+          "dosage": 70,
+          "medications": [
+            {
+              "name": "小續命湯",
+              "category": "袪風之劑",
+              "dosage": 70,
+              "frequency": "TIDPC PO",
+              "days": 7,
+              "type": "濃縮顆粒劑",
+              "isMulti": true,
+              "sosc_name": "袪風之劑",
+              "perDosage": "3.3",
+              "dailyDosage": "10"
+            }
+          ]
+        }
+      ];
+      const result = chineseMedProcessor.processChineseMedData(input);
+      assert.deepEqual(result, expected);
+    });
+
+    it('should group meds by freq if same date, hosp, ICD, and days', function () {
+      const input = {
+        "rObject": [
+          {
+            "cdrug_dose_name": "濃縮顆粒劑",
+            "cdrug_name": "“科達”小續命湯濃縮細粒",
+            "cdrug_sosc": "08",
+            "cdrug_sosc_name": "袪風之劑",
+            "cure_e_date": null,
+            "day": 7,
+            "drug_fre": "TIDPC PO",
+            "drug_multi_mark": "Y",
+            "drug_perscrn_name": "小續命湯 ",
+            "fee_ym": null,
+            "func_date": "2025-03-26T00:00:00",
+            "func_seq_no": "0044",
+            "hosp": "測試院所;門診;0000000000",
+            "hosp_id": "0000000000",
+            "icd_cname": "診斷欠明之腦血管疾病",
+            "icd_code": "I679",
+            "order_code": "A031463",
+            "order_qty": 63,
+            "r": 2
+          },
+          {
+            "cdrug_dose_name": "濃縮顆粒劑",
+            "cdrug_name": "“科達”延胡索濃縮細粒",
+            "cdrug_sosc": null,
+            "cdrug_sosc_name": null,
+            "cure_e_date": null,
+            "day": 7,
+            "drug_fre": "HS PO",
+            "drug_multi_mark": "N",
+            "drug_perscrn_name": "延胡索",
+            "fee_ym": null,
+            "func_date": "2025-03-26T00:00:00",
+            "func_seq_no": "0044",
+            "hosp": "測試院所;門診;0000000000",
+            "hosp_id": "0000000000",
+            "icd_cname": "診斷欠明之腦血管疾病",
+            "icd_code": "I679",
+            "order_code": "A032905",
+            "order_qty": 7,
+            "r": 13
+          },
+          {
+            "cdrug_dose_name": "濃縮顆粒劑",
+            "cdrug_name": "“科達”小續命湯濃縮細粒",
+            "cdrug_sosc": "08",
+            "cdrug_sosc_name": "袪風之劑",
+            "cure_e_date": null,
+            "day": 7,
+            "drug_fre": "TIDPC PO",
+            "drug_multi_mark": "Y",
+            "drug_perscrn_name": "小續命湯 ",
+            "fee_ym": null,
+            "func_date": "2025-03-19T00:00:00",
+            "func_seq_no": "0040",
+            "hosp": "測試院所;門診;0000000000",
+            "hosp_id": "0000000000",
+            "icd_cname": "診斷欠明之腦血管疾病",
+            "icd_code": "I679",
+            "order_code": "A031463",
+            "order_qty": 70,
+            "r": 5
+          }
+        ]
+      };
+      const expected = [
+        {
+          "date": "2025/03/26",
+          "icd_code": "I679",
+          "icd_name": "診斷欠明之腦血管疾病",
+          "hosp": "測試院所",
+          "visitType": "門診",
+          "days": 7,
+          "dosage": 63,
+          "medications": [
+            {
+              "name": "小續命湯",
+              "category": "袪風之劑",
+              "dosage": 63,
+              "frequency": "TIDPC PO",
+              "days": 7,
+              "type": "濃縮顆粒劑",
+              "isMulti": true,
+              "sosc_name": "袪風之劑",
+              "perDosage": "3",
+              "dailyDosage": "9"
+            }
+          ]
+        },
+        {
+          "date": "2025/03/26",
+          "icd_code": "I679",
+          "icd_name": "診斷欠明之腦血管疾病",
+          "hosp": "測試院所",
+          "visitType": "門診",
+          "days": 7,
+          "dosage": 7,
+          "medications": [
+            {
+              "name": "延胡索",
+              "category": null,
+              "dosage": 7,
+              "frequency": "HS PO",
+              "days": 7,
+              "type": "濃縮顆粒劑",
+              "isMulti": false,
+              "sosc_name": "",
+              "perDosage": "1",
+              "dailyDosage": "1"
+            }
+          ]
+        },
+        {
+          "date": "2025/03/19",
+          "icd_code": "I679",
+          "icd_name": "診斷欠明之腦血管疾病",
+          "hosp": "測試院所",
+          "visitType": "門診",
+          "days": 7,
+          "dosage": 70,
           "medications": [
             {
               "name": "小續命湯",
@@ -461,6 +917,7 @@ describe('utils/chineseMedProcessor', function () {
           "hosp": "測試院所",
           "visitType": "門診",
           "days": 7,
+          "dosage": 80.5,
           "medications": [
             {
               "name": "小續命湯",
@@ -590,6 +1047,7 @@ describe('utils/chineseMedProcessor', function () {
           "hosp": "測試院所",
           "visitType": "門診",
           "days": 7,
+          "dosage": 80.5,
           "medications": [
             {
               "name": "小續命湯",
@@ -719,6 +1177,7 @@ describe('utils/chineseMedProcessor', function () {
           "hosp": "測試院所",
           "visitType": "門診",
           "days": 7,
+          "dosage": 80.5,
           "medications": [
             {
               "name": "小續命湯",
@@ -845,6 +1304,7 @@ describe('utils/chineseMedProcessor', function () {
           "icd_name": "診斷欠明之腦血管疾病",
           "hosp": "測試院所",
           "days": 7,
+          "dosage": 80.5,
           "visitType": "門診",
           "medications": [
             {
@@ -911,6 +1371,7 @@ describe('utils/chineseMedProcessor', function () {
           "icd_name": "診斷欠明之腦血管疾病",
           "hosp": "測試院所",
           "days": 7,
+          "dosage": 63,
           "visitType": "會診",
           "medications": [
             {
@@ -1082,7 +1543,7 @@ describe('utils/chineseMedProcessor', function () {
     });
   });
 
-  describe.skip('.groupChineseMedsByDateAndICD');
+  describe.skip('.groupChineseMeds');
 
   describe('.formatDate', function () {
     it('should return YYYY/MM/DD format', function () {
