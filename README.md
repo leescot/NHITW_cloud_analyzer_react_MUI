@@ -23,9 +23,7 @@
 3. 執行以下命令安裝相依套件並建置專案：
 
    ```
-   npm install
-   npm install @mui/material @emotion/react @emotion/styled @mui/icons-material
-   npm run build
+   npm install --omit=dev && npm run build
    ```
 
 4. 在 Chrome 瀏覽器中，前往 `chrome://extensions/`

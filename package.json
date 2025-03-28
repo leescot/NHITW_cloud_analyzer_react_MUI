@@ -4,35 +4,35 @@
   "version": "1.1.4",
   "type": "module",
   "scripts": {
-    "dev": "vite",
     "build": "vite build && node scripts/build.js",
     "build:zip": "vite build && node scripts/build.js --zip",
     "build:alpha": "vite build && node scripts/build.js --alpha",
     "test": "vite build && node scripts/build.js --test && npm run dev",
-    "lint": "eslint .",
-    "preview": "vite preview"
+    "dev": "vite",
+    "preview": "vite preview",
+    "lint": "eslint ."
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
     "@emotion/styled": "^11.14.0",
     "@mui/icons-material": "^6.4.8",
     "@mui/material": "^6.4.8",
+    "@vitejs/plugin-react": "^4.3.4",
+    "esbuild": "^0.20.0",
     "react": "^19.0.0",
     "react-dom": "^19.0.0",
-    "react-markdown": "^10.1.0"
+    "react-markdown": "^10.1.0",
+    "vite": "^6.1.0"
   },
   "devDependencies": {
     "@eslint/js": "^9.19.0",
     "@types/react": "^19.0.8",
     "@types/react-dom": "^19.0.3",
-    "@vitejs/plugin-react": "^4.3.4",
-    "esbuild": "^0.20.0",
     "eslint": "^9.19.0",
     "eslint-plugin-react": "^7.37.4",
     "eslint-plugin-react-hooks": "^5.0.0",
     "eslint-plugin-react-refresh": "^0.4.18",
     "fs-extra": "^11.1.1",
-    "globals": "^15.14.0",
-    "vite": "^6.1.0"
+    "globals": "^15.14.0"
   }
 }
