@@ -56,15 +56,6 @@ const ChineseMedicine = ({
       });
   };
 
-  // 依照每日劑量降序排序藥品
-  const sortMedicationsByDailyDosage = (medications) => {
-    return [...medications].sort((a, b) => {
-      const dosageA = parseFloat(a.dailyDosage) || 0;
-      const dosageB = parseFloat(b.dailyDosage) || 0;
-      return dosageB - dosageA; // 降序排列
-    });
-  };
-
   return (
     <>
       {groupedChineseMeds.length === 0 ? (
@@ -78,7 +69,7 @@ const ChineseMedicine = ({
       ) : (
         groupedChineseMeds.map((group, index) => {
           // 排序藥品
-          const sortedMedications = sortMedicationsByDailyDosage(group.medications);
+          const sortedMedications = chineseMedProcessor.sortMedicationsByDailyDosage(group.medications);
 
           return (
             <Box key={index} sx={{ mb: 3 }}>

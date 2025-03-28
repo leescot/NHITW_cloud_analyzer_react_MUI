@@ -165,6 +165,31 @@ export const chineseMedProcessor = {
       });
   },
 
+  // 依照每日劑量降序排序藥品
+  sortMedicationsByDailyDosage(medications) {
+    return [...medications].sort((a, b) => {
+      const dosageA = parseFloat(a.dailyDosage) || 0;
+      const dosageB = parseFloat(b.dailyDosage) || 0;
+      return dosageB - dosageA; // 降序排列
+    });
+  },
+
+  getMedicationText(med, format, groupInfo) {
+    const nameText = `${med.name}`;
+    const dosageText = `${med.dailyDosage}g ${med.frequency}`;
+    const effectText = med.sosc_name && groupInfo.showEffectName ? ` - ${med.sosc_name}` : '';
+
+    switch (format) {
+      case 'nameWithDosageVertical':
+      case 'nameWithDosageHorizontal':
+        return `${nameText} ${dosageText}${effectText}`;
+      case 'nameVertical':
+      case 'nameHorizontal':
+      default:
+        return nameText;
+    }
+  },
+
   // Format Chinese medicine list for copying with different formats
   formatChineseMedList(medications, format, groupInfo) {
     if (format === 'none') {
@@ -178,29 +203,9 @@ export const chineseMedProcessor = {
     }
 
     // 先依照每日劑量降序排序藥品
-    const sortedMedications = [...medications].sort((a, b) => {
-      const dosageA = parseFloat(a.dailyDosage) || 0;
-      const dosageB = parseFloat(b.dailyDosage) || 0;
-      return dosageB - dosageA; // 降序排列
-    });
+    const sortedMedications = this.sortMedicationsByDailyDosage(medications);
 
-    const getMedicationText = (med) => {
-      const nameText = `${med.name}`;
-      const dosageText = `${med.dailyDosage}g ${med.frequency}`;
-      const effectText = med.sosc_name && groupInfo.showEffectName ? ` - ${med.sosc_name}` : '';
-
-      switch (format) {
-        case 'nameWithDosageVertical':
-        case 'nameWithDosageHorizontal':
-          return `${nameText} ${dosageText}${effectText}`;
-        case 'nameVertical':
-        case 'nameHorizontal':
-        default:
-          return nameText;
-      }
-    };
-
-    const medicationTexts = sortedMedications.map(med => getMedicationText(med));
+    const medicationTexts = sortedMedications.map(med => this.getMedicationText(med, format, groupInfo));
 
     // Format the full output with header
     if (format.includes('Horizontal')) {

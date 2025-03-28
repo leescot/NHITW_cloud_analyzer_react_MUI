@@ -1218,6 +1218,10 @@ describe('utils/chineseMedProcessor', function () {
 
   describe.skip('.sortGroupedData');
 
+  describe.skip('.sortMedicationsByDailyDosage');
+
+  describe.skip('.getMedicationText');
+
   describe('.formatChineseMedList',  function () {
     it('should honor `format`, `showDiagnosis`, `showEffectName`', function () {
       var medications = [
