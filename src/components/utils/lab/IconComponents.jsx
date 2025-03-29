@@ -52,4 +52,4 @@ export const CopySelectedButton = ({ onClick, style }) => {
       </IconButton>
     </Tooltip>
   );
-}; 
+};

@@ -18,4 +18,4 @@ document.addEventListener('DOMContentLoaded', () => {
       </React.StrictMode>
     );
   }
-}); 
+});

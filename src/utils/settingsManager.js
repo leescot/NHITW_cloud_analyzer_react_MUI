@@ -20,17 +20,17 @@ export const loadAllSettings = async () => {
       copyFormat: DEFAULT_SETTINGS.western.copyFormat,
       separateShortTermMeds: DEFAULT_SETTINGS.western.separateShortTermMeds,
       showExternalDrugImage: DEFAULT_SETTINGS.western.showExternalDrugImage,
-      
+
       // ATC5 Color settings
       enableATC5Colors: DEFAULT_SETTINGS.atc5.enableColors,
       atc5Groups: DEFAULT_SETTINGS.atc5.groups,
       atc5ColorGroups: DEFAULT_SETTINGS.atc5.colorGroups,
-      
+
       // Chinese medicine settings
       chineseMedShowDiagnosis: DEFAULT_SETTINGS.chinese.showDiagnosis,
       chineseMedShowEffectName: DEFAULT_SETTINGS.chinese.showEffectName,
       chineseMedCopyFormat: DEFAULT_SETTINGS.chinese.copyFormat,
-      
+
       // Lab settings
       labDisplayFormat: DEFAULT_SETTINGS.lab.displayFormat,
       showLabUnit: DEFAULT_SETTINGS.lab.showUnit,
@@ -40,14 +40,14 @@ export const loadAllSettings = async () => {
       labCopyFormat: DEFAULT_SETTINGS.lab.copyFormat,
       enableCustomCopy: DEFAULT_SETTINGS.lab.enableCustomCopy,
       customCopyItems: DEFAULT_SETTINGS.lab.customCopyItems,
-      
+
       // Overview settings
       medicationTrackingDays: DEFAULT_SETTINGS.overview.medicationTrackingDays,
       labTrackingDays: DEFAULT_SETTINGS.overview.labTrackingDays,
       imageTrackingDays: DEFAULT_SETTINGS.overview.imageTrackingDays,
       focusedLabTests: DEFAULT_SETTINGS.overview.focusedLabTests,
       focusedImageTests: DEFAULT_SETTINGS.overview.focusedImageTests,
-      
+
       // General display settings
       autoOpenPage: DEFAULT_SETTINGS.general.autoOpenPage,
       titleTextSize: DEFAULT_SETTINGS.general.titleTextSize,
@@ -105,7 +105,7 @@ export const loadAllSettings = async () => {
           useColorfulTabs: items.useColorfulTabs
         }
       };
-      
+
       resolve(allSettings);
     });
   });
@@ -123,9 +123,9 @@ export const listenForSettingsChanges = (callback) => {
       loadAllSettings().then(callback);
     }
   };
-  
+
   chrome.storage.onChanged.addListener(handleStorageChange);
-  
+
   // 返回清理函數
   return () => {
     chrome.storage.onChanged.removeListener(handleStorageChange);
@@ -141,9 +141,9 @@ export const listenForMessages = (callback) => {
   const handleMessage = (message) => {
     callback(message);
   };
-  
+
   chrome.runtime.onMessage.addListener(handleMessage);
-  
+
   // 返回清理函數
   return () => {
     chrome.runtime.onMessage.removeListener(handleMessage);
@@ -271,13 +271,13 @@ const handleLabSettingsChange = (event, currentSettings, updateCallback, callbac
       ...currentSettings.lab,
       [event.detail.setting]: event.detail.value
     };
-    
+
     // 更新設置
     updateCallback({
       ...currentSettings,
       lab: updatedSettings
     });
-    
+
     // 重新處理檢驗數據
     if (window.lastInterceptedLabData && callbacks.reprocessLab) {
       callbacks.reprocessLab(window.lastInterceptedLabData, updatedSettings);
@@ -298,13 +298,13 @@ const handleOverviewSettingsChange = (event, currentSettings, updateCallback, ca
       focusedLabTests: event.detail.allSettings.focusedLabTests || DEFAULT_LAB_TESTS,
       focusedImageTests: event.detail.allSettings.focusedImageTests || DEFAULT_IMAGE_TESTS
     };
-    
+
     // 更新設置
     updateCallback({
       ...currentSettings,
       overview: newOverviewSettings
     });
-    
+
     // 當追蹤天數變更時，重新處理藥物數據
     if (window.lastInterceptedMedicationData?.rObject && callbacks.reprocessMedication) {
       callbacks.reprocessMedication(window.lastInterceptedMedicationData, currentSettings.western);
@@ -315,15 +315,15 @@ const handleOverviewSettingsChange = (event, currentSettings, updateCallback, ca
       ...currentSettings.overview,
       [event.detail.setting]: event.detail.value
     };
-    
+
     // 更新設置
     updateCallback({
       ...currentSettings,
       overview: updatedSettings
     });
-    
+
     // 處理特定設置變更
-    if (event.detail.setting === "medicationTrackingDays" && 
+    if (event.detail.setting === "medicationTrackingDays" &&
         window.lastInterceptedMedicationData?.rObject &&
         callbacks.reprocessMedication) {
       callbacks.reprocessMedication(window.lastInterceptedMedicationData, currentSettings.western);
@@ -346,7 +346,7 @@ const handleGeneralDisplaySettingsChange = (event, updateGeneralDisplaySettings)
       alwaysOpenOverviewTab: event.detail.allSettings.alwaysOpenOverviewTab,
       useColorfulTabs: event.detail.allSettings.useColorfulTabs
     };
-    
+
     // 更新設置
     updateGeneralDisplaySettings(newGeneralDisplaySettings);
   } else {
@@ -356,4 +356,4 @@ const handleGeneralDisplaySettingsChange = (event, updateGeneralDisplaySettings)
       [event.detail.setting]: event.detail.value
     }));
   }
-}; 
+};

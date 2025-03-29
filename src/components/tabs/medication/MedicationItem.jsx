@@ -15,16 +15,16 @@ const MedicationItem = ({
   const medicationColor = getMedicationColor(med, settings);
   // 檢查藥物是否應該以粗體顯示
   const isBold = shouldBeBold(med, settings);
-  
+
   return (
     <Box sx={{ ml: 2, mb: 1 }}>
-      <TypographySizeWrapper 
+      <TypographySizeWrapper
         variant="body2"
         textSizeType="content"
         generalDisplaySettings={generalDisplaySettings}
-        sx={{ 
+        sx={{
           color: medicationColor ? medicationColor.color : 'inherit',
-          fontWeight: isBold ? 'bold' : 'normal' 
+          fontWeight: isBold ? 'bold' : 'normal'
         }}
       >
         {med.name}{" "}
@@ -68,9 +68,9 @@ const MedicationItem = ({
             component="span"
             textSizeType="note"
             generalDisplaySettings={generalDisplaySettings}
-            sx={{ 
-              color: "secondary.light", 
-              ml: 0.5 
+            sx={{
+              color: "secondary.light",
+              ml: 0.5
             }}
           >
             {" "}
@@ -93,12 +93,12 @@ const MedicationItem = ({
                 }
               }}
             >
-              <ImageIcon sx={{ 
-                fontSize: generalDisplaySettings.contentTextSize === 'small' 
-                  ? "14px" 
-                  : generalDisplaySettings.contentTextSize === 'medium' 
-                    ? "16px" 
-                    : "18px" 
+              <ImageIcon sx={{
+                fontSize: generalDisplaySettings.contentTextSize === 'small'
+                  ? "14px"
+                  : generalDisplaySettings.contentTextSize === 'medium'
+                    ? "16px"
+                    : "18px"
               }} />
             </IconButton>
           </Tooltip>
@@ -108,4 +108,4 @@ const MedicationItem = ({
   );
 };
 
-export default MedicationItem; 
+export default MedicationItem;

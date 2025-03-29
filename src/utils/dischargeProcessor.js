@@ -1,7 +1,7 @@
 export const dischargeProcessor = {
   processDischargeData(data) {
     // console.log('Starting to process discharge data:', data);
-    
+
     if (!data || !data.rObject || !Array.isArray(data.rObject)) {
       console.log('Invalid discharge data format:', data);
       return [];

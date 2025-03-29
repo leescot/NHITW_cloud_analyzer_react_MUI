@@ -3,7 +3,7 @@ import React from "react";
 // 獲取檢驗結果的顯示顏色
 export const getStatusColor = (lab, highlightAbnormal) => {
   if (!lab || !highlightAbnormal) return "inherit";
-  
+
   if (lab.valueStatus === "high") return "#c62828"; // 紅色
   if (lab.valueStatus === "low") return "#006400";  // 深綠色 (取代 #1b5e20)
   return "inherit"; // 正常值
@@ -12,7 +12,7 @@ export const getStatusColor = (lab, highlightAbnormal) => {
 // 格式化參考值範圍
 export const formatReferenceRange = (lab, showReference) => {
   if (!showReference) return null;
-  
+
   if (lab.formattedReference) {
     return (
       <span style={{ color: "gray", fontSize: "0.8em" }}>
@@ -28,7 +28,7 @@ export const formatReferenceRange = (lab, showReference) => {
       </span>
     );
   }
-  
+
   return null;
 };
 
@@ -37,11 +37,11 @@ export const formatLabItemForCopy = (lab, showUnit, showReference) => {
   // Prefer abbrName over itemName if available
   const displayName = lab.displayName || lab.abbrName || lab.itemName || lab.orderName;
   let labText = `${displayName}: ${lab.value}`;
-  
+
   if (showUnit && lab.unit) {
     labText += ` ${lab.unit}`;
   }
-  
+
   if (showReference) {
     if (lab.referenceMin !== null) {
       labText += ` (${lab.referenceMin}${lab.referenceMax !== null ? `-${lab.referenceMax}` : ''})`;
@@ -49,11 +49,11 @@ export const formatLabItemForCopy = (lab, showUnit, showReference) => {
       labText += ` (${lab.consultValue.min}-${lab.consultValue.max})`;
     }
   }
-  
+
   return labText;
 };
 
 // 格式化日期 YYYY-MM-DD 轉 YYYY/MM/DD
 export const formatDate = (dateString) => {
   return dateString.replace(/-/g, '/');
-}; 
+};

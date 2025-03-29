@@ -7,7 +7,10 @@ import reactRefresh from 'eslint-plugin-react-refresh'
 export default [
   { ignores: ['dist'] },
   {
-    rules: js.configs.recommended.rules,
+    rules: {
+      ...js.configs.recommended.rules,
+      "no-trailing-spaces": "error", // 禁止行尾空格
+    },
   },
   {
     files: [

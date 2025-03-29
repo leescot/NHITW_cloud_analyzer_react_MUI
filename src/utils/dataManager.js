@@ -36,7 +36,7 @@ export const handleAllData = async (dataSources, settings, setters) => {
     // 處理檢驗數據
     if (dataSources.labData?.rObject) {
       const processedLabs = labProcessor.processLabData(
-        dataSources.labData, 
+        dataSources.labData,
         settings.lab
       );
       setters.setGroupedLabs(processedLabs);
@@ -147,7 +147,7 @@ export const collectDataSources = () => {
     patientsummary: window.lastInterceptedPatientSummaryData,
     patientSummary: window.lastInterceptedPatientSummaryData || window.lastInterceptedPatientSummaryData
   };
-  
+
   return sources;
 };
 
@@ -188,4 +188,4 @@ export const reprocessData = async (dataType, data, settings, setter) => {
   } catch (error) {
     console.error(`Error reprocessing ${dataType} data:`, error);
   }
-}; 
+};

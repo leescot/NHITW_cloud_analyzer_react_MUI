@@ -21,26 +21,26 @@ const Overview_PatientSummary = ({ patientSummaryData = [], generalDisplaySettin
             const regex = /<span class='red-sign'>(.*?)<\/span>/;
             const match = item.originalText ? item.originalText.match(regex) : null;
             const displayText = match ? match[1] : item.text;
-            
+
             return (
               <ListItem key={index} sx={{ py: 0.5 }}>
-                <ListItemText 
+                <ListItemText
                   primary={
-                    <TypographySizeWrapper 
-                      variant="body1" 
+                    <TypographySizeWrapper
+                      variant="body1"
                       generalDisplaySettings={generalDisplaySettings}
                     >
                       {displayText}
                     </TypographySizeWrapper>
-                  } 
+                  }
                 />
               </ListItem>
             );
           })}
         </List>
       ) : (
-        <TypographySizeWrapper 
-          variant="body1" 
+        <TypographySizeWrapper
+          variant="body1"
           color="text.secondary"
           generalDisplaySettings={generalDisplaySettings}
         >
@@ -51,4 +51,4 @@ const Overview_PatientSummary = ({ patientSummaryData = [], generalDisplaySettin
   );
 };
 
-export default Overview_PatientSummary; 
+export default Overview_PatientSummary;

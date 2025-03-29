@@ -28,12 +28,12 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
 
   // Use useState for the medication lookup to maintain state between renders
   const [medNameLookup, setMedNameLookup] = useState({});
-  
+
   // Build medNameLookup when medications change
   useEffect(() => {
     // Create a new lookup object
     const newLookup = {};
-    
+
     // Populate lookup with medications
     groupedMedications.forEach(group => {
       group.medications.forEach(med => {
@@ -43,11 +43,11 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
         newLookup[med.name].push(med);
       });
     });
-    
+
     // Update the state with the new lookup
     setMedNameLookup(newLookup);
   }, [groupedMedications]);
-  
+
   // 判斷藥物所屬顏色的函數 (與 MedicationList 中相同)
   const getMedicationColor = (name) => {
     if (!settings?.enableATC5Colors) return null;
@@ -55,20 +55,20 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
     if (!medNameLookup[name]) {
       return null;
     }
-    
+
     const allMedInstances = medNameLookup[name];
     // 使用第一個找到的實例進行顏色判斷
     const medication = allMedInstances[0];
-    
+
     // 只使用 atc_code
     let atc5Code = medication.atc_code;
-    
+
     // Handle cases where the ATC5 code might be in the ATC name
     if (!atc5Code && medication.atc_name) {
       const matches = medication.atc_name.match(/\(([A-Z0-9]+)\)/);
       if (matches && matches[1]) atc5Code = matches[1];
     }
-    
+
     if (!atc5Code) {
       return null;
     }
@@ -89,16 +89,16 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
       });
       return match;
     });
-    
+
     if (!group) {
       return null;
     }
-    
+
     const groupName = group[0];
 
     // 檢查群組是否被分配到顏色
     const colorGroups = settings.atc5ColorGroups || { red: [], orange: [], green: [] };
-    
+
     if (colorGroups.red && colorGroups.red.includes(groupName)) {
       return { name: 'red', color: '#f44336' };
     } else if (colorGroups.orange && colorGroups.orange.includes(groupName)) {
@@ -106,25 +106,25 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
     } else if (colorGroups.green && colorGroups.green.includes(groupName)) {
       return { name: 'green', color: '#2e7d32' };
     }
-    
+
     return null;
   };
-  
+
   // 檢查是否存在 ATC5 顏色藥物
   useEffect(() => {
-    if (!settings?.enableATC5Colors || !medNameLookup || 
+    if (!settings?.enableATC5Colors || !medNameLookup ||
         !settings.atc5Groups || Object.keys(settings.atc5Groups).length === 0) {
       setHasATC5ColoredMeds(false);
       return;
     }
-    
+
     // 檢查是否有任何藥物有 ATC5 顏色
     const hasColoredMeds = Object.keys(medNameLookup).some(name => {
       return getMedicationColor(name) !== null;
     });
-    
+
     setHasATC5ColoredMeds(hasColoredMeds);
-    
+
     // 如果沒有 ATC5 顏色藥物且當前選擇的是 "colored_only"，則重置為默認過濾器
     if (!hasColoredMeds && dayFilter === "colored_only") {
       setDayFilter("gte7");
@@ -138,15 +138,15 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
     if (!medNameLookup[name]) {
       return false;
     }
-    
+
     const allMedInstances = medNameLookup[name];
-    
+
     // 使用第一個找到的實例進行判斷
     const medication = allMedInstances[0];
-    
+
     // 只使用 atc_code
     let atc5Code = medication.atc_code;
-    
+
     if (!atc5Code) return false;
 
     // 檢查是否有 atc5Groups 設定
@@ -164,17 +164,17 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
         }
       });
     });
-    
+
     if (!group) return false;
-    
+
     const groupName = group[0];
 
     // 檢查群組是否被分配到顏色
     const colorGroups = settings.atc5ColorGroups || { red: [], orange: [], green: [] };
-    
+
     // 如果藥物屬於任何有顏色的群組（紅色、橘色或綠色），返回 true
     return (
-      colorGroups.red.includes(groupName) || 
+      colorGroups.red.includes(groupName) ||
       colorGroups.orange.includes(groupName) ||
       colorGroups.green.includes(groupName)
     );
@@ -348,10 +348,10 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
       setSnackbarOpen(true);
       return;
     }
-    
+
     // 打開藥品圖片頁面
     window.open(`chrome-extension://${chrome.runtime.id}/drug-images.html?code=${drugcode}`, '_blank', 'noopener,noreferrer');
-    
+
     setSnackbarMessage("已開啟藥品圖片查看器");
     setSnackbarOpen(true);
   };
@@ -359,7 +359,7 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
   return (
     <>
       {groupedMedications.length === 0 ? (
-        <TypographySizeWrapper 
+        <TypographySizeWrapper
           textSizeType="content"
           generalDisplaySettings={generalDisplaySettings}
           color="text.secondary"
@@ -502,8 +502,8 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
                         padding: "8px 4px",
                       }}
                     >
-                      <TypographySizeWrapper 
-                        variant="body2" 
+                      <TypographySizeWrapper
+                        variant="body2"
                         textSizeType="content"
                         generalDisplaySettings={generalDisplaySettings}
                         sx={{ fontWeight: "medium" }}
@@ -533,7 +533,7 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
                   const medicationColor = getMedicationColor(name);
                   // 檢查藥物是否應該以粗體顯示
                   const isBold = shouldBeBold(name);
-                  
+
                   return (
                     <TableRow key={name}>
                       <TableCell
@@ -549,7 +549,7 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
                       >
                         <Box sx={{ display: 'flex', alignItems: 'center' }}>
                           <TypographySizeWrapper
-                            textSizeType="content" 
+                            textSizeType="content"
                             generalDisplaySettings={generalDisplaySettings}
                             sx={{
                               color: medicationColor?.color || 'inherit',
@@ -571,12 +571,12 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
                                   }
                                 }}
                               >
-                                <ImageIcon sx={{ 
-                                  fontSize: generalDisplaySettings.contentTextSize === 'small' 
-                                    ? "14px" 
-                                    : generalDisplaySettings.contentTextSize === 'medium' 
-                                      ? "16px" 
-                                      : "18px" 
+                                <ImageIcon sx={{
+                                  fontSize: generalDisplaySettings.contentTextSize === 'small'
+                                    ? "14px"
+                                    : generalDisplaySettings.contentTextSize === 'medium'
+                                      ? "16px"
+                                      : "18px"
                                 }} />
                               </IconButton>
                             </Tooltip>

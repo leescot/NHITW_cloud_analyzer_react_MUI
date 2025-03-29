@@ -1,7 +1,7 @@
 export const allergyProcessor = {
   processAllergyData(data) {
     // console.log('Starting to process allergy data:', data);
-    
+
     if (!data || !data.rObject || !Array.isArray(data.rObject)) {
       console.log('Invalid allergy data format:', data);
       return [];
@@ -37,17 +37,17 @@ export const allergyProcessor = {
   isValidAllergyRecord(item) {
     // 檢查日期
     if (!item.date) return false;
-    
+
     // 檢查 drug_name
-    if (!item.drugName || 
-        item.drugName === '未記錄' || 
-        item.drugName === 'NP' || 
-        item.drugName === 'N.P' || 
-        item.drugName === 'N.P.' || 
+    if (!item.drugName ||
+        item.drugName === '未記錄' ||
+        item.drugName === 'NP' ||
+        item.drugName === 'N.P' ||
+        item.drugName === 'N.P.' ||
         item.drugName.includes('未過敏')) {
       return false;
     }
-    
+
     return true;
   },
 

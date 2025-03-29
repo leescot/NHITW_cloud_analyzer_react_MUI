@@ -8,15 +8,15 @@ import { hasCustomReferenceRange, getCustomReferenceRange } from './customRefere
 // 格式化單筆檢驗資料
 const formatLabData = (lab) => {
   // console.log('Processing lab item:', lab.assay_item_name, 'consult_value:', lab.consult_value);
-  
+
   // 處理參考值範圍
   const consultValue = parseReferenceRange(lab.consult_value, lab.order_code, lab.hosp);
   // console.log('parsed consultValue:', consultValue);
-  
+
   // 格式化參考值範圍用於顯示
   const formattedReference = getReferenceRangeDisplayText(lab.consult_value, lab.order_code, lab.hosp);
   // console.log('formattedReference:', formattedReference);
-  
+
   // 檢查是否有自定義參考範圍
   let referenceMin, referenceMax;
   if (hasCustomReferenceRange(lab.order_code)) {
@@ -35,51 +35,51 @@ const formatLabData = (lab) => {
     referenceMax = consultValue ? consultValue.max : null;
     lab._usingCustomRange = false;
   }
-  
+
   // console.log('Final reference values:', {
   //   referenceMin,
   //   referenceMax,
   //   formattedReference,
   //   _usingCustomRange: lab._usingCustomRange
   // });
-  
+
   // 獲取縮寫名稱 - 傳入 itemName
   const abbrName = getAbbreviation(lab.order_code, lab.unit_data, lab.assay_item_name);
-  
+
   // 檢查是否有多個數值
   let normalizedValue;
   let valueStatus = "normal";
   let isAbnormal = false;
   let hasMultipleValues = false;
   let valueRange = null;
-  
+
   if (lab._multiValueData && lab._multiValueData.values && lab._multiValueData.values.length > 1) {
     hasMultipleValues = true;
-    
+
     // 將字符串數值轉換為數字以進行計算
     const numericValues = lab._multiValueData.values.map(val => {
       const num = parseFloat(val);
       return isNaN(num) ? null : num;
     }).filter(val => val !== null);
-    
+
     if (numericValues.length > 0) {
       // 如果有有效數字，計算其範圍
       const minValue = Math.min(...numericValues);
       const maxValue = Math.max(...numericValues);
-      
+
       valueRange = {
         min: minValue,
         max: maxValue,
         timePoints: lab._multiValueData.timePoints || []
       };
-      
+
       // 合併數值為範圍形式
       if (minValue === maxValue) {
         normalizedValue = `${minValue}`;
       } else {
         normalizedValue = `${minValue}-${maxValue}`;
       }
-      
+
       // 判斷值的狀態 (normal, high, low)
       // 如果最大値超出上限或最小値低於下限，則標記為異常
       if (!isZeroReferenceRange(lab.consult_value) || lab._usingCustomRange) {
@@ -98,7 +98,7 @@ const formatLabData = (lab) => {
   } else {
     // 單一值的情況
     normalizedValue = normalizeValue(lab.assay_value);
-    
+
     // 判斷值的狀態 (normal, high, low)
     // Skip abnormal marking for labs with [0.000][0.000] reference range
     if (!isZeroReferenceRange(lab.consult_value) || lab._usingCustomRange) {
@@ -108,7 +108,7 @@ const formatLabData = (lab) => {
         referenceMax !== null ? parseFloat(referenceMax) : null
       );
     }
-    
+
     // 為了保持向後兼容
     isAbnormal = valueStatus !== "normal";
   }
@@ -137,4 +137,4 @@ const formatLabData = (lab) => {
 
 export {
   formatLabData
-}; 
+};

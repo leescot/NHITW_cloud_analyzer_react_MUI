@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Typography, 
+import {
+  Typography,
   Switch,
   Accordion,
   AccordionSummary,
@@ -36,7 +36,7 @@ import { DEFAULT_LAB_COPY_ITEMS } from '../../config/labTests';
  */
 export const resetLabCopyItemsToDefault = (callback = () => {}) => {
   chrome.storage.sync.set(
-    { customCopyItems: DEFAULT_LAB_COPY_ITEMS }, 
+    { customCopyItems: DEFAULT_LAB_COPY_ITEMS },
     () => {
       // 通知其他組件設定已更改
       chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
@@ -65,7 +65,7 @@ const LabSettings = () => {
     enableCustomCopy: false,
     customCopyItems: DEFAULT_LAB_COPY_ITEMS
   });
-  
+
   const [customCopyDialogOpen, setCustomCopyDialogOpen] = useState(false);
   const [tempCustomCopyItems, setTempCustomCopyItems] = useState([]);
 
@@ -93,25 +93,25 @@ const LabSettings = () => {
       });
     });
   }, []);
-  
+
   // 打開自訂複製項目對話框
   const handleOpenCustomCopyDialog = () => {
     setTempCustomCopyItems([...settings.customCopyItems]);
     setCustomCopyDialogOpen(true);
   };
-  
+
   // 關閉自訂複製項目對話框
   const handleCloseCustomCopyDialog = () => {
     setCustomCopyDialogOpen(false);
   };
-  
+
   // 保存自訂複製項目設置
   const handleSaveCustomCopyItems = () => {
     const updatedSettings = {
       ...settings,
       customCopyItems: tempCustomCopyItems
     };
-    
+
     setSettings(updatedSettings);
     chrome.storage.sync.set({ customCopyItems: tempCustomCopyItems }, () => {
       // 發送消息給其他組件更新
@@ -126,24 +126,24 @@ const LabSettings = () => {
         }
       });
     });
-    
+
     setCustomCopyDialogOpen(false);
   };
-  
+
   // 重置自訂複製項目到默认设置
   const handleResetCustomCopyItems = () => {
     // Create a fresh deep copy of the default items
     const resetItems = JSON.parse(JSON.stringify(DEFAULT_LAB_COPY_ITEMS));
-    
+
     // Update state with reset items
     setTempCustomCopyItems([]);  // Clear first
-    
+
     // Use setTimeout to ensure the update happens in a separate render cycle
     setTimeout(() => {
       setTempCustomCopyItems(resetItems);
     }, 50);
   };
-  
+
   // 切換自訂複製項目啟用狀態
   const handleToggleCustomCopyItem = (index) => {
     const updatedItems = [...tempCustomCopyItems];
@@ -162,7 +162,7 @@ const LabSettings = () => {
         <Typography>檢驗報告設定</Typography>
       </AccordionSummary>
       <AccordionDetails>
-        
+
         {/* <Typography variant="subtitle2" sx={{ mb: 1, mt: 1 }}>顯示選項</Typography>
          */}
         <FormControlLabel
@@ -174,7 +174,7 @@ const LabSettings = () => {
           }
           label="顯示檢驗單位"
         />
-        
+
         <FormControlLabel
           control={
             <Switch
@@ -184,7 +184,7 @@ const LabSettings = () => {
           }
           label="顯示檢驗參考值"
         />
-        
+
         <FormControlLabel
           control={
             <Switch
@@ -194,7 +194,7 @@ const LabSettings = () => {
           }
           label="顯示檢驗縮寫"
         />
-        
+
         <FormControlLabel
           control={
             <Switch
@@ -204,7 +204,7 @@ const LabSettings = () => {
           }
           label="開啟異常值變色"
         />
-        
+
         <FormControlLabel
           control={
             <Switch
@@ -229,7 +229,7 @@ const LabSettings = () => {
         )}
 
         <Divider sx={{ my: 1.5 }} />
-        
+
         <FormControl fullWidth sx={{ mb: 2 }}>
           <InputLabel id="lab-display-format-label">檢驗報告呈現方式</InputLabel>
           <Select
@@ -267,7 +267,7 @@ const LabSettings = () => {
             </MenuItem>
           </Select>
         </FormControl>
-        
+
         <FormControl fullWidth sx={{ mb: 2 }}>
           <InputLabel id="lab-copy-format-label">檢驗報告複製格式</InputLabel>
           <Select
@@ -281,10 +281,10 @@ const LabSettings = () => {
             <MenuItem value="horizontal">橫式格式 (檢驗項目並排顯示)</MenuItem>
           </Select>
         </FormControl>
-        
+
         {/* 自訂複製項目對話框 */}
-        <Dialog 
-          open={customCopyDialogOpen} 
+        <Dialog
+          open={customCopyDialogOpen}
           onClose={handleCloseCustomCopyDialog}
           fullWidth
           maxWidth="sm"
@@ -305,8 +305,8 @@ const LabSettings = () => {
                       onChange={() => handleToggleCustomCopyItem(index)}
                     />
                   </ListItemIcon>
-                  <ListItemText 
-                    primary={`${item.displayName}`} 
+                  <ListItemText
+                    primary={`${item.displayName}`}
                   />
                 </ListItem>
               ))}
@@ -316,8 +316,8 @@ const LabSettings = () => {
             <Button onClick={handleCloseCustomCopyDialog} color="primary">
               取消
             </Button>
-            <Button 
-              onClick={handleResetCustomCopyItems} 
+            <Button
+              onClick={handleResetCustomCopyItems}
               color="secondary"
               sx={{ mr: 'auto' }}
             >

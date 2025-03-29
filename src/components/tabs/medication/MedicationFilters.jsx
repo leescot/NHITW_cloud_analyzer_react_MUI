@@ -28,7 +28,7 @@ const MedicationFilters = ({
           ),
         }}
       />
-      
+
       {/* 如果有多種訪問類型，顯示過濾選項 */}
       {availableVisitTypes.length > 1 && (
         <FormControl component="fieldset" sx={{ flexGrow: 2 }}>
@@ -41,9 +41,9 @@ const MedicationFilters = ({
           >
             {/* 門診+急診選項 */}
             {availableVisitTypes.includes("門診") && availableVisitTypes.includes("急診") && (
-              <FormControlLabel 
-                value="門診+急診" 
-                control={<Radio size="small" />} 
+              <FormControlLabel
+                value="門診+急診"
+                control={<Radio size="small" />}
                 label={
                   <TypographySizeWrapper
                     textSizeType="content"
@@ -51,15 +51,15 @@ const MedicationFilters = ({
                   >
                     門診+急診
                   </TypographySizeWrapper>
-                } 
+                }
               />
             )}
-            
+
             {/* 門診選項 */}
             {availableVisitTypes.includes("門診") && (
-              <FormControlLabel 
-                value="門診" 
-                control={<Radio size="small" />} 
+              <FormControlLabel
+                value="門診"
+                control={<Radio size="small" />}
                 label={
                   <TypographySizeWrapper
                     textSizeType="content"
@@ -67,15 +67,15 @@ const MedicationFilters = ({
                   >
                     門診
                   </TypographySizeWrapper>
-                } 
+                }
               />
             )}
-            
+
             {/* 急診選項 */}
             {availableVisitTypes.includes("急診") && (
-              <FormControlLabel 
-                value="急診" 
-                control={<Radio size="small" />} 
+              <FormControlLabel
+                value="急診"
+                control={<Radio size="small" />}
                 label={
                   <TypographySizeWrapper
                     textSizeType="content"
@@ -83,15 +83,15 @@ const MedicationFilters = ({
                   >
                     急診
                   </TypographySizeWrapper>
-                } 
+                }
               />
             )}
-            
+
             {/* 住診選項 */}
             {availableVisitTypes.includes("住診") && (
-              <FormControlLabel 
-                value="住診" 
-                control={<Radio size="small" />} 
+              <FormControlLabel
+                value="住診"
+                control={<Radio size="small" />}
                 label={
                   <TypographySizeWrapper
                     textSizeType="content"
@@ -99,14 +99,14 @@ const MedicationFilters = ({
                   >
                     住診
                   </TypographySizeWrapper>
-                } 
+                }
               />
             )}
-            
+
             {/* 顯示所有項目選項 */}
-            <FormControlLabel 
-              value="顯示所有項目" 
-              control={<Radio size="small" />} 
+            <FormControlLabel
+              value="顯示所有項目"
+              control={<Radio size="small" />}
               label={
                 <TypographySizeWrapper
                   textSizeType="content"
@@ -114,7 +114,7 @@ const MedicationFilters = ({
                 >
                   顯示所有項目
                 </TypographySizeWrapper>
-              } 
+              }
             />
           </RadioGroup>
         </FormControl>
@@ -123,4 +123,4 @@ const MedicationFilters = ({
   );
 };
 
-export default MedicationFilters; 
+export default MedicationFilters;

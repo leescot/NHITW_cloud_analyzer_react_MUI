@@ -17,8 +17,8 @@ const MedicationGroup = ({
   return (
     <Box sx={{ mb: 1.5 }}>
       <Box>
-        <TypographySizeWrapper 
-          variant="subtitle1" 
+        <TypographySizeWrapper
+          variant="subtitle1"
           textSizeType="content"
           generalDisplaySettings={generalDisplaySettings}
           color={getVisitTypeColor(group.visitType)}
@@ -64,10 +64,10 @@ const MedicationGroup = ({
           setSnackbarOpen={setSnackbarOpen}
         />
       ))}
-      
+
       {!isLast && <Divider sx={{ my: 1.0 }} />}
     </Box>
   );
 };
 
-export default MedicationGroup; 
+export default MedicationGroup;

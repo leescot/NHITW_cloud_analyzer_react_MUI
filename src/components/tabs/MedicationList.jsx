@@ -14,19 +14,19 @@ const MedicationList = ({
   // 添加 snackbar 狀態
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
-  
+
   // 添加訪問類型過濾狀態
   const [selectedVisitType, setSelectedVisitType] = useState("");
   const [availableVisitTypes, setAvailableVisitTypes] = useState([]);
   const [filteredMedications, setFilteredMedications] = useState(groupedMedications);
-  
+
   // 分類藥物為長期和短期用藥
   const [longTermMeds, setLongTermMeds] = useState([]);
   const [shortTermMeds, setShortTermMeds] = useState([]);
-  
+
   // 添加搜尋功能狀態
   const [searchText, setSearchText] = useState("");
-  
+
   // 獲取可用的訪問類型並設置默認選項
   useEffect(() => {
     // 獲取所有不同的訪問類型
@@ -34,7 +34,7 @@ const MedicationList = ({
     let hasOutpatient = false;
     let hasEmergency = false;
     let hasInpatient = false;
-    
+
     groupedMedications.forEach(group => {
       if (group.visitType) {
         visitTypes.add(group.visitType);
@@ -43,17 +43,17 @@ const MedicationList = ({
         if (group.visitType === "住診") hasInpatient = true;
       }
     });
-    
+
     // 轉換為數組
     const typesArray = Array.from(visitTypes);
     setAvailableVisitTypes(typesArray);
-    
+
     // 設置默認選擇
     if (typesArray.length > 1) {
       // 如果同時有門診和急診，默認選擇"門診+急診"
       if (hasOutpatient && hasEmergency) {
         setSelectedVisitType("門診+急診");
-      } 
+      }
       // 否則如果有門診，默認選擇門診
       else if (hasOutpatient) {
         setSelectedVisitType("門診");
@@ -67,12 +67,12 @@ const MedicationList = ({
       setSelectedVisitType("");
     }
   }, [groupedMedications]);
-  
+
   // 當選擇的訪問類型或搜尋文字變化時過濾藥物
   useEffect(() => {
     // 先用訪問類型過濾
     let visitTypeFiltered = [];
-    
+
     if (!selectedVisitType || selectedVisitType === "顯示所有項目") {
       visitTypeFiltered = groupedMedications;
     } else if (selectedVisitType === "門診+急診") {
@@ -88,58 +88,58 @@ const MedicationList = ({
         group => group.visitType === selectedVisitType
       );
     }
-    
+
     // 如果有搜尋文字，再進一步過濾藥物
     if (searchText.trim() !== "") {
       const searchLower = searchText.toLowerCase();
-      
+
       // 針對每個藥物組，只保留符合搜尋條件的藥物
       const searchFiltered = visitTypeFiltered.map(group => {
         // 深複製組資料，但不包含medications
         const newGroup = { ...group };
-        
+
         // 過濾藥物，只保留符合搜尋條件的
-        newGroup.medications = group.medications.filter(med => 
-          (med.name && med.name.toLowerCase().includes(searchLower)) || 
+        newGroup.medications = group.medications.filter(med =>
+          (med.name && med.name.toLowerCase().includes(searchLower)) ||
           (med.ingredient && med.ingredient.toLowerCase().includes(searchLower))
         );
-        
+
         return newGroup;
       }).filter(group => group.medications.length > 0); // 只保留有符合藥物的組
-      
+
       setFilteredMedications(searchFiltered);
     } else {
       // 沒有搜尋文字，只用訪問類型過濾
       setFilteredMedications(visitTypeFiltered);
     }
   }, [selectedVisitType, groupedMedications, searchText]);
-  
+
   // 當過濾後的藥物變化時，將其分為長期和短期用藥
   useEffect(() => {
     if (settings.separateShortTermMeds) {
       // 定義長期用藥的閾值（14天）
       const LONG_TERM_THRESHOLD = 14;
-      
+
       // 長期用藥：至少有一種藥物 >= 14天
-      const longTerm = filteredMedications.filter(group => 
+      const longTerm = filteredMedications.filter(group =>
         group.medications.some(med => parseInt(med.days, 10) >= LONG_TERM_THRESHOLD)
       );
-      
+
       // 短期用藥：所有藥物 < 14天
-      const shortTerm = filteredMedications.filter(group => 
+      const shortTerm = filteredMedications.filter(group =>
         group.medications.every(med => parseInt(med.days, 10) < LONG_TERM_THRESHOLD)
       );
-      
+
       setLongTermMeds(longTerm);
       setShortTermMeds(shortTerm);
     }
   }, [filteredMedications, settings.separateShortTermMeds]);
-  
+
   // 處理訪問類型選擇變化
   const handleVisitTypeChange = (event) => {
     setSelectedVisitType(event.target.value);
   };
-  
+
   // 處理搜尋文字變化
   const handleSearchChange = (event) => {
     setSearchText(event.target.value);
@@ -186,22 +186,22 @@ const MedicationList = ({
   // 判斷藥物所屬顏色的函數
   const getMedicationColor = (medication) => {
     if (!settings.enableATC5Colors) return null;
-    
+
     let atc5Code = medication.atc_code;
-    
+
     // Handle cases where the ATC5 code might be in the ATC name
     if (!atc5Code && medication.atc_name) {
       const matches = medication.atc_name.match(/\(([A-Z0-9]+)\)/);
       if (matches && matches[1]) atc5Code = matches[1];
     }
-    
+
     if (!atc5Code) return null;
-    
+
     // 檢查是否有 atc5Groups 設定
     if (!settings.atc5Groups || Object.keys(settings.atc5Groups).length === 0) {
       return null;
     }
-    
+
     // 檢查藥物的 ATC5 代碼是否屬於任何群組
     const group = Object.entries(settings.atc5Groups).find(([groupName, codes]) => {
       const match = codes.some(code => {
@@ -213,14 +213,14 @@ const MedicationList = ({
       });
       return match;
     });
-    
+
     if (!group) return null;
-    
+
     const groupName = group[0];
-    
+
     // 檢查群組是否被分配到顏色
     const colorGroups = settings.atc5ColorGroups || { red: [], orange: [], green: [] };
-    
+
     if (colorGroups.red && colorGroups.red.includes(groupName)) {
       return { name: 'red', color: '#f44336' };
     } else if (colorGroups.orange && colorGroups.orange.includes(groupName)) {
@@ -228,22 +228,22 @@ const MedicationList = ({
     } else if (colorGroups.green && colorGroups.green.includes(groupName)) {
       return { name: 'green', color: '#2e7d32' };
     }
-    
+
     return null;
   };
 
   // 判斷藥物是否應該以粗體顯示的函數
   const shouldBeBold = (medication) => {
     // if (!settings.enableATC5Colors) return false;
-    
+
     // let atc5Code = medication.atc_code;
-    
+
     // if (!atc5Code) return false;
-    
+
     // if (!settings.atc5Groups || Object.keys(settings.atc5Groups).length === 0) {
     //   return false;
     // }
-    
+
     // const group = Object.entries(settings.atc5Groups).find(([groupName, codes]) => {
     //   return codes.some(code => {
     //     if (code.length === 7) {
@@ -253,24 +253,24 @@ const MedicationList = ({
     //     }
     //   });
     // });
-    
+
     // if (!group) return false;
-    
+
     // const groupName = group[0];
-    
+
     // // 檢查群組是否被分配到顏色
     // const colorGroups = settings.atc5ColorGroups || { red: [], orange: [], green: [] };
-    
+
     // // 如果藥物屬於任何有顏色的群組（紅色、橘色或綠色），返回 true
     // return (
-    //   colorGroups.red.includes(groupName) || 
+    //   colorGroups.red.includes(groupName) ||
     //   colorGroups.orange.includes(groupName) ||
     //   colorGroups.green.includes(groupName)
     // );
     // Always return false to disable bold formatting
     return false;
   };
-  
+
   // 根據看診類型獲取顏色
   const getVisitTypeColor = (visitType) => {
     switch(visitType) {
@@ -291,10 +291,10 @@ const MedicationList = ({
       setSnackbarOpen(true);
       return;
     }
-    
+
     // 打開藥品圖片頁面
     window.open(`chrome-extension://${chrome.runtime.id}/drug-images.html?code=${drugcode}`, '_blank', 'noopener,noreferrer');
-    
+
     setSnackbarMessage("已開啟藥品圖片查看器");
     setSnackbarOpen(true);
   };
@@ -302,8 +302,8 @@ const MedicationList = ({
   return (
     <>
       {groupedMedications.length === 0 ? (
-        <TypographySizeWrapper 
-          variant="body2" 
+        <TypographySizeWrapper
+          variant="body2"
           textSizeType="content"
           generalDisplaySettings={generalDisplaySettings}
           color="text.secondary"
@@ -321,10 +321,10 @@ const MedicationList = ({
             availableVisitTypes={availableVisitTypes}
             generalDisplaySettings={generalDisplaySettings}
           />
-          
+
           {filteredMedications.length === 0 ? (
-            <TypographySizeWrapper 
-              variant="body2" 
+            <TypographySizeWrapper
+              variant="body2"
               textSizeType="content"
               generalDisplaySettings={generalDisplaySettings}
               color="text.secondary"

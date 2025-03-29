@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Typography, 
+import {
+  Typography,
   Switch,
   Accordion,
   AccordionSummary,
@@ -57,7 +57,7 @@ const ChineseMedicationSettings = () => {
           }
           label="顯示主診斷資訊"
         />
-        
+
         <FormControlLabel
           control={
             <Switch
@@ -67,7 +67,7 @@ const ChineseMedicationSettings = () => {
           }
           label="顯示效能名稱"
         />
-        
+
         <FormControl fullWidth sx={{ mt: 2 }}>
           <InputLabel id="chinesemed-copy-format-label">中藥複製格式</InputLabel>
           <Select
@@ -89,4 +89,4 @@ const ChineseMedicationSettings = () => {
   );
 };
 
-export default ChineseMedicationSettings; 
+export default ChineseMedicationSettings;

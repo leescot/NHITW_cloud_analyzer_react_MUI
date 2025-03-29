@@ -1,7 +1,7 @@
 export const dashboardProcessor = {
   processDashboardData({ medicationData, chineseMedData }) {
     // console.log('Starting to process dashboard data');
-    
+
     const now = new Date();
     const ninetyDaysAgo = new Date(now.getTime() - (90 * 24 * 60 * 60 * 1000));
     const thirtyDaysAgo = new Date(now.getTime() - (30 * 24 * 60 * 60 * 1000));
@@ -54,7 +54,7 @@ export const dashboardProcessor = {
         const key = `${med.drug_date}_${med.icd_code}`;
         if (!diagnosesMap.has(key)) {
           const hospName = med.hosp?.split(';')[0] || '西醫';
-          
+
           diagnosesMap.set(key, {
             date: med.drug_date,
             icdCode: med.icd_code,
@@ -79,7 +79,7 @@ export const dashboardProcessor = {
         const key = `${formattedDate}_${med.icd_code}`;
         if (!diagnosesMap.has(key)) {
           const hospName = med.hosp?.split(';')[0] || '中醫';
-          
+
           diagnosesMap.set(key, {
             date: formattedDate,
             icdCode: med.icd_code,
@@ -117,7 +117,7 @@ export const dashboardProcessor = {
           month: '2-digit',
           day: '2-digit'
         });
-        const drugName = med.drug_ing_name 
+        const drugName = med.drug_ing_name
           ? `${med.drug_ename} (${med.drug_ing_name})`
           : med.drug_ename;
         western.add(`${formattedDate} ${drugName}`);
@@ -135,7 +135,7 @@ export const dashboardProcessor = {
         const drugName = med.cdrug_name || med.drug_perscrn_name;
         if (drugName) {
           const isMulti = med.drug_multi_mark === 'Y';
-          const formattedName = isMulti 
+          const formattedName = isMulti
             ? `${drugName.trim()} (複方)`
             : drugName.trim();
           chinese.add(`${formattedDate} ${formattedName}`);
@@ -159,4 +159,4 @@ export const dashboardProcessor = {
       protein: []     // 尿蛋白
     };
   }
-}; 
+};

@@ -4,12 +4,12 @@ import TypographySizeWrapper from "../../utils/TypographySizeWrapper";
 import { getStatusColor, formatReferenceRange } from "../../utils/lab/LabUtilities";
 
 // 生成測試項目顯示
-const LabItemDisplay = ({ 
-  lab, 
-  groupIndex, 
-  labIndex, 
-  selectedLabItems, 
-  handleToggleLabItem, 
+const LabItemDisplay = ({
+  lab,
+  groupIndex,
+  labIndex,
+  selectedLabItems,
+  handleToggleLabItem,
   generalDisplaySettings,
   labSettings
 }) => {
@@ -24,24 +24,24 @@ const LabItemDisplay = ({
 
   const labId = `${groupIndex}-${labIndex}`;
   const isSelected = selectedLabItems[groupIndex]?.[labId] || false;
-  
+
   return (
-    <Box sx={{ 
-      display: 'flex', 
-      alignItems: 'center', 
-      mb: 0.25 
+    <Box sx={{
+      display: 'flex',
+      alignItems: 'center',
+      mb: 0.25
     }}>
-      {enableCustomCopy && 
-       (displayFormat !== 'vertical' && 
+      {enableCustomCopy &&
+       (displayFormat !== 'vertical' &&
         displayFormat !== 'horizontal') ? (
         <FormControlLabel
           control={
-            <Checkbox 
+            <Checkbox
               checked={isSelected}
               onChange={() => handleToggleLabItem(groupIndex, labIndex)}
               size="small"
               disableRipple
-              sx={{ 
+              sx={{
                 color: 'rgba(0, 0, 0, 0.25)',
                 '&.Mui-checked': {
                   color: '#9c64a6', // 淡紫色 (比 secondary.main 更淡)
@@ -73,8 +73,8 @@ const LabItemDisplay = ({
               {formatReferenceRange(lab, showReference)}
             </TypographySizeWrapper>
           }
-          sx={{ 
-            m: 0, 
+          sx={{
+            m: 0,
             p: 0,
             alignItems: 'center',
             '& .MuiCheckbox-root': {
@@ -113,4 +113,4 @@ const LabItemDisplay = ({
   );
 };
 
-export default LabItemDisplay; 
+export default LabItemDisplay;

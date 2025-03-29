@@ -25,16 +25,16 @@ const LineSpacingWrapper = ({
 }) => {
   // Ensure generalDisplaySettings is defined
   const settings = generalDisplaySettings || { lineSpacingHeight: 'medium' };
-  
+
   // Get the correct line spacing from the settings
   const marginBottom = LINE_SPACING[settings.lineSpacingHeight || 'medium'];
-  
+
   // Merge the marginBottom into the existing sx prop
   const updatedSx = {
     ...sx,
     mb: marginBottom
   };
-  
+
   return (
     <Box sx={updatedSx} {...rest}>
       {children}
@@ -42,4 +42,4 @@ const LineSpacingWrapper = ({
   );
 };
 
-export default LineSpacingWrapper; 
+export default LineSpacingWrapper;

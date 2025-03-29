@@ -12,7 +12,7 @@
  * }
  */
 const customReferenceRanges = {
-  // 總膽固醇 
+  // 總膽固醇
   "09001C": {
     min: 0,
     max: 200,
@@ -68,4 +68,4 @@ export {
   customReferenceRanges,
   hasCustomReferenceRange,
   getCustomReferenceRange
-}; 
+};

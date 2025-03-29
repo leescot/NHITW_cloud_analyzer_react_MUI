@@ -10,8 +10,8 @@ import TypographySizeWrapper from "../utils/TypographySizeWrapper";
 const Overview_SurgeryRecords = ({ surgeryData = [], generalDisplaySettings }) => {
   return (
     <Paper sx={{ p: 2 }}>
-      <TypographySizeWrapper 
-        variant="h6" 
+      <TypographySizeWrapper
+        variant="h6"
         textSizeType="title"
         generalDisplaySettings={generalDisplaySettings}
         gutterBottom
@@ -22,7 +22,7 @@ const Overview_SurgeryRecords = ({ surgeryData = [], generalDisplaySettings }) =
         <List dense disablePadding>
           {surgeryData.map((item, index) => (
             <ListItem key={index} sx={{ py: 0.5 }}>
-              <ListItemText 
+              <ListItemText
                 primary={
                   <TypographySizeWrapper
                     textSizeType="content"
@@ -45,7 +45,7 @@ const Overview_SurgeryRecords = ({ surgeryData = [], generalDisplaySettings }) =
           ))}
         </List>
       ) : (
-        <TypographySizeWrapper 
+        <TypographySizeWrapper
           textSizeType="content"
           generalDisplaySettings={generalDisplaySettings}
           color="text.secondary"
@@ -57,4 +57,4 @@ const Overview_SurgeryRecords = ({ surgeryData = [], generalDisplaySettings }) =
   );
 };
 
-export default Overview_SurgeryRecords; 
+export default Overview_SurgeryRecords;

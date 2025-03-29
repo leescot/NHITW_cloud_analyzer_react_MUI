@@ -1,5 +1,5 @@
 import React, { useEffect, useState } from 'react';
-import { 
+import {
   Grid,
   Paper,
   Box,
@@ -32,7 +32,7 @@ const DataStatusTab = ({ dataStatus }) => {
       medDays: <AccessTimeIcon fontSize="large" />,
       patientSummary: <SummarizeIcon fontSize="large" />
     };
-    
+
     return icons[key] || <DescriptionIcon fontSize="large" />;
   };
 
@@ -50,7 +50,7 @@ const DataStatusTab = ({ dataStatus }) => {
 
     checkLoadingState();
     const intervalId = setInterval(checkLoadingState, 1000);
-    
+
     return () => clearInterval(intervalId);
   }, []);
 
@@ -59,10 +59,10 @@ const DataStatusTab = ({ dataStatus }) => {
       <Grid container spacing={2}>
         {Object.entries(dataStatus).map(([key, value]) => (
           <Grid item xs={4} key={key}>
-            <Paper 
-              elevation={1} 
-              sx={{ 
-                p: 1.5, 
+            <Paper
+              elevation={1}
+              sx={{
+                p: 1.5,
                 textAlign: 'center',
                 height: '100%',
                 display: 'flex',
@@ -80,8 +80,8 @@ const DataStatusTab = ({ dataStatus }) => {
                 {value.status === 'loading' ? (
                   <CircularProgress size={20} />
                 ) : (
-                  <Typography 
-                    variant="body2" 
+                  <Typography
+                    variant="body2"
                     color={value.count > 0 ? 'success.main' : 'text.secondary'}
                     fontWeight={value.count > 0 ? 'bold' : 'normal'}
                   >
@@ -110,8 +110,8 @@ const getShortLabel = (key) => {
     medDays: '餘藥',
     patientSummary: '摘要'
   };
-  
+
   return labels[key] || key;
 };
 
-export default DataStatusTab; 
+export default DataStatusTab;

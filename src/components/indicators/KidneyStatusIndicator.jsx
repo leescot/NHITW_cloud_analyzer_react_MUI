@@ -6,10 +6,10 @@ import { NOTE_TEXT_SIZES } from "../../utils/textSizeUtils";
 // 腎臟狀態指示器組件
 const KidneyStatusIndicator = ({ stage, fontSize }) => {
   if (stage === null) return null;
-  
+
   // 使用 NOTE_TEXT_SIZES 並設定默認值
   const fontSizeValue = NOTE_TEXT_SIZES[fontSize] || NOTE_TEXT_SIZES['small'];
-  
+
   // 根據階段決定顏色
   let color;
   switch(stage) {
@@ -23,7 +23,7 @@ const KidneyStatusIndicator = ({ stage, fontSize }) => {
     default:
       color = "default";
   }
-  
+
   return (
     <Tooltip title={`慢性腎臟病 Stage ${stage}`}>
       <Chip
@@ -31,7 +31,7 @@ const KidneyStatusIndicator = ({ stage, fontSize }) => {
         label={`CKD${stage}`}
         size="small"
         color={color}
-        sx={{ 
+        sx={{
           mx: 0.5,
           '& .MuiChip-label': {
             fontSize: fontSizeValue
@@ -42,4 +42,4 @@ const KidneyStatusIndicator = ({ stage, fontSize }) => {
   );
 };
 
-export default KidneyStatusIndicator; 
+export default KidneyStatusIndicator;

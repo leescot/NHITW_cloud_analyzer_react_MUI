@@ -2,23 +2,23 @@
 export const updateDataStatus = (setDataStatus) => {
   chrome.runtime.sendMessage({ action: "getDataStatus" }, (response) => {
     console.log("DATA STATUS RESPONSE:", response);
-    
+
     if (response && response.dataStatus) {
       // Make a copy to avoid direct state mutation
       const updatedStatus = { ...response.dataStatus };
-      
+
       // Add any missing entries with default values
       const expectedKeys = [
-        'medication', 'labData', 'chineseMed', 'imaging', 
+        'medication', 'labData', 'chineseMed', 'imaging',
         'allergy', 'surgery', 'discharge', 'medDays', 'patientSummary'
       ];
-      
+
       expectedKeys.forEach(key => {
         if (!updatedStatus[key]) {
           updatedStatus[key] = { status: 'none', count: 0 };
         }
       });
-      
+
       console.log("PROCESSED STATUS FOR UI:", updatedStatus);
       setDataStatus(updatedStatus);
     }
@@ -50,11 +50,11 @@ export const handleSettingChange = (settingName, value, setLocalState, localStat
       [localStateProp]: value
     }));
   }
-  
+
   // Save to Chrome storage
   chrome.storage.sync.set({ [settingName]: value }, () => {
     console.log(`Setting updated: ${settingName} = ${JSON.stringify(value)}`);
-    
+
     // Notify content script of setting change
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       if (tabs[0]?.id) {
@@ -73,11 +73,11 @@ export const handleSettingChange = (settingName, value, setLocalState, localStat
 export const handleFetchData = (setDataStatus) => {
   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
     if (tabs[0]?.id) {
-      chrome.tabs.sendMessage(tabs[0].id, { action: 'manualDataFetch' }, 
+      chrome.tabs.sendMessage(tabs[0].id, { action: 'manualDataFetch' },
         (response) => {
           if (response && response.status === 'started') {
             console.log('Manual data fetch initiated');
-            
+
             // Update status after a delay to allow fetch to complete
             setTimeout(() => {
               updateDataStatus(setDataStatus);
@@ -92,9 +92,9 @@ export const handleFetchData = (setDataStatus) => {
 // 清除資料處理函數
 export const handleClearData = (setDataStatus) => {
   chrome.storage.local.remove([
-    'medicationData', 
-    'labData', 
-    'chinesemedData', 
+    'medicationData',
+    'labData',
+    'chinesemedData',
     'imagingData',
     'allergyData',
     'surgeryData',
@@ -103,7 +103,7 @@ export const handleClearData = (setDataStatus) => {
   ], () => {
     console.log('All data cleared from storage');
     updateDataStatus(setDataStatus);
-    
+
     // Notify content script to clear data
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       if (tabs[0]?.id) {
@@ -111,4 +111,4 @@ export const handleClearData = (setDataStatus) => {
       }
     });
   });
-}; 
+};

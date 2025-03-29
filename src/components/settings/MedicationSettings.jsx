@@ -141,13 +141,13 @@ const MedicationSettings = () => {
   const handleDeleteGroup = (groupName) => {
     const updatedGroups = { ...settings.atc5Groups };
     delete updatedGroups[groupName];
-    
+
     // 首先更新 ATC5 分组
     handleLocalSettingChange('atc5Groups', updatedGroups);
-    
+
     // 然后从任何颜色分配中删除已删除的组
     const updatedColorGroups = { ...settings.atc5ColorGroups };
-    
+
     // 检查所有颜色类别并删除组（如果存在）
     ['red', 'orange', 'green'].forEach(color => {
       if (updatedColorGroups[color].includes(groupName)) {
@@ -156,7 +156,7 @@ const MedicationSettings = () => {
         );
       }
     });
-    
+
     // 更新颜色组分配
     handleLocalSettingChange('atc5ColorGroups', updatedColorGroups);
   };
@@ -176,26 +176,26 @@ const MedicationSettings = () => {
     }
 
     const codes = newGroupCodes.trim().split(/\s+/);
-    
+
     if (codes.length === 0 || (codes.length === 1 && codes[0] === "")) {
       alert("請輸入至少一個 ATC 代碼");
       return;
     }
-    
+
     const updatedGroups = { ...settings.atc5Groups };
     const oldGroupName = editingGroup;
-    
+
     // 更新分组
     if (oldGroupName && oldGroupName !== newGroupName) {
       delete updatedGroups[oldGroupName];
     }
-    
+
     updatedGroups[newGroupName] = codes;
     handleLocalSettingChange('atc5Groups', updatedGroups);
-    
+
     // 更新颜色分配
     const updatedColorGroups = { ...settings.atc5ColorGroups };
-    
+
     // 从所有颜色组中删除旧的组名（如果存在）
     ['red', 'orange', 'green'].forEach(color => {
       // 如果是编辑现有组，删除旧的分配
@@ -204,7 +204,7 @@ const MedicationSettings = () => {
           group => group !== oldGroupName
         );
       }
-      
+
       // 如果是编辑现有组且组名已更改，还需删除新名称的任何现有分配
       if (oldGroupName !== newGroupName) {
         updatedColorGroups[color] = updatedColorGroups[color].filter(
@@ -212,17 +212,17 @@ const MedicationSettings = () => {
         );
       }
     });
-    
+
     // 添加新的颜色分配（如果不是"none"）
     if (newGroupColor !== "none") {
       updatedColorGroups[newGroupColor] = [
-        ...updatedColorGroups[newGroupColor], 
+        ...updatedColorGroups[newGroupColor],
         newGroupName
       ];
     }
-    
+
     handleLocalSettingChange('atc5ColorGroups', updatedColorGroups);
-    
+
     setEditMode(false);
     setEditingGroup(null);
   };
@@ -236,11 +236,11 @@ const MedicationSettings = () => {
     // 创建默认组的深拷贝
     const groupsCopy = JSON.parse(JSON.stringify(DEFAULT_ATC5_GROUPS));
     const colorGroupsCopy = JSON.parse(JSON.stringify(DEFAULT_ATC5_COLOR_GROUPS));
-    
+
     // 将两个设置都更新为默认值
     handleLocalSettingChange('atc5Groups', groupsCopy);
     handleLocalSettingChange('atc5ColorGroups', colorGroupsCopy);
-    
+
     // 如果打开，关闭编辑模式
     setEditMode(false);
     setEditingGroup(null);
@@ -249,7 +249,7 @@ const MedicationSettings = () => {
   // 为更好显示格式化 ATC 代码 - 两列
   const formatCodesForDisplay = (codes) => {
     if (codes.length === 0) return null;
-    
+
     // 为两列布局创建代码对
     const rows = [];
     for (let i = 0; i < codes.length; i += 2) {
@@ -261,7 +261,7 @@ const MedicationSettings = () => {
         rows.push([codes[i]]);
       }
     }
-    
+
     return (
       <Box sx={{ width: '100%' }}>
         {rows.map((row, rowIndex) => (
@@ -294,15 +294,15 @@ const MedicationSettings = () => {
       green: { color: "success", label: "綠" },
       none: { color: "default", label: "無" }
     };
-    
+
     const groupColor = getGroupColor(groupName);
     const { color, label } = colorMap[groupColor];
-    
+
     if (groupColor === "none") return null;
-    
+
     return (
-      <Chip 
-        size="small" 
+      <Chip
+        size="small"
         label={label}
         color={color}
         variant="outlined"
@@ -314,15 +314,15 @@ const MedicationSettings = () => {
 
   // 颜色选择标签的样式
   const getColorLabelStyle = (color) => {
-    const baseStyle = { 
-      borderRadius: 1, 
-      px: 1, 
-      py: 0.5, 
-      display: 'flex', 
+    const baseStyle = {
+      borderRadius: 1,
+      px: 1,
+      py: 0.5,
+      display: 'flex',
       alignItems: 'center',
       gap: 0.5
     };
-    
+
     switch (color) {
       case "red":
         return { ...baseStyle, bgcolor: '#ffebee', color: 'error.main', border: '1px solid', borderColor: 'error.light' };
@@ -434,8 +434,8 @@ const MedicationSettings = () => {
         />
         {settings.enableATC5Colors && (
           <Box sx={{ mt: 1, mb: 2, ml: 4 }}>
-            <Button 
-              variant="outlined" 
+            <Button
+              variant="outlined"
               onClick={handleOpenAtc5GroupsDialog}
             >
               設定ATC5群組與顏色
@@ -469,8 +469,8 @@ const MedicationSettings = () => {
         </FormControl>
 
         {/* 整合后的 ATC5 分组和颜色对话框 */}
-        <Dialog 
-          open={atc5GroupsDialogOpen} 
+        <Dialog
+          open={atc5GroupsDialogOpen}
           onClose={handleCloseAtc5GroupsDialog}
           fullWidth
           maxWidth="md"
@@ -483,26 +483,26 @@ const MedicationSettings = () => {
             <Typography variant="body2" gutterBottom sx={{ color: 'text.secondary' }}>
               每個群組可以選擇一種顏色或不指定顏色(暫不分組)
             </Typography>
-            
+
             {!editMode ? (
               <Box sx={{ mt: 2 }}>
                 <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
-                  <Button 
-                    variant="contained" 
+                  <Button
+                    variant="contained"
                     startIcon={<AddIcon />}
                     onClick={handleAddNewGroup}
                   >
                     新增群組
                   </Button>
                 </Box>
-                
+
                 <List sx={{ width: '100%' }}>
                   {Object.entries(settings.atc5Groups).map(([groupName, codes], index) => (
                     <React.Fragment key={groupName}>
                       {index > 0 && <Divider />}
                       <ListItem
-                        sx={{ 
-                          py: 1.5, 
+                        sx={{
+                          py: 1.5,
                           position: 'relative',
                           display: 'block'
                         }}
@@ -560,8 +560,8 @@ const MedicationSettings = () => {
                       value={newGroupColor}
                       onChange={(e) => setNewGroupColor(e.target.value)}
                     >
-                      
-                      <FormControlLabel 
+
+                      <FormControlLabel
                         value="red"
                         control={<Radio color="error" />}
                         label={
@@ -571,7 +571,7 @@ const MedicationSettings = () => {
                           </Box>
                         }
                       />
-                      <FormControlLabel 
+                      <FormControlLabel
                         value="orange"
                         control={<Radio color="warning" />}
                         label={
@@ -581,7 +581,7 @@ const MedicationSettings = () => {
                           </Box>
                         }
                       />
-                      <FormControlLabel 
+                      <FormControlLabel
                         value="green"
                         control={<Radio color="success" />}
                         label={
@@ -591,7 +591,7 @@ const MedicationSettings = () => {
                           </Box>
                         }
                       />
-                      <FormControlLabel 
+                      <FormControlLabel
                         value="none"
                         control={<Radio />}
                         label={
@@ -612,7 +612,7 @@ const MedicationSettings = () => {
             )}
           </DialogContent>
           <DialogActions sx={{ justifyContent: 'center' }}>
-            <Button 
+            <Button
               onClick={handleResetSettings}
               color="secondary"
             >
