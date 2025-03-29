@@ -149,6 +149,7 @@ describe('utils/chineseMedProcessor', function () {
           "visitType": "門診",
           "days": 7,
           "dosage": 70,
+          "freq": "TIDPC PO",
           "medications": [
             {
               "name": "小續命湯",
@@ -184,6 +185,7 @@ describe('utils/chineseMedProcessor', function () {
           "visitType": "門診",
           "days": 7,
           "dosage": 87.5,
+          "freq": "TIDPC PO",
           "medications": [
             {
               "name": "小續命湯",
@@ -326,6 +328,7 @@ describe('utils/chineseMedProcessor', function () {
           "visitType": "門診",
           "days": 7,
           "dosage": 49,
+          "freq": "TIDPC PO",
           "medications": [
             {
               "name": "止嗽散",
@@ -361,6 +364,7 @@ describe('utils/chineseMedProcessor', function () {
           "visitType": "門診",
           "days": 7,
           "dosage": 28,
+          "freq": "BIDPC",
           "medications": [
             {
               "name": "藿香正氣散(丸)",
@@ -470,6 +474,7 @@ describe('utils/chineseMedProcessor', function () {
           "visitType": "門診",
           "days": 7,
           "dosage": 63,
+          "freq": "TIDPC PO",
           "medications": [
             {
               "name": "小續命湯",
@@ -493,6 +498,7 @@ describe('utils/chineseMedProcessor', function () {
           "visitType": "門診",
           "days": 7,
           "dosage": 7,
+          "freq": "TIDPC PO",
           "medications": [
             {
               "name": "延胡索",
@@ -516,6 +522,7 @@ describe('utils/chineseMedProcessor', function () {
           "visitType": "門診",
           "days": 7,
           "dosage": 70,
+          "freq": "TIDPC PO",
           "medications": [
             {
               "name": "小續命湯",
@@ -613,6 +620,7 @@ describe('utils/chineseMedProcessor', function () {
           "visitType": "門診",
           "days": 14,
           "dosage": 126,
+          "freq": "TIDPC PO",
           "medications": [
             {
               "name": "小續命湯",
@@ -636,6 +644,7 @@ describe('utils/chineseMedProcessor', function () {
           "visitType": "門診",
           "days": 7,
           "dosage": 7,
+          "freq": "TIDPC PO",
           "medications": [
             {
               "name": "延胡索",
@@ -659,6 +668,7 @@ describe('utils/chineseMedProcessor', function () {
           "visitType": "門診",
           "days": 7,
           "dosage": 70,
+          "freq": "TIDPC PO",
           "medications": [
             {
               "name": "小續命湯",
@@ -756,6 +766,7 @@ describe('utils/chineseMedProcessor', function () {
           "visitType": "門診",
           "days": 7,
           "dosage": 63,
+          "freq": "TIDPC PO",
           "medications": [
             {
               "name": "小續命湯",
@@ -779,6 +790,7 @@ describe('utils/chineseMedProcessor', function () {
           "visitType": "門診",
           "days": 7,
           "dosage": 7,
+          "freq": "HS PO",
           "medications": [
             {
               "name": "延胡索",
@@ -802,6 +814,7 @@ describe('utils/chineseMedProcessor', function () {
           "visitType": "門診",
           "days": 7,
           "dosage": 70,
+          "freq": "TIDPC PO",
           "medications": [
             {
               "name": "小續命湯",
@@ -962,6 +975,7 @@ describe('utils/chineseMedProcessor', function () {
           "visitType": "門診",
           "days": 7,
           "dosage": 28,
+          "freq": "BIDPC",
           "medications": [
             {
               "name": "藿香正氣散(丸)",
@@ -997,6 +1011,7 @@ describe('utils/chineseMedProcessor', function () {
           "visitType": "門診",
           "days": 2,
           "dosage": 3.6,
+          "freq": "TID",
           "medications": [
             {
               "name": "葛根",
@@ -1032,6 +1047,7 @@ describe('utils/chineseMedProcessor', function () {
           "visitType": "門診",
           "days": 3,
           "dosage": 21,
+          "freq": "TIDPC PO",
           "medications": [
             {
               "name": "止嗽散",
@@ -1204,6 +1220,7 @@ describe('utils/chineseMedProcessor', function () {
           "visitType": "門診",
           "days": 7,
           "dosage": 24.5,
+          "freq": "BIDPC",
           "medications": [
             {
               "name": "藿香正氣散(丸)",
@@ -1239,6 +1256,7 @@ describe('utils/chineseMedProcessor', function () {
           "visitType": "門診",
           "days": 4,
           "dosage": 7.2,
+          "freq": "TID",
           "medications": [
             {
               "name": "葛根",
@@ -1274,6 +1292,7 @@ describe('utils/chineseMedProcessor', function () {
           "visitType": "門診",
           "days": 7,
           "dosage": 28,
+          "freq": "TIDPC PO",
           "medications": [
             {
               "name": "止嗽散",
@@ -1402,6 +1421,7 @@ describe('utils/chineseMedProcessor', function () {
           "visitType": "門診",
           "days": 7,
           "dosage": 80.5,
+          "freq": "TIDPC PO",
           "medications": [
             {
               "name": "小續命湯",
@@ -1532,6 +1552,7 @@ describe('utils/chineseMedProcessor', function () {
           "visitType": "門診",
           "days": 7,
           "dosage": 80.5,
+          "freq": "TIDPC PO",
           "medications": [
             {
               "name": "小續命湯",
@@ -1662,6 +1683,7 @@ describe('utils/chineseMedProcessor', function () {
           "visitType": "門診",
           "days": 7,
           "dosage": 80.5,
+          "freq": "TIDPC PO",
           "medications": [
             {
               "name": "小續命湯",
@@ -1789,6 +1811,7 @@ describe('utils/chineseMedProcessor', function () {
           "hosp": "測試院所",
           "days": 7,
           "dosage": 80.5,
+          "freq": "TIDPC PO",
           "visitType": "門診",
           "medications": [
             {
@@ -1856,6 +1879,7 @@ describe('utils/chineseMedProcessor', function () {
           "hosp": "測試院所",
           "days": 7,
           "dosage": 63,
+          "freq": "TIDPC PO",
           "visitType": "會診",
           "medications": [
             {
@@ -2163,7 +2187,7 @@ describe('utils/chineseMedProcessor', function () {
 
   describe.skip('.sortGroupedData');
 
-  describe.skip('.sortMedicationsByDailyDosage');
+  describe.skip('.sortMedicationsByDosage');
 
   describe.skip('.getMedicationText');
 
@@ -2199,6 +2223,7 @@ describe('utils/chineseMedProcessor', function () {
         "date": "2025/03/26",
         "hosp": "院所甲",
         "days": 7,
+        "freq": "TIDPC PO",
         "icd_code": "I679",
         "icd_name": "診斷欠明之腦血管疾病",
         "visitType": "門診",
@@ -2214,14 +2239,14 @@ describe('utils/chineseMedProcessor', function () {
       assert.deepEqual(
         chineseMedProcessor.formatChineseMedList(medications, 'nameVertical', groupInfo),
         `\
-2025/03/26 - 院所甲 7天 [I679 診斷欠明之腦血管疾病]
+2025/03/26 - 院所甲 7天 TIDPC PO [I679 診斷欠明之腦血管疾病]
 小續命湯
 延胡索`,
       );
       assert.deepEqual(
         chineseMedProcessor.formatChineseMedList(medications, 'nameVertical', {...groupInfo, showDiagnosis: false}),
         `\
-2025/03/26 - 院所甲 7天
+2025/03/26 - 院所甲 7天 TIDPC PO
 小續命湯
 延胡索`,
       );
@@ -2229,75 +2254,75 @@ describe('utils/chineseMedProcessor', function () {
       assert.deepEqual(
         chineseMedProcessor.formatChineseMedList(medications, 'nameHorizontal', groupInfo),
         `\
-2025/03/26 - 院所甲 7天 [I679 診斷欠明之腦血管疾病]
+2025/03/26 - 院所甲 7天 TIDPC PO [I679 診斷欠明之腦血管疾病]
 小續命湯, 延胡索`,
       );
       assert.deepEqual(
         chineseMedProcessor.formatChineseMedList(medications, 'nameHorizontal', {...groupInfo, showDiagnosis: false}),
         `\
-2025/03/26 - 院所甲 7天
+2025/03/26 - 院所甲 7天 TIDPC PO
 小續命湯, 延胡索`,
       );
 
       assert.deepEqual(
         chineseMedProcessor.formatChineseMedList(medications, 'nameWithDosageVertical', groupInfo),
         `\
-2025/03/26 - 院所甲 7天 [I679 診斷欠明之腦血管疾病]
-小續命湯 9g TIDPC PO - 袪風之劑
-延胡索 1g TIDPC PO`,
+2025/03/26 - 院所甲 7天 TIDPC PO [I679 診斷欠明之腦血管疾病]
+小續命湯 9g - 袪風之劑
+延胡索 1g`,
       );
       assert.deepEqual(
         chineseMedProcessor.formatChineseMedList(medications, 'nameWithDosageVertical', {...groupInfo, showDiagnosis: false}),
         `\
-2025/03/26 - 院所甲 7天
-小續命湯 9g TIDPC PO - 袪風之劑
-延胡索 1g TIDPC PO`,
+2025/03/26 - 院所甲 7天 TIDPC PO
+小續命湯 9g - 袪風之劑
+延胡索 1g`,
       );
       assert.deepEqual(
         chineseMedProcessor.formatChineseMedList(medications, 'nameWithDosageVertical', {...groupInfo, showEffectName: false}),
         `\
-2025/03/26 - 院所甲 7天 [I679 診斷欠明之腦血管疾病]
-小續命湯 9g TIDPC PO
-延胡索 1g TIDPC PO`,
+2025/03/26 - 院所甲 7天 TIDPC PO [I679 診斷欠明之腦血管疾病]
+小續命湯 9g
+延胡索 1g`,
       );
       assert.deepEqual(
         chineseMedProcessor.formatChineseMedList(medications, 'nameWithDosageVertical', {...groupInfo, showDiagnosis: false, showEffectName: false}),
         `\
-2025/03/26 - 院所甲 7天
-小續命湯 9g TIDPC PO
-延胡索 1g TIDPC PO`,
+2025/03/26 - 院所甲 7天 TIDPC PO
+小續命湯 9g
+延胡索 1g`,
       );
 
       assert.deepEqual(
         chineseMedProcessor.formatChineseMedList(medications, 'nameWithDosageHorizontal', groupInfo),
         `\
-2025/03/26 - 院所甲 7天 [I679 診斷欠明之腦血管疾病]
-小續命湯 9g TIDPC PO - 袪風之劑, 延胡索 1g TIDPC PO`,
+2025/03/26 - 院所甲 7天 TIDPC PO [I679 診斷欠明之腦血管疾病]
+小續命湯 9g - 袪風之劑, 延胡索 1g`,
       );
       assert.deepEqual(
         chineseMedProcessor.formatChineseMedList(medications, 'nameWithDosageHorizontal', {...groupInfo, showDiagnosis: false}),
         `\
-2025/03/26 - 院所甲 7天
-小續命湯 9g TIDPC PO - 袪風之劑, 延胡索 1g TIDPC PO`,
+2025/03/26 - 院所甲 7天 TIDPC PO
+小續命湯 9g - 袪風之劑, 延胡索 1g`,
       );
       assert.deepEqual(
         chineseMedProcessor.formatChineseMedList(medications, 'nameWithDosageHorizontal', {...groupInfo, showEffectName: false}),
         `\
-2025/03/26 - 院所甲 7天 [I679 診斷欠明之腦血管疾病]
-小續命湯 9g TIDPC PO, 延胡索 1g TIDPC PO`,
+2025/03/26 - 院所甲 7天 TIDPC PO [I679 診斷欠明之腦血管疾病]
+小續命湯 9g, 延胡索 1g`,
       );
       assert.deepEqual(
         chineseMedProcessor.formatChineseMedList(medications, 'nameWithDosageHorizontal', {...groupInfo, showDiagnosis: false, showEffectName: false}),
         `\
-2025/03/26 - 院所甲 7天
-小續命湯 9g TIDPC PO, 延胡索 1g TIDPC PO`,
+2025/03/26 - 院所甲 7天 TIDPC PO
+小續命湯 9g, 延胡索 1g`,
       );
 
       // treat unknown as nameVertical
       assert.deepEqual(
         chineseMedProcessor.formatChineseMedList(medications, 'unknown', groupInfo),
         `\
-2025/03/26 - 院所甲 7天 [I679 診斷欠明之腦血管疾病]
+2025/03/26 - 院所甲 7天 TIDPC PO [I679 診斷欠明之腦血管疾病]
 小續命湯
 延胡索`,
       );
@@ -2305,7 +2330,7 @@ describe('utils/chineseMedProcessor', function () {
       assert.deepEqual(
         chineseMedProcessor.formatChineseMedList(medications, 'unknown', {...groupInfo, showDiagnosis: false}),
         `\
-2025/03/26 - 院所甲 7天
+2025/03/26 - 院所甲 7天 TIDPC PO
 小續命湯
 延胡索`,
       );

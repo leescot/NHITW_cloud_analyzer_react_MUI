@@ -31,6 +31,7 @@ const ChineseMedicine = ({
       date: group.date,
       hosp: group.hosp,
       days: days,
+      freq: group.freq,
       icd_code: group.icd_code,
       icd_name: group.icd_name,
       visitType: group.visitType,
@@ -69,7 +70,7 @@ const ChineseMedicine = ({
       ) : (
         groupedChineseMeds.map((group, index) => {
           // 排序藥品
-          const sortedMedications = chineseMedProcessor.sortMedicationsByDailyDosage(group.medications);
+          const sortedMedications = chineseMedProcessor.sortMedicationsByDosage(group.medications);
 
           return (
             <Box key={index} sx={{ mb: 3 }}>
@@ -96,7 +97,7 @@ const ChineseMedicine = ({
                     mb: 0
                   }}
                 >
-                  {group.days}天
+                  {group.days}天 {group.freq}
                 </TypographySizeWrapper>
 
                 {chineseMedSettings.showDiagnosis && group.icd_code && (
@@ -148,7 +149,7 @@ const ChineseMedicine = ({
                     generalDisplaySettings={generalDisplaySettings}
                     sx={{ color: "text.secondary" }}
                   >
-                    {med.dailyDosage}g {med.frequency}
+                    {med.dailyDosage}g
                   </TypographySizeWrapper>
 
                   {chineseMedSettings.showEffectName && med.sosc_name && (

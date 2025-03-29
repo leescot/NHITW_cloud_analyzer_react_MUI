@@ -84,6 +84,7 @@ export const chineseMedProcessor = {
         Object.defineProperty(this, 'dosage', {value});
         return value;
       },
+      freq: med.drug_fre,
       medications: [],
     };
 
@@ -231,18 +232,14 @@ export const chineseMedProcessor = {
       });
   },
 
-  // 依照每日劑量降序排序藥品
-  sortMedicationsByDailyDosage(medications) {
-    return [...medications].sort((a, b) => {
-      const dosageA = parseFloat(a.dailyDosage) || 0;
-      const dosageB = parseFloat(b.dailyDosage) || 0;
-      return dosageB - dosageA; // 降序排列
-    });
+  // 依照劑量降序排序藥品
+  sortMedicationsByDosage(medications) {
+    return [...medications].sort((a, b) => b.order_qty - a.order_qty);
   },
 
   getMedicationText(med, format, groupInfo) {
     const nameText = `${med.name}`;
-    const dosageText = `${med.dailyDosage}g ${med.frequency}`;
+    const dosageText = `${med.dailyDosage}g`;
     const effectText = med.sosc_name && groupInfo.showEffectName ? ` - ${med.sosc_name}` : '';
 
     switch (format) {
@@ -263,13 +260,13 @@ export const chineseMedProcessor = {
     }
 
     // Format the header with date, hospital, days and diagnosis
-    let header = `${groupInfo.date} - ${groupInfo.hosp} ${groupInfo.days}天`;
+    let header = `${groupInfo.date} - ${groupInfo.hosp} ${groupInfo.days}天 ${groupInfo.freq}`;
     if (groupInfo.showDiagnosis && groupInfo.icd_code && groupInfo.icd_name) {
       header += ` [${groupInfo.icd_code} ${groupInfo.icd_name}]`;
     }
 
-    // 先依照每日劑量降序排序藥品
-    const sortedMedications = this.sortMedicationsByDailyDosage(medications);
+    // 先依照劑量降序排序藥品
+    const sortedMedications = this.sortMedicationsByDosage(medications);
 
     const medicationTexts = sortedMedications.map(med => this.getMedicationText(med, format, groupInfo));
 
