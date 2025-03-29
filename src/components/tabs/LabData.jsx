@@ -10,29 +10,29 @@ import { VerticalLayout, HorizontalLayout, MultiColumnLayout } from "./lab/Layou
 
 const LabData = ({ groupedLabs, settings, labSettings, generalDisplaySettings }) => {
   // console.log("LabData rendering with lab settings:", labSettings);
-  
+
   // Ensure all required properties exist in labSettings with defaults
   const completeLabSettings = {
     displayFormat: 'byType',
     showUnit: false,
     showReference: false,
-    enableAbbrev: true, 
+    enableAbbrev: true,
     highlightAbnormal: true,
     copyFormat: 'horizontal',
     enableCustomCopy: false,
     customCopyItems: [],
     ...labSettings
   };
-  
+
   // 使用自定義 Hook 處理複製功能
   const {
-    snackbarOpen, 
-    snackbarMessage, 
-    handleSnackbarClose, 
-    handleCopyAllLabData: copyAllLabData, 
+    snackbarOpen,
+    snackbarMessage,
+    handleSnackbarClose,
+    handleCopyAllLabData: copyAllLabData,
     handleCopyUserSelectedLabData: copyUserSelectedLabData
   } = useCopyLabData();
-  
+
   // 添加檢驗項目選擇狀態
   // 使用 Map 來追蹤每個組別中選中的項目 { groupIndex: { labId: boolean } }
   const [selectedLabItems, setSelectedLabItems] = useState({});
@@ -42,37 +42,37 @@ const LabData = ({ groupedLabs, settings, labSettings, generalDisplaySettings })
   useEffect(() => {
     if (completeLabSettings.enableCustomCopy && groupedLabs.length > 0) {
       const initialSelections = {};
-      
+
       groupedLabs.forEach((group, groupIndex) => {
         initialSelections[groupIndex] = {};
-        
+
         group.labs.forEach((lab, labIndex) => {
           const labId = `${groupIndex}-${labIndex}`;
           let isPreselected = false;
-          
+
           // 檢查此檢驗項目是否在 customCopyItems 中並且啟用
           if (completeLabSettings.customCopyItems && Array.isArray(completeLabSettings.customCopyItems)) {
             const enabledOrderCodes = completeLabSettings.customCopyItems
               .filter(item => item.enabled)
               .map(item => item.orderCode);
-            
+
             // 特殊處理 08011C (WBC, Hb, Platelet)
             if (lab.orderCode === '08011C') {
-              if (enabledOrderCodes.includes('08011C-WBC') && 
-                  (lab.itemName?.toLowerCase().includes('wbc') || 
+              if (enabledOrderCodes.includes('08011C-WBC') &&
+                  (lab.itemName?.toLowerCase().includes('wbc') ||
                    lab.itemName?.toLowerCase().includes('白血球'))) {
                 isPreselected = true;
               }
-              if (enabledOrderCodes.includes('08011C-Hb') && 
-                  (lab.itemName?.toLowerCase().includes('hb') || 
-                   lab.itemName?.toLowerCase().includes('hgb') || 
-                   lab.itemName?.toLowerCase().includes('血色素') || 
+              if (enabledOrderCodes.includes('08011C-Hb') &&
+                  (lab.itemName?.toLowerCase().includes('hb') ||
+                   lab.itemName?.toLowerCase().includes('hgb') ||
+                   lab.itemName?.toLowerCase().includes('血色素') ||
                    lab.itemName?.toLowerCase().includes('Hemoglobin'))) {
                 isPreselected = true;
               }
-              if (enabledOrderCodes.includes('08011C-Platelet') && 
-                  (lab.itemName?.toLowerCase().includes('plt') || 
-                   lab.itemName?.toLowerCase().includes('platelet') || 
+              if (enabledOrderCodes.includes('08011C-Platelet') &&
+                  (lab.itemName?.toLowerCase().includes('plt') ||
+                   lab.itemName?.toLowerCase().includes('platelet') ||
                    lab.itemName?.toLowerCase().includes('血小板'))) {
                 isPreselected = true;
               }
@@ -85,9 +85,9 @@ const LabData = ({ groupedLabs, settings, labSettings, generalDisplaySettings })
             }
             // 特殊處理 09040C (UPCR)
             else if (lab.orderCode === '09040C') {
-              if (enabledOrderCodes.includes('09040C') && 
-                  (lab.abbrName === 'UPCR' || 
-                  (lab.itemName && (lab.itemName.includes('UPCR') || 
+              if (enabledOrderCodes.includes('09040C') &&
+                  (lab.abbrName === 'UPCR' ||
+                  (lab.itemName && (lab.itemName.includes('UPCR') ||
                                     lab.itemName.includes('蛋白/肌酸酐比值') ||
                                     lab.itemName.includes('protein/Creatinine'))))) {
                 isPreselected = true;
@@ -95,9 +95,9 @@ const LabData = ({ groupedLabs, settings, labSettings, generalDisplaySettings })
             }
             // 特殊處理 12111C (UACR)
             else if (lab.orderCode === '12111C') {
-              if (enabledOrderCodes.includes('12111C') && 
-                  (lab.abbrName === 'UACR' || 
-                  (lab.itemName && (lab.itemName.toLowerCase().includes('u-acr') || 
+              if (enabledOrderCodes.includes('12111C') &&
+                  (lab.abbrName === 'UACR' ||
+                  (lab.itemName && (lab.itemName.toLowerCase().includes('u-acr') ||
                                     lab.itemName.toLowerCase().includes('albumin/creatinine') ||
                                     lab.itemName.toLowerCase().includes('/cre'))))) {
                 isPreselected = true;
@@ -108,11 +108,11 @@ const LabData = ({ groupedLabs, settings, labSettings, generalDisplaySettings })
               isPreselected = true;
             }
           }
-          
+
           initialSelections[groupIndex][labId] = isPreselected;
         });
       });
-      
+
       setSelectedLabItems(initialSelections);
     }
   }, [completeLabSettings.enableCustomCopy, completeLabSettings.customCopyItems, groupedLabs]);
@@ -120,16 +120,16 @@ const LabData = ({ groupedLabs, settings, labSettings, generalDisplaySettings })
   // 切換檢驗項目選擇狀態
   const handleToggleLabItem = (groupIndex, labIndex) => {
     const labId = `${groupIndex}-${labIndex}`;
-    
+
     setSelectedLabItems(prev => {
       const updatedSelections = {...prev};
-      
+
       if (!updatedSelections[groupIndex]) {
         updatedSelections[groupIndex] = {};
       }
-      
+
       updatedSelections[groupIndex][labId] = !updatedSelections[groupIndex][labId];
-      
+
       return updatedSelections;
     });
   };
@@ -137,7 +137,7 @@ const LabData = ({ groupedLabs, settings, labSettings, generalDisplaySettings })
   // 檢查是否有選擇的檢驗項目
   const hasSelectedItems = (groupIndex) => {
     if (!selectedLabItems[groupIndex]) return false;
-    
+
     return Object.values(selectedLabItems[groupIndex]).some(selected => selected);
   };
 
@@ -160,12 +160,12 @@ const LabData = ({ groupedLabs, settings, labSettings, generalDisplaySettings })
       default: return 1; // 'vertical' 或其他情況
     }
   };
-  
+
   return (
     <>
       {groupedLabs.length === 0 ? (
-        <TypographySizeWrapper 
-          color="text.secondary" 
+        <TypographySizeWrapper
+          color="text.secondary"
           variant="body2"
           textSizeType="content"
           generalDisplaySettings={generalDisplaySettings}
@@ -176,7 +176,7 @@ const LabData = ({ groupedLabs, settings, labSettings, generalDisplaySettings })
         groupedLabs.map((group, index) => (
           <Box key={index} sx={{ mb: 2 }}>
             {/* 檢驗數據標題區域 - 使用提取出的 LabHeader 組件 */}
-            <LabHeader 
+            <LabHeader
               group={group}
               index={index}
               settings={settings}

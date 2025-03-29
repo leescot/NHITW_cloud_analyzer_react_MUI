@@ -5,12 +5,29 @@ import reactHooks from 'eslint-plugin-react-hooks'
 import reactRefresh from 'eslint-plugin-react-refresh'
 
 export default [
-  { ignores: ['dist'] },
   {
-    files: ['**/*.{js,jsx}'],
+    ignores: [
+      'dist',
+      'tests/lib/**/*.js',
+    ],
+  },
+  {
+    rules: {
+      ...js.configs.recommended.rules,
+      "no-trailing-spaces": "error", // 禁止行尾空格
+    },
+  },
+  {
+    files: [
+      'src/**/*.{js,jsx}',
+      'public/**/*.js',
+    ],
     languageOptions: {
       ecmaVersion: 2020,
-      globals: globals.browser,
+      globals: {
+        ...globals.browser,
+        chrome: false,
+      },
       parserOptions: {
         ecmaVersion: 'latest',
         ecmaFeatures: { jsx: true },
@@ -24,7 +41,6 @@ export default [
       'react-refresh': reactRefresh,
     },
     rules: {
-      ...js.configs.recommended.rules,
       ...react.configs.recommended.rules,
       ...react.configs['jsx-runtime'].rules,
       ...reactHooks.configs.recommended.rules,
@@ -33,6 +49,26 @@ export default [
         'warn',
         { allowConstantExport: true },
       ],
+    },
+  },
+  {
+    files: [
+      'scripts/**/*.js',
+      'tests/serve.js',
+    ],
+    languageOptions: {
+      globals: globals.node,
+    },
+  },
+  {
+    files: [
+      'tests/**/*.js',
+    ],
+    languageOptions: {
+      globals: {
+        ...globals.browser,
+        ...globals.mocha,
+      },
     },
   },
 ]

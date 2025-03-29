@@ -1,11 +1,11 @@
 import React from 'react';
-import { 
-  Box, 
-  Typography, 
-  Paper, 
-  Divider, 
-  List, 
-  ListItem, 
+import {
+  Box,
+  Typography,
+  Paper,
+  Divider,
+  List,
+  ListItem,
   ListItemText,
   Link,
   Avatar,
@@ -60,7 +60,7 @@ const AboutTab = () => {
           <Typography variant="h6">貢獻者</Typography>
         </Box>
         <Divider sx={{ mb: 2 }} />
-        
+
         <List disablePadding>
           {contributors.map((contributor, index) => (
             <ListItem key={index} sx={{ py: 1.5 }}>
@@ -68,9 +68,9 @@ const AboutTab = () => {
                 <Grid item>
                   {contributor.avatar.includes('/') ? (
                     // 如果是圖片路徑
-                    <Avatar 
-                      src={contributor.avatar} 
-                      alt={contributor.name.split(' ')[0]} 
+                    <Avatar
+                      src={contributor.avatar}
+                      alt={contributor.name.split(' ')[0]}
                       sx={{ width: 50, height: 50, mr: 2 }}
                     />
                   ) : (
@@ -92,10 +92,10 @@ const AboutTab = () => {
                         </Typography>
                         {Array.isArray(contributor.role) ? (
                           contributor.role.map((role, roleIndex) => (
-                            <Typography 
-                              key={roleIndex} 
-                              variant="body2" 
-                              color="primary" 
+                            <Typography
+                              key={roleIndex}
+                              variant="body2"
+                              color="primary"
                               sx={{ fontWeight: 500, lineHeight: 1.2, mb: roleIndex < contributor.role.length - 1 ? 0.5 : 0 }}
                             >
                               {role}
@@ -110,8 +110,8 @@ const AboutTab = () => {
                       <Stack direction="column" spacing={0.5} sx={{ ml: 1 }}>
                         {contributor.github && (
                           <Tooltip title="GitHub">
-                            <IconButton 
-                              size="small" 
+                            <IconButton
+                              size="small"
                               color="primary"
                               component="a"
                               href={contributor.github}
@@ -125,8 +125,8 @@ const AboutTab = () => {
                         )}
                         {contributor.blog && (
                           <Tooltip title="個人網站">
-                            <IconButton 
-                              size="small" 
+                            <IconButton
+                              size="small"
                               color="primary"
                               component="a"
                               href={contributor.blog}
@@ -154,34 +154,34 @@ const AboutTab = () => {
           <Typography variant="h6">聯絡方式</Typography>
         </Box>
         <Divider sx={{ mb: 2 }} />
-        
+
         <Typography variant="body1" paragraph>
           如有任何問題、建議或錯誤回報，請透過以下方式聯絡我們：
         </Typography>
-        
+
         <List disablePadding>
           <ListItem>
-            <ListItemText 
-              primary="Email" 
-              secondary={<Link href="mailto:aszk1415@gmail.com">aszk1415@gmail.com</Link>} 
+            <ListItemText
+              primary="Email"
+              secondary={<Link href="mailto:aszk1415@gmail.com">aszk1415@gmail.com</Link>}
             />
           </ListItem>
           <ListItem>
-            <ListItemText 
-              primary="GitHub" 
+            <ListItemText
+              primary="GitHub"
               secondary={
                 <Box sx={{ wordBreak: 'break-word' }}>
-                  <Link 
-                    href="https://github.com/leescot/NHITW_cloud_analyzer_react_MUI" 
-                    target="_blank" 
+                  <Link
+                    href="https://github.com/leescot/NHITW_cloud_analyzer_react_MUI"
+                    target="_blank"
                     rel="noopener noreferrer"
                     sx={{ display: 'flex', alignItems: 'center' }}
                   >
                     <GitHubIcon sx={{ mr: 0.5, fontSize: '1rem', flexShrink: 0 }} />
-                    <Typography 
-                      variant="body2" 
-                      component="span" 
-                      sx={{ 
+                    <Typography
+                      variant="body2"
+                      component="span"
+                      sx={{
                         wordBreak: 'break-word',
                         overflowWrap: 'break-word',
                         hyphens: 'auto'
@@ -191,7 +191,7 @@ const AboutTab = () => {
                     </Typography>
                   </Link>
                 </Box>
-              } 
+              }
             />
           </ListItem>
         </List>
@@ -203,7 +203,7 @@ const AboutTab = () => {
           <Typography variant="h6">關於擴充功能</Typography>
         </Box>
         <Divider sx={{ mb: 2 }} />
-        
+
         <Grid container spacing={2}>
           <Grid item xs={4}>
             <Typography variant="subtitle2" color="text.secondary">名稱</Typography>
@@ -211,14 +211,14 @@ const AboutTab = () => {
           <Grid item xs={8}>
             <Typography variant="body1">{manifestData.name}</Typography>
           </Grid>
-          
+
           <Grid item xs={4}>
             <Typography variant="subtitle2" color="text.secondary">版本</Typography>
           </Grid>
           <Grid item xs={8}>
             <Typography variant="body1">{manifestData.version}</Typography>
           </Grid>
-          
+
           <Grid item xs={4}>
             <Typography variant="subtitle2" color="text.secondary">描述</Typography>
           </Grid>

@@ -1,7 +1,7 @@
 export const medDaysProcessor = {
   processMedDaysData(data) {
     // console.log('Starting to process medication days data:', data);
-    
+
     if (!data || !data.rObject || !Array.isArray(data.rObject)) {
       console.log('Invalid medication days data format:', data);
       return [];
@@ -48,4 +48,4 @@ export const medDaysProcessor = {
       expiryDate: item.edate || '未記錄'
     };
   }
-}; 
+};

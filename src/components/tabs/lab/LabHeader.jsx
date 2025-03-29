@@ -4,10 +4,10 @@ import TypographySizeWrapper from "../../utils/TypographySizeWrapper";
 import { CopyAllButton, CopySelectedButton } from "../../utils/lab/IconComponents";
 import { formatDate } from "../../utils/lab/LabUtilities";
 
-const LabHeader = ({ 
-  group, 
-  index, 
-  settings, 
+const LabHeader = ({
+  group,
+  index,
+  settings,
   labSettings,
   generalDisplaySettings,
   handleCopyAllLabData,
@@ -18,11 +18,11 @@ const LabHeader = ({
 
   return (
     <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
-      <TypographySizeWrapper 
-        variant="subtitle1" 
+      <TypographySizeWrapper
+        variant="subtitle1"
         textSizeType="content"
         generalDisplaySettings={generalDisplaySettings}
-        color="primary" 
+        color="primary"
         sx={{ flexGrow: 1 }}
       >
         {/* 將日期格式從 YYYY-MM-DD 轉換為 YYYY/MM/DD */}
@@ -40,7 +40,7 @@ const LabHeader = ({
             {group.icd_code} {group.icd_name}
           </TypographySizeWrapper>
         )}
-      
+
         {/* 複製按鈕 - 根據設定決定顯示一個還是兩個 */}
         {labSettings.enableCustomCopy ? (
           <>
@@ -58,4 +58,4 @@ const LabHeader = ({
   );
 };
 
-export default LabHeader; 
+export default LabHeader;

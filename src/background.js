@@ -62,7 +62,7 @@ Object.entries(API_ENDPOINTS).forEach(([type, endpoint]) => {
 
 chrome.webRequest.onBeforeRequest.addListener(
   function(details) {
-    if (details.method === "GET" && 
+    if (details.method === "GET" &&
         details.url.includes("medcloud2.nhi.gov.tw/imu/api/imue0090/imue0090s02/get-data")) {
       // console.log("Detected Chinese medicine API request:", details.url);
       chrome.tabs.sendMessage(details.tabId, {
@@ -79,7 +79,7 @@ chrome.webRequest.onBeforeRequest.addListener(
 
 chrome.webRequest.onBeforeRequest.addListener(
   function(details) {
-    if (details.method === "GET" && 
+    if (details.method === "GET" &&
         details.url.includes("medcloud2.nhi.gov.tw/imu/api/imue0130/imue0130s02/get-data")) {
       // console.log("Detected imaging API request:", details.url);
       chrome.tabs.sendMessage(details.tabId, {
@@ -97,7 +97,7 @@ chrome.webRequest.onBeforeRequest.addListener(
 // Add completion listeners for new APIs
 chrome.webRequest.onCompleted.addListener(
   function(details) {
-    if (details.method === "GET" && 
+    if (details.method === "GET" &&
         details.url.includes("medcloud2.nhi.gov.tw/imu/api/imue0090/imue0090s02/get-data")) {
       // console.log("Completed Chinese medicine API request:", details.url);
       chrome.tabs.sendMessage(details.tabId, {
@@ -114,7 +114,7 @@ chrome.webRequest.onCompleted.addListener(
 
 chrome.webRequest.onCompleted.addListener(
   function(details) {
-    if (details.method === "GET" && 
+    if (details.method === "GET" &&
         details.url.includes("medcloud2.nhi.gov.tw/imu/api/imue0130/imue0130s02/get-data")) {
       // console.log("Completed imaging API request:", details.url);
       chrome.tabs.sendMessage(details.tabId, {
@@ -131,7 +131,7 @@ chrome.webRequest.onCompleted.addListener(
 
 chrome.webRequest.onBeforeRequest.addListener(
   function(details) {
-    if (details.method === "GET" && 
+    if (details.method === "GET" &&
         details.url.includes("medcloud2.nhi.gov.tw/imu/api/imue0008/imue0008s02/get-data")) {
       // console.log("Detected medication history API request:", details.url);
       chrome.tabs.sendMessage(details.tabId, {
@@ -149,7 +149,7 @@ chrome.webRequest.onBeforeRequest.addListener(
 // 監聽檢驗資料 API 請求
 chrome.webRequest.onBeforeRequest.addListener(
   function(details) {
-    if (details.method === "GET" && 
+    if (details.method === "GET" &&
         details.url.includes("medcloud2.nhi.gov.tw/imu/api/imue0060/imue0060s02/get-data")) {
       // console.log("Detected lab data API request:", details.url);
       chrome.tabs.sendMessage(details.tabId, {
@@ -167,10 +167,10 @@ chrome.webRequest.onBeforeRequest.addListener(
 // 監聽藥歷 API 請求完成
 chrome.webRequest.onCompleted.addListener(
   function(details) {
-    if (details.method === "GET" && 
+    if (details.method === "GET" &&
         details.url.includes("medcloud2.nhi.gov.tw/imu/api/imue0008/imue0008s02/get-data")) {
       // console.log("Completed medication history API request:", details.url, "Status:", details.statusCode);
-      
+
       chrome.tabs.sendMessage(details.tabId, {
         action: "apiCallCompleted",
         url: details.url,
@@ -186,10 +186,10 @@ chrome.webRequest.onCompleted.addListener(
 // 監聽檢驗資料 API 請求完成
 chrome.webRequest.onCompleted.addListener(
   function(details) {
-    if (details.method === "GET" && 
+    if (details.method === "GET" &&
         details.url.includes("medcloud2.nhi.gov.tw/imu/api/imue0060/imue0060s02/get-data")) {
       // console.log("Completed lab data API request:", details.url, "Status:", details.statusCode);
-      
+
       chrome.tabs.sendMessage(details.tabId, {
         action: "apiCallCompleted",
         url: details.url,
@@ -205,7 +205,7 @@ chrome.webRequest.onCompleted.addListener(
 // Monitor patient summary API requests
 chrome.webRequest.onBeforeRequest.addListener(
   function(details) {
-    if (details.method === "GET" && 
+    if (details.method === "GET" &&
         details.url.includes("medcloud2.nhi.gov.tw/imu/api/imue2000/imue2000s01/get-summary")) {
       // console.log("Detected patient summary API request:", details.url);
       chrome.tabs.sendMessage(details.tabId, {
@@ -222,7 +222,7 @@ chrome.webRequest.onBeforeRequest.addListener(
 
 chrome.webRequest.onCompleted.addListener(
   function(details) {
-    if (details.method === "GET" && 
+    if (details.method === "GET" &&
         details.url.includes("medcloud2.nhi.gov.tw/imu/api/imue2000/imue2000s01/get-summary")) {
       // console.log("Completed patient summary API request:", details.url);
       chrome.tabs.sendMessage(details.tabId, {
@@ -257,25 +257,25 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       // console.log(`Background script received ${dataType} to save`);
       currentSessionData[dataType] = message.data;
       currentSessionData.currentUserSession = message.userSession || currentSessionData.currentUserSession;
-      
-      chrome.storage.local.set({ 
+
+      chrome.storage.local.set({
         [dataType]: message.data,
         currentUserSession: message.userSession || currentSessionData.currentUserSession
       }, function() {
         // console.log(`${dataType} saved to storage`);
         chrome.action.setBadgeText({ text: "✓" });
         chrome.action.setBadgeBackgroundColor({ color: "#4CAF50" });
-        
+
         if (message.data && message.data.rObject && Array.isArray(message.data.rObject)) {
-          sendResponse({ 
-            status: "saved", 
-            recordCount: message.data.rObject.length 
+          sendResponse({
+            status: "saved",
+            recordCount: message.data.rObject.length
           });
         } else {
-          sendResponse({ 
-            status: "saved", 
+          sendResponse({
+            status: "saved",
             recordCount: 0,
-            error: "Invalid data format" 
+            error: "Invalid data format"
           });
         }
       });
@@ -287,54 +287,54 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       // console.log("Background script received Chinese medicine data to save");
       currentSessionData.chinesemedData = message.data;
       currentSessionData.currentUserSession = message.userSession || currentSessionData.currentUserSession;
-      
-      chrome.storage.local.set({ 
+
+      chrome.storage.local.set({
         chinesemedData: message.data,
         currentUserSession: message.userSession || currentSessionData.currentUserSession
       }, function() {
         // console.log("Chinese medicine data saved to storage");
         chrome.action.setBadgeText({ text: "✓" });
         chrome.action.setBadgeBackgroundColor({ color: "#4CAF50" });
-        
+
         if (message.data && message.data.rObject && Array.isArray(message.data.rObject)) {
-          sendResponse({ 
-            status: "saved", 
-            recordCount: message.data.rObject.length 
+          sendResponse({
+            status: "saved",
+            recordCount: message.data.rObject.length
           });
         } else {
-          sendResponse({ 
-            status: "saved", 
+          sendResponse({
+            status: "saved",
             recordCount: 0,
-            error: "Invalid data format" 
+            error: "Invalid data format"
           });
         }
       });
       return true;
     }
-    
+
     if (message.action === "saveImagingData") {
       // console.log("Background script received imaging data to save");
       currentSessionData.imagingData = message.data;
       currentSessionData.currentUserSession = message.userSession || currentSessionData.currentUserSession;
-      
-      chrome.storage.local.set({ 
+
+      chrome.storage.local.set({
         imagingData: message.data,
         currentUserSession: message.userSession || currentSessionData.currentUserSession
       }, function() {
         // console.log("Imaging data saved to storage");
         chrome.action.setBadgeText({ text: "✓" });
         chrome.action.setBadgeBackgroundColor({ color: "#4CAF50" });
-        
+
         if (message.data && message.data.rObject && Array.isArray(message.data.rObject)) {
-          sendResponse({ 
-            status: "saved", 
-            recordCount: message.data.rObject.length 
+          sendResponse({
+            status: "saved",
+            recordCount: message.data.rObject.length
           });
         } else {
-          sendResponse({ 
-            status: "saved", 
+          sendResponse({
+            status: "saved",
             recordCount: 0,
-            error: "Invalid data format" 
+            error: "Invalid data format"
           });
         }
       });
@@ -358,11 +358,11 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       token: null,
       currentUserSession: message.userSession
     };
-    
+
     chrome.storage.local.remove([
-      'medicationData', 
-      'labData', 
-      'chinesemedData', 
+      'medicationData',
+      'labData',
+      'chinesemedData',
       'imagingData',
       'allergyData',
       'surgeryData',
@@ -373,7 +373,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       // console.log("Storage data cleared due to user session change");
       chrome.action.setBadgeText({ text: "" });
     });
-    
+
     sendResponse({ status: "session_reset" });
     return true;
   }
@@ -392,7 +392,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     sendResponse({ status: "cleared" });
     return true;
   }
-  
+
   // The existing code continues below...
   // 處理用戶會話變更，清空臨時資料
   if (message.userSession && message.userSession !== currentSessionData.currentUserSession) {
@@ -404,78 +404,78 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       currentUserSession: message.userSession
     };
   }
-  
+
   if (message.action === "saveMedicationData") {
-    // console.log("Background script received medication data to save:", 
-    //             message.data && message.data.rObject ? 
-    //             `${message.data.rObject.length} records` : 
+    // console.log("Background script received medication data to save:",
+    //             message.data && message.data.rObject ?
+    //             `${message.data.rObject.length} records` :
     //             "Invalid data format");
-    
+
     // 儲存到當前會話的臨時資料中
     currentSessionData.medicationData = message.data;
     currentSessionData.currentUserSession = message.userSession || currentSessionData.currentUserSession;
-    
+
     // 同時儲存到 storage 便於 popup 讀取
-    chrome.storage.local.set({ 
+    chrome.storage.local.set({
       medicationData: message.data,
       currentUserSession: message.userSession || currentSessionData.currentUserSession
     }, function() {
       // console.log("Medication data saved to storage");
       chrome.action.setBadgeText({ text: "✓" });
       chrome.action.setBadgeBackgroundColor({ color: "#4CAF50" });
-      
+
       if (message.data && message.data.rObject && Array.isArray(message.data.rObject)) {
-        sendResponse({ 
-          status: "saved", 
-          recordCount: message.data.rObject.length 
+        sendResponse({
+          status: "saved",
+          recordCount: message.data.rObject.length
         });
       } else {
-        sendResponse({ 
-          status: "saved", 
+        sendResponse({
+          status: "saved",
           recordCount: 0,
-          error: "Invalid data format" 
+          error: "Invalid data format"
         });
       }
     });
     return true; // 保持通道開啟
   }
-  
+
   // 處理檢驗資料的保存請求
   if (message.action === "saveLabData") {
-    // console.log("Background script received lab data to save:", 
-    //             message.data && message.data.rObject ? 
-    //             `${message.data.rObject.length} records` : 
+    // console.log("Background script received lab data to save:",
+    //             message.data && message.data.rObject ?
+    //             `${message.data.rObject.length} records` :
     //             "Invalid data format");
-    
+
     // 儲存到當前會話的臨時資料中
     currentSessionData.labData = message.data;
     currentSessionData.currentUserSession = message.userSession || currentSessionData.currentUserSession;
-    
+
     // 同時儲存到 storage 便於 popup 讀取
-    chrome.storage.local.set({ 
+    chrome.storage.local.set({
       labData: message.data,
       currentUserSession: message.userSession || currentSessionData.currentUserSession
     }, function() {
       // console.log("Lab data saved to storage");
       chrome.action.setBadgeText({ text: "✓" });
       chrome.action.setBadgeBackgroundColor({ color: "#4CAF50" });
-      
+
       if (message.data && message.data.rObject && Array.isArray(message.data.rObject)) {
-        sendResponse({ 
-          status: "saved", 
-          recordCount: message.data.rObject.length 
+        sendResponse({
+          status: "saved",
+          recordCount: message.data.rObject.length
         });
       } else {
-        sendResponse({ 
-          status: "saved", 
+        sendResponse({
+          status: "saved",
           recordCount: 0,
-          error: "Invalid data format" 
+          error: "Invalid data format"
         });
       }
     });
     return true; // 保持通道開啟
   }
-  
+
   // 儲存令牌（只儲存到臨時會話）
   if (message.action === "saveToken") {
     // console.log("Background script received token to save");
@@ -484,22 +484,22 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     sendResponse({ status: "token_saved" });
     return true;
   }
-  
+
   // 讀取臨時會話的資料
   if (message.action === "getSessionData") {
     // console.log("Background script received request for session data");
-    sendResponse({ 
+    sendResponse({
       status: "success",
       data: currentSessionData
     });
     return true;
   }
-  
+
   if (message.action === "getDataStatus") {
     chrome.storage.local.get([
-      'medicationData', 
-      'labData', 
-      'chinesemedData', 
+      'medicationData',
+      'labData',
+      'chinesemedData',
       'imagingData',
       'allergyData',
       'surgeryData',
@@ -509,7 +509,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     ], (result) => {
       console.log("STORAGE DATA DEBUG:", result);
       const dataStatus = {};
-      
+
       // Process each data type
       if (result.medicationData?.rObject) {
         dataStatus.medication = {
@@ -519,7 +519,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       } else {
         dataStatus.medication = { status: 'none', count: 0 };
       }
-      
+
       if (result.labData?.rObject) {
         dataStatus.labData = {
           status: 'fetched',
@@ -528,7 +528,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       } else {
         dataStatus.labData = { status: 'none', count: 0 };
       }
-      
+
       if (result.chinesemedData?.rObject) {
         dataStatus.chineseMed = {
           status: 'fetched',
@@ -537,7 +537,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       } else {
         dataStatus.chineseMed = { status: 'none', count: 0 };
       }
-      
+
       if (result.imagingData?.rObject) {
         console.log("IMAGING DEBUG:", result.imagingData);
         dataStatus.imaging = {
@@ -548,7 +548,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         console.log("IMAGING NOT FOUND OR INVALID FORMAT:", result.imagingData);
         dataStatus.imaging = { status: 'none', count: 0 };
       }
-      
+
       if (result.allergyData?.rObject) {
         dataStatus.allergy = {
           status: 'fetched',
@@ -557,7 +557,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       } else {
         dataStatus.allergy = { status: 'none', count: 0 };
       }
-      
+
       if (result.surgeryData?.rObject) {
         dataStatus.surgery = {
           status: 'fetched',
@@ -566,7 +566,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       } else {
         dataStatus.surgery = { status: 'none', count: 0 };
       }
-      
+
       if (result.dischargeData?.rObject) {
         dataStatus.discharge = {
           status: 'fetched',
@@ -575,7 +575,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       } else {
         dataStatus.discharge = { status: 'none', count: 0 };
       }
-      
+
       if (result.medDaysData?.rObject) {
         dataStatus.medDays = {
           status: 'fetched',
@@ -584,7 +584,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       } else {
         dataStatus.medDays = { status: 'none', count: 0 };
       }
-      
+
       // Process patient summary data
       if (result.patientSummaryData?.robject) {
         dataStatus.patientSummary = {
@@ -600,13 +600,13 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
       } else {
         dataStatus.patientSummary = { status: 'none', count: 0 };
       }
-      
+
       sendResponse({ dataStatus });
     });
-    
+
     return true; // Keep message channel open for async response
   }
-  
+
   sendResponse({ status: "received" });
   return true;
 });
@@ -617,7 +617,7 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
       changeInfo.url.includes('medcloud2.nhi.gov.tw/imu/login') ||
       changeInfo.url.includes('medcloud2.nhi.gov.tw/imu/IMUE1000/IMUE0001'))) {
     console.log("Detected navigation to login page, clearing session data");
-    
+
     // 重置臨時會話資料
     currentSessionData = {
       medicationData: null,
@@ -625,7 +625,7 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
       token: null,
       currentUserSession: null
     };
-    
+
     // 同時清除儲存的資料
     chrome.storage.local.remove(['medicationData', 'labData', 'currentUserSession'], function() {
       console.log("Storage data cleared due to logout");
@@ -648,32 +648,32 @@ function saveDataToStorage(type, data, userSession) {
     'meddays': 'medDaysData',
     'patientsummary': 'patientSummaryData'
   };
-  
+
   const storageKey = storageKeys[type.toLowerCase()] || type + 'Data';
-  
+
   // Update session data
   currentSessionData[storageKey] = data;
   currentSessionData.currentUserSession = userSession || currentSessionData.currentUserSession;
-  
+
   // Create storage object
-  const storageObj = { 
+  const storageObj = {
     [storageKey]: data,
     currentUserSession: userSession || currentSessionData.currentUserSession
   };
-  
-  // console.log(`Saving ${type} data to storage with key ${storageKey}:`, 
+
+  // console.log(`Saving ${type} data to storage with key ${storageKey}:`,
     // data?.rObject ? `${data.rObject.length} records` : 'No records or invalid format');
-  
+
   return new Promise((resolve) => {
     chrome.storage.local.set(storageObj, function() {
       // console.log(`${type} data saved to storage with key ${storageKey}`);
       chrome.action.setBadgeText({ text: "✓" });
       chrome.action.setBadgeBackgroundColor({ color: "#4CAF50" });
-      
+
       const recordCount = (data?.rObject && Array.isArray(data.rObject)) ? data.rObject.length : 0;
-      
-      resolve({ 
-        status: "saved", 
+
+      resolve({
+        status: "saved",
         recordCount: recordCount,
         error: recordCount ? null : "Zero records or invalid format"
       });

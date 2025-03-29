@@ -1,6 +1,6 @@
 /**
  * Overview_RecentDiagnosis Component
- * 
+ *
  * This component displays recent diagnosis information from the past 180 days,
  * categorized by visit type (outpatient/emergency/inpatient).
  * - Outpatient and emergency diagnoses are sorted by frequency (most frequent first)
@@ -10,14 +10,14 @@
  */
 
 import React, { useMemo } from "react";
-import { 
-  Box, 
-  Card, 
-  CardContent, 
-  Typography, 
-  Table, 
-  TableBody, 
-  TableRow, 
+import {
+  Box,
+  Card,
+  CardContent,
+  Typography,
+  Table,
+  TableBody,
+  TableRow,
   TableCell,
   Tooltip,
   Badge,
@@ -29,7 +29,7 @@ import InfoIcon from '@mui/icons-material/Info';
 import GrassIcon from '@mui/icons-material/Grass';
 import TypographySizeWrapper from "../utils/TypographySizeWrapper";
 
-const Overview_RecentDiagnosis = ({ 
+const Overview_RecentDiagnosis = ({
   groupedMedications = [],
   groupedChineseMeds = [],
   generalDisplaySettings = {},
@@ -39,44 +39,44 @@ const Overview_RecentDiagnosis = ({
   const diagnosisData = useMemo(() => {
     const now = new Date();
     const cutoffDate = new Date();
-    cutoffDate.setDate(now.getDate() - trackingDays); 
-    
+    cutoffDate.setDate(now.getDate() - trackingDays);
+
     const outpatientDiagnoses = {};
     const emergencyDiagnoses = [];  // Changed from object to array to store date info
     const inpatientDiagnoses = [];
     const vaccineRecords = [];      // New array for vaccine records
-    
+
     // Helper function to safely parse dates in various formats
     const parseDate = (dateStr) => {
       if (!dateStr) return null;
-      
+
       // Handle yyyy/mm/dd and yyyy-mm-dd formats
       let normalizedDate = dateStr.replace(/\//g, '-');
-      
+
       // Try parsing the date
       const parsedDate = new Date(normalizedDate);
-      
+
       // Check if date is valid
       if (isNaN(parsedDate.getTime())) {
         return null;
       }
-      
+
       return parsedDate;
     };
-    
+
     // Helper function to check if an ICD code is a vaccine code
     const isVaccineCode = (icdCode) => {
       if (!icdCode) return false;
-      
+
       // Check if it starts with Z23, Z24, Z25, Z26, or Z27
       const normalizedCode = icdCode.toUpperCase();
-      return normalizedCode.startsWith('Z23') || 
-             normalizedCode.startsWith('Z24') || 
-             normalizedCode.startsWith('Z25') || 
-             normalizedCode.startsWith('Z26') || 
+      return normalizedCode.startsWith('Z23') ||
+             normalizedCode.startsWith('Z24') ||
+             normalizedCode.startsWith('Z25') ||
+             normalizedCode.startsWith('Z26') ||
              normalizedCode.startsWith('Z27');
     };
-    
+
     // Process western medications
     groupedMedications.forEach(group => {
       // Skip entries older than the tracking period
@@ -84,31 +84,31 @@ const Overview_RecentDiagnosis = ({
       if (!groupDate) {
         return;
       }
-      
+
       if (groupDate < cutoffDate) {
         return;
       }
-      
+
       // Skip entries without diagnosis info
       if (!group.icd_code || !group.icd_name) {
         return;
       }
-      
+
       // Normalize ICD code to handle case sensitivity issues
       const normalizedIcdCode = group.icd_code.toUpperCase();
-      
+
       const diagnosisKey = `${normalizedIcdCode}|${group.icd_name}`;
-      
+
       // 檢查診斷碼和藥物，只有當診斷碼是疫苗相關且至少有一個藥物是J07開頭ATC碼時，才將其視為疫苗記錄
       if (isVaccineCode(normalizedIcdCode)) {
         // 檢查是否有J07開頭的疫苗藥物
         let hasVaccineMedication = false;
         let medicationNames = [];
-        
+
         if (Array.isArray(group.medications) && group.medications.length > 0) {
           // 過濾出有J07開頭ATC碼的藥物
           const vaccineFilteredMeds = group.medications.filter(med => med.atc_code && med.atc_code.startsWith('J07'));
-          
+
           // 如果有J07藥物，則記錄該筆為疫苗記錄
           if (vaccineFilteredMeds.length > 0) {
             hasVaccineMedication = true;
@@ -121,7 +121,7 @@ const Overview_RecentDiagnosis = ({
             medicationNames = [group.name || group.drugName];
           }
         }
-        
+
         // 只有當既有疫苗診斷碼又有J07藥物時，才加入疫苗記錄
         if (hasVaccineMedication && medicationNames.length > 0) {
           vaccineRecords.push({
@@ -172,30 +172,30 @@ const Overview_RecentDiagnosis = ({
         }
       }
     });
-    
+
     // Process Chinese medications - apply the same fix
     groupedChineseMeds.forEach(group => {
       // Skip entries older than the tracking period
       const groupDate = parseDate(group.date);
       if (!groupDate || groupDate < cutoffDate) return;
-      
+
       // Skip entries without diagnosis info
       if (!group.icd_code || !group.icd_name) return;
-      
+
       // Normalize ICD code
       const normalizedIcdCode = group.icd_code.toUpperCase();
       const diagnosisKey = `${normalizedIcdCode}|${group.icd_name}`;
-      
+
       // 檢查診斷碼和藥物，只有當診斷碼是疫苗相關且至少有一個藥物是J07開頭ATC碼時，才將其視為疫苗記錄
       if (isVaccineCode(normalizedIcdCode)) {
         // 檢查是否有J07開頭的疫苗藥物
         let hasVaccineMedication = false;
         let medicationNames = [];
-        
+
         if (Array.isArray(group.medications) && group.medications.length > 0) {
           // 過濾出有J07開頭ATC碼的藥物
           const vaccineFilteredMeds = group.medications.filter(med => med.atc_code && med.atc_code.startsWith('J07'));
-          
+
           // 如果有J07藥物，則記錄該筆為疫苗記錄
           if (vaccineFilteredMeds.length > 0) {
             hasVaccineMedication = true;
@@ -208,7 +208,7 @@ const Overview_RecentDiagnosis = ({
             medicationNames = [group.name || group.drugName];
           }
         }
-        
+
         // 只有當既有疫苗診斷碼又有J07藥物時，才加入疫苗記錄
         if (hasVaccineMedication && medicationNames.length > 0) {
           vaccineRecords.push({
@@ -261,16 +261,16 @@ const Overview_RecentDiagnosis = ({
         }
       }
     });
-    
+
     // Convert to arrays and sort by frequency (most frequent first)
     const sortedOutpatient = Object.entries(outpatientDiagnoses).map(([key, data]) => {
       const [code, name] = key.split('|');
-      return { 
-        code, 
-        name, 
-        count: data.count, 
+      return {
+        code,
+        name,
+        count: data.count,
         isChineseMed: data.isChineseMed,
-        key 
+        key
       };
     }).sort((a, b) => {
       // First sort by count (descending)
@@ -280,47 +280,47 @@ const Overview_RecentDiagnosis = ({
       // If counts are the same, sort by ICD code (ascending)
       return a.code.localeCompare(b.code);
     });
-    
+
     // Emergency diagnoses - sort by date (newest first)
     const sortedEmergency = [...emergencyDiagnoses].sort((a, b) => {
       // Handle different date formats (yyyy/mm/dd or yyyy-mm-dd)
       const dateA = parseDate(a.date);
       const dateB = parseDate(b.date);
-      
+
       // If either date is invalid, fall back to string comparison
       if (!dateA || !dateB) {
         return a.date.localeCompare(b.date);
       }
-      
+
       return dateB - dateA;
     });
-    
+
     // Inpatient diagnoses are already an array - sort by date (newest first)
     const sortedInpatient = [...inpatientDiagnoses].sort((a, b) => {
       // Handle different date formats (yyyy/mm/dd or yyyy-mm-dd)
       const dateA = parseDate(a.date);
       const dateB = parseDate(b.date);
-      
+
       // If either date is invalid, fall back to string comparison
       if (!dateA || !dateB) {
         return a.date.localeCompare(b.date);
       }
-      
+
       return dateB - dateA;
     });
-    
+
     // Sort vaccine records by date (newest first)
     const sortedVaccines = [...vaccineRecords].sort((a, b) => {
       const dateA = parseDate(a.date);
       const dateB = parseDate(b.date);
-      
+
       if (!dateA || !dateB) {
         return a.date.localeCompare(b.date);
       }
-      
+
       return dateB - dateA;
     });
-    
+
     return {
       outpatient: sortedOutpatient,
       emergency: sortedEmergency,
@@ -328,57 +328,57 @@ const Overview_RecentDiagnosis = ({
       vaccines: sortedVaccines
     };
   }, [groupedMedications, groupedChineseMeds, trackingDays]);
-  
+
   // Check if there's any diagnosis data
   const hasDiagnoses = useMemo(() => {
-    return diagnosisData.outpatient.length > 0 || 
-           diagnosisData.emergency.length > 0 || 
+    return diagnosisData.outpatient.length > 0 ||
+           diagnosisData.emergency.length > 0 ||
            diagnosisData.inpatient.length > 0 ||
            diagnosisData.vaccines.length > 0;
   }, [diagnosisData]);
-  
+
   // Render a diagnosis category table row
   const renderDiagnosisCategory = (title, diagnoses, isInpatient = false, isEmergency = false, isVaccine = false) => {
     // Return nothing if no diagnoses in this category
     if (diagnoses.length === 0) return null;
-    
+
     // Display up to 5 diagnoses, then show tooltip for more
     const visibleDiagnoses = diagnoses.slice(0, 5);
     const hasMore = diagnoses.length > 5;
-    
+
     // Determine color based on category
-    const categoryColor = isEmergency ? "#c62828" : 
-                         (isInpatient ? "#388e3c" : 
+    const categoryColor = isEmergency ? "#c62828" :
+                         (isInpatient ? "#388e3c" :
                          (isVaccine ? "#1565c0" : "primary.main"));
-    
+
     // Get background color (lighter version of the category color)
-    const bgColor = isEmergency ? alpha("#c62828", 0.15) : 
-                   (isInpatient ? alpha("#388e3c", 0.2) : 
+    const bgColor = isEmergency ? alpha("#c62828", 0.15) :
+                   (isInpatient ? alpha("#388e3c", 0.2) :
                    (isVaccine ? alpha("#1565c0", 0.18) : alpha("#2196f3", 0.15)));
-    
+
     // Convert full title to single character
-    const shortTitle = title === "門診" ? "門" : 
-                      (title === "急診" ? "急" : 
-                      (title === "住診" ? "住" : 
+    const shortTitle = title === "門診" ? "門" :
+                      (title === "急診" ? "急" :
+                      (title === "住診" ? "住" :
                       (title === "疫苗" ? "疫" : title)));
-    
+
     return (
       <TableRow>
-        <TableCell 
-          component="th" 
-          scope="row" 
+        <TableCell
+          component="th"
+          scope="row"
           align="center"
-          sx={{ 
+          sx={{
             width: '10%',
             verticalAlign: 'middle', // Center the content vertically
-            borderBottom: 'none', 
+            borderBottom: 'none',
             padding: '8px 2px',
             backgroundColor: bgColor,
           }}
         >
-          <Box 
-            sx={{ 
-              display: 'flex', 
+          <Box
+            sx={{
+              display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
               borderRadius: '50%', // Make it circular
@@ -406,11 +406,11 @@ const Overview_RecentDiagnosis = ({
             {visibleDiagnoses.map((diagnosis, index) => (
               <Box key={diagnosis.key} sx={{ display: 'flex', alignItems: 'center', mb: 0.8 }}>
                 {(isInpatient || isEmergency) && (
-                  <Chip 
+                  <Chip
                     size="small"
                     label={`${diagnosis.date}${diagnosis.hospital ? ` (${diagnosis.hospital})` : ''}`}
-                    sx={{ 
-                      fontSize: '0.7rem', 
+                    sx={{
+                      fontSize: '0.7rem',
                       height: '20px',
                       mr: 1,
                       bgcolor: 'transparent',
@@ -421,14 +421,14 @@ const Overview_RecentDiagnosis = ({
                     }}
                   />
                 )}
-                
+
                 {isVaccine && (
                   <Box sx={{ mr: 1 }}>
-                    <Chip 
+                    <Chip
                       size="small"
                       label={diagnosis.date}
-                      sx={{ 
-                        fontSize: '0.7rem', 
+                      sx={{
+                        fontSize: '0.7rem',
                         height: '20px',
                         mb: 0.3,
                         bgcolor: 'transparent',
@@ -439,11 +439,11 @@ const Overview_RecentDiagnosis = ({
                       }}
                     />
                     {diagnosis.hospital && (
-                      <Chip 
+                      <Chip
                         size="small"
                         label={diagnosis.hospital}
-                        sx={{ 
-                          fontSize: '0.65rem', 
+                        sx={{
+                          fontSize: '0.65rem',
                           height: '18px',
                           bgcolor: alpha(categoryColor, 0.08),
                           color: categoryColor,
@@ -453,7 +453,7 @@ const Overview_RecentDiagnosis = ({
                     )}
                   </Box>
                 )}
-                
+
                 <TypographySizeWrapper
                   textSizeType="content"
                   generalDisplaySettings={generalDisplaySettings}
@@ -470,7 +470,7 @@ const Overview_RecentDiagnosis = ({
                     <>{diagnosis.code} {diagnosis.name}</>
                   )}
                 </TypographySizeWrapper>
-                
+
                 {/* Add Chinese Medicine icon if diagnosis is from Chinese medicine */}
                 {diagnosis.isChineseMed && (
                   <Tooltip title="中醫診斷">
@@ -481,27 +481,27 @@ const Overview_RecentDiagnosis = ({
                     />
                   </Tooltip>
                 )}
-                
+
                 {!isInpatient && !isEmergency && !isVaccine && diagnosis.count > 1 && (
-                  <Badge 
-                    badgeContent={diagnosis.count} 
-                    color="primary" 
-                    sx={{ 
-                      '& .MuiBadge-badge': { 
-                        fontSize: '0.7rem', 
-                        height: '16px', 
+                  <Badge
+                    badgeContent={diagnosis.count}
+                    color="primary"
+                    sx={{
+                      '& .MuiBadge-badge': {
+                        fontSize: '0.7rem',
+                        height: '16px',
                         minWidth: '16px',
                         backgroundColor: 'primary.main',
                         color: 'white'
-                      } 
+                      }
                     }}
                   />
                 )}
               </Box>
             ))}
-            
+
             {hasMore && (
-              <Tooltip 
+              <Tooltip
                 title={
                   <Box>
                     {diagnoses.slice(5).map((diagnosis) => (
@@ -539,7 +539,7 @@ const Overview_RecentDiagnosis = ({
       </TableRow>
     );
   };
-  
+
   return (
     <Card variant="outlined" sx={{ mb: 2 }}>
       <CardContent sx={{ p: 2, "&:last-child": { pb: 2 } }}>
@@ -551,7 +551,7 @@ const Overview_RecentDiagnosis = ({
         >
           半年內就醫診斷
         </TypographySizeWrapper>
-        
+
         {!hasDiagnoses ? (
           <TypographySizeWrapper
             textSizeType="content"
@@ -565,10 +565,10 @@ const Overview_RecentDiagnosis = ({
             <TableBody>
               {/* Render the outpatient diagnoses */}
               {renderDiagnosisCategory("門診", diagnosisData.outpatient)}
-              
+
               {/* Add divider if there are more categories */}
-              {diagnosisData.outpatient.length > 0 && 
-               (diagnosisData.emergency.length > 0 || 
+              {diagnosisData.outpatient.length > 0 &&
+               (diagnosisData.emergency.length > 0 ||
                 diagnosisData.inpatient.length > 0 ||
                 diagnosisData.vaccines.length > 0) && (
                 <TableRow>
@@ -577,13 +577,13 @@ const Overview_RecentDiagnosis = ({
                   </TableCell>
                 </TableRow>
               )}
-              
+
               {/* Render emergency diagnoses */}
               {renderDiagnosisCategory("急診", diagnosisData.emergency, false, true)}
-              
+
               {/* Add divider if needed */}
-              {diagnosisData.emergency.length > 0 && 
-               (diagnosisData.inpatient.length > 0 || 
+              {diagnosisData.emergency.length > 0 &&
+               (diagnosisData.inpatient.length > 0 ||
                 diagnosisData.vaccines.length > 0) && (
                 <TableRow>
                   <TableCell colSpan={2} sx={{ padding: '4px 0' }}>
@@ -591,12 +591,12 @@ const Overview_RecentDiagnosis = ({
                   </TableCell>
                 </TableRow>
               )}
-              
+
               {/* Render inpatient diagnoses */}
               {renderDiagnosisCategory("住診", diagnosisData.inpatient, true)}
-              
+
               {/* Add divider before vaccines if needed */}
-              {diagnosisData.inpatient.length > 0 && 
+              {diagnosisData.inpatient.length > 0 &&
                diagnosisData.vaccines.length > 0 && (
                 <TableRow>
                   <TableCell colSpan={2} sx={{ padding: '4px 0' }}>
@@ -604,7 +604,7 @@ const Overview_RecentDiagnosis = ({
                   </TableCell>
                 </TableRow>
               )}
-              
+
               {/* Render vaccine records */}
               {renderDiagnosisCategory("疫苗", diagnosisData.vaccines, false, false, true)}
             </TableBody>

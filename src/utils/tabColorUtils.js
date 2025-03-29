@@ -20,14 +20,14 @@ const TAB_COLORS = {
     imaging: { primary: "#4a148c", dark: "#4a148c" }, // 紫色
     medDays: { primary: "#880e4f", dark: "#880e4f" }, // 粉紅色
     help: { primary: "#2196f3", dark: "#0d47a1" }, // 藍色
-    
+
     // PopupSettings 標籤
     settings: { primary: "#0d47a1", dark: "#0d47a1" }, // 深藍色
     dataStatus: { primary: "#e65100", dark: "#e65100" }, // 橙色
     about: { primary: "#673ab7", dark: "#4a148c" }, // 紫色
     loadData: { primary: "#2e7d32", dark: "#1b5e20" }, // 綠色
     testMode: { primary: "#4a148c", dark: "#4a148c" }, // 紫色
-    
+
     disabled: "#9e9e9e", // 灰色
     disabledDark: "#616161", // 深灰色
   }
@@ -44,8 +44,8 @@ export const getTabColor = (generalDisplaySettings, tabType, hasData = true) => 
   if (generalDisplaySettings && generalDisplaySettings.useColorfulTabs) {
     // 彩色標籤模式
     if (hasData) {
-      return tabType && TAB_COLORS.colorful[tabType] ? 
-        TAB_COLORS.colorful[tabType].primary : 
+      return tabType && TAB_COLORS.colorful[tabType] ?
+        TAB_COLORS.colorful[tabType].primary :
         TAB_COLORS.colorful.overview.primary;
     } else {
       return TAB_COLORS.colorful.disabled;
@@ -71,8 +71,8 @@ export const getTabSelectedColor = (generalDisplaySettings, tabType, hasData = t
   if (generalDisplaySettings && generalDisplaySettings.useColorfulTabs) {
     // 彩色標籤模式
     if (hasData) {
-      return tabType && TAB_COLORS.colorful[tabType] ? 
-        TAB_COLORS.colorful[tabType].dark : 
+      return tabType && TAB_COLORS.colorful[tabType] ?
+        TAB_COLORS.colorful[tabType].dark :
         TAB_COLORS.colorful.overview.dark;
     } else {
       return TAB_COLORS.colorful.disabledDark;

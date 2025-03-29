@@ -40,36 +40,36 @@ function injectLegacyContent() {
   import("./localDataHandler.js")
     .then((localDataHandler) => {
       console.log("Local data handler loaded");
-      
+
       // 設置消息監聽器處理本地資料載入
       chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
         // 處理載入本地資料的請求
         if (message.action === "loadLocalData") {
           console.log("Received loadLocalData request");
-          
+
           // 使用本地資料處理器處理資料
           const result = localDataHandler.processLocalData(
             message.data,
             message.filename
           );
-          
+
           // 發送處理結果
           sendResponse(result);
           return true; // 保持消息通道開啟以進行非同步回應
         }
-        
+
         // 處理清除本地資料的請求
         if (message.action === "clearLocalData") {
           console.log("Received clearLocalData request");
-          
+
           // 清除本地資料
           const result = localDataHandler.clearLocalData();
-          
+
           // 發送處理結果
           sendResponse(result);
           return true;
         }
-        
+
         // 處理獲取患者資料的請求
         if (message.action === "getPatientData") {
           // 這部分保持原有的實現邏輯
@@ -134,11 +134,11 @@ function injectLegacyContent() {
           window.dispatchEvent(customEvent);
         }, 100);
       }
-      
+
       // 處理本地數據清除消息
       if (event.data && event.data.type === "localDataCleared") {
         console.log("收到本地數據清除消息");
-        
+
         // 可以添加一些清除本地數據的邏輯
         // ...
       }

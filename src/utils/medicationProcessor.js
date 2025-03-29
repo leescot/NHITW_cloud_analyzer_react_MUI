@@ -12,13 +12,13 @@ export const medicationProcessor = {
       if (firstQuoteMatch) {
         // Keep the content of the first quotes
         const firstQuoteContent = firstQuoteMatch[1];
-        
+
         // Remove the first quoted part from the string
         simplifiedName = simplifiedName.substring(firstQuoteMatch[0].length);
-        
+
         // Now remove all other quoted text
         simplifiedName = simplifiedName.replace(/"([^"]*)"/g, "");
-        
+
         // Prepend the first quoted content back (without quotes)
         simplifiedName = firstQuoteContent + " " + simplifiedName;
       }
@@ -26,7 +26,7 @@ export const medicationProcessor = {
       // Normal case: remove all quoted text
       simplifiedName = simplifiedName.replace(/"([^"]*)"/g, "");
     }
-    
+
     // Process tablet related variations
     const tabletRegex =
       /\b(tablets?|f\.?c\.?\s*tablets?|film[\s-]?coated\s*tablets?|prolonged release tablets?)\b/gi;
@@ -61,7 +61,7 @@ export const medicationProcessor = {
     const complexDoseRegex =
       /\((\d+(?:\.\d+)?(?:\/\d+(?:\.\d+)?){0,2})\)\s*(?:MG|MCG|G|ML|I\.U\.\/ML)(?!\s*\/)/i;
     const doseMatch = simplifiedName.match(complexDoseRegex);
-    
+
     // Cut off everything after the dosage if found
     if (doseMatch) {
       const dosePart = `(${doseMatch[1]})`;
@@ -162,28 +162,28 @@ export const medicationProcessor = {
       const numWeeks = Math.ceil(parseInt(days) / 7);
       const estimatedDoses = numWeeks * 3; // For TIW
       const perDose = Math.round(totalDosage / estimatedDoses);
-      
+
       // Only return if it's a clean number
       if (validUnits.includes(perDose)) {
         return perDose.toString();
       }
     }
-    
+
     if (freq === "BIW" || frequency.includes("BIW")) {
       const numWeeks = Math.ceil(parseInt(days) / 7);
       const estimatedDoses = numWeeks * 2; // For BIW
       const perDose = Math.round(totalDosage / estimatedDoses);
-      
+
       if (validUnits.includes(perDose)) {
         return perDose.toString();
       }
     }
-    
+
     if (freq === "QW" || frequency.includes("QW")) {
       const numWeeks = Math.ceil(parseInt(days) / 7);
       const estimatedDoses = numWeeks; // For QW
       const perDose = Math.round(totalDosage / estimatedDoses);
-      
+
       if (validUnits.includes(perDose)) {
         return perDose.toString();
       }
@@ -201,7 +201,7 @@ export const medicationProcessor = {
   // Main function to process medication data with settings
   processMedicationData(data) {
     // Removed excessive logging
-    
+
     if (!data || !data.rObject || !Array.isArray(data.rObject)) {
       console.error("Invalid medication data format");
       return Promise.resolve([]);
@@ -227,7 +227,7 @@ export const medicationProcessor = {
               const hospParts = (record.HOSP_NAME || record.hosp || "").split(";");
               const hospitalName = hospParts[0] || "";
               const visitType = hospParts.length > 1 ? hospParts[1] || "" : "";
-              
+
               // Create a unique key that includes date, hospital, visit type, and ICD code
               const key = `${record.PER_DATE || record.drug_date}_${hospitalName}_${visitType}_${record.ICD_CODE || record.icd_code || ""}`;
 

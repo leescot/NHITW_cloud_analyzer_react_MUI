@@ -196,9 +196,9 @@ Options:
     await bundleContentScript({sourcemap: true});
     await copyExtensionFiles();
 
-    for (const file of ['manifest.json', 'test.html']) {
+    for (const file of fs.readdirSync(path.resolve(ROOT, 'tests', 'extension'))) {
       copyFileSync(
-        path.resolve(ROOT, 'localhost_file', file),
+        path.resolve(ROOT, 'tests', 'extension', file),
         path.resolve(ROOT, 'dist', file),
       );
     }

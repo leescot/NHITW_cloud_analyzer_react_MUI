@@ -1,40 +1,40 @@
 // 主要模組整合所有處理功能
 
-import { 
-  labCodeAbbreviations, 
-  specialLabCodeAbbreviations, 
-  getAbbreviation, 
-  isGFRItem, 
-  isMultiItemOrderCode 
+import {
+  labCodeAbbreviations,
+  specialLabCodeAbbreviations,
+  getAbbreviation,
+  isGFRItem,
+  isMultiItemOrderCode
 } from './abbreviationUtils.js';
 
-import { 
-  normalizeValue, 
-  checkIfAbnormal 
+import {
+  normalizeValue,
+  checkIfAbnormal
 } from './valueUtils.js';
 
-import { 
-  isZeroReferenceRange, 
+import {
+  isZeroReferenceRange,
   parseReferenceRange,
   getReferenceRangeDisplayText
 } from './referenceRangeUtils.js';
 
-import { 
-  deduplicateLabData 
+import {
+  deduplicateLabData
 } from './deduplicationUtils.js';
 
-import { 
-  formatLabData 
+import {
+  formatLabData
 } from './formattingUtils.js';
 
-import { 
-  groupLabsByDate, 
-  sortGroupedData, 
-  getAllLabTypes 
+import {
+  groupLabsByDate,
+  sortGroupedData,
+  getAllLabTypes
 } from './groupingUtils.js';
 
-import { 
-  prepareLabTableData 
+import {
+  prepareLabTableData
 } from './tableUtils.js';
 
 import { hasCustomReferenceRange, getCustomReferenceRange } from './customReferenceRanges.js';
@@ -47,29 +47,29 @@ const labProcessor = {
   getAbbreviation,
   isGFRItem,
   isMultiItemOrderCode,
-  
+
   // 數值標準化和檢查
   normalizeValue,
   checkIfAbnormal,
-  
+
   // 參考範圍處理
   isZeroReferenceRange,
   parseReferenceRange,
-  
+
   // 資料去重
   deduplicateLabData,
-  
+
   // 資料格式化
   formatLabData,
-  
+
   // 資料分組
   groupLabsByDate,
   sortGroupedData,
   getAllLabTypes,
-  
+
   // 表格數據準備
   prepareLabTableData,
-  
+
   // 處理檢驗資料的主要函數
   processLabData(labData, settings = {}) {
     if (!labData || !labData.rObject || !Array.isArray(labData.rObject)) {
@@ -89,7 +89,7 @@ const labProcessor = {
       const date = lab.real_inspect_date?.replace(/\//g, '-') || lab.recipe_date?.replace(/\//g, '-') || '';
       const hosp = lab.hosp?.split(';')[0] || '';
       const groupKey = `${date}_${hosp}`;
-      
+
       if (!acc[groupKey]) {
         acc[groupKey] = {
           date,
@@ -99,19 +99,19 @@ const labProcessor = {
           labs: []
         };
       }
-      
+
       // 忽略檢驗值為 "***" 的項目
       if (lab.assay_value === "***") {
         return acc; // 跳過此項目，不加入分析範圍
       }
-      
+
       // Parse reference values using comprehensive parser - pass order_code and hosp
       const consultValue = this.parseReferenceRange(lab.consult_value, lab.order_code, lab.hosp);
-      
+
       // 直接从源数据生成格式化的参考范围 - pass order_code and hosp
       const formattedReference = getReferenceRangeDisplayText(lab.consult_value, lab.order_code, lab.hosp);
       // console.log(`${lab.assay_item_name} - formattedReference direct:`, formattedReference);
-      
+
       // 檢查是否有自定義參考範圍
       let referenceMin, referenceMax;
       let usingCustomRange = false;
@@ -133,24 +133,24 @@ const labProcessor = {
         referenceMax = consultValue ? consultValue.max : null;
         usingCustomRange = false;
       }
-      
+
       // 初始化狀態變數
       let valueStatus = "normal";
       let isAbnormal = false;
-      
+
       // Skip abnormal marking for labs with [0.000][0.000] reference range unless using custom range
       if ((lab.consult_value && this.isZeroReferenceRange(lab.consult_value) && !usingCustomRange)) {
         valueStatus = "normal";
       } else if (lab.assay_value) {
         const value = parseFloat(lab.assay_value);
-        
+
         if (!isNaN(value)) {
           // 使用新的 getValueStatus 邏輯
           if (referenceMin !== null && referenceMax !== null) {
             // 有上下限
             const min = parseFloat(referenceMin);
             const max = parseFloat(referenceMax);
-            
+
             if (!isNaN(min) && !isNaN(max)) {
               if (value < min) valueStatus = "low";
               else if (value > max) valueStatus = "high";
@@ -170,45 +170,45 @@ const labProcessor = {
           }
         }
       }
-      
+
       // 設定 isAbnormal 當值狀態不是 normal 時
       isAbnormal = valueStatus !== "normal";
-      
+
       // 獲取縮寫名稱 - 傳入 itemName 作為新參數
       const abbrName = this.getAbbreviation(lab.order_code, lab.unit_data, lab.assay_item_name);
-      
+
       // 檢查是否有多值數據
       let normalizedValue;
       let hasMultipleValues = false;
       let valueRange = null;
-      
+
       if (lab._multiValueData && lab._multiValueData.values && lab._multiValueData.values.length > 1) {
         hasMultipleValues = true;
-        
+
         // 將字符串數值轉換為數字以進行計算
         const numericValues = lab._multiValueData.values.map(val => {
           const num = parseFloat(val);
           return isNaN(num) ? null : num;
         }).filter(val => val !== null);
-        
+
         if (numericValues.length > 0) {
           // 如果有有效數字，計算其範圍
           const minValue = Math.min(...numericValues);
           const maxValue = Math.max(...numericValues);
-          
+
           valueRange = {
             min: minValue,
             max: maxValue,
             timePoints: lab._multiValueData.timePoints || []
           };
-          
+
           // 合併數值為範圍形式
           if (minValue === maxValue) {
             normalizedValue = `${minValue}`;
           } else {
             normalizedValue = `${minValue}-${maxValue}`;
           }
-          
+
           // 重新判斷異常狀態（基於範圍的最小值和最大值）
           if ((lab.consult_value && this.isZeroReferenceRange(lab.consult_value) && !usingCustomRange)) {
             valueStatus = "normal";
@@ -221,7 +221,7 @@ const labProcessor = {
               valueStatus = "normal";
             }
           }
-          
+
           // 更新異常標記
           isAbnormal = valueStatus !== "normal";
         } else {
@@ -263,17 +263,17 @@ const labProcessor = {
         // Include the raw consult_value for debugging
         _rawConsultValue: lab.consult_value
       });
-      
+
       return acc;
     }, {});
-    
+
     // Convert to array and sort by date (newest first)
-    const result = Object.values(groupedByDate).sort((a, b) => 
+    const result = Object.values(groupedByDate).sort((a, b) =>
       b.date.localeCompare(a.date)
     );
-    
+
     return result;
   }
 };
 
-export { labProcessor }; 
+export { labProcessor };

@@ -42,7 +42,7 @@ export const imagingProcessor = {
     });
 
     // console.log('Processed imaging data:', { withReport, withoutReport }); // 添加調試信息
-    
+
     return {
       withReport: withReport,
       withoutReport: withoutReport
@@ -51,7 +51,7 @@ export const imagingProcessor = {
 
   formatDate(dateStr) {
     if (!dateStr) return '';
-    
+
     // 處理日期格式
     const parts = dateStr.split('/');
     if (parts.length === 3) {
@@ -59,7 +59,7 @@ export const imagingProcessor = {
       const year = parts[0].length === 4 ? parts[0] : String(parseInt(parts[0]) + 1911);
       return `${year}/${parts[1]}/${parts[2]}`;
     }
-    
+
     return dateStr;
   }
 };

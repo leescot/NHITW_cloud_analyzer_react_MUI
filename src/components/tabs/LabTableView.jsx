@@ -1,13 +1,13 @@
 import React, { useState, useEffect } from 'react';
-import { 
-  Table, 
-  TableBody, 
-  TableCell, 
-  TableContainer, 
-  TableHead, 
-  TableRow, 
-  Paper, 
-  Typography, 
+import {
+  Table,
+  TableBody,
+  TableCell,
+  TableContainer,
+  TableHead,
+  TableRow,
+  Paper,
+  Typography,
   Box,
   RadioGroup,
   FormControlLabel,
@@ -21,24 +21,24 @@ const LabTableView = ({ groupedLabs, labSettings, generalDisplaySettings }) => {
   // console.log("LabTableView rendering with lab settings:", labSettings);
   // 獲取所有可用的檢驗類型
   const allLabTypes = labProcessor.getAllLabTypes(groupedLabs);
-  
+
   // 按指定順序排序檢驗類型
   const labTypes = sortLabTypes(allLabTypes);
 
   // 狀態管理選擇的檢驗類型 - 初始值設為排序後的第一個類型（如果有的話）
   const [selectedType, setSelectedType] = useState(labTypes.length > 0 ? labTypes[0].value : 'all');
-  
+
   // 按優先順序排序檢驗類型的輔助函數
   function sortLabTypes(types) {
     const priorityTypes = ["生化學檢查", "血液學檢查", "尿液檢查"];
     const priorityMap = new Map(priorityTypes.map((type, index) => [type, index]));
-    
+
     // 將所有類型轉換為具有標籤和值的對象
     const typeObjects = types.map(type => ({
       label: type,
       value: type
     }));
-    
+
     // 排序: 優先類型按指定順序，其他類型按原順序，"所有檢驗"放最後
     return typeObjects.sort((a, b) => {
       const priorityA = priorityMap.has(a.label) ? priorityMap.get(a.label) : 999;
@@ -46,13 +46,13 @@ const LabTableView = ({ groupedLabs, labSettings, generalDisplaySettings }) => {
       return priorityA - priorityB;
     });
   }
-  
+
   // 添加"所有檢驗"選項（放在最後）
   const radioOptions = [...labTypes, { label: "所有檢驗", value: "all" }];
-  
+
   // 根據選擇的類型準備表格數據
   const { dates, items } = labProcessor.prepareLabTableData(
-    groupedLabs, 
+    groupedLabs,
     selectedType === 'all' ? null : selectedType
   );
 
@@ -64,27 +64,27 @@ const LabTableView = ({ groupedLabs, labSettings, generalDisplaySettings }) => {
   // 格式化日期顯示
   const formatDateHeader = (dateStr) => {
     if (!dateStr) return '';
-    
+
     // 假設日期格式為 'YYYY-MM-DD'
     const parts = dateStr.split('-');
     if (parts.length !== 3) return dateStr;
-    
+
     const year = parts[0];
     const month = parts[1];
     const day = parts[2];
-    
+
     return (
       <Box>
-        <TypographySizeWrapper 
-          variant="caption" 
+        <TypographySizeWrapper
+          variant="caption"
           textSizeType="note"
           generalDisplaySettings={generalDisplaySettings}
-          color="text.secondary" 
+          color="text.secondary"
           display="block"
         >
           {year}
         </TypographySizeWrapper>
-        <TypographySizeWrapper 
+        <TypographySizeWrapper
           variant="body2"
           textSizeType="content"
           generalDisplaySettings={generalDisplaySettings}
@@ -122,10 +122,10 @@ const LabTableView = ({ groupedLabs, labSettings, generalDisplaySettings }) => {
             onChange={handleTypeChange}
           >
             {radioOptions.map(option => (
-              <FormControlLabel 
-                key={option.value} 
-                value={option.value} 
-                control={<Radio size="small" />} 
+              <FormControlLabel
+                key={option.value}
+                value={option.value}
+                control={<Radio size="small" />}
                 label={
                   <TypographySizeWrapper
                     textSizeType="content"
@@ -138,10 +138,10 @@ const LabTableView = ({ groupedLabs, labSettings, generalDisplaySettings }) => {
             ))}
           </RadioGroup>
         </FormControl>
-        <TypographySizeWrapper 
+        <TypographySizeWrapper
           textSizeType="content"
           generalDisplaySettings={generalDisplaySettings}
-          color="text.secondary" 
+          color="text.secondary"
           sx={{ m: 2 }}
         >
           沒有可顯示的檢驗數據
@@ -162,10 +162,10 @@ const LabTableView = ({ groupedLabs, labSettings, generalDisplaySettings }) => {
           onChange={handleTypeChange}
         >
           {radioOptions.map(option => (
-            <FormControlLabel 
-              key={option.value} 
-              value={option.value} 
-              control={<Radio size="small" />} 
+            <FormControlLabel
+              key={option.value}
+              value={option.value}
+              control={<Radio size="small" />}
               label={
                 <TypographySizeWrapper
                   textSizeType="content"
@@ -179,13 +179,13 @@ const LabTableView = ({ groupedLabs, labSettings, generalDisplaySettings }) => {
           ))}
         </RadioGroup>
       </FormControl>
-      
+
       {/* 調整表格容器以確保其適合父容器 */}
-      <TableContainer 
-        component={Paper} 
-        sx={{ 
-          width: '100%', 
-          flexGrow: 1, 
+      <TableContainer
+        component={Paper}
+        sx={{
+          width: '100%',
+          flexGrow: 1,
           overflow: 'auto',
           // 移除底部空間
           mb: 0,
@@ -203,12 +203,12 @@ const LabTableView = ({ groupedLabs, labSettings, generalDisplaySettings }) => {
         <Table stickyHeader size="small" aria-label="lab results table">
           <TableHead>
             <TableRow>
-              <TableCell 
-                sx={{ 
-                  position: 'sticky', 
-                  left: 0, 
+              <TableCell
+                sx={{
+                  position: 'sticky',
+                  left: 0,
                   top: 0,
-                  backgroundColor: '#f5f5f5', 
+                  backgroundColor: '#f5f5f5',
                   zIndex: 3,
                   borderBottom: '2px solid #e0e0e0'
                 }}
@@ -221,10 +221,10 @@ const LabTableView = ({ groupedLabs, labSettings, generalDisplaySettings }) => {
                 </TypographySizeWrapper>
               </TableCell>
               {dates.map((dateInfo, index) => (
-                <TableCell 
-                  key={index} 
+                <TableCell
+                  key={index}
                   align="center"
-                  sx={{ 
+                  sx={{
                     position: 'sticky',
                     top: 0,
                     backgroundColor: '#f5f5f5',
@@ -240,12 +240,12 @@ const LabTableView = ({ groupedLabs, labSettings, generalDisplaySettings }) => {
           <TableBody>
             {items.map((item) => (
               <TableRow key={item.key} hover>
-                <TableCell 
-                  component="th" 
+                <TableCell
+                  component="th"
                   scope="row"
-                  sx={{ 
-                    position: 'sticky', 
-                    left: 0, 
+                  sx={{
+                    position: 'sticky',
+                    left: 0,
                     backgroundColor: 'white',
                     zIndex: 1,
                     // 當滑鼠懸停時調整背景色
@@ -254,8 +254,8 @@ const LabTableView = ({ groupedLabs, labSettings, generalDisplaySettings }) => {
                     }
                   }}
                 >
-                  <TypographySizeWrapper 
-                    variant="body2" 
+                  <TypographySizeWrapper
+                    variant="body2"
                     textSizeType="content"
                     generalDisplaySettings={generalDisplaySettings}
                     fontWeight="medium"
@@ -263,14 +263,14 @@ const LabTableView = ({ groupedLabs, labSettings, generalDisplaySettings }) => {
                     {item.displayName}
                   </TypographySizeWrapper>
                 </TableCell>
-                
+
                 {dates.map((dateInfo, dateIndex) => {
                   const dateKey = `${dateInfo.date}_${dateInfo.hosp}`;
                   const value = item.values[dateKey];
-                  
+
                   return (
-                    <TableCell 
-                      key={dateIndex} 
+                    <TableCell
+                      key={dateIndex}
                       align="center"
                       sx={{
                         color: getStatusColor(
@@ -332,8 +332,8 @@ const LabTableView = ({ groupedLabs, labSettings, generalDisplaySettings }) => {
                           </TypographySizeWrapper>
                         </Box>
                       ) : (
-                        <TypographySizeWrapper 
-                          variant="body2" 
+                        <TypographySizeWrapper
+                          variant="body2"
                           textSizeType="content"
                           generalDisplaySettings={generalDisplaySettings}
                           color="text.disabled"

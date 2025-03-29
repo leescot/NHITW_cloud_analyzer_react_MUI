@@ -14,10 +14,10 @@ export const useCopyLabData = () => {
   // 複製所有檢驗數據的函數
   const handleCopyAllLabData = (group, labSettings) => {
     const { copyFormat, showUnit, showReference } = labSettings;
-    
+
     // 格式化日期，從 YYYY-MM-DD 轉換為 YYYY/MM/DD
     const formattedDate = formatDate(group.date);
-    
+
     let formattedText = `${formattedDate} - ${group.hosp}\n`;
 
     // Format based on copyFormat setting
@@ -31,7 +31,7 @@ export const useCopyLabData = () => {
       let labItems = group.labs.map((lab) => formatLabItemForCopy(lab, showUnit, showReference));
       formattedText += labItems.join(" ");
     }
-    
+
     navigator.clipboard
       .writeText(formattedText)
       .then(() => {
@@ -48,7 +48,7 @@ export const useCopyLabData = () => {
   // 複製使用者選擇的檢驗數據的函數
   const handleCopyUserSelectedLabData = (group, groupIndex, selectedLabItems, labSettings) => {
     const { copyFormat, showUnit, showReference } = labSettings;
-    
+
     if (!selectedLabItems[groupIndex]) {
       setSnackbarMessage("未選擇任何項目進行複製");
       setSnackbarOpen(true);
@@ -70,7 +70,7 @@ export const useCopyLabData = () => {
     // 生成複製文本
     // 格式化日期，從 YYYY-MM-DD 轉換為 YYYY/MM/DD
     const formattedDate = formatDate(group.date);
-    
+
     let formattedText = `${formattedDate} - ${group.hosp}\n`;
 
     // 根據複製格式處理
@@ -84,7 +84,7 @@ export const useCopyLabData = () => {
       let labItems = filteredLabs.map((lab) => formatLabItemForCopy(lab, showUnit, showReference));
       formattedText += labItems.join(" ");
     }
-    
+
     navigator.clipboard
       .writeText(formattedText)
       .then(() => {
@@ -105,4 +105,4 @@ export const useCopyLabData = () => {
     handleCopyAllLabData,
     handleCopyUserSelectedLabData
   };
-}; 
+};

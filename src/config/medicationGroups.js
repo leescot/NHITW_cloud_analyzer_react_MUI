@@ -19,4 +19,4 @@ export const DEFAULT_ATC5_COLOR_GROUPS = {
   red: ['抗凝','NSAID'],
   orange: ['ARB','ACEI','STATIN'],
   green: ['SGLT2','GLP1'],
-}; 
+};

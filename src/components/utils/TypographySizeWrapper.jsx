@@ -41,10 +41,10 @@ const TypographySizeWrapper = ({
 }) => {
   // Ensure generalDisplaySettings is defined
   const settings = generalDisplaySettings || { titleTextSize: 'medium', contentTextSize: 'medium', noteTextSize: 'small' };
-  
+
   // Determine which text size type to use based on variant or explicit textSizeType
   let sizeType = textSizeType;
-  
+
   if (!sizeType) {
     if (variant === 'h6' || variant === 'h5' || variant === 'h4') {
       sizeType = 'title';
@@ -54,7 +54,7 @@ const TypographySizeWrapper = ({
       sizeType = 'content';
     }
   }
-  
+
   // Get the correct font size from the settings
   let fontSize;
   switch (sizeType) {
@@ -68,13 +68,13 @@ const TypographySizeWrapper = ({
     default:
       fontSize = CONTENT_TEXT_SIZES[settings.contentTextSize || 'medium'];
   }
-  
+
   // Merge the fontSize into the existing sx prop
   const updatedSx = {
     ...sx,
     fontSize
   };
-  
+
   return (
     <Typography variant={variant} sx={updatedSx} {...rest}>
       {children}
@@ -82,4 +82,4 @@ const TypographySizeWrapper = ({
   );
 };
 
-export default TypographySizeWrapper; 
+export default TypographySizeWrapper;

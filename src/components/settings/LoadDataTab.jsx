@@ -35,7 +35,7 @@ const dataTypeMap = {
 // 新增下載功能
 const handleDownloadJSON = (setDownloading, setSnackbar) => {
   setDownloading(true);
-  
+
   // 從 content script 獲取所有資料
   chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
     if (!tabs || !tabs[0] || !tabs[0].id) {
@@ -47,11 +47,11 @@ const handleDownloadJSON = (setDownloading, setSnackbar) => {
       });
       return;
     }
-    
+
     try {
       chrome.tabs.sendMessage(tabs[0].id, { action: "getPatientData" }, function(response) {
         setDownloading(false);
-        
+
         // 處理 chrome 錯誤
         if (chrome.runtime.lastError) {
           setSnackbar({
@@ -61,7 +61,7 @@ const handleDownloadJSON = (setDownloading, setSnackbar) => {
           });
           return;
         }
-        
+
         // 檢查回應是否存在
         if (!response) {
           setSnackbar({
@@ -71,7 +71,7 @@ const handleDownloadJSON = (setDownloading, setSnackbar) => {
           });
           return;
         }
-        
+
         // 檢查是否有錯誤訊息
         if (response.error) {
           setSnackbar({
@@ -81,7 +81,7 @@ const handleDownloadJSON = (setDownloading, setSnackbar) => {
           });
           return;
         }
-        
+
         // 檢查是否已直接由內容腳本處理下載
         if (response.directDownload || response.status === "success") {
           setSnackbar({
@@ -251,9 +251,9 @@ const LoadDataTab = ({ localDataStatus, setSnackbar }) => {
         <Typography variant="subtitle1" gutterBottom>
           下載雲端資料
         </Typography>
-        <Button 
-          variant="contained" 
-          color="primary" 
+        <Button
+          variant="contained"
+          color="primary"
           startIcon={downloading ? <CircularProgress size={16} color="inherit" /> : <DownloadIcon />}
           onClick={() => handleDownloadJSON(setDownloading, setSnackbar)}
           disabled={downloading}
@@ -280,12 +280,12 @@ const LoadDataTab = ({ localDataStatus, setSnackbar }) => {
           </Typography>
           <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 1 }}>
             {localDataStatus.types.map((type) => (
-              <Chip 
-                key={type} 
-                label={dataTypeMap[type] || type} 
-                size="small" 
-                color="primary" 
-                variant="outlined" 
+              <Chip
+                key={type}
+                label={dataTypeMap[type] || type}
+                size="small"
+                color="primary"
+                variant="outlined"
               />
             ))}
           </Box>
@@ -310,7 +310,7 @@ const LoadDataTab = ({ localDataStatus, setSnackbar }) => {
         <Typography variant="subtitle1" gutterBottom>
           選擇 JSON 檔案
         </Typography>
-        
+
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
           <Button
             variant="contained"
@@ -330,7 +330,7 @@ const LoadDataTab = ({ localDataStatus, setSnackbar }) => {
             {selectedFile ? selectedFile.name : '未選擇檔案'}
           </Typography>
         </Box>
-        
+
         <Button
           variant="contained"
           color="primary"
@@ -346,4 +346,4 @@ const LoadDataTab = ({ localDataStatus, setSnackbar }) => {
   );
 };
 
-export default LoadDataTab; 
+export default LoadDataTab;

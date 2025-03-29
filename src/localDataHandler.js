@@ -18,76 +18,76 @@ let localDataStatus = {
  */
 export function processLocalData(jsonData, filename) {
   console.log('開始處理本地 JSON 資料:', filename);
-  
+
   try {
     // 重置資料類型追蹤
     const loadedTypes = [];
-    
+
     // 檢查不同種類的資料並處理
     if (jsonData.medication) {
       window.lastInterceptedMedicationData = JSON.parse(JSON.stringify(jsonData.medication));
       loadedTypes.push('medication');
-      
+
       // 觸發資料載入完成事件
       triggerDataFetchCompleted('medication');
     }
-    
+
     if (jsonData.lab) {
       window.lastInterceptedLabData = JSON.parse(JSON.stringify(jsonData.lab));
       loadedTypes.push('labData');
-      
+
       triggerDataFetchCompleted('lab');
     }
-    
+
     if (jsonData.chinesemed) {
       window.lastInterceptedChineseMedData = JSON.parse(JSON.stringify(jsonData.chinesemed));
       loadedTypes.push('chineseMed');
-      
+
       triggerDataFetchCompleted('chinesemed');
     }
-    
+
     if (jsonData.imaging) {
       window.lastInterceptedImagingData = JSON.parse(JSON.stringify(jsonData.imaging));
       loadedTypes.push('imaging');
-      
+
       triggerDataFetchCompleted('imaging');
     }
-    
+
     if (jsonData.allergy) {
       window.lastInterceptedAllergyData = JSON.parse(JSON.stringify(jsonData.allergy));
       loadedTypes.push('allergy');
-      
+
       triggerDataFetchCompleted('allergy');
     }
-    
+
     if (jsonData.surgery) {
       window.lastInterceptedSurgeryData = JSON.parse(JSON.stringify(jsonData.surgery));
       loadedTypes.push('surgery');
-      
+
       triggerDataFetchCompleted('surgery');
     }
-    
+
     if (jsonData.discharge) {
       window.lastInterceptedDischargeData = JSON.parse(JSON.stringify(jsonData.discharge));
       loadedTypes.push('discharge');
-      
+
       triggerDataFetchCompleted('discharge');
     }
-    
+
     if (jsonData.medDays) {
       window.lastInterceptedMedDaysData = JSON.parse(JSON.stringify(jsonData.medDays));
       loadedTypes.push('medDays');
-      
+
       triggerDataFetchCompleted('medDays');
     }
-    
+
     if (jsonData.patientSummary) {
       window.lastInterceptedPatientSummaryData = JSON.parse(JSON.stringify(jsonData.patientSummary));
       loadedTypes.push('patientSummary');
-      
+
       triggerDataFetchCompleted('patientSummary');
     }
-    
+
     // 更新資料狀態
     if (loadedTypes.length > 0) {
       localDataStatus = {
@@ -95,10 +95,10 @@ export function processLocalData(jsonData, filename) {
         source: filename,
         dataTypes: loadedTypes
       };
-      
+
       // 通知擴充功能資料已載入
       notifyExtensionDataLoaded(filename, loadedTypes);
-      
+
       return {
         success: true,
         message: `成功載入 ${loadedTypes.length} 種資料`,
@@ -165,19 +165,19 @@ export function clearLocalData() {
     window.lastInterceptedDischargeData = undefined;
     window.lastInterceptedMedDaysData = undefined;
     window.lastInterceptedPatientSummaryData = undefined;
-    
+
     // 重置狀態
     localDataStatus = {
       loaded: false,
       source: '',
       dataTypes: []
     };
-    
+
     // 發送清除完成消息
     chrome.runtime.sendMessage({
       action: "localDataCleared"
     });
-    
+
     return {
       success: true,
       message: '已清除所有本地資料'
@@ -197,4 +197,4 @@ export function clearLocalData() {
  */
 export function getLocalDataStatus() {
   return { ...localDataStatus };
-} 
+}

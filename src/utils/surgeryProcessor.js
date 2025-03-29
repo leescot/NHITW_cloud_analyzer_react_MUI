@@ -1,7 +1,7 @@
 export const surgeryProcessor = {
   processSurgeryData(data) {
     // console.log('Starting to process surgery data:', data);
-    
+
     if (!data || !data.rObject || !Array.isArray(data.rObject)) {
       console.log('Invalid surgery data format:', data);
       return [];
@@ -36,10 +36,10 @@ export const surgeryProcessor = {
     return {
       date: item.exe_s_date?.split('T')[0], // 只取日期部分
       hospital: item.hosp?.split(';')[0] || '未記錄',
-      diagnosis: item.icd_code && item.icd_cname 
+      diagnosis: item.icd_code && item.icd_cname
         ? `${item.icd_code} ${item.icd_cname}`
         : (item.icd_code || item.icd_cname || '未記錄'),
       orderCode: item.order_code || '未記錄'
     };
   }
-}; 
+};

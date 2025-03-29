@@ -20,4 +20,4 @@ export default defineConfig({
     },
     emptyOutDir: false, // Don't delete the main build files
   },
-}); 
+});
