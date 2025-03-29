@@ -12,18 +12,8 @@ export const chineseMedProcessor = {
       // 轉換為陣列並依日期排序
       const sortedGroups = this.sortGroupedData(grouped);
 
-      // Verify that we have valid data structures before returning them
       // Each group should have visitType, icd_code, and icd_name for the Overview_RecentDiagnosis component
-      const validatedGroups = sortedGroups.map(group => {
-        // Make sure the group has all required fields
-        if (!group.visitType) {
-          group.visitType = "門診"; // Default to outpatient
-        }
-
-        return group;
-      });
-
-      return validatedGroups;
+      return sortedGroups;
     } catch (error) {
       console.error('Error processing Chinese medicine data:', error);
       console.error('Error details:', error.stack);
@@ -34,11 +24,11 @@ export const chineseMedProcessor = {
   // 將中藥資料依照日期和 ICD 代碼分組
   groupChineseMedsByDateAndICD(medications) {
     return medications.reduce((acc, med) => {
+      if (!med.icd_code) { return acc; }
+
       // 從 func_date 取得日期並格式化
       const date = this.formatDate(med.func_date);
-      if (!date || !med.icd_code) {
-        return acc;
-      }
+      if (!date) { return acc; }
 
       const key = `${date}_${med.icd_code}`;
 
@@ -73,7 +63,7 @@ export const chineseMedProcessor = {
     const hospParts = med.hosp.split(';');
 
     // Ensure we have at least 2 parts (hospital name and visit type)
-    const visitType = hospParts.length > 1 ? hospParts[1].trim() : "門診"; // Default to "門診" if not specified
+    const visitType = hospParts[1]?.trim() || "門診"; // Default to "門診"
 
     // Ensure the ICD code and name are not null or undefined
     const icd_code = med.icd_code || '';
@@ -84,8 +74,8 @@ export const chineseMedProcessor = {
       icd_code: icd_code,
       icd_name: icd_name,
       hosp: hospParts[0],  // First part of hosp (hospital name)
-      days: med.day,
       visitType: visitType, // Add the visitType field
+      days: med.day,
       medications: []
     };
 
@@ -200,22 +190,15 @@ export const chineseMedProcessor = {
 
     const getMedicationText = (med) => {
       const nameText = `${med.name}`;
-      const newFormatText = `${med.dailyDosage}g ${med.frequency}`;
-      const oldDosageText = med.perDosage === 'SPECIAL'
-        ? `總量${med.dosage}`
-        : `${med.perDosage}#`;
-      const oldUsageText = `${oldDosageText} ${med.frequency} / ${med.days}天`;
+      const dosageText = `${med.dailyDosage}g ${med.frequency}`;
       const effectText = med.sosc_name && groupInfo.showEffectName ? ` - ${med.sosc_name}` : '';
 
       switch (format) {
-        case 'nameVertical':
-          return nameText;
         case 'nameWithDosageVertical':
-          return `${nameText} ${newFormatText}${effectText}`;
-        case 'nameHorizontal':
-          return nameText;
         case 'nameWithDosageHorizontal':
-          return `${nameText} ${newFormatText}${effectText}`;
+          return `${nameText} ${dosageText}${effectText}`;
+        case 'nameVertical':
+        case 'nameHorizontal':
         default:
           return nameText;
       }
@@ -230,42 +213,4 @@ export const chineseMedProcessor = {
       return `${header}\n${medicationTexts.join('\n')}`;
     }
   },
-
-  getChineseMedicationCopyText(medications, groupInfo) {
-    const sortedMedications = [...medications].sort((a, b) => {
-      return b.dailyDosage - a.dailyDosage;
-    });
-
-    const getMedicationText = (med) => {
-      const nameText = `${med.name}`;
-      const newFormatText = `${med.dailyDosage}g ${med.frequency}`;
-      const oldDosageText = med.perDosage === 'SPECIAL'
-        ? `總量${med.dosage}`
-        : `${med.perDosage}#`;
-      const oldUsageText = `${oldDosageText} ${med.frequency} / ${med.days}天`;
-      const effectText = med.sosc_name && groupInfo.showEffectName ? ` - ${med.sosc_name}` : '';
-
-      switch (groupInfo.copyFormat) {
-        case 'new':
-          return `${nameText} ${newFormatText}${effectText}`;
-        case 'old':
-          return `${nameText} ${oldUsageText}${effectText}`;
-        case 'both':
-          return `${nameText} ${newFormatText} (${oldUsageText})${effectText}`;
-        default:
-          return '';
-      }
-    };
-
-    // 診斷資訊
-    const diagnosisText = groupInfo.icd_code ? ` ${groupInfo.icd_code} ${groupInfo.icd_name}` : '';
-
-    // 標題行
-    const headerText = `${groupInfo.date} - ${groupInfo.hosp}${diagnosisText} ${groupInfo.days}天\n`;
-
-    // 藥品行
-    const medicationLines = sortedMedications.map(med => getMedicationText(med)).join('\n');
-
-    return headerText + medicationLines;
-  }
 };

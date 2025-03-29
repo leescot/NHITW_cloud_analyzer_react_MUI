@@ -77,10 +77,8 @@ const ChineseMedicine = ({
         </TypographySizeWrapper>
       ) : (
         groupedChineseMeds.map((group, index) => {
-          // 取得組中第一個藥品的天數
-          const days = group.days || (group.medications && group.medications.length > 0 ? group.medications[0].days : "");
           // 排序藥品
-          const sortedMedications = sortMedicationsByDailyDosage(group.medications || []);
+          const sortedMedications = sortMedicationsByDailyDosage(group.medications);
 
           return (
             <Box key={index} sx={{ mb: 3 }}>
@@ -123,7 +121,7 @@ const ChineseMedicine = ({
                     mb: 0
                   }}
                 >
-                  {days}天
+                  {group.days}天
                 </TypographySizeWrapper>
 
                 {chineseMedSettings.copyFormat !== "none" && (
