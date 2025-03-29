@@ -234,7 +234,7 @@ export const chineseMedProcessor = {
 
   // 依照劑量降序排序藥品
   sortMedicationsByDosage(medications) {
-    return [...medications].sort((a, b) => b.order_qty - a.order_qty);
+    return [...medications].sort((a, b) => b.dosage - a.dosage);
   },
 
   getMedicationText(med, format, groupInfo) {
