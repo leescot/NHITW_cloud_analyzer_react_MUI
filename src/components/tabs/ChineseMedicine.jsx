@@ -31,6 +31,7 @@ const ChineseMedicine = ({
       date: group.date,
       hosp: group.hosp,
       days: days,
+      freq: group.freq,
       icd_code: group.icd_code,
       icd_name: group.icd_name,
       visitType: group.visitType,
@@ -56,15 +57,6 @@ const ChineseMedicine = ({
       });
   };
 
-  // 依照每日劑量降序排序藥品
-  const sortMedicationsByDailyDosage = (medications) => {
-    return [...medications].sort((a, b) => {
-      const dosageA = parseFloat(a.dailyDosage) || 0;
-      const dosageB = parseFloat(b.dailyDosage) || 0;
-      return dosageB - dosageA; // 降序排列
-    });
-  };
-
   return (
     <>
       {groupedChineseMeds.length === 0 ? (
@@ -77,10 +69,8 @@ const ChineseMedicine = ({
         </TypographySizeWrapper>
       ) : (
         groupedChineseMeds.map((group, index) => {
-          // 取得組中第一個藥品的天數
-          const days = group.days || (group.medications && group.medications.length > 0 ? group.medications[0].days : "");
           // 排序藥品
-          const sortedMedications = sortMedicationsByDailyDosage(group.medications || []);
+          const sortedMedications = chineseMedProcessor.sortMedicationsByDosage(group.medications);
 
           return (
             <Box key={index} sx={{ mb: 3 }}>
@@ -96,22 +86,6 @@ const ChineseMedicine = ({
                   {group.date} - {group.hosp}
                 </TypographySizeWrapper>
 
-                {group.icd_code && (
-                  <TypographySizeWrapper
-                    component="span"
-                    textSizeType="content"
-                    variant="h6"
-                    generalDisplaySettings={generalDisplaySettings}
-                    sx={{
-                      color: "text.primary",
-                      ml: 1,
-                      mb: 0
-                    }}
-                  >
-                    {group.icd_code} {group.icd_name}
-                  </TypographySizeWrapper>
-                )}
-
                 <TypographySizeWrapper
                   component="span"
                   textSizeType="content"
@@ -123,8 +97,22 @@ const ChineseMedicine = ({
                     mb: 0
                   }}
                 >
-                  {days}天
+                  {group.days}天 {group.freq}
                 </TypographySizeWrapper>
+
+                {chineseMedSettings.showDiagnosis && group.icd_code && (
+                  <TypographySizeWrapper
+                    component="span"
+                    textSizeType="note"
+                    generalDisplaySettings={generalDisplaySettings}
+                    sx={{
+                      color: "text.secondary",
+                      ml: 1,
+                    }}
+                  >
+                    {group.icd_code} {group.icd_name}
+                  </TypographySizeWrapper>
+                )}
 
                 {chineseMedSettings.copyFormat !== "none" && (
                   <Tooltip title="複製中藥清單">
@@ -161,7 +149,7 @@ const ChineseMedicine = ({
                     generalDisplaySettings={generalDisplaySettings}
                     sx={{ color: "text.secondary" }}
                   >
-                    {med.dailyDosage}g {med.frequency}
+                    {med.dailyDosage}g
                   </TypographySizeWrapper>
 
                   {chineseMedSettings.showEffectName && med.sosc_name && (
