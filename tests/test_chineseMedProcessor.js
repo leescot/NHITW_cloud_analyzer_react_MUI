@@ -822,6 +822,490 @@ describe('utils/chineseMedProcessor', function () {
       assert.deepEqual(result, expected);
     });
 
+    it('should order by max days per hosp if same date', function () {
+      const input = {
+        "rObject": [
+          {
+            "hosp_id": "0000000001",
+            "hosp": "院所甲;門診;0000000001",
+            "icd_cname": "喉嚨痛",
+            "order_code": "A033312",
+            "drug_multi_mark": "Y",
+            "drug_perscrn_name": "止嗽散   ",
+            "cdrug_sosc": "14",
+            "cdrug_sosc_name": "袪痰之劑",
+            "drug_fre": "TIDPC PO",
+            "day": 3,
+            "cdrug_dose_name": "濃縮散劑",
+            "order_qty": 15,
+            "func_date": "2024-07-30T00:00:00",
+            "cure_e_date": null,
+            "func_seq_no": "0005",
+            "icd_code": "R070",
+            "fee_ym": null,
+            "cdrug_name": "“晉安”止嗽散濃縮散",
+            "r": 91
+          },
+          {
+            "hosp_id": "0000000001",
+            "hosp": "院所甲;門診;0000000001",
+            "icd_cname": "喉嚨痛",
+            "order_code": "A035578",
+            "drug_multi_mark": "N",
+            "drug_perscrn_name": "甘草",
+            "cdrug_sosc": null,
+            "cdrug_sosc_name": null,
+            "drug_fre": "TIDPC PO",
+            "day": 3,
+            "cdrug_dose_name": "濃縮顆粒劑",
+            "order_qty": 6,
+            "func_date": "2024-07-30T00:00:00",
+            "cure_e_date": null,
+            "func_seq_no": "0005",
+            "icd_code": "R070",
+            "fee_ym": null,
+            "cdrug_name": "“天明”甘草濃縮細粒",
+            "r": 92
+          },
+          {
+            "cdrug_dose_name": "濃縮散劑",
+            "cdrug_name": "”仙豐”藿香正氣散濃縮散",
+            "cdrug_sosc": "05",
+            "cdrug_sosc_name": "和解之劑",
+            "cure_e_date": null,
+            "day": 7,
+            "drug_fre": "BIDPC",
+            "drug_multi_mark": "Y",
+            "drug_perscrn_name": "藿香正氣散(丸)",
+            "fee_ym": "2024-07-01T00:00:00",
+            "func_date": "2024-07-30T00:00:00",
+            "func_seq_no": "0024",
+            "hosp": "院所乙;門診;0000000002",
+            "hosp_id": "0000000002",
+            "icd_cname": "喉嚨痛",
+            "icd_code": "R070",
+            "order_code": "A034408",
+            "order_qty": 24.5,
+            "r": 107
+          },
+          {
+            "cdrug_dose_name": "濃縮散劑",
+            "cdrug_name": "“仙豐”桔梗濃縮散",
+            "cdrug_sosc": null,
+            "cdrug_sosc_name": null,
+            "cure_e_date": null,
+            "day": 7,
+            "drug_fre": "BIDPC",
+            "drug_multi_mark": "N",
+            "drug_perscrn_name": "桔梗",
+            "fee_ym": "2024-07-01T00:00:00",
+            "func_date": "2024-07-30T00:00:00",
+            "func_seq_no": "0024",
+            "hosp": "院所乙;門診;0000000002",
+            "hosp_id": "0000000002",
+            "icd_cname": "喉嚨痛",
+            "icd_code": "R070",
+            "order_code": "A042851",
+            "order_qty": 3.5,
+            "r": 108
+          },
+          {
+            "hosp_id": "0000000002",
+            "hosp": "院所乙;門診;0000000002",
+            "icd_cname": "喉嚨痛",
+            "order_code": "A033816",
+            "drug_multi_mark": "N",
+            "drug_perscrn_name": "葛根",
+            "cdrug_sosc": null,
+            "cdrug_sosc_name": null,
+            "drug_fre": "TID",
+            "day": 2,
+            "cdrug_dose_name": "濃縮顆粒劑",
+            "order_qty": 3,
+            "fee_ym": "2024-07-01T00:00:00",
+            "func_date": "2024-07-30T00:00:00",
+            "cure_e_date": null,
+            "func_seq_no": "0046",
+            "icd_code": "R070",
+            "cdrug_name": "“港香蘭” 葛根濃縮細粒",
+            "r": 36
+          },
+          {
+            "hosp_id": "0000000002",
+            "hosp": "院所乙;門診;0000000002",
+            "icd_cname": "喉嚨痛",
+            "order_code": "A045998",
+            "drug_multi_mark": "N",
+            "drug_perscrn_name": "黃芩",
+            "cdrug_sosc": null,
+            "cdrug_sosc_name": null,
+            "drug_fre": "TID",
+            "day": 2,
+            "cdrug_dose_name": "濃縮顆粒劑",
+            "order_qty": 0.6,
+            "fee_ym": "2024-07-01T00:00:00",
+            "func_date": "2024-07-30T00:00:00",
+            "cure_e_date": null,
+            "func_seq_no": "0046",
+            "icd_code": "R070",
+            "cdrug_name": "“港香蘭”黃芩濃縮細粒",
+            "r": 64
+          },
+        ]
+      };
+      const expected = [
+        {
+          "date": "2024/07/30",
+          "icd_code": "R070",
+          "icd_name": "喉嚨痛",
+          "hosp": "院所乙",
+          "visitType": "門診",
+          "days": 7,
+          "dosage": 28,
+          "medications": [
+            {
+              "name": "藿香正氣散(丸)",
+              "category": "和解之劑",
+              "dosage": 24.5,
+              "frequency": "BIDPC",
+              "days": 7,
+              "type": "濃縮散劑",
+              "isMulti": true,
+              "sosc_name": "和解之劑",
+              "perDosage": "1.7",
+              "dailyDosage": "3.5"
+            },
+            {
+              "name": "桔梗",
+              "category": null,
+              "dosage": 3.5,
+              "frequency": "BIDPC",
+              "days": 7,
+              "type": "濃縮散劑",
+              "isMulti": false,
+              "sosc_name": "",
+              "perDosage": "0.2",
+              "dailyDosage": "0.5"
+            }
+          ]
+        },
+        {
+          "date": "2024/07/30",
+          "icd_code": "R070",
+          "icd_name": "喉嚨痛",
+          "hosp": "院所乙",
+          "visitType": "門診",
+          "days": 2,
+          "dosage": 3.6,
+          "medications": [
+            {
+              "name": "葛根",
+              "category": null,
+              "dosage": 3,
+              "frequency": "TID",
+              "days": 2,
+              "type": "濃縮顆粒劑",
+              "isMulti": false,
+              "sosc_name": "",
+              "perDosage": "0.5",
+              "dailyDosage": "1.5"
+            },
+            {
+              "name": "黃芩",
+              "category": null,
+              "dosage": 0.6,
+              "frequency": "TID",
+              "days": 2,
+              "type": "濃縮顆粒劑",
+              "isMulti": false,
+              "sosc_name": "",
+              "perDosage": "0",
+              "dailyDosage": "0.3"
+            }
+          ]
+        },
+        {
+          "date": "2024/07/30",
+          "icd_code": "R070",
+          "icd_name": "喉嚨痛",
+          "hosp": "院所甲",
+          "visitType": "門診",
+          "days": 3,
+          "dosage": 21,
+          "medications": [
+            {
+              "name": "止嗽散",
+              "category": "袪痰之劑",
+              "dosage": 15,
+              "frequency": "TIDPC PO",
+              "days": 3,
+              "type": "濃縮散劑",
+              "isMulti": true,
+              "sosc_name": "袪痰之劑",
+              "perDosage": "1.7",
+              "dailyDosage": "5"
+            },
+            {
+              "name": "甘草",
+              "category": null,
+              "dosage": 6,
+              "frequency": "TIDPC PO",
+              "days": 3,
+              "type": "濃縮顆粒劑",
+              "isMulti": false,
+              "sosc_name": "",
+              "perDosage": "0.7",
+              "dailyDosage": "2"
+            }
+          ]
+        }
+      ];
+      const result = chineseMedProcessor.processChineseMedData(input);
+      assert.deepEqual(result, expected);
+    });
+
+    it('should order by total dosage per hosp if same date and max days per hosp', function () {
+      const input = {
+        "rObject": [
+          {
+            "hosp_id": "0000000001",
+            "hosp": "院所甲;門診;0000000001",
+            "icd_cname": "喉嚨痛",
+            "order_code": "A033312",
+            "drug_multi_mark": "Y",
+            "drug_perscrn_name": "止嗽散   ",
+            "cdrug_sosc": "14",
+            "cdrug_sosc_name": "袪痰之劑",
+            "drug_fre": "TIDPC PO",
+            "day": 7,
+            "cdrug_dose_name": "濃縮散劑",
+            "order_qty": 21,
+            "func_date": "2024-07-30T00:00:00",
+            "cure_e_date": null,
+            "func_seq_no": "0005",
+            "icd_code": "R070",
+            "fee_ym": null,
+            "cdrug_name": "“晉安”止嗽散濃縮散",
+            "r": 91
+          },
+          {
+            "hosp_id": "0000000001",
+            "hosp": "院所甲;門診;0000000001",
+            "icd_cname": "喉嚨痛",
+            "order_code": "A035578",
+            "drug_multi_mark": "N",
+            "drug_perscrn_name": "甘草",
+            "cdrug_sosc": null,
+            "cdrug_sosc_name": null,
+            "drug_fre": "TIDPC PO",
+            "day": 7,
+            "cdrug_dose_name": "濃縮顆粒劑",
+            "order_qty": 7,
+            "func_date": "2024-07-30T00:00:00",
+            "cure_e_date": null,
+            "func_seq_no": "0005",
+            "icd_code": "R070",
+            "fee_ym": null,
+            "cdrug_name": "“天明”甘草濃縮細粒",
+            "r": 92
+          },
+          {
+            "cdrug_dose_name": "濃縮散劑",
+            "cdrug_name": "”仙豐”藿香正氣散濃縮散",
+            "cdrug_sosc": "05",
+            "cdrug_sosc_name": "和解之劑",
+            "cure_e_date": null,
+            "day": 7,
+            "drug_fre": "BIDPC",
+            "drug_multi_mark": "Y",
+            "drug_perscrn_name": "藿香正氣散(丸)",
+            "fee_ym": "2024-07-01T00:00:00",
+            "func_date": "2024-07-30T00:00:00",
+            "func_seq_no": "0024",
+            "hosp": "院所乙;門診;0000000002",
+            "hosp_id": "0000000002",
+            "icd_cname": "喉嚨痛",
+            "icd_code": "R070",
+            "order_code": "A034408",
+            "order_qty": 21,
+            "r": 107
+          },
+          {
+            "cdrug_dose_name": "濃縮散劑",
+            "cdrug_name": "“仙豐”桔梗濃縮散",
+            "cdrug_sosc": null,
+            "cdrug_sosc_name": null,
+            "cure_e_date": null,
+            "day": 7,
+            "drug_fre": "BIDPC",
+            "drug_multi_mark": "N",
+            "drug_perscrn_name": "桔梗",
+            "fee_ym": "2024-07-01T00:00:00",
+            "func_date": "2024-07-30T00:00:00",
+            "func_seq_no": "0024",
+            "hosp": "院所乙;門診;0000000002",
+            "hosp_id": "0000000002",
+            "icd_cname": "喉嚨痛",
+            "icd_code": "R070",
+            "order_code": "A042851",
+            "order_qty": 3.5,
+            "r": 108
+          },
+          {
+            "hosp_id": "0000000002",
+            "hosp": "院所乙;門診;0000000002",
+            "icd_cname": "喉嚨痛",
+            "order_code": "A033816",
+            "drug_multi_mark": "N",
+            "drug_perscrn_name": "葛根",
+            "cdrug_sosc": null,
+            "cdrug_sosc_name": null,
+            "drug_fre": "TID",
+            "day": 4,
+            "cdrug_dose_name": "濃縮顆粒劑",
+            "order_qty": 6,
+            "fee_ym": "2024-07-01T00:00:00",
+            "func_date": "2024-07-30T00:00:00",
+            "cure_e_date": null,
+            "func_seq_no": "0046",
+            "icd_code": "R070",
+            "cdrug_name": "“港香蘭” 葛根濃縮細粒",
+            "r": 36
+          },
+          {
+            "hosp_id": "0000000002",
+            "hosp": "院所乙;門診;0000000002",
+            "icd_cname": "喉嚨痛",
+            "order_code": "A045998",
+            "drug_multi_mark": "N",
+            "drug_perscrn_name": "黃芩",
+            "cdrug_sosc": null,
+            "cdrug_sosc_name": null,
+            "drug_fre": "TID",
+            "day": 4,
+            "cdrug_dose_name": "濃縮顆粒劑",
+            "order_qty": 1.2,
+            "fee_ym": "2024-07-01T00:00:00",
+            "func_date": "2024-07-30T00:00:00",
+            "cure_e_date": null,
+            "func_seq_no": "0046",
+            "icd_code": "R070",
+            "cdrug_name": "“港香蘭”黃芩濃縮細粒",
+            "r": 64
+          },
+        ]
+      };
+      const expected = [
+        {
+          "date": "2024/07/30",
+          "icd_code": "R070",
+          "icd_name": "喉嚨痛",
+          "hosp": "院所乙",
+          "visitType": "門診",
+          "days": 7,
+          "dosage": 24.5,
+          "medications": [
+            {
+              "name": "藿香正氣散(丸)",
+              "category": "和解之劑",
+              "dosage": 21,
+              "frequency": "BIDPC",
+              "days": 7,
+              "type": "濃縮散劑",
+              "isMulti": true,
+              "sosc_name": "和解之劑",
+              "perDosage": "1.5",
+              "dailyDosage": "3"
+            },
+            {
+              "name": "桔梗",
+              "category": null,
+              "dosage": 3.5,
+              "frequency": "BIDPC",
+              "days": 7,
+              "type": "濃縮散劑",
+              "isMulti": false,
+              "sosc_name": "",
+              "perDosage": "0.2",
+              "dailyDosage": "0.5"
+            }
+          ]
+        },
+        {
+          "date": "2024/07/30",
+          "icd_code": "R070",
+          "icd_name": "喉嚨痛",
+          "hosp": "院所乙",
+          "visitType": "門診",
+          "days": 4,
+          "dosage": 7.2,
+          "medications": [
+            {
+              "name": "葛根",
+              "category": null,
+              "dosage": 6,
+              "frequency": "TID",
+              "days": 4,
+              "type": "濃縮顆粒劑",
+              "isMulti": false,
+              "sosc_name": "",
+              "perDosage": "0.5",
+              "dailyDosage": "1.5"
+            },
+            {
+              "name": "黃芩",
+              "category": null,
+              "dosage": 1.2,
+              "frequency": "TID",
+              "days": 4,
+              "type": "濃縮顆粒劑",
+              "isMulti": false,
+              "sosc_name": "",
+              "perDosage": "0.1",
+              "dailyDosage": "0.3"
+            }
+          ]
+        },
+        {
+          "date": "2024/07/30",
+          "icd_code": "R070",
+          "icd_name": "喉嚨痛",
+          "hosp": "院所甲",
+          "visitType": "門診",
+          "days": 7,
+          "dosage": 28,
+          "medications": [
+            {
+              "name": "止嗽散",
+              "category": "袪痰之劑",
+              "dosage": 21,
+              "frequency": "TIDPC PO",
+              "days": 7,
+              "type": "濃縮散劑",
+              "isMulti": true,
+              "sosc_name": "袪痰之劑",
+              "perDosage": "1",
+              "dailyDosage": "3"
+            },
+            {
+              "name": "甘草",
+              "category": null,
+              "dosage": 7,
+              "frequency": "TIDPC PO",
+              "days": 7,
+              "type": "濃縮顆粒劑",
+              "isMulti": false,
+              "sosc_name": "",
+              "perDosage": "0.3",
+              "dailyDosage": "1"
+            }
+          ]
+        }
+      ];
+      const result = chineseMedProcessor.processChineseMedData(input);
+      assert.deepEqual(result, expected);
+    });
+
     it('should exclude meds with missing date', function () {
       const input = {
         "rObject": [

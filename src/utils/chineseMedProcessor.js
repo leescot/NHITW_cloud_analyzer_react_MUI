@@ -169,11 +169,37 @@ export const chineseMedProcessor = {
 
   // 排序分組後的資料
   sortGroupedData(grouped) {
+    const mapMaxDaysPerHosp = new Map();
+    const mapTotalDosagePerHosp = new Map();
+    const getHashKey = (group) => JSON.stringify([group.date, group.hosp]);
+    const getMaxDaysPerHosp = (group) => mapMaxDaysPerHosp.get(getHashKey(group));
+    const getTotalDosagePerHosp = (group) => mapTotalDosagePerHosp.get(getHashKey(group));
+
+    for (const group of Object.values(grouped)) {
+      const key = getHashKey(group);
+      if (!(group.days <= mapMaxDaysPerHosp.get(key))) {
+        mapMaxDaysPerHosp.set(key, group.days);
+      }
+      mapTotalDosagePerHosp.set(key, group.dosage + (mapTotalDosagePerHosp.get(key) || 0));
+    }
+    
     return Object.values(grouped)
       .sort((a, b) => {
         // date
         let va = new Date(a.date.replace(/\//g, '-'));
         let vb = new Date(b.date.replace(/\//g, '-'));
+        if (vb > va) { return 1; }
+        if (vb < va) { return -1; }
+
+        // hosp max days
+        va = getMaxDaysPerHosp(a);
+        vb = getMaxDaysPerHosp(b);
+        if (vb > va) { return 1; }
+        if (vb < va) { return -1; }
+
+        // hosp total dosage
+        va = getTotalDosagePerHosp(a);
+        vb = getTotalDosagePerHosp(b);
         if (vb > va) { return 1; }
         if (vb < va) { return -1; }
 
