@@ -85,22 +85,6 @@ const ChineseMedicine = ({
                   {group.date} - {group.hosp}
                 </TypographySizeWrapper>
 
-                {group.icd_code && (
-                  <TypographySizeWrapper
-                    component="span"
-                    textSizeType="content"
-                    variant="h6"
-                    generalDisplaySettings={generalDisplaySettings}
-                    sx={{
-                      color: "text.primary",
-                      ml: 1,
-                      mb: 0
-                    }}
-                  >
-                    {group.icd_code} {group.icd_name}
-                  </TypographySizeWrapper>
-                )}
-
                 <TypographySizeWrapper
                   component="span"
                   textSizeType="content"
@@ -114,6 +98,20 @@ const ChineseMedicine = ({
                 >
                   {group.days}天
                 </TypographySizeWrapper>
+
+                {chineseMedSettings.showDiagnosis && group.icd_code && (
+                  <TypographySizeWrapper
+                    component="span"
+                    textSizeType="note"
+                    generalDisplaySettings={generalDisplaySettings}
+                    sx={{
+                      color: "text.secondary",
+                      ml: 1,
+                    }}
+                  >
+                    {group.icd_code} {group.icd_name}
+                  </TypographySizeWrapper>
+                )}
 
                 {chineseMedSettings.copyFormat !== "none" && (
                   <Tooltip title="複製中藥清單">
