@@ -45,16 +45,12 @@ export const chineseMedProcessor = {
   // 格式化日期 (從 "YYYY-MM-DDT00:00:00" 轉為 "YYYY/MM/DD")
   formatDate(dateStr) {
     if (!dateStr) return null;
-    try {
-      const date = new Date(dateStr);
-      const year = date.getFullYear();
-      const month = String(date.getMonth() + 1).padStart(2, '0');
-      const day = String(date.getDate()).padStart(2, '0');
-      return `${year}/${month}/${day}`;
-    } catch (error) {
-      console.error('Error formatting date:', error);
-      return null;
-    }
+    const date = new Date(dateStr);
+    if (Number.isNaN(date.valueOf())) { return null; }
+    const year = date.getFullYear();
+    const month = String(date.getMonth() + 1).padStart(2, '0');
+    const day = String(date.getDate()).padStart(2, '0');
+    return `${year}/${month}/${day}`;
   },
 
   // 創建新的分組

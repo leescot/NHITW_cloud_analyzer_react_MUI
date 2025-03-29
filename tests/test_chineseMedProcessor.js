@@ -622,7 +622,7 @@ describe('utils/chineseMedProcessor', function () {
       assert.deepEqual(result, expected);
     });
 
-    it('should exclude meds with malformated date (XFAIL)', function () {
+    it('should exclude meds with malformated date', function () {
       const input = {
         "rObject": [
           {
@@ -1102,7 +1102,7 @@ describe('utils/chineseMedProcessor', function () {
       assert.isNull(chineseMedProcessor.formatDate(""));
     });
 
-    it('should return null for malformed input (XFAIL)', function () {
+    it('should return null for malformed input', function () {
       assert.isNull(chineseMedProcessor.formatDate("unknown"));
     });
   });
