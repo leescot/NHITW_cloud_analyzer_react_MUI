@@ -2217,6 +2217,19 @@ describe('utils/chineseMedProcessor', function () {
     });
   });
 
+  describe('.calculateRemainingDays', function () {
+    it('should calculate the days from midnight to midnight', function () {
+      assert.strictEqual(chineseMedProcessor.calculateRemainingDays(2, "2025-03-10T00:00:00+0800", "2025-03-10T22:00:00+0800"), 2);
+
+      assert.strictEqual(chineseMedProcessor.calculateRemainingDays(2, "2025-03-10T00:00:00+0800", "2025-03-11T00:00:00+0800"), 1);
+      assert.strictEqual(chineseMedProcessor.calculateRemainingDays(2, "2025-03-10T10:00:00+0800", "2025-03-11T00:00:00+0800"), 1);
+      assert.strictEqual(chineseMedProcessor.calculateRemainingDays(2, "2025-03-10T10:00:00+0800", "2025-03-11T23:00:00+0800"), 1);
+
+      assert.strictEqual(chineseMedProcessor.calculateRemainingDays(2, "2025-03-10T10:00:00+0800", "2025-03-12T00:00:00+0800"), 0);
+      assert.strictEqual(chineseMedProcessor.calculateRemainingDays(2, "2025-03-10T10:00:00+0800", "2025-03-12T20:00:00+0800"), 0);
+    });
+  });
+
   describe.skip('.formatChineseMedData');
 
   describe.skip('.sortGroupedData');

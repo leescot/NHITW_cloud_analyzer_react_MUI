@@ -150,6 +150,29 @@ export const chineseMedProcessor = {
     return perDose.toString();
   },
 
+  // 計算剩餘用藥天數
+  calculateRemainingDays(days, dateOrder, dateNow = Date.now()) {
+    if (typeof dateOrder === 'string' || Number.isInteger(dateOrder)) {
+      dateOrder = new Date(dateOrder);
+      dateOrder.setHours(0);
+      dateOrder.setMinutes(0);
+      dateOrder.setSeconds(0);
+      dateOrder.setMilliseconds(0);
+      dateOrder = dateOrder.valueOf();
+    }
+    if (typeof dateNow === 'string' || Number.isInteger(dateNow)) {
+      dateNow = new Date(dateNow);
+      dateNow.setHours(0);
+      dateNow.setMinutes(0);
+      dateNow.setSeconds(0);
+      dateNow.setMilliseconds(0);
+      dateNow = dateNow.valueOf();
+    }
+
+    const msPerDay = 86400000;
+    return (dateOrder + days * msPerDay - dateNow) / msPerDay;
+  },
+
   // Update formatChineseMedData
   formatChineseMedData(med) {
     const perDosage = this.calculatePerDosage(med.order_qty, med.drug_fre, med.day);

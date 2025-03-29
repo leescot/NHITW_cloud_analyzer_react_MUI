@@ -50,6 +50,8 @@ const ChineseMedicine = ({
         </TypographySizeWrapper>
       ) : (
         groupedChineseMeds.map((group, index) => {
+          const drug_left = chineseMedProcessor.calculateRemainingDays(group.days, group.date);
+
           // 排序藥品
           const sortedMedications = chineseMedProcessor.sortMedicationsByDosage(group.medications);
 
@@ -80,6 +82,20 @@ const ChineseMedicine = ({
                 >
                   {group.days}天 {group.freq}
                 </TypographySizeWrapper>
+
+                {drug_left > 0 && (
+                  <TypographySizeWrapper
+                    component="span"
+                    textSizeType="note"
+                    generalDisplaySettings={generalDisplaySettings}
+                    sx={{
+                      color: "secondary.light",
+                      ml: 0.5
+                    }}
+                  >
+                    (餘{drug_left}天)
+                  </TypographySizeWrapper>
+                )}
 
                 {chineseMedSettings.showDiagnosis && group.icd_code && (
                   <TypographySizeWrapper
