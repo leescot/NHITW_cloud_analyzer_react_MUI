@@ -1,5 +1,7 @@
 import React, { useEffect } from 'react';
 
+import { updateDataStatus } from './utils/settingsHelper.js';
+
 function App() {
   useEffect(() => {
     console.log('PopupSettings 組件已掛載');
