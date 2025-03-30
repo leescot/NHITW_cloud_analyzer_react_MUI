@@ -95,13 +95,8 @@ export const chineseMedProcessor = {
   calculateDailyDosage(dosage, days) {
     if (!dosage || !days) return '';
 
-    try {
-      const dailyDosage = Math.round((parseFloat(dosage) / parseInt(days)) * 10) / 10;
-      return dailyDosage.toString();
-    } catch (error) {
-      console.error('Error calculating daily dosage:', error);
-      return '';
-    }
+    const dailyDosage = Math.round((parseFloat(dosage) / parseInt(days)) * 10) / 10;
+    return dailyDosage.toString();
   },
 
   // Add calculation for per-dose amount
