@@ -375,7 +375,7 @@ describe('utils/chineseMedProcessor', function () {
               "type": "濃縮散劑",
               "isMulti": true,
               "sosc_name": "和解之劑",
-              "perDosage": "1.7",
+              "perDosage": "1.8",
               "dailyDosage": "3.5"
             },
             {
@@ -387,7 +387,7 @@ describe('utils/chineseMedProcessor', function () {
               "type": "濃縮散劑",
               "isMulti": false,
               "sosc_name": "",
-              "perDosage": "0.2",
+              "perDosage": "0.3",
               "dailyDosage": "0.5"
             }
           ]
@@ -986,7 +986,7 @@ describe('utils/chineseMedProcessor', function () {
               "type": "濃縮散劑",
               "isMulti": true,
               "sosc_name": "和解之劑",
-              "perDosage": "1.7",
+              "perDosage": "1.8",
               "dailyDosage": "3.5"
             },
             {
@@ -998,7 +998,7 @@ describe('utils/chineseMedProcessor', function () {
               "type": "濃縮散劑",
               "isMulti": false,
               "sosc_name": "",
-              "perDosage": "0.2",
+              "perDosage": "0.3",
               "dailyDosage": "0.5"
             }
           ]
@@ -1034,7 +1034,7 @@ describe('utils/chineseMedProcessor', function () {
               "type": "濃縮顆粒劑",
               "isMulti": false,
               "sosc_name": "",
-              "perDosage": "0",
+              "perDosage": "0.1",
               "dailyDosage": "0.3"
             }
           ]
@@ -1243,7 +1243,7 @@ describe('utils/chineseMedProcessor', function () {
               "type": "濃縮散劑",
               "isMulti": false,
               "sosc_name": "",
-              "perDosage": "0.2",
+              "perDosage": "0.3",
               "dailyDosage": "0.5"
             }
           ]
@@ -2166,6 +2166,8 @@ describe('utils/chineseMedProcessor', function () {
     });
 
     it('should round to 1st decimal', function () {
+      assert.strictEqual(chineseMedProcessor.calculatePerDosage(0.6, "TID", 2), "0.1");
+      assert.strictEqual(chineseMedProcessor.calculatePerDosage(13.5, "TID", 3), "1.5");
       assert.strictEqual(chineseMedProcessor.calculatePerDosage(24, "TID", 7), "1.1");
       assert.strictEqual(chineseMedProcessor.calculatePerDosage(40, "TID", 7), "1.9");
 
