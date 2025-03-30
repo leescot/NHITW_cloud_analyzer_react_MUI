@@ -53,6 +53,7 @@ export default [
   },
   {
     files: [
+      '*.js',
       'scripts/**/*.js',
       'tests/serve.js',
     ],
