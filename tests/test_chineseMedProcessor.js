@@ -172,7 +172,7 @@ describe('utils/chineseMedProcessor', function () {
               "type": "濃縮顆粒劑",
               "isMulti": false,
               "sosc_name": "",
-              "perDosage": "0.3",
+              "perDosage": "0.33",
               "dailyDosage": "1"
             }
           ]
@@ -196,7 +196,7 @@ describe('utils/chineseMedProcessor', function () {
               "type": "濃縮顆粒劑",
               "isMulti": true,
               "sosc_name": "袪風之劑",
-              "perDosage": "3.3",
+              "perDosage": "3.33",
               "dailyDosage": "10"
             },
             {
@@ -220,7 +220,7 @@ describe('utils/chineseMedProcessor', function () {
               "type": "濃縮顆粒劑",
               "isMulti": false,
               "sosc_name": "",
-              "perDosage": "0.3",
+              "perDosage": "0.33",
               "dailyDosage": "1"
             }
           ]
@@ -339,7 +339,7 @@ describe('utils/chineseMedProcessor', function () {
               "type": "濃縮散劑",
               "isMulti": true,
               "sosc_name": "袪痰之劑",
-              "perDosage": "1.7",
+              "perDosage": "1.67",
               "dailyDosage": "5"
             },
             {
@@ -351,7 +351,7 @@ describe('utils/chineseMedProcessor', function () {
               "type": "濃縮顆粒劑",
               "isMulti": false,
               "sosc_name": "",
-              "perDosage": "0.7",
+              "perDosage": "0.67",
               "dailyDosage": "2"
             }
           ]
@@ -375,7 +375,7 @@ describe('utils/chineseMedProcessor', function () {
               "type": "濃縮散劑",
               "isMulti": true,
               "sosc_name": "和解之劑",
-              "perDosage": "1.8",
+              "perDosage": "1.75",
               "dailyDosage": "3.5"
             },
             {
@@ -387,7 +387,7 @@ describe('utils/chineseMedProcessor', function () {
               "type": "濃縮散劑",
               "isMulti": false,
               "sosc_name": "",
-              "perDosage": "0.3",
+              "perDosage": "0.25",
               "dailyDosage": "0.5"
             }
           ]
@@ -509,7 +509,7 @@ describe('utils/chineseMedProcessor', function () {
               "type": "濃縮顆粒劑",
               "isMulti": false,
               "sosc_name": "",
-              "perDosage": "0.3",
+              "perDosage": "0.33",
               "dailyDosage": "1"
             }
           ]
@@ -533,7 +533,7 @@ describe('utils/chineseMedProcessor', function () {
               "type": "濃縮顆粒劑",
               "isMulti": true,
               "sosc_name": "袪風之劑",
-              "perDosage": "3.3",
+              "perDosage": "3.33",
               "dailyDosage": "10"
             }
           ]
@@ -655,7 +655,7 @@ describe('utils/chineseMedProcessor', function () {
               "type": "濃縮顆粒劑",
               "isMulti": false,
               "sosc_name": "",
-              "perDosage": "0.3",
+              "perDosage": "0.33",
               "dailyDosage": "1"
             }
           ]
@@ -679,7 +679,7 @@ describe('utils/chineseMedProcessor', function () {
               "type": "濃縮顆粒劑",
               "isMulti": true,
               "sosc_name": "袪風之劑",
-              "perDosage": "3.3",
+              "perDosage": "3.33",
               "dailyDosage": "10"
             }
           ]
@@ -825,7 +825,7 @@ describe('utils/chineseMedProcessor', function () {
               "type": "濃縮顆粒劑",
               "isMulti": true,
               "sosc_name": "袪風之劑",
-              "perDosage": "3.3",
+              "perDosage": "3.33",
               "dailyDosage": "10"
             }
           ]
@@ -986,7 +986,7 @@ describe('utils/chineseMedProcessor', function () {
               "type": "濃縮散劑",
               "isMulti": true,
               "sosc_name": "和解之劑",
-              "perDosage": "1.8",
+              "perDosage": "1.75",
               "dailyDosage": "3.5"
             },
             {
@@ -998,7 +998,7 @@ describe('utils/chineseMedProcessor', function () {
               "type": "濃縮散劑",
               "isMulti": false,
               "sosc_name": "",
-              "perDosage": "0.3",
+              "perDosage": "0.25",
               "dailyDosage": "0.5"
             }
           ]
@@ -1058,7 +1058,7 @@ describe('utils/chineseMedProcessor', function () {
               "type": "濃縮散劑",
               "isMulti": true,
               "sosc_name": "袪痰之劑",
-              "perDosage": "1.7",
+              "perDosage": "1.67",
               "dailyDosage": "5"
             },
             {
@@ -1070,7 +1070,7 @@ describe('utils/chineseMedProcessor', function () {
               "type": "濃縮顆粒劑",
               "isMulti": false,
               "sosc_name": "",
-              "perDosage": "0.7",
+              "perDosage": "0.67",
               "dailyDosage": "2"
             }
           ]
@@ -1243,7 +1243,7 @@ describe('utils/chineseMedProcessor', function () {
               "type": "濃縮散劑",
               "isMulti": false,
               "sosc_name": "",
-              "perDosage": "0.3",
+              "perDosage": "0.25",
               "dailyDosage": "0.5"
             }
           ]
@@ -1315,7 +1315,7 @@ describe('utils/chineseMedProcessor', function () {
               "type": "濃縮顆粒劑",
               "isMulti": false,
               "sosc_name": "",
-              "perDosage": "0.3",
+              "perDosage": "0.33",
               "dailyDosage": "1"
             }
           ]
@@ -1432,7 +1432,7 @@ describe('utils/chineseMedProcessor', function () {
               "type": "濃縮顆粒劑",
               "isMulti": true,
               "sosc_name": "袪風之劑",
-              "perDosage": "3.3",
+              "perDosage": "3.33",
               "dailyDosage": "10"
             },
             {
@@ -1563,7 +1563,7 @@ describe('utils/chineseMedProcessor', function () {
               "type": "濃縮顆粒劑",
               "isMulti": true,
               "sosc_name": "袪風之劑",
-              "perDosage": "3.3",
+              "perDosage": "3.33",
               "dailyDosage": "10"
             },
             {
@@ -1694,7 +1694,7 @@ describe('utils/chineseMedProcessor', function () {
               "type": "濃縮顆粒劑",
               "isMulti": true,
               "sosc_name": "袪風之劑",
-              "perDosage": "3.3",
+              "perDosage": "3.33",
               "dailyDosage": "10"
             },
             {
@@ -1809,10 +1809,10 @@ describe('utils/chineseMedProcessor', function () {
           "icd_code": "I679",
           "icd_name": "診斷欠明之腦血管疾病",
           "hosp": "測試院所",
+          "visitType": "門診",
           "days": 7,
           "dosage": 80.5,
           "freq": "TIDPC PO",
-          "visitType": "門診",
           "medications": [
             {
               "name": "小續命湯",
@@ -1823,7 +1823,7 @@ describe('utils/chineseMedProcessor', function () {
               "type": "濃縮顆粒劑",
               "isMulti": true,
               "sosc_name": "袪風之劑",
-              "perDosage": "3.3",
+              "perDosage": "3.33",
               "dailyDosage": "10"
             },
             {
@@ -2165,14 +2165,14 @@ describe('utils/chineseMedProcessor', function () {
       assert.strictEqual(chineseMedProcessor.calculatePerDosage(24, "TIW", 28), "2");
     });
 
-    it('should round to nearest 0.1x', function () {
+    it('should round to nearest 0.01x', function () {
       assert.strictEqual(chineseMedProcessor.calculatePerDosage(0.6, "TID", 2), "0.1");
       assert.strictEqual(chineseMedProcessor.calculatePerDosage(13.5, "TID", 3), "1.5");
-      assert.strictEqual(chineseMedProcessor.calculatePerDosage(24, "TID", 7), "1.1");
+      assert.strictEqual(chineseMedProcessor.calculatePerDosage(24, "TID", 7), "1.14");
       assert.strictEqual(chineseMedProcessor.calculatePerDosage(40, "TID", 7), "1.9");
 
       assert.strictEqual(chineseMedProcessor.calculatePerDosage(10, "QOD", 7), "2.5");
-      assert.strictEqual(chineseMedProcessor.calculatePerDosage(10, "BIW", 10), "3.3");
+      assert.strictEqual(chineseMedProcessor.calculatePerDosage(10, "BIW", 10), "3.33");
     });
 
     it('should return "SPECIAL" for special dosage', function () {

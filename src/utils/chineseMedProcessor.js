@@ -146,7 +146,7 @@ export const chineseMedProcessor = {
       return 'SPECIAL';
     }
 
-    const perDose = Math.round((dosage / totalDoses) * 10) / 10;
+    const perDose = Math.round((dosage / totalDoses) * 100) / 100;
     return perDose.toString();
   },
 
