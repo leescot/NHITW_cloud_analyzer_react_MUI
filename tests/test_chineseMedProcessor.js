@@ -2145,13 +2145,17 @@ describe('utils/chineseMedProcessor', function () {
       assert.strictEqual(chineseMedProcessor.calculatePerDosage(21, "TIDP", 7), "1");
       assert.strictEqual(chineseMedProcessor.calculatePerDosage(28, "QIDP", 7), "1");
 
+      assert.strictEqual(chineseMedProcessor.calculatePerDosage(14, "DAILY", 7), "2");
+      assert.strictEqual(chineseMedProcessor.calculatePerDosage(14, "QAM", 7), "2");
+      assert.strictEqual(chineseMedProcessor.calculatePerDosage(14, "QPM", 7), "2");
+      assert.strictEqual(chineseMedProcessor.calculatePerDosage(14, "QL", 7), "2");
+      assert.strictEqual(chineseMedProcessor.calculatePerDosage(14, "QN", 7), "2");
+
       assert.strictEqual(chineseMedProcessor.calculatePerDosage(84, "Q2H", 7), "1");
       assert.strictEqual(chineseMedProcessor.calculatePerDosage(42, "Q4H", 7), "1");
       assert.strictEqual(chineseMedProcessor.calculatePerDosage(28, "Q6H", 7), "1");
       assert.strictEqual(chineseMedProcessor.calculatePerDosage(21, "Q8H", 7), "1");
       assert.strictEqual(chineseMedProcessor.calculatePerDosage(14, "Q12H", 7), "1");
-
-      assert.strictEqual(chineseMedProcessor.calculatePerDosage(14, "DAILY", 7), "2");
     });
 
     it('should correctly handle a frequency lower than daily', function () {
@@ -2172,8 +2176,36 @@ describe('utils/chineseMedProcessor', function () {
     it('should return "SPECIAL" for special dosage', function () {
       assert.strictEqual(chineseMedProcessor.calculatePerDosage(14, "ST", 7), "SPECIAL");
       assert.strictEqual(chineseMedProcessor.calculatePerDosage(14, "STAT", 7), "SPECIAL");
+      assert.strictEqual(chineseMedProcessor.calculatePerDosage(14, "ONCE", 7), "SPECIAL");
+      assert.strictEqual(chineseMedProcessor.calculatePerDosage(14, "ASORDER", 7), "SPECIAL");
+
+      // PRN-like
       assert.strictEqual(chineseMedProcessor.calculatePerDosage(14, "PRN", 7), "SPECIAL");
+      assert.strictEqual(chineseMedProcessor.calculatePerDosage(14, "PRNB", 7), "SPECIAL");
+
+      assert.strictEqual(chineseMedProcessor.calculatePerDosage(14, "PRNQD", 7), "SPECIAL");
+      assert.strictEqual(chineseMedProcessor.calculatePerDosage(14, "PRNBID", 7), "SPECIAL");
+      assert.strictEqual(chineseMedProcessor.calculatePerDosage(14, "PRNTID", 7), "SPECIAL");
+      assert.strictEqual(chineseMedProcessor.calculatePerDosage(14, "PRNQ6H", 7), "SPECIAL");
+
+      assert.strictEqual(chineseMedProcessor.calculatePerDosage(14, "PRN QD", 7), "SPECIAL");
+      assert.strictEqual(chineseMedProcessor.calculatePerDosage(14, "PRN BID", 7), "SPECIAL");
+      assert.strictEqual(chineseMedProcessor.calculatePerDosage(14, "PRN TID", 7), "SPECIAL");
+      assert.strictEqual(chineseMedProcessor.calculatePerDosage(14, "PRN Q6H", 7), "SPECIAL");
+
       assert.strictEqual(chineseMedProcessor.calculatePerDosage(14, "需要時", 7), "SPECIAL");
+      assert.strictEqual(chineseMedProcessor.calculatePerDosage(14, "需要時BID", 7), "SPECIAL");
+    });
+
+    it('should ignore case', function () {
+      assert.strictEqual(chineseMedProcessor.calculatePerDosage(14, "qd", 7), "2");
+      assert.strictEqual(chineseMedProcessor.calculatePerDosage(28, "bid", 7), "2");
+      assert.strictEqual(chineseMedProcessor.calculatePerDosage(42, "tid", 7), "2");
+      assert.strictEqual(chineseMedProcessor.calculatePerDosage(56, "qid", 7), "2");
+    });
+
+    it('should return "SPECIAL" for undefined dosage', function () {
+      assert.strictEqual(chineseMedProcessor.calculatePerDosage(14, "UNKNOWN", 7), "SPECIAL");
     });
 
     it('should return "" for missing dosage, frequency, or days', function () {

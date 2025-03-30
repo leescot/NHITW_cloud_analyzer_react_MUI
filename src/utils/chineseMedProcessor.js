@@ -109,39 +109,45 @@ export const chineseMedProcessor = {
     if (!dosage || !frequency || !days) return '';
 
     const frequencyMap = {
-      'QD': 1, 'QDP': 1, 'QAM': 1, 'QPM': 1,
+      'QD': 1, 'QDP': 1, 'DAILY': 1,
+      'QAM': 1, 'QPM': 1,
+      'QL': 1, 'QN': 1,
+      'HS': 1, 'HSP': 1,
       'BID': 2, 'BIDP': 2,
       'TID': 3, 'TIDP': 3,
       'QID': 4, 'QIDP': 4,
-      'Q2H': 12, 'Q4H': 6, 'Q6H': 4, 'Q8H': 3,
-      'Q12H': 2, 'HS': 1, 'HSP': 1, 'DAILY': 1, 'QN': 1, 'STAT': 1, 'ST': 1
-    };
+      'Q2H': 12, 'Q4H': 6, 'Q6H': 4, 'Q8H': 3, 'Q12H': 2,
 
-    const freqMatch = frequency.toUpperCase().match(/QD|QDP|BID|BIDP|TID|TIDP|QID|QIDP|Q2H|Q4H|Q6H|Q8H|Q12H|HS|HSP|PRN|QOD|TIW|BIW|QW|DAILY/);
-    if (!freqMatch && !frequency.includes('需要時')) {
+      // frequency below QD
+      'QOD': 1/2, 'Q2D': 1/2,
+      'QW': 1/7, 'BIW': 2/7, 'TIW': 3/7,
+
+      // known special
+      'PRN': null, 'PRNB': null, 'ASORDER': null, 'ONCE': null, '需要時': null,
+      'STAT': null, 'ST': null,
+    };
+    const freqRegexStr = Object.keys(frequencyMap).join("|");
+    const freqRegex = new RegExp(freqRegexStr, "i");
+    const freqMatch = frequency.match(freqRegex);
+    if (!freqMatch) {
       console.log('無法識別的頻次:', frequency);
       return 'SPECIAL';
     }
 
-    let totalDoses;
-    const freq = freqMatch ? freqMatch[0] : 'PRN';
-
-    if (frequency.includes('QOD') || frequency.includes('Q2D')) {
-      totalDoses = Math.ceil(parseInt(days) / 2);
-    } else if (frequency.includes('TIW')) {
-      totalDoses = Math.ceil(parseInt(days) * 3 / 7);
-    } else if (frequency.includes('BIW')) {
-      totalDoses = Math.ceil(parseInt(days) * 2 / 7);
-    } else if (frequency.includes('QW')) {
-      totalDoses = Math.ceil(parseInt(days) / 7);
-    } else if (freq === 'PRN' || frequency.includes('需要時')) {
+    const freq = freqMatch[0].toUpperCase();
+    const timesPerDay = frequencyMap[freq];
+    if (!Number.isFinite(timesPerDay)) {
       return 'SPECIAL';
-    } else {
-      const timesPerDay = frequencyMap[freq] || 1;
-      totalDoses = parseInt(days) * timesPerDay;
     }
 
-    if (isNaN(totalDoses) || totalDoses <= 0) {
+    let totalDoses = parseInt(days) * timesPerDay;
+
+    // e.g. QOD, QW, BIW, TIW
+    if (timesPerDay < 1) {
+      totalDoses = Math.ceil(totalDoses);
+    }
+
+    if (Number.isNaN(totalDoses) || totalDoses <= 0) {
       return 'SPECIAL';
     }
 
