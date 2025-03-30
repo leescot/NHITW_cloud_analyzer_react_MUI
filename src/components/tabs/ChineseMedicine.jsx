@@ -24,26 +24,7 @@ const ChineseMedicine = ({
       return;
     }
 
-    // 取得藥品的天數
-    const days = medications && medications.length > 0 ? medications[0].days : "";
-
-    const groupInfo = {
-      date: group.date,
-      hosp: group.hosp,
-      days: days,
-      freq: group.freq,
-      icd_code: group.icd_code,
-      icd_name: group.icd_name,
-      visitType: group.visitType,
-      showDiagnosis: chineseMedSettings.showDiagnosis,
-      showEffectName: chineseMedSettings.showEffectName
-    };
-
-    const copyText = chineseMedProcessor.formatChineseMedList(
-      medications,
-      chineseMedSettings.copyFormat,
-      groupInfo
-    );
+    const copyText = chineseMedProcessor.formatChineseMedList(group, chineseMedSettings);
 
     navigator.clipboard.writeText(copyText)
       .then(() => {

@@ -2439,62 +2439,169 @@ describe('utils/chineseMedProcessor', function () {
     });
   });
 
-  describe.skip('.getMedicationText');
+  describe('.getMedicationText', function () {
+    it('should honor specified `copyFormat`', function () {
+      const med = {
+        "name": "小續命湯",
+        "category": "袪風之劑",
+        "dosage": 63,
+        "frequency": "TIDPC PO",
+        "days": 7,
+        "type": "濃縮顆粒劑",
+        "isMulti": true,
+        "sosc_name": "袪風之劑",
+        "perDosage": "3",
+        "dailyDosage": "9"
+      };
 
-  describe('.formatChineseMedList',  function () {
-    it('should honor `format`, `showDiagnosis`, `showEffectName`', function () {
-      var medications = [
-        {
-          "name": "小續命湯",
-          "category": "袪風之劑",
-          "dosage": 63,
-          "frequency": "TIDPC PO",
-          "days": 7,
-          "type": "濃縮顆粒劑",
-          "isMulti": true,
-          "sosc_name": "袪風之劑",
-          "perDosage": "3",
-          "dailyDosage": "9"
-        },
-        {
-          "name": "延胡索",
-          "category": null,
-          "dosage": 7,
-          "frequency": "TIDPC PO",
-          "days": 7,
-          "type": "濃縮顆粒劑",
-          "isMulti": false,
-          "sosc_name": "",
-          "perDosage": "0.3",
-          "dailyDosage": "1"
-        }
-      ];
-      var groupInfo = {
+      assert.strictEqual(
+        chineseMedProcessor.getMedicationText(med, {copyFormat: 'nameWithDosageVertical'}),
+        '小續命湯 9g',
+      );
+
+      assert.strictEqual(
+        chineseMedProcessor.getMedicationText(med, {copyFormat: 'nameWithDosageHorizontal'}),
+        '小續命湯 9g',
+      );
+
+      assert.strictEqual(
+        chineseMedProcessor.getMedicationText(med, {copyFormat: 'nameVertical'}),
+        '小續命湯',
+      );
+
+      assert.strictEqual(
+        chineseMedProcessor.getMedicationText(med, {copyFormat: 'nameHorizontal'}),
+        '小續命湯',
+      );
+
+      // default for undefined format
+      assert.strictEqual(
+        chineseMedProcessor.getMedicationText(med, {copyFormat: 'unknown'}),
+        '小續命湯',
+      );
+    });
+
+    it('should honor specified `showEffectName`', function () {
+      const med = {
+        "name": "小續命湯",
+        "category": "袪風之劑",
+        "dosage": 63,
+        "frequency": "TIDPC PO",
+        "days": 7,
+        "type": "濃縮顆粒劑",
+        "isMulti": true,
+        "sosc_name": "袪風之劑",
+        "perDosage": "3",
+        "dailyDosage": "9"
+      };
+
+      assert.strictEqual(
+        chineseMedProcessor.getMedicationText(med, {copyFormat: 'nameWithDosageVertical'}),
+        '小續命湯 9g',
+      );
+      assert.strictEqual(
+        chineseMedProcessor.getMedicationText(med, {copyFormat: 'nameWithDosageVertical', showEffectName: false}),
+        '小續命湯 9g',
+      );
+      assert.strictEqual(
+        chineseMedProcessor.getMedicationText(med, {copyFormat: 'nameWithDosageVertical', showEffectName: true}),
+        '小續命湯 9g - 袪風之劑',
+      );
+
+      assert.strictEqual(
+        chineseMedProcessor.getMedicationText(med, {copyFormat: 'nameWithDosageHorizontal'}),
+        '小續命湯 9g',
+      );
+      assert.strictEqual(
+        chineseMedProcessor.getMedicationText(med, {copyFormat: 'nameWithDosageHorizontal', showEffectName: false}),
+        '小續命湯 9g',
+      );
+      assert.strictEqual(
+        chineseMedProcessor.getMedicationText(med, {copyFormat: 'nameWithDosageHorizontal', showEffectName: true}),
+        '小續命湯 9g - 袪風之劑',
+      );
+
+      assert.strictEqual(
+        chineseMedProcessor.getMedicationText(med, {copyFormat: 'nameVertical'}),
+        '小續命湯',
+      );
+      assert.strictEqual(
+        chineseMedProcessor.getMedicationText(med, {copyFormat: 'nameVertical', showEffectName: false}),
+        '小續命湯',
+      );
+      assert.strictEqual(
+        chineseMedProcessor.getMedicationText(med, {copyFormat: 'nameVertical', showEffectName: true}),
+        '小續命湯',
+      );
+
+      assert.strictEqual(
+        chineseMedProcessor.getMedicationText(med, {copyFormat: 'nameHorizontal'}),
+        '小續命湯',
+      );
+      assert.strictEqual(
+        chineseMedProcessor.getMedicationText(med, {copyFormat: 'nameHorizontal', showEffectName: false}),
+        '小續命湯',
+      );
+      assert.strictEqual(
+        chineseMedProcessor.getMedicationText(med, {copyFormat: 'nameHorizontal', showEffectName: true}),
+        '小續命湯',
+      );
+    });
+  });
+
+  describe('.formatChineseMedList', function () {
+    it('should honor `copyFormat`, `showDiagnosis`, `showEffectName`', function () {
+      const group = {
         "date": "2025/03/26",
         "hosp": "院所甲",
         "days": 7,
+        "dosage": 70,
         "freq": "TIDPC PO",
         "icd_code": "I679",
         "icd_name": "診斷欠明之腦血管疾病",
         "visitType": "門診",
-        "showDiagnosis": true,
-        "showEffectName": true
+        "medications": [
+          {
+            "name": "小續命湯",
+            "category": "袪風之劑",
+            "dosage": 63,
+            "frequency": "TIDPC PO",
+            "days": 7,
+            "type": "濃縮顆粒劑",
+            "isMulti": true,
+            "sosc_name": "袪風之劑",
+            "perDosage": "3",
+            "dailyDosage": "9"
+          },
+          {
+            "name": "延胡索",
+            "category": null,
+            "dosage": 7,
+            "frequency": "TIDPC PO",
+            "days": 7,
+            "type": "濃縮顆粒劑",
+            "isMulti": false,
+            "sosc_name": "",
+            "perDosage": "0.3",
+            "dailyDosage": "1"
+          }
+        ]
       };
 
       assert.deepEqual(
-        chineseMedProcessor.formatChineseMedList(medications, 'none', groupInfo),
+        chineseMedProcessor.formatChineseMedList(group, {copyFormat: 'none'}),
         '',
       );
 
       assert.deepEqual(
-        chineseMedProcessor.formatChineseMedList(medications, 'nameVertical', groupInfo),
+        chineseMedProcessor.formatChineseMedList(group, {copyFormat: 'nameVertical'}),
         `\
 2025/03/26 - 院所甲 7天 TIDPC PO [I679 診斷欠明之腦血管疾病]
 小續命湯
 延胡索`,
       );
       assert.deepEqual(
-        chineseMedProcessor.formatChineseMedList(medications, 'nameVertical', {...groupInfo, showDiagnosis: false}),
+        chineseMedProcessor.formatChineseMedList(group, {copyFormat: 'nameVertical', showDiagnosis: false}),
         `\
 2025/03/26 - 院所甲 7天 TIDPC PO
 小續命湯
@@ -2502,41 +2609,41 @@ describe('utils/chineseMedProcessor', function () {
       );
 
       assert.deepEqual(
-        chineseMedProcessor.formatChineseMedList(medications, 'nameHorizontal', groupInfo),
+        chineseMedProcessor.formatChineseMedList(group, {copyFormat: 'nameHorizontal'}),
         `\
 2025/03/26 - 院所甲 7天 TIDPC PO [I679 診斷欠明之腦血管疾病]
 小續命湯, 延胡索`,
       );
       assert.deepEqual(
-        chineseMedProcessor.formatChineseMedList(medications, 'nameHorizontal', {...groupInfo, showDiagnosis: false}),
+        chineseMedProcessor.formatChineseMedList(group, {copyFormat: 'nameHorizontal', showDiagnosis: false}),
         `\
 2025/03/26 - 院所甲 7天 TIDPC PO
 小續命湯, 延胡索`,
       );
 
       assert.deepEqual(
-        chineseMedProcessor.formatChineseMedList(medications, 'nameWithDosageVertical', groupInfo),
+        chineseMedProcessor.formatChineseMedList(group, {copyFormat: 'nameWithDosageVertical'}),
         `\
 2025/03/26 - 院所甲 7天 TIDPC PO [I679 診斷欠明之腦血管疾病]
 小續命湯 9g - 袪風之劑
 延胡索 1g`,
       );
       assert.deepEqual(
-        chineseMedProcessor.formatChineseMedList(medications, 'nameWithDosageVertical', {...groupInfo, showDiagnosis: false}),
+        chineseMedProcessor.formatChineseMedList(group, {copyFormat: 'nameWithDosageVertical', showDiagnosis: false}),
         `\
 2025/03/26 - 院所甲 7天 TIDPC PO
 小續命湯 9g - 袪風之劑
 延胡索 1g`,
       );
       assert.deepEqual(
-        chineseMedProcessor.formatChineseMedList(medications, 'nameWithDosageVertical', {...groupInfo, showEffectName: false}),
+        chineseMedProcessor.formatChineseMedList(group, {copyFormat: 'nameWithDosageVertical', showEffectName: false}),
         `\
 2025/03/26 - 院所甲 7天 TIDPC PO [I679 診斷欠明之腦血管疾病]
 小續命湯 9g
 延胡索 1g`,
       );
       assert.deepEqual(
-        chineseMedProcessor.formatChineseMedList(medications, 'nameWithDosageVertical', {...groupInfo, showDiagnosis: false, showEffectName: false}),
+        chineseMedProcessor.formatChineseMedList(group, {copyFormat: 'nameWithDosageVertical', showDiagnosis: false, showEffectName: false}),
         `\
 2025/03/26 - 院所甲 7天 TIDPC PO
 小續命湯 9g
@@ -2544,25 +2651,25 @@ describe('utils/chineseMedProcessor', function () {
       );
 
       assert.deepEqual(
-        chineseMedProcessor.formatChineseMedList(medications, 'nameWithDosageHorizontal', groupInfo),
+        chineseMedProcessor.formatChineseMedList(group, {copyFormat: 'nameWithDosageHorizontal'}),
         `\
 2025/03/26 - 院所甲 7天 TIDPC PO [I679 診斷欠明之腦血管疾病]
 小續命湯 9g - 袪風之劑, 延胡索 1g`,
       );
       assert.deepEqual(
-        chineseMedProcessor.formatChineseMedList(medications, 'nameWithDosageHorizontal', {...groupInfo, showDiagnosis: false}),
+        chineseMedProcessor.formatChineseMedList(group, {copyFormat: 'nameWithDosageHorizontal', showDiagnosis: false}),
         `\
 2025/03/26 - 院所甲 7天 TIDPC PO
 小續命湯 9g - 袪風之劑, 延胡索 1g`,
       );
       assert.deepEqual(
-        chineseMedProcessor.formatChineseMedList(medications, 'nameWithDosageHorizontal', {...groupInfo, showEffectName: false}),
+        chineseMedProcessor.formatChineseMedList(group, {copyFormat: 'nameWithDosageHorizontal', showEffectName: false}),
         `\
 2025/03/26 - 院所甲 7天 TIDPC PO [I679 診斷欠明之腦血管疾病]
 小續命湯 9g, 延胡索 1g`,
       );
       assert.deepEqual(
-        chineseMedProcessor.formatChineseMedList(medications, 'nameWithDosageHorizontal', {...groupInfo, showDiagnosis: false, showEffectName: false}),
+        chineseMedProcessor.formatChineseMedList(group, {copyFormat: 'nameWithDosageHorizontal', showDiagnosis: false, showEffectName: false}),
         `\
 2025/03/26 - 院所甲 7天 TIDPC PO
 小續命湯 9g, 延胡索 1g`,
@@ -2570,7 +2677,7 @@ describe('utils/chineseMedProcessor', function () {
 
       // treat unknown as nameVertical
       assert.deepEqual(
-        chineseMedProcessor.formatChineseMedList(medications, 'unknown', groupInfo),
+        chineseMedProcessor.formatChineseMedList(group, {copyFormat: 'unknown'}),
         `\
 2025/03/26 - 院所甲 7天 TIDPC PO [I679 診斷欠明之腦血管疾病]
 小續命湯
@@ -2578,7 +2685,7 @@ describe('utils/chineseMedProcessor', function () {
       );
 
       assert.deepEqual(
-        chineseMedProcessor.formatChineseMedList(medications, 'unknown', {...groupInfo, showDiagnosis: false}),
+        chineseMedProcessor.formatChineseMedList(group, {copyFormat: 'unknown', showDiagnosis: false}),
         `\
 2025/03/26 - 院所甲 7天 TIDPC PO
 小續命湯

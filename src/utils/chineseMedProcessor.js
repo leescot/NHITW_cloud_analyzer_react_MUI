@@ -238,12 +238,15 @@ export const chineseMedProcessor = {
     return [...medications].sort((a, b) => b.dosage - a.dosage);
   },
 
-  getMedicationText(med, format, groupInfo) {
+  getMedicationText(med, {
+    copyFormat,
+    showEffectName = false,
+  } = {}) {
     const nameText = `${med.name}`;
     const dosageText = `${med.dailyDosage}g`;
-    const effectText = med.sosc_name && groupInfo.showEffectName ? ` - ${med.sosc_name}` : '';
+    const effectText = med.sosc_name && showEffectName ? ` - ${med.sosc_name}` : '';
 
-    switch (format) {
+    switch (copyFormat) {
       case 'nameWithDosageVertical':
       case 'nameWithDosageHorizontal':
         return `${nameText} ${dosageText}${effectText}`;
@@ -254,25 +257,29 @@ export const chineseMedProcessor = {
     }
   },
 
-  // Format Chinese medicine list for copying with different formats
-  formatChineseMedList(medications, format, groupInfo) {
-    if (format === 'none') {
+  // Format Chinese medicine group for copying with different formats
+  formatChineseMedList(group, {
+    copyFormat,
+    showDiagnosis = true,
+    showEffectName = true,
+  } = {}) {
+    if (copyFormat === 'none') {
       return '';
     }
 
     // Format the header with date, hospital, days and diagnosis
-    let header = `${groupInfo.date} - ${groupInfo.hosp} ${groupInfo.days}天 ${groupInfo.freq}`;
-    if (groupInfo.showDiagnosis && groupInfo.icd_code && groupInfo.icd_name) {
-      header += ` [${groupInfo.icd_code} ${groupInfo.icd_name}]`;
+    let header = `${group.date} - ${group.hosp} ${group.days}天 ${group.freq}`;
+    if (showDiagnosis && group.icd_code && group.icd_name) {
+      header += ` [${group.icd_code} ${group.icd_name}]`;
     }
 
     // 先依照劑量降序排序藥品
-    const sortedMedications = this.sortMedicationsByDosage(medications);
+    const sortedMedications = this.sortMedicationsByDosage(group.medications);
 
-    const medicationTexts = sortedMedications.map(med => this.getMedicationText(med, format, groupInfo));
+    const medicationTexts = sortedMedications.map(med => this.getMedicationText(med, {copyFormat, showEffectName}));
 
     // Format the full output with header
-    if (format.includes('Horizontal')) {
+    if (copyFormat.includes('Horizontal')) {
       return `${header}\n${medicationTexts.join(', ')}`;
     } else {
       return `${header}\n${medicationTexts.join('\n')}`;
