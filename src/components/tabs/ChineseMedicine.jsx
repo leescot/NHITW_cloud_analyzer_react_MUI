@@ -130,7 +130,7 @@ const ChineseMedicine = ({
                     generalDisplaySettings={generalDisplaySettings}
                     sx={{ color: "text.secondary" }}
                   >
-                    {med.dailyDosage}g
+                    {chineseMedSettings.doseFormat === 'perDose' ? med.perDosage : med.dailyDosage}g
                   </TypographySizeWrapper>
 
                   {chineseMedSettings.showEffectName && med.sosc_name && (

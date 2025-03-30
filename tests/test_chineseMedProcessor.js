@@ -2547,6 +2547,47 @@ describe('utils/chineseMedProcessor', function () {
         '小續命湯',
       );
     });
+
+    it('should honor specified `doseFormat`', function () {
+      const med = {
+        "name": "小續命湯",
+        "category": "袪風之劑",
+        "dosage": 63,
+        "frequency": "TIDPC PO",
+        "days": 7,
+        "type": "濃縮顆粒劑",
+        "isMulti": true,
+        "sosc_name": "袪風之劑",
+        "perDosage": "3",
+        "dailyDosage": "9"
+      };
+
+      assert.strictEqual(
+        chineseMedProcessor.getMedicationText(med, {copyFormat: 'nameWithDosageVertical'}),
+        '小續命湯 9g',
+      );
+      assert.strictEqual(
+        chineseMedProcessor.getMedicationText(med, {copyFormat: 'nameWithDosageVertical', doseFormat: 'perDay'}),
+        '小續命湯 9g',
+      );
+      assert.strictEqual(
+        chineseMedProcessor.getMedicationText(med, {copyFormat: 'nameWithDosageVertical', doseFormat: 'perDose'}),
+        '小續命湯 3g',
+      );
+
+      assert.strictEqual(
+        chineseMedProcessor.getMedicationText(med, {copyFormat: 'nameWithDosageHorizontal'}),
+        '小續命湯 9g',
+      );
+      assert.strictEqual(
+        chineseMedProcessor.getMedicationText(med, {copyFormat: 'nameWithDosageHorizontal', doseFormat: 'perDay'}),
+        '小續命湯 9g',
+      );
+      assert.strictEqual(
+        chineseMedProcessor.getMedicationText(med, {copyFormat: 'nameWithDosageHorizontal', doseFormat: 'perDose'}),
+        '小續命湯 3g',
+      );
+    });
   });
 
   describe('.formatChineseMedList', function () {

@@ -241,9 +241,10 @@ export const chineseMedProcessor = {
   getMedicationText(med, {
     copyFormat,
     showEffectName = false,
+    doseFormat,
   } = {}) {
     const nameText = `${med.name}`;
-    const dosageText = `${med.dailyDosage}g`;
+    const dosageText = `${doseFormat === 'perDose' ? med.perDosage : med.dailyDosage}g`;
     const effectText = med.sosc_name && showEffectName ? ` - ${med.sosc_name}` : '';
 
     switch (copyFormat) {
@@ -262,6 +263,7 @@ export const chineseMedProcessor = {
     copyFormat,
     showDiagnosis = true,
     showEffectName = true,
+    doseFormat,
   } = {}) {
     if (copyFormat === 'none') {
       return '';
@@ -276,7 +278,7 @@ export const chineseMedProcessor = {
     // 先依照劑量降序排序藥品
     const sortedMedications = this.sortMedicationsByDosage(group.medications);
 
-    const medicationTexts = sortedMedications.map(med => this.getMedicationText(med, {copyFormat, showEffectName}));
+    const medicationTexts = sortedMedications.map(med => this.getMedicationText(med, {copyFormat, showEffectName, doseFormat}));
 
     // Format the full output with header
     if (copyFormat.includes('Horizontal')) {

@@ -35,6 +35,7 @@ export const DEFAULT_SETTINGS = {
   chinese: {
     showDiagnosis: false,
     showEffectName: false,
+    doseFormat: "perDay",
     copyFormat: "nameWithDosageVertical",
   },
 

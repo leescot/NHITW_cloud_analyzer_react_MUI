@@ -29,6 +29,7 @@ export const loadAllSettings = async () => {
       // Chinese medicine settings
       chineseMedShowDiagnosis: DEFAULT_SETTINGS.chinese.showDiagnosis,
       chineseMedShowEffectName: DEFAULT_SETTINGS.chinese.showEffectName,
+      chineseMedDoseFormat: DEFAULT_SETTINGS.chinese.doseFormat,
       chineseMedCopyFormat: DEFAULT_SETTINGS.chinese.copyFormat,
 
       // Lab settings
@@ -76,6 +77,7 @@ export const loadAllSettings = async () => {
         chinese: {
           showDiagnosis: items.chineseMedShowDiagnosis,
           showEffectName: items.chineseMedShowEffectName,
+          doseFormat: items.chineseMedDoseFormat,
           copyFormat: items.chineseMedCopyFormat,
         },
         lab: {
@@ -222,6 +224,7 @@ const handleChineseMedSettingsChange = (event, currentSettings, updateCallback, 
     const newChineseMedSettings = {
       showDiagnosis: event.detail.allSettings.chineseMedShowDiagnosis,
       showEffectName: event.detail.allSettings.chineseMedShowEffectName,
+      doseFormat: event.detail.allSettings.chineseMedDoseFormat,
       copyFormat: event.detail.allSettings.chineseMedCopyFormat,
     };
 
