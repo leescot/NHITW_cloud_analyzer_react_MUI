@@ -2084,7 +2084,7 @@ describe('utils/chineseMedProcessor', function () {
       assert.strictEqual(chineseMedProcessor.calculateDailyDosage(2.1, 7), "0.3");
     });
 
-    it('should round to 1st decimal', function () {
+    it('should round to nearest 0.1x', function () {
       assert.strictEqual(chineseMedProcessor.calculateDailyDosage(2.2, 7), "0.3");
       assert.strictEqual(chineseMedProcessor.calculateDailyDosage(2.6, 7), "0.4");
     });
@@ -2165,7 +2165,7 @@ describe('utils/chineseMedProcessor', function () {
       assert.strictEqual(chineseMedProcessor.calculatePerDosage(24, "TIW", 28), "2");
     });
 
-    it('should round to 1st decimal', function () {
+    it('should round to nearest 0.1x', function () {
       assert.strictEqual(chineseMedProcessor.calculatePerDosage(0.6, "TID", 2), "0.1");
       assert.strictEqual(chineseMedProcessor.calculatePerDosage(13.5, "TID", 3), "1.5");
       assert.strictEqual(chineseMedProcessor.calculatePerDosage(24, "TID", 7), "1.1");
