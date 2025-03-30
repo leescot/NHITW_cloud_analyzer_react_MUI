@@ -2187,7 +2187,223 @@ describe('utils/chineseMedProcessor', function () {
 
   describe.skip('.sortGroupedData');
 
-  describe.skip('.sortMedicationsByDosage');
+  describe('.sortMedicationsByDosage', function () {
+    it('should sort items by dosage', function () {
+      let input;
+      const expected = [
+        {
+          "name": "小續命湯",
+          "category": "袪風之劑",
+          "dosage": 63,
+          "frequency": "TIDPC PO",
+          "days": 7,
+          "type": "濃縮顆粒劑",
+          "isMulti": true,
+          "sosc_name": "袪風之劑",
+          "perDosage": "3",
+          "dailyDosage": "9"
+        },
+        {
+          "name": "杜仲",
+          "category": null,
+          "dosage": 14,
+          "frequency": "TIDPC PO",
+          "days": 7,
+          "type": "濃縮顆粒劑",
+          "isMulti": false,
+          "sosc_name": "",
+          "perDosage": "0.7",
+          "dailyDosage": "2"
+        },
+        {
+          "name": "延胡索",
+          "category": null,
+          "dosage": 7,
+          "frequency": "TIDPC PO",
+          "days": 7,
+          "type": "濃縮顆粒劑",
+          "isMulti": false,
+          "sosc_name": "",
+          "perDosage": "0.3",
+          "dailyDosage": "1"
+        },
+        {
+          "name": "川芎",
+          "category": null,
+          "dosage": 7,
+          "frequency": "TIDPC PO",
+          "days": 7,
+          "type": "濃縮顆粒劑",
+          "isMulti": false,
+          "sosc_name": "",
+          "perDosage": "0.3",
+          "dailyDosage": "1"
+        }
+      ];
+
+      input = [
+        {
+          "name": "小續命湯",
+          "category": "袪風之劑",
+          "dosage": 63,
+          "frequency": "TIDPC PO",
+          "days": 7,
+          "type": "濃縮顆粒劑",
+          "isMulti": true,
+          "sosc_name": "袪風之劑",
+          "perDosage": "3",
+          "dailyDosage": "9"
+        },
+        {
+          "name": "延胡索",
+          "category": null,
+          "dosage": 7,
+          "frequency": "TIDPC PO",
+          "days": 7,
+          "type": "濃縮顆粒劑",
+          "isMulti": false,
+          "sosc_name": "",
+          "perDosage": "0.3",
+          "dailyDosage": "1"
+        },
+        {
+          "name": "川芎",
+          "category": null,
+          "dosage": 7,
+          "frequency": "TIDPC PO",
+          "days": 7,
+          "type": "濃縮顆粒劑",
+          "isMulti": false,
+          "sosc_name": "",
+          "perDosage": "0.3",
+          "dailyDosage": "1"
+        },
+        {
+          "name": "杜仲",
+          "category": null,
+          "dosage": 14,
+          "frequency": "TIDPC PO",
+          "days": 7,
+          "type": "濃縮顆粒劑",
+          "isMulti": false,
+          "sosc_name": "",
+          "perDosage": "0.7",
+          "dailyDosage": "2"
+        }
+      ];
+      assert.deepEqual(chineseMedProcessor.sortMedicationsByDosage(input), expected);
+
+      input = [
+        {
+          "name": "杜仲",
+          "category": null,
+          "dosage": 14,
+          "frequency": "TIDPC PO",
+          "days": 7,
+          "type": "濃縮顆粒劑",
+          "isMulti": false,
+          "sosc_name": "",
+          "perDosage": "0.7",
+          "dailyDosage": "2"
+        },
+        {
+          "name": "延胡索",
+          "category": null,
+          "dosage": 7,
+          "frequency": "TIDPC PO",
+          "days": 7,
+          "type": "濃縮顆粒劑",
+          "isMulti": false,
+          "sosc_name": "",
+          "perDosage": "0.3",
+          "dailyDosage": "1"
+        },
+        {
+          "name": "小續命湯",
+          "category": "袪風之劑",
+          "dosage": 63,
+          "frequency": "TIDPC PO",
+          "days": 7,
+          "type": "濃縮顆粒劑",
+          "isMulti": true,
+          "sosc_name": "袪風之劑",
+          "perDosage": "3",
+          "dailyDosage": "9"
+        },
+        {
+          "name": "川芎",
+          "category": null,
+          "dosage": 7,
+          "frequency": "TIDPC PO",
+          "days": 7,
+          "type": "濃縮顆粒劑",
+          "isMulti": false,
+          "sosc_name": "",
+          "perDosage": "0.3",
+          "dailyDosage": "1"
+        }
+      ];
+      assert.deepEqual(chineseMedProcessor.sortMedicationsByDosage(input), expected);
+    });
+
+    it('should not modify the input array', function () {
+      const input = [
+        {
+          "name": "杜仲",
+          "category": null,
+          "dosage": 14,
+          "frequency": "TIDPC PO",
+          "days": 7,
+          "type": "濃縮顆粒劑",
+          "isMulti": false,
+          "sosc_name": "",
+          "perDosage": "0.7",
+          "dailyDosage": "2"
+        },
+        {
+          "name": "延胡索",
+          "category": null,
+          "dosage": 7,
+          "frequency": "TIDPC PO",
+          "days": 7,
+          "type": "濃縮顆粒劑",
+          "isMulti": false,
+          "sosc_name": "",
+          "perDosage": "0.3",
+          "dailyDosage": "1"
+        },
+        {
+          "name": "小續命湯",
+          "category": "袪風之劑",
+          "dosage": 63,
+          "frequency": "TIDPC PO",
+          "days": 7,
+          "type": "濃縮顆粒劑",
+          "isMulti": true,
+          "sosc_name": "袪風之劑",
+          "perDosage": "3",
+          "dailyDosage": "9"
+        },
+        {
+          "name": "川芎",
+          "category": null,
+          "dosage": 7,
+          "frequency": "TIDPC PO",
+          "days": 7,
+          "type": "濃縮顆粒劑",
+          "isMulti": false,
+          "sosc_name": "",
+          "perDosage": "0.3",
+          "dailyDosage": "1"
+        }
+      ];
+      const clone = JSON.parse(JSON.stringify(input));
+      const result = chineseMedProcessor.sortMedicationsByDosage(input);
+      assert.notDeepEqual(result, clone);
+      assert.notStrictEqual(result, input);
+      assert.deepEqual(input, clone);
+    });
+  });
 
   describe.skip('.getMedicationText');
 
