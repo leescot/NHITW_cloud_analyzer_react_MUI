@@ -1,9 +1,7 @@
 name: Create Alpha Release
 
 on:
-  push:
-    branches:
-      - alpha-release
+  workflow_dispatch:
 
 jobs:
   build-and-release:
