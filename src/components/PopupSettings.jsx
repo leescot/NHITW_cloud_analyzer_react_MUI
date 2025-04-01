@@ -9,12 +9,15 @@ import {
   Tab,
   CircularProgress,
   Snackbar,
-  Alert
+  Alert,
+  IconButton,
+  Tooltip
 } from '@mui/material';
 import SettingsIcon from '@mui/icons-material/Settings';
 import InfoIcon from '@mui/icons-material/Info';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import HelpIcon from '@mui/icons-material/Help';
+import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 
 // 引入標籤顏色工具函數
 import { getTabColor, getTabSelectedColor } from '../utils/tabColorUtils';
@@ -77,6 +80,15 @@ const PopupSettings = () => {
   const [activeTab, setActiveTab] = useState(0);
 
   const handleTabChange = (event, newValue) => {
+    // 檢查是否點擊了"開啟雲端"標籤
+    const lastTabIndex = developerMode ? 4 : 3;
+    if (newValue === lastTabIndex) {
+      // 開啟雲端連結而不切換標籤
+      openNHIMedCloud();
+      return;
+    }
+    
+    // 正常切換標籤
     setActiveTab(newValue);
   };
 
@@ -152,6 +164,11 @@ const PopupSettings = () => {
       });
     }
     // 移除非開發者模式下的點擊提示，避免洩露開發者模式的存在
+  };
+
+  // Function to open NHI MedCloud website
+  const openNHIMedCloud = () => {
+    chrome.tabs.create({ url: 'https://medcloud2.nhi.gov.tw/imu/IMUE1000/' });
   };
 
   // 組件掛載時初始化
@@ -287,6 +304,16 @@ const PopupSettings = () => {
               }}
             />
           )}
+          <Tab
+            icon={<OpenInNewIcon />}
+            label="開啟雲端"
+            sx={{
+              color: getTabColor(generalDisplaySettings, "cloud"),
+              "&.Mui-selected": {
+                color: getTabSelectedColor(generalDisplaySettings, "cloud"),
+              },
+            }}
+          />
         </Tabs>
       </AppBar>
       {/* Settings Tab */}
