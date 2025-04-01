@@ -11,14 +11,28 @@
 
 ## 系統需求
 
-- Google Chrome 瀏覽器
+- [Google Chrome](https://www.google.com/chrome/) 瀏覽器（其他 Chromium 核心的瀏覽器如 [Microsoft Edge](https://www.microsoft.com/edge) 亦可，但介面可能稍有不同）
 - 健保雲端資料系統存取權限 (<https://medcloud2.nhi.gov.tw/>)
 
-## 開發者模式安裝說明
+## 安裝說明
 
-要在開發者模式下安裝此 Chrome 擴充功能，請按照以下步驟操作：
+### 從 Chrome 線上應用程式商店安裝
 
-1. 複製或下載此專案到您的電腦。若是下載 zip 檔，請直接解壓縮，跳至第 4 步驟。
+如果電腦可以連上外網，可直接至 [Chrome 線上應用程式商店](https://chromewebstore.google.com/detail/kmhlkhgagjadmoclpjomgodfbdfkifja)下載安裝本擴充功能。
+
+### 使用 Chrome 開發人員模式安裝
+
+1. 至本專案版本庫 Tags => Releases 下載[最新版的壓縮檔](https://github.com/leescot/NHITW_cloud_analyzer_react_MUI/releases/latest)
+2. 將下載的壓縮檔解壓縮為資料夾
+3. 在 Chrome 瀏覽器中，前往「管理擴充功能」頁面（或造訪網址 `chrome://extensions/`）
+4. 在右上角啟用「開發人員模式」
+5. 點擊「載入未封裝項目」按鈕
+6. 選擇步驟 2 的資料夾（`manifest.json` 等檔案所在的資料夾）
+7. 擴充功能應該已成功安裝並顯示在您的擴充功能列表中
+
+### 從專案原始碼編譯安裝
+
+1. 複製或下載此專案的原始碼到您的電腦
 2. 開啟終端機，並進入專案目錄
 3. 執行以下命令安裝相依套件並建置專案：
 
@@ -26,11 +40,7 @@
    npm install --omit=dev && npm run build
    ```
 
-4. 在 Chrome 瀏覽器中，前往 `chrome://extensions/`
-5. 在右上角啟用「開發人員模式」
-6. 點擊「載入未封裝項目」按鈕
-7. 選擇專案中的 `dist` 資料夾
-8. 擴充功能應該已成功安裝並顯示在您的擴充功能列表中
+4. 比照上一節的步驟 3–7 在瀏覽器安裝，其中在步驟 6 選擇專案中的 `dist` 資料夾
 
 ## 使用方法
 
@@ -96,5 +106,3 @@
 - **影像追蹤天數**：180 天 （預設值，可自行更改）
 - **關注檢驗項目**：預設包含常見檢驗項目 （有固定清單，可自行選定與排序）)
 - **關注影像項目**：預設包含常見影像檢查 （有固定清單，可自行選定）
-
-## Add Release Github Acition
