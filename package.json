@@ -10,8 +10,8 @@
     "test": "vite build && node scripts/build.js --test && node tests/serve.js",
     "dev": "vite",
     "preview": "vite preview",
-    "lint": "eslint .",
-    "lint:fix": "eslint --fix ."
+    "lint": "eslint",
+    "lint:fix": "eslint --fix"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -26,7 +26,7 @@
     "vite": "^6.1.0"
   },
   "devDependencies": {
-    "@eslint/js": "^9.19.0",
+    "@stylistic/eslint-plugin": "^4.2.0",
     "@types/react": "^19.0.8",
     "@types/react-dom": "^19.0.3",
     "eslint": "^9.19.0",
