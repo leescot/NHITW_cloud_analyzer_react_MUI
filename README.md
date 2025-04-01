@@ -1,4 +1,4 @@
-# 健保雲端資料擷取器 2.0 (NHI Extractor)
+# 更好的健保雲端 2.0 (NHI Extractor)
 
 這是一個 Chrome 擴充功能，用於從健保雲端資料系統擷取資料。此工具可協助醫療專業人員更有效率地處理健保雲端資料。
 
@@ -15,6 +15,8 @@
 - 健保雲端資料系統存取權限 (<https://medcloud2.nhi.gov.tw/>)
 
 ## 安裝說明
+
+### 安裝說明影片(Youtube): [連結](https://www.youtube.com/watch?v=atu3LXBK6og)
 
 ### 從 Chrome 線上應用程式商店安裝
 
