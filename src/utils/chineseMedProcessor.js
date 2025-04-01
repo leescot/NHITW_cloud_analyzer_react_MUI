@@ -95,13 +95,8 @@ export const chineseMedProcessor = {
   calculateDailyDosage(dosage, days) {
     if (!dosage || !days) return '';
 
-    try {
-      const dailyDosage = Math.round((parseFloat(dosage) / parseInt(days)) * 10) / 10;
-      return dailyDosage.toString();
-    } catch (error) {
-      console.error('Error calculating daily dosage:', error);
-      return '';
-    }
+    const dailyDosage = Math.round((parseFloat(dosage) / parseInt(days)) * 10) / 10;
+    return dailyDosage.toString();
   },
 
   // Add calculation for per-dose amount
@@ -109,44 +104,73 @@ export const chineseMedProcessor = {
     if (!dosage || !frequency || !days) return '';
 
     const frequencyMap = {
-      'QD': 1, 'QDP': 1, 'QAM': 1, 'QPM': 1,
+      'QD': 1, 'QDP': 1, 'DAILY': 1,
+      'QAM': 1, 'QPM': 1,
+      'QL': 1, 'QN': 1,
+      'HS': 1, 'HSP': 1,
       'BID': 2, 'BIDP': 2,
       'TID': 3, 'TIDP': 3,
       'QID': 4, 'QIDP': 4,
-      'Q2H': 12, 'Q4H': 6, 'Q6H': 4, 'Q8H': 3,
-      'Q12H': 2, 'HS': 1, 'HSP': 1, 'DAILY': 1, 'QN': 1, 'STAT': 1, 'ST': 1
-    };
+      'Q2H': 12, 'Q4H': 6, 'Q6H': 4, 'Q8H': 3, 'Q12H': 2,
 
-    const freqMatch = frequency.toUpperCase().match(/QD|QDP|BID|BIDP|TID|TIDP|QID|QIDP|Q2H|Q4H|Q6H|Q8H|Q12H|HS|HSP|PRN|QOD|TIW|BIW|QW|DAILY/);
-    if (!freqMatch && !frequency.includes('需要時')) {
+      // frequency below QD
+      'QOD': 1/2, 'Q2D': 1/2,
+      'QW': 1/7, 'BIW': 2/7, 'TIW': 3/7,
+
+      // known special
+      'PRN': null, 'PRNB': null, 'ASORDER': null, 'ONCE': null, '需要時': null,
+      'STAT': null, 'ST': null,
+    };
+    const freqRegexStr = Object.keys(frequencyMap).join("|");
+    const freqRegex = new RegExp(freqRegexStr, "i");
+    const freqMatch = frequency.match(freqRegex);
+    if (!freqMatch) {
       console.log('無法識別的頻次:', frequency);
       return 'SPECIAL';
     }
 
-    let totalDoses;
-    const freq = freqMatch ? freqMatch[0] : 'PRN';
-
-    if (frequency.includes('QOD') || frequency.includes('Q2D')) {
-      totalDoses = Math.ceil(parseInt(days) / 2);
-    } else if (frequency.includes('TIW')) {
-      totalDoses = Math.ceil(parseInt(days) * 3 / 7);
-    } else if (frequency.includes('BIW')) {
-      totalDoses = Math.ceil(parseInt(days) * 2 / 7);
-    } else if (frequency.includes('QW')) {
-      totalDoses = Math.ceil(parseInt(days) / 7);
-    } else if (freq === 'PRN' || frequency.includes('需要時')) {
-      return 'SPECIAL';
-    } else {
-      const timesPerDay = frequencyMap[freq] || 1;
-      totalDoses = parseInt(days) * timesPerDay;
-    }
-
-    if (isNaN(totalDoses) || totalDoses <= 0) {
+    const freq = freqMatch[0].toUpperCase();
+    const timesPerDay = frequencyMap[freq];
+    if (!Number.isFinite(timesPerDay)) {
       return 'SPECIAL';
     }
 
-    const perDose = Math.round((parseInt(dosage) / totalDoses) * 10) / 10;
+    let totalDoses = parseInt(days) * timesPerDay;
+
+    // e.g. QOD, QW, BIW, TIW
+    if (timesPerDay < 1) {
+      totalDoses = Math.ceil(totalDoses);
+    }
+
+    if (Number.isNaN(totalDoses) || totalDoses <= 0) {
+      return 'SPECIAL';
+    }
+
+    const perDose = Math.round((dosage / totalDoses) * 100) / 100;
     return perDose.toString();
+  },
+
+  // 計算剩餘用藥天數
+  calculateRemainingDays(days, dateOrder, dateNow = Date.now()) {
+    if (typeof dateOrder === 'string' || Number.isInteger(dateOrder)) {
+      dateOrder = new Date(dateOrder);
+      dateOrder.setHours(0);
+      dateOrder.setMinutes(0);
+      dateOrder.setSeconds(0);
+      dateOrder.setMilliseconds(0);
+      dateOrder = dateOrder.valueOf();
+    }
+    if (typeof dateNow === 'string' || Number.isInteger(dateNow)) {
+      dateNow = new Date(dateNow);
+      dateNow.setHours(0);
+      dateNow.setMinutes(0);
+      dateNow.setSeconds(0);
+      dateNow.setMilliseconds(0);
+      dateNow = dateNow.valueOf();
+    }
+
+    const msPerDay = 86400000;
+    return (dateOrder + days * msPerDay - dateNow) / msPerDay;
   },
 
   // Update formatChineseMedData
@@ -237,12 +261,16 @@ export const chineseMedProcessor = {
     return [...medications].sort((a, b) => b.dosage - a.dosage);
   },
 
-  getMedicationText(med, format, groupInfo) {
+  getMedicationText(med, {
+    copyFormat,
+    showEffectName = false,
+    doseFormat,
+  } = {}) {
     const nameText = `${med.name}`;
-    const dosageText = `${med.dailyDosage}g`;
-    const effectText = med.sosc_name && groupInfo.showEffectName ? ` - ${med.sosc_name}` : '';
+    const dosageText = `${doseFormat === 'perDose' ? med.perDosage : med.dailyDosage}g`;
+    const effectText = med.sosc_name && showEffectName ? ` - ${med.sosc_name}` : '';
 
-    switch (format) {
+    switch (copyFormat) {
       case 'nameWithDosageVertical':
       case 'nameWithDosageHorizontal':
         return `${nameText} ${dosageText}${effectText}`;
@@ -253,25 +281,30 @@ export const chineseMedProcessor = {
     }
   },
 
-  // Format Chinese medicine list for copying with different formats
-  formatChineseMedList(medications, format, groupInfo) {
-    if (format === 'none') {
+  // Format Chinese medicine group for copying with different formats
+  formatChineseMedList(group, {
+    copyFormat,
+    showDiagnosis = true,
+    showEffectName = true,
+    doseFormat,
+  } = {}) {
+    if (copyFormat === 'none') {
       return '';
     }
 
     // Format the header with date, hospital, days and diagnosis
-    let header = `${groupInfo.date} - ${groupInfo.hosp} ${groupInfo.days}天 ${groupInfo.freq}`;
-    if (groupInfo.showDiagnosis && groupInfo.icd_code && groupInfo.icd_name) {
-      header += ` [${groupInfo.icd_code} ${groupInfo.icd_name}]`;
+    let header = `${group.date} - ${group.hosp} ${group.days}天 ${group.freq}`;
+    if (showDiagnosis && group.icd_code && group.icd_name) {
+      header += ` [${group.icd_code} ${group.icd_name}]`;
     }
 
     // 先依照劑量降序排序藥品
-    const sortedMedications = this.sortMedicationsByDosage(medications);
+    const sortedMedications = this.sortMedicationsByDosage(group.medications);
 
-    const medicationTexts = sortedMedications.map(med => this.getMedicationText(med, format, groupInfo));
+    const medicationTexts = sortedMedications.map(med => this.getMedicationText(med, {copyFormat, showEffectName, doseFormat}));
 
     // Format the full output with header
-    if (format.includes('Horizontal')) {
+    if (copyFormat.includes('Horizontal')) {
       return `${header}\n${medicationTexts.join(', ')}`;
     } else {
       return `${header}\n${medicationTexts.join('\n')}`;

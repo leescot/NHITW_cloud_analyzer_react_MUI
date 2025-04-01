@@ -19,6 +19,7 @@ const ChineseMedicationSettings = () => {
   const [settings, setSettings] = useState({
     showDiagnosis: false,
     showEffectName: false,
+    doseFormat: 'perDay',
     copyFormat: 'nameWithDosageVertical'
   });
 
@@ -27,11 +28,13 @@ const ChineseMedicationSettings = () => {
     chrome.storage.sync.get({
       chineseMedShowDiagnosis: false,
       chineseMedShowEffectName: false,
+      chineseMedDoseFormat: 'perDay',
       chineseMedCopyFormat: 'nameWithDosageVertical'
     }, (items) => {
       setSettings({
         showDiagnosis: items.chineseMedShowDiagnosis,
         showEffectName: items.chineseMedShowEffectName,
+        doseFormat: items.chineseMedDoseFormat,
         copyFormat: items.chineseMedCopyFormat
       });
     });
@@ -67,6 +70,20 @@ const ChineseMedicationSettings = () => {
           }
           label="顯示效能名稱"
         />
+
+        <FormControl fullWidth sx={{ mt: 2 }}>
+          <InputLabel id="chinesemed-dose-format-label">劑量顯示格式</InputLabel>
+          <Select
+            labelId="chinesemed-dose-format-label"
+            id="chinesemed-dose-format"
+            value={settings.doseFormat}
+            label="中藥複製格式"
+            onChange={(e) => handleSettingChange('chineseMedDoseFormat', e.target.value, setSettings, 'doseFormat')}
+          >
+            <MenuItem value="perDay">每日劑量</MenuItem>
+            <MenuItem value="perDose">每次劑量</MenuItem>
+          </Select>
+        </FormControl>
 
         <FormControl fullWidth sx={{ mt: 2 }}>
           <InputLabel id="chinesemed-copy-format-label">中藥複製格式</InputLabel>

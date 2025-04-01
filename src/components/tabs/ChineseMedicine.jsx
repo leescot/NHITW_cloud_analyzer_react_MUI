@@ -24,26 +24,7 @@ const ChineseMedicine = ({
       return;
     }
 
-    // 取得藥品的天數
-    const days = medications && medications.length > 0 ? medications[0].days : "";
-
-    const groupInfo = {
-      date: group.date,
-      hosp: group.hosp,
-      days: days,
-      freq: group.freq,
-      icd_code: group.icd_code,
-      icd_name: group.icd_name,
-      visitType: group.visitType,
-      showDiagnosis: chineseMedSettings.showDiagnosis,
-      showEffectName: chineseMedSettings.showEffectName
-    };
-
-    const copyText = chineseMedProcessor.formatChineseMedList(
-      medications,
-      chineseMedSettings.copyFormat,
-      groupInfo
-    );
+    const copyText = chineseMedProcessor.formatChineseMedList(group, chineseMedSettings);
 
     navigator.clipboard.writeText(copyText)
       .then(() => {
@@ -69,6 +50,8 @@ const ChineseMedicine = ({
         </TypographySizeWrapper>
       ) : (
         groupedChineseMeds.map((group, index) => {
+          const drug_left = chineseMedProcessor.calculateRemainingDays(group.days, group.date);
+
           // 排序藥品
           const sortedMedications = chineseMedProcessor.sortMedicationsByDosage(group.medications);
 
@@ -99,6 +82,20 @@ const ChineseMedicine = ({
                 >
                   {group.days}天 {group.freq}
                 </TypographySizeWrapper>
+
+                {drug_left > 0 && (
+                  <TypographySizeWrapper
+                    component="span"
+                    textSizeType="note"
+                    generalDisplaySettings={generalDisplaySettings}
+                    sx={{
+                      color: "secondary.light",
+                      ml: 0.5
+                    }}
+                  >
+                    (餘{drug_left}天)
+                  </TypographySizeWrapper>
+                )}
 
                 {chineseMedSettings.showDiagnosis && group.icd_code && (
                   <TypographySizeWrapper
@@ -149,7 +146,7 @@ const ChineseMedicine = ({
                     generalDisplaySettings={generalDisplaySettings}
                     sx={{ color: "text.secondary" }}
                   >
-                    {med.dailyDosage}g
+                    {chineseMedSettings.doseFormat === 'perDose' ? med.perDosage : med.dailyDosage}g
                   </TypographySizeWrapper>
 
                   {chineseMedSettings.showEffectName && med.sosc_name && (

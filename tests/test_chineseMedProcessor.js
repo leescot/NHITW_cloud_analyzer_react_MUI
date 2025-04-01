@@ -172,7 +172,7 @@ describe('utils/chineseMedProcessor', function () {
               "type": "濃縮顆粒劑",
               "isMulti": false,
               "sosc_name": "",
-              "perDosage": "0.3",
+              "perDosage": "0.33",
               "dailyDosage": "1"
             }
           ]
@@ -196,7 +196,7 @@ describe('utils/chineseMedProcessor', function () {
               "type": "濃縮顆粒劑",
               "isMulti": true,
               "sosc_name": "袪風之劑",
-              "perDosage": "3.3",
+              "perDosage": "3.33",
               "dailyDosage": "10"
             },
             {
@@ -220,7 +220,7 @@ describe('utils/chineseMedProcessor', function () {
               "type": "濃縮顆粒劑",
               "isMulti": false,
               "sosc_name": "",
-              "perDosage": "0.3",
+              "perDosage": "0.33",
               "dailyDosage": "1"
             }
           ]
@@ -339,7 +339,7 @@ describe('utils/chineseMedProcessor', function () {
               "type": "濃縮散劑",
               "isMulti": true,
               "sosc_name": "袪痰之劑",
-              "perDosage": "1.7",
+              "perDosage": "1.67",
               "dailyDosage": "5"
             },
             {
@@ -351,7 +351,7 @@ describe('utils/chineseMedProcessor', function () {
               "type": "濃縮顆粒劑",
               "isMulti": false,
               "sosc_name": "",
-              "perDosage": "0.7",
+              "perDosage": "0.67",
               "dailyDosage": "2"
             }
           ]
@@ -375,7 +375,7 @@ describe('utils/chineseMedProcessor', function () {
               "type": "濃縮散劑",
               "isMulti": true,
               "sosc_name": "和解之劑",
-              "perDosage": "1.7",
+              "perDosage": "1.75",
               "dailyDosage": "3.5"
             },
             {
@@ -387,7 +387,7 @@ describe('utils/chineseMedProcessor', function () {
               "type": "濃縮散劑",
               "isMulti": false,
               "sosc_name": "",
-              "perDosage": "0.2",
+              "perDosage": "0.25",
               "dailyDosage": "0.5"
             }
           ]
@@ -509,7 +509,7 @@ describe('utils/chineseMedProcessor', function () {
               "type": "濃縮顆粒劑",
               "isMulti": false,
               "sosc_name": "",
-              "perDosage": "0.3",
+              "perDosage": "0.33",
               "dailyDosage": "1"
             }
           ]
@@ -533,7 +533,7 @@ describe('utils/chineseMedProcessor', function () {
               "type": "濃縮顆粒劑",
               "isMulti": true,
               "sosc_name": "袪風之劑",
-              "perDosage": "3.3",
+              "perDosage": "3.33",
               "dailyDosage": "10"
             }
           ]
@@ -655,7 +655,7 @@ describe('utils/chineseMedProcessor', function () {
               "type": "濃縮顆粒劑",
               "isMulti": false,
               "sosc_name": "",
-              "perDosage": "0.3",
+              "perDosage": "0.33",
               "dailyDosage": "1"
             }
           ]
@@ -679,7 +679,7 @@ describe('utils/chineseMedProcessor', function () {
               "type": "濃縮顆粒劑",
               "isMulti": true,
               "sosc_name": "袪風之劑",
-              "perDosage": "3.3",
+              "perDosage": "3.33",
               "dailyDosage": "10"
             }
           ]
@@ -825,7 +825,7 @@ describe('utils/chineseMedProcessor', function () {
               "type": "濃縮顆粒劑",
               "isMulti": true,
               "sosc_name": "袪風之劑",
-              "perDosage": "3.3",
+              "perDosage": "3.33",
               "dailyDosage": "10"
             }
           ]
@@ -986,7 +986,7 @@ describe('utils/chineseMedProcessor', function () {
               "type": "濃縮散劑",
               "isMulti": true,
               "sosc_name": "和解之劑",
-              "perDosage": "1.7",
+              "perDosage": "1.75",
               "dailyDosage": "3.5"
             },
             {
@@ -998,7 +998,7 @@ describe('utils/chineseMedProcessor', function () {
               "type": "濃縮散劑",
               "isMulti": false,
               "sosc_name": "",
-              "perDosage": "0.2",
+              "perDosage": "0.25",
               "dailyDosage": "0.5"
             }
           ]
@@ -1034,7 +1034,7 @@ describe('utils/chineseMedProcessor', function () {
               "type": "濃縮顆粒劑",
               "isMulti": false,
               "sosc_name": "",
-              "perDosage": "0",
+              "perDosage": "0.1",
               "dailyDosage": "0.3"
             }
           ]
@@ -1058,7 +1058,7 @@ describe('utils/chineseMedProcessor', function () {
               "type": "濃縮散劑",
               "isMulti": true,
               "sosc_name": "袪痰之劑",
-              "perDosage": "1.7",
+              "perDosage": "1.67",
               "dailyDosage": "5"
             },
             {
@@ -1070,7 +1070,7 @@ describe('utils/chineseMedProcessor', function () {
               "type": "濃縮顆粒劑",
               "isMulti": false,
               "sosc_name": "",
-              "perDosage": "0.7",
+              "perDosage": "0.67",
               "dailyDosage": "2"
             }
           ]
@@ -1243,7 +1243,7 @@ describe('utils/chineseMedProcessor', function () {
               "type": "濃縮散劑",
               "isMulti": false,
               "sosc_name": "",
-              "perDosage": "0.2",
+              "perDosage": "0.25",
               "dailyDosage": "0.5"
             }
           ]
@@ -1315,7 +1315,7 @@ describe('utils/chineseMedProcessor', function () {
               "type": "濃縮顆粒劑",
               "isMulti": false,
               "sosc_name": "",
-              "perDosage": "0.3",
+              "perDosage": "0.33",
               "dailyDosage": "1"
             }
           ]
@@ -1432,7 +1432,7 @@ describe('utils/chineseMedProcessor', function () {
               "type": "濃縮顆粒劑",
               "isMulti": true,
               "sosc_name": "袪風之劑",
-              "perDosage": "3.3",
+              "perDosage": "3.33",
               "dailyDosage": "10"
             },
             {
@@ -1563,7 +1563,7 @@ describe('utils/chineseMedProcessor', function () {
               "type": "濃縮顆粒劑",
               "isMulti": true,
               "sosc_name": "袪風之劑",
-              "perDosage": "3.3",
+              "perDosage": "3.33",
               "dailyDosage": "10"
             },
             {
@@ -1694,7 +1694,7 @@ describe('utils/chineseMedProcessor', function () {
               "type": "濃縮顆粒劑",
               "isMulti": true,
               "sosc_name": "袪風之劑",
-              "perDosage": "3.3",
+              "perDosage": "3.33",
               "dailyDosage": "10"
             },
             {
@@ -1809,10 +1809,10 @@ describe('utils/chineseMedProcessor', function () {
           "icd_code": "I679",
           "icd_name": "診斷欠明之腦血管疾病",
           "hosp": "測試院所",
+          "visitType": "門診",
           "days": 7,
           "dosage": 80.5,
           "freq": "TIDPC PO",
-          "visitType": "門診",
           "medications": [
             {
               "name": "小續命湯",
@@ -1823,7 +1823,7 @@ describe('utils/chineseMedProcessor', function () {
               "type": "濃縮顆粒劑",
               "isMulti": true,
               "sosc_name": "袪風之劑",
-              "perDosage": "3.3",
+              "perDosage": "3.33",
               "dailyDosage": "10"
             },
             {
@@ -2084,7 +2084,7 @@ describe('utils/chineseMedProcessor', function () {
       assert.strictEqual(chineseMedProcessor.calculateDailyDosage(2.1, 7), "0.3");
     });
 
-    it('should round to 1st decimal', function () {
+    it('should round to nearest 0.1x', function () {
       assert.strictEqual(chineseMedProcessor.calculateDailyDosage(2.2, 7), "0.3");
       assert.strictEqual(chineseMedProcessor.calculateDailyDosage(2.6, 7), "0.4");
     });
@@ -2145,13 +2145,17 @@ describe('utils/chineseMedProcessor', function () {
       assert.strictEqual(chineseMedProcessor.calculatePerDosage(21, "TIDP", 7), "1");
       assert.strictEqual(chineseMedProcessor.calculatePerDosage(28, "QIDP", 7), "1");
 
+      assert.strictEqual(chineseMedProcessor.calculatePerDosage(14, "DAILY", 7), "2");
+      assert.strictEqual(chineseMedProcessor.calculatePerDosage(14, "QAM", 7), "2");
+      assert.strictEqual(chineseMedProcessor.calculatePerDosage(14, "QPM", 7), "2");
+      assert.strictEqual(chineseMedProcessor.calculatePerDosage(14, "QL", 7), "2");
+      assert.strictEqual(chineseMedProcessor.calculatePerDosage(14, "QN", 7), "2");
+
       assert.strictEqual(chineseMedProcessor.calculatePerDosage(84, "Q2H", 7), "1");
       assert.strictEqual(chineseMedProcessor.calculatePerDosage(42, "Q4H", 7), "1");
       assert.strictEqual(chineseMedProcessor.calculatePerDosage(28, "Q6H", 7), "1");
       assert.strictEqual(chineseMedProcessor.calculatePerDosage(21, "Q8H", 7), "1");
       assert.strictEqual(chineseMedProcessor.calculatePerDosage(14, "Q12H", 7), "1");
-
-      assert.strictEqual(chineseMedProcessor.calculatePerDosage(14, "DAILY", 7), "2");
     });
 
     it('should correctly handle a frequency lower than daily', function () {
@@ -2161,19 +2165,49 @@ describe('utils/chineseMedProcessor', function () {
       assert.strictEqual(chineseMedProcessor.calculatePerDosage(24, "TIW", 28), "2");
     });
 
-    it('should round to 1st decimal', function () {
-      assert.strictEqual(chineseMedProcessor.calculatePerDosage(24, "TID", 7), "1.1");
+    it('should round to nearest 0.01x', function () {
+      assert.strictEqual(chineseMedProcessor.calculatePerDosage(0.6, "TID", 2), "0.1");
+      assert.strictEqual(chineseMedProcessor.calculatePerDosage(13.5, "TID", 3), "1.5");
+      assert.strictEqual(chineseMedProcessor.calculatePerDosage(24, "TID", 7), "1.14");
       assert.strictEqual(chineseMedProcessor.calculatePerDosage(40, "TID", 7), "1.9");
 
       assert.strictEqual(chineseMedProcessor.calculatePerDosage(10, "QOD", 7), "2.5");
-      assert.strictEqual(chineseMedProcessor.calculatePerDosage(10, "BIW", 10), "3.3");
+      assert.strictEqual(chineseMedProcessor.calculatePerDosage(10, "BIW", 10), "3.33");
     });
 
     it('should return "SPECIAL" for special dosage', function () {
       assert.strictEqual(chineseMedProcessor.calculatePerDosage(14, "ST", 7), "SPECIAL");
       assert.strictEqual(chineseMedProcessor.calculatePerDosage(14, "STAT", 7), "SPECIAL");
+      assert.strictEqual(chineseMedProcessor.calculatePerDosage(14, "ONCE", 7), "SPECIAL");
+      assert.strictEqual(chineseMedProcessor.calculatePerDosage(14, "ASORDER", 7), "SPECIAL");
+
+      // PRN-like
       assert.strictEqual(chineseMedProcessor.calculatePerDosage(14, "PRN", 7), "SPECIAL");
+      assert.strictEqual(chineseMedProcessor.calculatePerDosage(14, "PRNB", 7), "SPECIAL");
+
+      assert.strictEqual(chineseMedProcessor.calculatePerDosage(14, "PRNQD", 7), "SPECIAL");
+      assert.strictEqual(chineseMedProcessor.calculatePerDosage(14, "PRNBID", 7), "SPECIAL");
+      assert.strictEqual(chineseMedProcessor.calculatePerDosage(14, "PRNTID", 7), "SPECIAL");
+      assert.strictEqual(chineseMedProcessor.calculatePerDosage(14, "PRNQ6H", 7), "SPECIAL");
+
+      assert.strictEqual(chineseMedProcessor.calculatePerDosage(14, "PRN QD", 7), "SPECIAL");
+      assert.strictEqual(chineseMedProcessor.calculatePerDosage(14, "PRN BID", 7), "SPECIAL");
+      assert.strictEqual(chineseMedProcessor.calculatePerDosage(14, "PRN TID", 7), "SPECIAL");
+      assert.strictEqual(chineseMedProcessor.calculatePerDosage(14, "PRN Q6H", 7), "SPECIAL");
+
       assert.strictEqual(chineseMedProcessor.calculatePerDosage(14, "需要時", 7), "SPECIAL");
+      assert.strictEqual(chineseMedProcessor.calculatePerDosage(14, "需要時BID", 7), "SPECIAL");
+    });
+
+    it('should ignore case', function () {
+      assert.strictEqual(chineseMedProcessor.calculatePerDosage(14, "qd", 7), "2");
+      assert.strictEqual(chineseMedProcessor.calculatePerDosage(28, "bid", 7), "2");
+      assert.strictEqual(chineseMedProcessor.calculatePerDosage(42, "tid", 7), "2");
+      assert.strictEqual(chineseMedProcessor.calculatePerDosage(56, "qid", 7), "2");
+    });
+
+    it('should return "SPECIAL" for undefined dosage', function () {
+      assert.strictEqual(chineseMedProcessor.calculatePerDosage(14, "UNKNOWN", 7), "SPECIAL");
     });
 
     it('should return "" for missing dosage, frequency, or days', function () {
@@ -2183,17 +2217,78 @@ describe('utils/chineseMedProcessor', function () {
     });
   });
 
+  describe('.calculateRemainingDays', function () {
+    it('should calculate the days from midnight to midnight', function () {
+      assert.strictEqual(chineseMedProcessor.calculateRemainingDays(2, "2025-03-10T00:00:00+0800", "2025-03-10T22:00:00+0800"), 2);
+
+      assert.strictEqual(chineseMedProcessor.calculateRemainingDays(2, "2025-03-10T00:00:00+0800", "2025-03-11T00:00:00+0800"), 1);
+      assert.strictEqual(chineseMedProcessor.calculateRemainingDays(2, "2025-03-10T10:00:00+0800", "2025-03-11T00:00:00+0800"), 1);
+      assert.strictEqual(chineseMedProcessor.calculateRemainingDays(2, "2025-03-10T10:00:00+0800", "2025-03-11T23:00:00+0800"), 1);
+
+      assert.strictEqual(chineseMedProcessor.calculateRemainingDays(2, "2025-03-10T10:00:00+0800", "2025-03-12T00:00:00+0800"), 0);
+      assert.strictEqual(chineseMedProcessor.calculateRemainingDays(2, "2025-03-10T10:00:00+0800", "2025-03-12T20:00:00+0800"), 0);
+    });
+  });
+
   describe.skip('.formatChineseMedData');
 
   describe.skip('.sortGroupedData');
 
-  describe.skip('.sortMedicationsByDosage');
+  describe('.sortMedicationsByDosage', function () {
+    it('should sort items by dosage', function () {
+      let input;
+      const expected = [
+        {
+          "name": "小續命湯",
+          "category": "袪風之劑",
+          "dosage": 63,
+          "frequency": "TIDPC PO",
+          "days": 7,
+          "type": "濃縮顆粒劑",
+          "isMulti": true,
+          "sosc_name": "袪風之劑",
+          "perDosage": "3",
+          "dailyDosage": "9"
+        },
+        {
+          "name": "杜仲",
+          "category": null,
+          "dosage": 14,
+          "frequency": "TIDPC PO",
+          "days": 7,
+          "type": "濃縮顆粒劑",
+          "isMulti": false,
+          "sosc_name": "",
+          "perDosage": "0.7",
+          "dailyDosage": "2"
+        },
+        {
+          "name": "延胡索",
+          "category": null,
+          "dosage": 7,
+          "frequency": "TIDPC PO",
+          "days": 7,
+          "type": "濃縮顆粒劑",
+          "isMulti": false,
+          "sosc_name": "",
+          "perDosage": "0.3",
+          "dailyDosage": "1"
+        },
+        {
+          "name": "川芎",
+          "category": null,
+          "dosage": 7,
+          "frequency": "TIDPC PO",
+          "days": 7,
+          "type": "濃縮顆粒劑",
+          "isMulti": false,
+          "sosc_name": "",
+          "perDosage": "0.3",
+          "dailyDosage": "1"
+        }
+      ];
 
-  describe.skip('.getMedicationText');
-
-  describe('.formatChineseMedList',  function () {
-    it('should honor `format`, `showDiagnosis`, `showEffectName`', function () {
-      var medications = [
+      input = [
         {
           "name": "小續命湯",
           "category": "袪風之劑",
@@ -2217,34 +2312,350 @@ describe('utils/chineseMedProcessor', function () {
           "sosc_name": "",
           "perDosage": "0.3",
           "dailyDosage": "1"
+        },
+        {
+          "name": "川芎",
+          "category": null,
+          "dosage": 7,
+          "frequency": "TIDPC PO",
+          "days": 7,
+          "type": "濃縮顆粒劑",
+          "isMulti": false,
+          "sosc_name": "",
+          "perDosage": "0.3",
+          "dailyDosage": "1"
+        },
+        {
+          "name": "杜仲",
+          "category": null,
+          "dosage": 14,
+          "frequency": "TIDPC PO",
+          "days": 7,
+          "type": "濃縮顆粒劑",
+          "isMulti": false,
+          "sosc_name": "",
+          "perDosage": "0.7",
+          "dailyDosage": "2"
         }
       ];
-      var groupInfo = {
+      assert.deepEqual(chineseMedProcessor.sortMedicationsByDosage(input), expected);
+
+      input = [
+        {
+          "name": "杜仲",
+          "category": null,
+          "dosage": 14,
+          "frequency": "TIDPC PO",
+          "days": 7,
+          "type": "濃縮顆粒劑",
+          "isMulti": false,
+          "sosc_name": "",
+          "perDosage": "0.7",
+          "dailyDosage": "2"
+        },
+        {
+          "name": "延胡索",
+          "category": null,
+          "dosage": 7,
+          "frequency": "TIDPC PO",
+          "days": 7,
+          "type": "濃縮顆粒劑",
+          "isMulti": false,
+          "sosc_name": "",
+          "perDosage": "0.3",
+          "dailyDosage": "1"
+        },
+        {
+          "name": "小續命湯",
+          "category": "袪風之劑",
+          "dosage": 63,
+          "frequency": "TIDPC PO",
+          "days": 7,
+          "type": "濃縮顆粒劑",
+          "isMulti": true,
+          "sosc_name": "袪風之劑",
+          "perDosage": "3",
+          "dailyDosage": "9"
+        },
+        {
+          "name": "川芎",
+          "category": null,
+          "dosage": 7,
+          "frequency": "TIDPC PO",
+          "days": 7,
+          "type": "濃縮顆粒劑",
+          "isMulti": false,
+          "sosc_name": "",
+          "perDosage": "0.3",
+          "dailyDosage": "1"
+        }
+      ];
+      assert.deepEqual(chineseMedProcessor.sortMedicationsByDosage(input), expected);
+    });
+
+    it('should not modify the input array', function () {
+      const input = [
+        {
+          "name": "杜仲",
+          "category": null,
+          "dosage": 14,
+          "frequency": "TIDPC PO",
+          "days": 7,
+          "type": "濃縮顆粒劑",
+          "isMulti": false,
+          "sosc_name": "",
+          "perDosage": "0.7",
+          "dailyDosage": "2"
+        },
+        {
+          "name": "延胡索",
+          "category": null,
+          "dosage": 7,
+          "frequency": "TIDPC PO",
+          "days": 7,
+          "type": "濃縮顆粒劑",
+          "isMulti": false,
+          "sosc_name": "",
+          "perDosage": "0.3",
+          "dailyDosage": "1"
+        },
+        {
+          "name": "小續命湯",
+          "category": "袪風之劑",
+          "dosage": 63,
+          "frequency": "TIDPC PO",
+          "days": 7,
+          "type": "濃縮顆粒劑",
+          "isMulti": true,
+          "sosc_name": "袪風之劑",
+          "perDosage": "3",
+          "dailyDosage": "9"
+        },
+        {
+          "name": "川芎",
+          "category": null,
+          "dosage": 7,
+          "frequency": "TIDPC PO",
+          "days": 7,
+          "type": "濃縮顆粒劑",
+          "isMulti": false,
+          "sosc_name": "",
+          "perDosage": "0.3",
+          "dailyDosage": "1"
+        }
+      ];
+      const clone = JSON.parse(JSON.stringify(input));
+      const result = chineseMedProcessor.sortMedicationsByDosage(input);
+      assert.notDeepEqual(result, clone);
+      assert.notStrictEqual(result, input);
+      assert.deepEqual(input, clone);
+    });
+  });
+
+  describe('.getMedicationText', function () {
+    it('should honor specified `copyFormat`', function () {
+      const med = {
+        "name": "小續命湯",
+        "category": "袪風之劑",
+        "dosage": 63,
+        "frequency": "TIDPC PO",
+        "days": 7,
+        "type": "濃縮顆粒劑",
+        "isMulti": true,
+        "sosc_name": "袪風之劑",
+        "perDosage": "3",
+        "dailyDosage": "9"
+      };
+
+      assert.strictEqual(
+        chineseMedProcessor.getMedicationText(med, {copyFormat: 'nameWithDosageVertical'}),
+        '小續命湯 9g',
+      );
+
+      assert.strictEqual(
+        chineseMedProcessor.getMedicationText(med, {copyFormat: 'nameWithDosageHorizontal'}),
+        '小續命湯 9g',
+      );
+
+      assert.strictEqual(
+        chineseMedProcessor.getMedicationText(med, {copyFormat: 'nameVertical'}),
+        '小續命湯',
+      );
+
+      assert.strictEqual(
+        chineseMedProcessor.getMedicationText(med, {copyFormat: 'nameHorizontal'}),
+        '小續命湯',
+      );
+
+      // default for undefined format
+      assert.strictEqual(
+        chineseMedProcessor.getMedicationText(med, {copyFormat: 'unknown'}),
+        '小續命湯',
+      );
+    });
+
+    it('should honor specified `showEffectName`', function () {
+      const med = {
+        "name": "小續命湯",
+        "category": "袪風之劑",
+        "dosage": 63,
+        "frequency": "TIDPC PO",
+        "days": 7,
+        "type": "濃縮顆粒劑",
+        "isMulti": true,
+        "sosc_name": "袪風之劑",
+        "perDosage": "3",
+        "dailyDosage": "9"
+      };
+
+      assert.strictEqual(
+        chineseMedProcessor.getMedicationText(med, {copyFormat: 'nameWithDosageVertical'}),
+        '小續命湯 9g',
+      );
+      assert.strictEqual(
+        chineseMedProcessor.getMedicationText(med, {copyFormat: 'nameWithDosageVertical', showEffectName: false}),
+        '小續命湯 9g',
+      );
+      assert.strictEqual(
+        chineseMedProcessor.getMedicationText(med, {copyFormat: 'nameWithDosageVertical', showEffectName: true}),
+        '小續命湯 9g - 袪風之劑',
+      );
+
+      assert.strictEqual(
+        chineseMedProcessor.getMedicationText(med, {copyFormat: 'nameWithDosageHorizontal'}),
+        '小續命湯 9g',
+      );
+      assert.strictEqual(
+        chineseMedProcessor.getMedicationText(med, {copyFormat: 'nameWithDosageHorizontal', showEffectName: false}),
+        '小續命湯 9g',
+      );
+      assert.strictEqual(
+        chineseMedProcessor.getMedicationText(med, {copyFormat: 'nameWithDosageHorizontal', showEffectName: true}),
+        '小續命湯 9g - 袪風之劑',
+      );
+
+      assert.strictEqual(
+        chineseMedProcessor.getMedicationText(med, {copyFormat: 'nameVertical'}),
+        '小續命湯',
+      );
+      assert.strictEqual(
+        chineseMedProcessor.getMedicationText(med, {copyFormat: 'nameVertical', showEffectName: false}),
+        '小續命湯',
+      );
+      assert.strictEqual(
+        chineseMedProcessor.getMedicationText(med, {copyFormat: 'nameVertical', showEffectName: true}),
+        '小續命湯',
+      );
+
+      assert.strictEqual(
+        chineseMedProcessor.getMedicationText(med, {copyFormat: 'nameHorizontal'}),
+        '小續命湯',
+      );
+      assert.strictEqual(
+        chineseMedProcessor.getMedicationText(med, {copyFormat: 'nameHorizontal', showEffectName: false}),
+        '小續命湯',
+      );
+      assert.strictEqual(
+        chineseMedProcessor.getMedicationText(med, {copyFormat: 'nameHorizontal', showEffectName: true}),
+        '小續命湯',
+      );
+    });
+
+    it('should honor specified `doseFormat`', function () {
+      const med = {
+        "name": "小續命湯",
+        "category": "袪風之劑",
+        "dosage": 63,
+        "frequency": "TIDPC PO",
+        "days": 7,
+        "type": "濃縮顆粒劑",
+        "isMulti": true,
+        "sosc_name": "袪風之劑",
+        "perDosage": "3",
+        "dailyDosage": "9"
+      };
+
+      assert.strictEqual(
+        chineseMedProcessor.getMedicationText(med, {copyFormat: 'nameWithDosageVertical'}),
+        '小續命湯 9g',
+      );
+      assert.strictEqual(
+        chineseMedProcessor.getMedicationText(med, {copyFormat: 'nameWithDosageVertical', doseFormat: 'perDay'}),
+        '小續命湯 9g',
+      );
+      assert.strictEqual(
+        chineseMedProcessor.getMedicationText(med, {copyFormat: 'nameWithDosageVertical', doseFormat: 'perDose'}),
+        '小續命湯 3g',
+      );
+
+      assert.strictEqual(
+        chineseMedProcessor.getMedicationText(med, {copyFormat: 'nameWithDosageHorizontal'}),
+        '小續命湯 9g',
+      );
+      assert.strictEqual(
+        chineseMedProcessor.getMedicationText(med, {copyFormat: 'nameWithDosageHorizontal', doseFormat: 'perDay'}),
+        '小續命湯 9g',
+      );
+      assert.strictEqual(
+        chineseMedProcessor.getMedicationText(med, {copyFormat: 'nameWithDosageHorizontal', doseFormat: 'perDose'}),
+        '小續命湯 3g',
+      );
+    });
+  });
+
+  describe('.formatChineseMedList', function () {
+    it('should honor `copyFormat`, `showDiagnosis`, `showEffectName`', function () {
+      const group = {
         "date": "2025/03/26",
         "hosp": "院所甲",
         "days": 7,
+        "dosage": 70,
         "freq": "TIDPC PO",
         "icd_code": "I679",
         "icd_name": "診斷欠明之腦血管疾病",
         "visitType": "門診",
-        "showDiagnosis": true,
-        "showEffectName": true
+        "medications": [
+          {
+            "name": "小續命湯",
+            "category": "袪風之劑",
+            "dosage": 63,
+            "frequency": "TIDPC PO",
+            "days": 7,
+            "type": "濃縮顆粒劑",
+            "isMulti": true,
+            "sosc_name": "袪風之劑",
+            "perDosage": "3",
+            "dailyDosage": "9"
+          },
+          {
+            "name": "延胡索",
+            "category": null,
+            "dosage": 7,
+            "frequency": "TIDPC PO",
+            "days": 7,
+            "type": "濃縮顆粒劑",
+            "isMulti": false,
+            "sosc_name": "",
+            "perDosage": "0.3",
+            "dailyDosage": "1"
+          }
+        ]
       };
 
       assert.deepEqual(
-        chineseMedProcessor.formatChineseMedList(medications, 'none', groupInfo),
+        chineseMedProcessor.formatChineseMedList(group, {copyFormat: 'none'}),
         '',
       );
 
       assert.deepEqual(
-        chineseMedProcessor.formatChineseMedList(medications, 'nameVertical', groupInfo),
+        chineseMedProcessor.formatChineseMedList(group, {copyFormat: 'nameVertical'}),
         `\
 2025/03/26 - 院所甲 7天 TIDPC PO [I679 診斷欠明之腦血管疾病]
 小續命湯
 延胡索`,
       );
       assert.deepEqual(
-        chineseMedProcessor.formatChineseMedList(medications, 'nameVertical', {...groupInfo, showDiagnosis: false}),
+        chineseMedProcessor.formatChineseMedList(group, {copyFormat: 'nameVertical', showDiagnosis: false}),
         `\
 2025/03/26 - 院所甲 7天 TIDPC PO
 小續命湯
@@ -2252,41 +2663,41 @@ describe('utils/chineseMedProcessor', function () {
       );
 
       assert.deepEqual(
-        chineseMedProcessor.formatChineseMedList(medications, 'nameHorizontal', groupInfo),
+        chineseMedProcessor.formatChineseMedList(group, {copyFormat: 'nameHorizontal'}),
         `\
 2025/03/26 - 院所甲 7天 TIDPC PO [I679 診斷欠明之腦血管疾病]
 小續命湯, 延胡索`,
       );
       assert.deepEqual(
-        chineseMedProcessor.formatChineseMedList(medications, 'nameHorizontal', {...groupInfo, showDiagnosis: false}),
+        chineseMedProcessor.formatChineseMedList(group, {copyFormat: 'nameHorizontal', showDiagnosis: false}),
         `\
 2025/03/26 - 院所甲 7天 TIDPC PO
 小續命湯, 延胡索`,
       );
 
       assert.deepEqual(
-        chineseMedProcessor.formatChineseMedList(medications, 'nameWithDosageVertical', groupInfo),
+        chineseMedProcessor.formatChineseMedList(group, {copyFormat: 'nameWithDosageVertical'}),
         `\
 2025/03/26 - 院所甲 7天 TIDPC PO [I679 診斷欠明之腦血管疾病]
 小續命湯 9g - 袪風之劑
 延胡索 1g`,
       );
       assert.deepEqual(
-        chineseMedProcessor.formatChineseMedList(medications, 'nameWithDosageVertical', {...groupInfo, showDiagnosis: false}),
+        chineseMedProcessor.formatChineseMedList(group, {copyFormat: 'nameWithDosageVertical', showDiagnosis: false}),
         `\
 2025/03/26 - 院所甲 7天 TIDPC PO
 小續命湯 9g - 袪風之劑
 延胡索 1g`,
       );
       assert.deepEqual(
-        chineseMedProcessor.formatChineseMedList(medications, 'nameWithDosageVertical', {...groupInfo, showEffectName: false}),
+        chineseMedProcessor.formatChineseMedList(group, {copyFormat: 'nameWithDosageVertical', showEffectName: false}),
         `\
 2025/03/26 - 院所甲 7天 TIDPC PO [I679 診斷欠明之腦血管疾病]
 小續命湯 9g
 延胡索 1g`,
       );
       assert.deepEqual(
-        chineseMedProcessor.formatChineseMedList(medications, 'nameWithDosageVertical', {...groupInfo, showDiagnosis: false, showEffectName: false}),
+        chineseMedProcessor.formatChineseMedList(group, {copyFormat: 'nameWithDosageVertical', showDiagnosis: false, showEffectName: false}),
         `\
 2025/03/26 - 院所甲 7天 TIDPC PO
 小續命湯 9g
@@ -2294,25 +2705,25 @@ describe('utils/chineseMedProcessor', function () {
       );
 
       assert.deepEqual(
-        chineseMedProcessor.formatChineseMedList(medications, 'nameWithDosageHorizontal', groupInfo),
+        chineseMedProcessor.formatChineseMedList(group, {copyFormat: 'nameWithDosageHorizontal'}),
         `\
 2025/03/26 - 院所甲 7天 TIDPC PO [I679 診斷欠明之腦血管疾病]
 小續命湯 9g - 袪風之劑, 延胡索 1g`,
       );
       assert.deepEqual(
-        chineseMedProcessor.formatChineseMedList(medications, 'nameWithDosageHorizontal', {...groupInfo, showDiagnosis: false}),
+        chineseMedProcessor.formatChineseMedList(group, {copyFormat: 'nameWithDosageHorizontal', showDiagnosis: false}),
         `\
 2025/03/26 - 院所甲 7天 TIDPC PO
 小續命湯 9g - 袪風之劑, 延胡索 1g`,
       );
       assert.deepEqual(
-        chineseMedProcessor.formatChineseMedList(medications, 'nameWithDosageHorizontal', {...groupInfo, showEffectName: false}),
+        chineseMedProcessor.formatChineseMedList(group, {copyFormat: 'nameWithDosageHorizontal', showEffectName: false}),
         `\
 2025/03/26 - 院所甲 7天 TIDPC PO [I679 診斷欠明之腦血管疾病]
 小續命湯 9g, 延胡索 1g`,
       );
       assert.deepEqual(
-        chineseMedProcessor.formatChineseMedList(medications, 'nameWithDosageHorizontal', {...groupInfo, showDiagnosis: false, showEffectName: false}),
+        chineseMedProcessor.formatChineseMedList(group, {copyFormat: 'nameWithDosageHorizontal', showDiagnosis: false, showEffectName: false}),
         `\
 2025/03/26 - 院所甲 7天 TIDPC PO
 小續命湯 9g, 延胡索 1g`,
@@ -2320,7 +2731,7 @@ describe('utils/chineseMedProcessor', function () {
 
       // treat unknown as nameVertical
       assert.deepEqual(
-        chineseMedProcessor.formatChineseMedList(medications, 'unknown', groupInfo),
+        chineseMedProcessor.formatChineseMedList(group, {copyFormat: 'unknown'}),
         `\
 2025/03/26 - 院所甲 7天 TIDPC PO [I679 診斷欠明之腦血管疾病]
 小續命湯
@@ -2328,7 +2739,7 @@ describe('utils/chineseMedProcessor', function () {
       );
 
       assert.deepEqual(
-        chineseMedProcessor.formatChineseMedList(medications, 'unknown', {...groupInfo, showDiagnosis: false}),
+        chineseMedProcessor.formatChineseMedList(group, {copyFormat: 'unknown', showDiagnosis: false}),
         `\
 2025/03/26 - 院所甲 7天 TIDPC PO
 小續命湯

@@ -1889,6 +1889,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     const isChineseMedSetting = [
       "chineseMedShowDiagnosis",
       "chineseMedShowEffectName",
+      "chineseMedDoseFormat",
       "chineseMedCopyFormat",
     ].includes(message.setting);
 
