@@ -123,10 +123,15 @@ const MedicationSettings = () => {
 
   // 查找组的颜色
   const getGroupColor = (groupName) => {
-    if (settings.atc5ColorGroups.red.includes(groupName)) return "red";
-    if (settings.atc5ColorGroups.orange.includes(groupName)) return "orange";
-    if (settings.atc5ColorGroups.green.includes(groupName)) return "green";
-    return "none";
+    // # zh-TW: 使用 Map 代替多個 if-else 檢查，提高可讀性和效率
+    const colorMap = new Map([
+      [settings.atc5ColorGroups.red.includes(groupName), "red"],
+      [settings.atc5ColorGroups.orange.includes(groupName), "orange"],
+      [settings.atc5ColorGroups.green.includes(groupName), "green"]
+    ]);
+    
+    // 找出第一個符合條件的顏色，或返回 "none"
+    return colorMap.get(true) || "none";
   };
 
   // ATC5 分组管理函数
@@ -250,16 +255,14 @@ const MedicationSettings = () => {
   const formatCodesForDisplay = (codes) => {
     if (codes.length === 0) return null;
 
-    // 为两列布局创建代码对
+    // # zh-TW: 為兩列佈局創建代碼對
     const rows = [];
     for (let i = 0; i < codes.length; i += 2) {
-      if (i + 1 < codes.length) {
-        // 如果我们有一对
-        rows.push([codes[i], codes[i + 1]]);
-      } else {
-        // 如果最后有奇数
-        rows.push([codes[i]]);
-      }
+      // # zh-TW: 使用條件運算符替代 if-else 邏輯，更簡潔
+      const pair = i + 1 < codes.length 
+        ? [codes[i], codes[i + 1]]  // 如果有一對
+        : [codes[i]];               // 如果最後有奇數
+      rows.push(pair);
     }
 
     return (
@@ -288,17 +291,19 @@ const MedicationSettings = () => {
 
   // 根据组的颜色获取显示芯片
   const getColorChip = (groupName) => {
-    const colorMap = {
-      red: { color: "error", label: "紅" },
-      orange: { color: "warning", label: "橘" },
-      green: { color: "success", label: "綠" },
-      none: { color: "default", label: "無" }
-    };
+    // # zh-TW: 使用 Map 代替物件映射，保持一致性並提高查詢效率
+    const colorMap = new Map([
+      ["red", { color: "error", label: "紅" }],
+      ["orange", { color: "warning", label: "橘" }],
+      ["green", { color: "success", label: "綠" }],
+      ["none", { color: "default", label: "無" }]
+    ]);
 
     const groupColor = getGroupColor(groupName);
-    const { color, label } = colorMap[groupColor];
-
+    // 如果顏色是 none 則不顯示芯片
     if (groupColor === "none") return null;
+    
+    const { color, label } = colorMap.get(groupColor);
 
     return (
       <Chip
@@ -323,16 +328,15 @@ const MedicationSettings = () => {
       gap: 0.5
     };
 
-    switch (color) {
-      case "red":
-        return { ...baseStyle, bgcolor: '#ffebee', color: 'error.main', border: '1px solid', borderColor: 'error.light' };
-      case "orange":
-        return { ...baseStyle, bgcolor: '#fff3e0', color: 'warning.main', border: '1px solid', borderColor: 'warning.light' };
-      case "green":
-        return { ...baseStyle, bgcolor: '#e8f5e9', color: 'success.main', border: '1px solid', borderColor: 'success.light' };
-      default:
-        return { ...baseStyle, bgcolor: 'grey.100', color: 'text.secondary', border: '1px solid', borderColor: 'grey.300' };
-    }
+    // # zh-TW: 使用 Map 代替 switch-case，提高可讀性和維護性
+    const styleMap = new Map([
+      ["red", { ...baseStyle, bgcolor: '#ffebee', color: 'error.main', border: '1px solid', borderColor: 'error.light' }],
+      ["orange", { ...baseStyle, bgcolor: '#fff3e0', color: 'warning.main', border: '1px solid', borderColor: 'warning.light' }],
+      ["green", { ...baseStyle, bgcolor: '#e8f5e9', color: 'success.main', border: '1px solid', borderColor: 'success.light' }]
+    ]);
+    
+    // 返回對應顏色的樣式，如果找不到則返回預設樣式
+    return styleMap.get(color) || { ...baseStyle, bgcolor: 'grey.100', color: 'text.secondary', border: '1px solid', borderColor: 'grey.300' };
   };
 
   return (

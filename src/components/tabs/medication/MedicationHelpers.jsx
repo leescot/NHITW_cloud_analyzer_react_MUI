@@ -6,7 +6,7 @@ export const getMedicationColor = (medication, settings) => {
 
   let atc5Code = medication.atc_code;
 
-  // Handle cases where the ATC5 code might be in the ATC name
+  // 處理 ATC5 代碼可能存在於 ATC 名稱中的情況
   if (!atc5Code && medication.atc_name) {
     const matches = medication.atc_name.match(/\(([A-Z0-9]+)\)/);
     if (matches && matches[1]) atc5Code = matches[1];
@@ -23,9 +23,9 @@ export const getMedicationColor = (medication, settings) => {
   const group = Object.entries(settings.atc5Groups).find(([groupName, codes]) => {
     const match = codes.some(code => {
       if (code.length === 7) {
-        return atc5Code === code; // Exact match for 7-character codes
+        return atc5Code === code; // 7字元代碼的精確匹配
       } else {
-        return atc5Code.startsWith(code); // Prefix match for shorter codes
+        return atc5Code.startsWith(code); // 較短代碼的前綴匹配
       }
     });
     return match;
@@ -37,13 +37,19 @@ export const getMedicationColor = (medication, settings) => {
 
   // 檢查群組是否被分配到顏色
   const colorGroups = settings.atc5ColorGroups || { red: [], orange: [], green: [] };
-
-  if (colorGroups.red && colorGroups.red.includes(groupName)) {
-    return { name: 'red', color: '#f44336' };
-  } else if (colorGroups.orange && colorGroups.orange.includes(groupName)) {
-    return { name: 'orange', color: '#ed6c02' };
-  } else if (colorGroups.green && colorGroups.green.includes(groupName)) {
-    return { name: 'green', color: '#2e7d32' };
+  
+  // 使用 Map 儲存顏色映射關係
+  const colorMap = new Map([
+    ['red', { name: 'red', color: '#f44336' }],
+    ['orange', { name: 'orange', color: '#ed6c02' }],
+    ['green', { name: 'green', color: '#2e7d32' }]
+  ]);
+  
+  // 檢查群組屬於哪個顏色類別
+  for (const [colorKey, groupNames] of Object.entries(colorGroups)) {
+    if (groupNames && groupNames.includes(groupName) && colorMap.has(colorKey)) {
+      return colorMap.get(colorKey);
+    }
   }
 
   return null;
@@ -85,21 +91,21 @@ export const shouldBeBold = (medication, settings) => {
   //   colorGroups.green.includes(groupName)
   // );
 
-  // Always return false to disable bold formatting
+  // 始終返回 false 以禁用粗體格式
   return false;
 };
 
 // 根據看診類型獲取顏色
 export const getVisitTypeColor = (visitType) => {
-  switch(visitType) {
-    case "急診":
-      return "#c62828"; // 較柔和的紅色
-    case "住診":
-      return "#388e3c"; // 較柔和的綠色
-    case "門診":
-    default:
-      return "primary.main"; // 預設藍色
-  }
+  // 使用 Map 儲存看診類型與顏色的映射關係
+  const visitTypeColorMap = new Map([
+    ["急診", "#c62828"], // 較柔和的紅色
+    ["住診", "#388e3c"], // 較柔和的綠色
+    ["門診", "primary.main"] // 預設藍色
+  ]);
+  
+  // 返回對應顏色或預設值
+  return visitTypeColorMap.get(visitType) || "primary.main";
 };
 
 // 複製藥物的函數

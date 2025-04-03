@@ -127,16 +127,18 @@ export const getMedicationColorGroup = (medication, settings) => {
 
 // Helper function to map color names to MUI color codes
 const mapColorNameToColorCode = (colorName) => {
-  switch (colorName) {
-    case 'red':
-      return 'error';
-    case 'orange':
-      return 'warning';
-    case 'green':
-      return 'success';
-    default:
-      return 'primary';
-  }
+  // 使用 Map 替代 switch 語句，提高可讀性和效率
+  const colorMap = new Map([
+    ['red', 'error'],
+    ['orange', 'warning'],
+    ['green', 'success'],
+    // 預設值
+    ['default', 'primary']
+  ]);
+  
+  // 如果顏色名稱存在於 Map 中，則返回對應的顏色代碼
+  // 否則返回預設值 'primary'
+  return colorMap.get(colorName) || colorMap.get('default');
 };
 
 // 将日期格式化为 YYYY/MM/DD

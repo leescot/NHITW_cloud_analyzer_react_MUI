@@ -79,6 +79,37 @@ const PopupSettings = () => {
   // Add tab state
   const [activeTab, setActiveTab] = useState(0);
 
+  // 使用 Map 處理標籤內容的顯示
+  const tabContentMap = new Map([
+    [0, (
+      <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+        <GeneralDisplaySettings />
+        <OverviewSettings />
+        <MedicationSettings />
+        <ChineseMedicationSettings />
+        <LabSettings />
+      </Box>
+    )],
+    [1, (
+      <Box>
+        <DataStatusTab dataStatus={dataStatus} />
+      </Box>
+    )],
+    [2, (
+      <Box>
+        <AboutTab />
+      </Box>
+    )],
+    [3, (
+      <Box>
+        <LoadDataTab
+          localDataStatus={localDataStatus}
+          setSnackbar={setSnackbar}
+        />
+      </Box>
+    )]
+  ]);
+
   const handleTabChange = (event, newValue) => {
     // 檢查是否點擊了"開啟雲端"標籤
     const lastTabIndex = developerMode ? 4 : 3;
@@ -96,49 +127,58 @@ const PopupSettings = () => {
     setSnackbar(prev => ({ ...prev, open: false }));
   };
 
+  // 使用 Map 處理開發者模式的不同點擊次數情況
+  const handleDeveloperModeActions = new Map([
+    [5, {
+      action: (currentMode) => {
+        const newMode = !currentMode;
+        setDeveloperMode(newMode);
+        
+        // 儲存開發者模式狀態
+        chrome.storage.local.set({ developerMode: newMode });
+        
+        // 如果關閉開發者模式，且當前在開發模式頁面，切換回設定頁面
+        if (!newMode && activeTab === 3) {
+          setActiveTab(0);
+        }
+        
+        return {
+          message: newMode ? '開發者模式已啟用' : '開發者模式已關閉',
+          severity: newMode ? 'success' : 'info'
+        };
+      }
+    }]
+  ]);
+
   // 處理底部文字點擊事件
   const handleFooterClick = () => {
     // 增加計數器
     const newCount = clickCount + 1;
     setClickCount(newCount);
 
-    // 檢查是否達到點擊次數
-    if (!developerMode && newCount === 5) {
-      // 啟用開發者模式
-      setDeveloperMode(true);
-
+    // 使用 Map 處理開發者模式的點擊邏輯
+    const actionConfig = handleDeveloperModeActions.get(newCount);
+    if (actionConfig) {
+      const { message, severity } = actionConfig.action(developerMode);
+      
       // 顯示通知
       setSnackbar({
         open: true,
-        message: '開發者模式已啟用',
-        severity: 'success'
+        message,
+        severity
       });
 
       // 重置計數器
       setTimeout(() => setClickCount(0), 500);
-
-      // 儲存開發者模式狀態
-      chrome.storage.local.set({ developerMode: true });
-    } else if (developerMode && newCount === 5) {
-      // 關閉開發者模式
-      setDeveloperMode(false);
-
-      // 顯示通知
-      setSnackbar({
-        open: true,
-        message: '開發者模式已關閉',
-        severity: 'info'
-      });
-
-      // 重置計數器
-      setTimeout(() => setClickCount(0), 500);
-
-      // 儲存開發者模式狀態
-      chrome.storage.local.set({ developerMode: false });
-
-      // 如果當前在開發模式頁面，切換回設定頁面
-      if (activeTab === 3) {
-        setActiveTab(0);
+    } else {
+      // 只在開發者模式已啟用的情況下且點擊次數在範圍內才顯示點擊提示
+      if (developerMode && newCount > 0 && newCount < 7) {
+        setSnackbar({
+          open: true,
+          message: `再點擊 ${7 - newCount} 次以關閉開發者模式`,
+          severity: 'info',
+          autoHideDuration: 1000
+        });
       }
     }
 
@@ -153,23 +193,31 @@ const PopupSettings = () => {
         setClickCount(0);
       }, 5000);
     }
-
-    // 只在開發者模式已啟用的情況下才顯示點擊提示
-    if (developerMode && newCount > 0 && newCount < 7) {
-      setSnackbar({
-        open: true,
-        message: `再點擊 ${7 - newCount} 次以關閉開發者模式`,
-        severity: 'info',
-        autoHideDuration: 1000
-      });
-    }
-    // 移除非開發者模式下的點擊提示，避免洩露開發者模式的存在
   };
 
   // Function to open NHI MedCloud website
   const openNHIMedCloud = () => {
     chrome.tabs.create({ url: 'https://medcloud2.nhi.gov.tw/imu/IMUE1000/' });
   };
+
+  // 消息處理 Map
+  const messageHandlerMap = new Map([
+    ['refreshDataStatus', () => updateDataStatus(setDataStatus)],
+    ['localDataLoaded', (message) => {
+      setLocalDataStatus({
+        loaded: true,
+        source: message.source || '本地檔案',
+        types: message.dataTypes || []
+      });
+
+      // 顯示通知
+      setSnackbar({
+        open: true,
+        message: `已成功載入${message.dataTypes.length}種本地資料`,
+        severity: 'success'
+      });
+    }]
+  ]);
 
   // 組件掛載時初始化
   useEffect(() => {
@@ -200,24 +248,9 @@ const PopupSettings = () => {
 
     // 監聽來自 background 的消息，用於更新數據狀態
     const handleMessage = (message) => {
-      if (message.action === "refreshDataStatus") {
-        updateDataStatus(setDataStatus);
-      }
-
-      // 處理本地數據加載消息
-      if (message.action === "localDataLoaded") {
-        setLocalDataStatus({
-          loaded: true,
-          source: message.source || '本地檔案',
-          types: message.dataTypes || []
-        });
-
-        // 顯示通知
-        setSnackbar({
-          open: true,
-          message: `已成功載入${message.dataTypes.length}種本地資料`,
-          severity: 'success'
-        });
+      const handler = messageHandlerMap.get(message.action);
+      if (handler) {
+        handler(message);
       }
     };
 
@@ -316,41 +349,15 @@ const PopupSettings = () => {
           />
         </Tabs>
       </AppBar>
-      {/* Settings Tab */}
-      {activeTab === 0 && (
-          <Box sx={{ display: 'flex', flexDirection: 'column' }}>
-            <GeneralDisplaySettings />
-            <OverviewSettings />
-            <MedicationSettings />
-            <ChineseMedicationSettings />
-            <LabSettings />
-          </Box>
-        )}
+
+      {/* 使用 Map 渲染標籤內容 */}
+      {activeTab === 0 && tabContentMap.get(0)}
 
       <Box sx={{ flexGrow: 1, overflow: 'auto', p: 2 }}>
-        {/* Data Status Tab */}
-        {activeTab === 1 && (
-          <Box>
-            <DataStatusTab dataStatus={dataStatus} />
-          </Box>
-        )}
-
-        {/* About Tab */}
-        {activeTab === 2 && (
-          <Box>
-            <AboutTab />
-          </Box>
-        )}
-
-        {/* Load Data Tab - 只在開發者模式時顯示 */}
-        {activeTab === 3 && developerMode && (
-          <Box>
-            <LoadDataTab
-              localDataStatus={localDataStatus}
-              setSnackbar={setSnackbar}
-            />
-          </Box>
-        )}
+        {/* 使用 Map 渲染其他標籤內容 */}
+        {activeTab === 1 && tabContentMap.get(1)}
+        {activeTab === 2 && tabContentMap.get(2)}
+        {activeTab === 3 && developerMode && tabContentMap.get(3)}
       </Box>
 
       <Box

@@ -9,7 +9,6 @@ import { allergyProcessor } from "./allergyProcessor";
 import { surgeryProcessor } from "./surgeryProcessor";
 import { dischargeProcessor } from "./dischargeProcessor";
 import { medDaysProcessor } from "./medDaysProcessor";
-import { dashboardProcessor } from "./dashboardProcessor";
 import { patientSummaryProcessor } from "./patientSummaryProcessor";
 
 /**
@@ -23,104 +22,121 @@ export const handleAllData = async (dataSources, settings, setters) => {
   const results = {};
 
   try {
-    // 處理藥物數據
-    if (dataSources.medication?.rObject) {
-      const processedMedications = await medicationProcessor.processMedicationData(
-        dataSources.medication,
-        settings.western
-      );
-      setters.setGroupedMedications(processedMedications);
-      results.medications = processedMedications;
-    }
+    // 建立資料處理映射
+    const dataProcessors = new Map([
+      ['medication', {
+        process: async () => {
+          if (dataSources.medication?.rObject) {
+            const processedMedications = await medicationProcessor.processMedicationData(
+              dataSources.medication,
+              settings.western
+            );
+            setters.setGroupedMedications(processedMedications);
+            results.medications = processedMedications;
+          }
+        }
+      }],
+      ['labData', {
+        process: () => {
+          if (dataSources.labData?.rObject) {
+            const processedLabs = labProcessor.processLabData(
+              dataSources.labData,
+              settings.lab
+            );
+            setters.setGroupedLabs(processedLabs);
+            results.labs = processedLabs;
+          }
+        }
+      }],
+      ['chinesemed', {
+        process: () => {
+          if (dataSources.chinesemed?.rObject) {
+            const processedChineseMeds = chineseMedProcessor.processChineseMedData(
+              dataSources.chinesemed
+            );
+            setters.setGroupedChineseMeds(processedChineseMeds);
+            results.chineseMeds = processedChineseMeds;
+          }
+        }
+      }],
+      ['imaging', {
+        process: () => {
+          if (dataSources.imaging?.rObject) {
+            const processedImaging = imagingProcessor.processImagingData(
+              dataSources.imaging
+            );
+            setters.setImagingData(processedImaging);
+            results.imaging = processedImaging;
+          }
+        }
+      }],
+      ['allergy', {
+        process: () => {
+          if (dataSources.allergy?.rObject) {
+            const processedAllergy = allergyProcessor.processAllergyData(
+              dataSources.allergy
+            );
+            setters.setAllergyData(processedAllergy);
+            results.allergy = processedAllergy;
+          }
+        }
+      }],
+      ['surgery', {
+        process: () => {
+          if (dataSources.surgery?.rObject) {
+            const processedSurgery = surgeryProcessor.processSurgeryData(
+              dataSources.surgery
+            );
+            setters.setSurgeryData(processedSurgery);
+            results.surgery = processedSurgery;
+          }
+        }
+      }],
+      ['discharge', {
+        process: () => {
+          if (dataSources.discharge?.rObject) {
+            const processedDischarge = dischargeProcessor.processDischargeData(
+              dataSources.discharge
+            );
+            setters.setDischargeData(processedDischarge);
+            results.discharge = processedDischarge;
+          }
+        }
+      }],
+      ['medDays', {
+        process: () => {
+          if (dataSources.medDays?.rObject) {
+            const processedMedDays = medDaysProcessor.processMedDaysData(
+              dataSources.medDays
+            );
+            setters.setMedDaysData(processedMedDays);
+            results.medDays = processedMedDays;
+          }
+        }
+      }],
+      ['patientSummary', {
+        process: () => {
+          if (dataSources.patientsummary?.rObject) {
+            const processedPatientSummary = patientSummaryProcessor.processPatientSummaryData(
+              dataSources.patientsummary
+            );
+            setters.setPatientSummaryData(processedPatientSummary);
+            results.patientSummary = processedPatientSummary;
+          } else if (dataSources.patientSummary?.rObject) {
+            // 嘗試使用大寫S作為後備
+            const processedPatientSummary = patientSummaryProcessor.processPatientSummaryData(
+              dataSources.patientSummary
+            );
+            setters.setPatientSummaryData(processedPatientSummary);
+            results.patientSummary = processedPatientSummary;
+          }
+        }
+      }]
+    ]);
 
-    // 處理檢驗數據
-    if (dataSources.labData?.rObject) {
-      const processedLabs = labProcessor.processLabData(
-        dataSources.labData,
-        settings.lab
-      );
-      setters.setGroupedLabs(processedLabs);
-      results.labs = processedLabs;
-    }
-
-    // 處理中藥數據
-    if (dataSources.chinesemed?.rObject) {
-      const processedChineseMeds = chineseMedProcessor.processChineseMedData(
-        dataSources.chinesemed
-      );
-      setters.setGroupedChineseMeds(processedChineseMeds);
-      results.chineseMeds = processedChineseMeds;
-    }
-
-    // 處理影像數據
-    if (dataSources.imaging?.rObject) {
-      const processedImaging = imagingProcessor.processImagingData(
-        dataSources.imaging
-      );
-      setters.setImagingData(processedImaging);
-      results.imaging = processedImaging;
-    }
-
-    // 處理過敏數據
-    if (dataSources.allergy?.rObject) {
-      const processedAllergy = allergyProcessor.processAllergyData(
-        dataSources.allergy
-      );
-      setters.setAllergyData(processedAllergy);
-      results.allergy = processedAllergy;
-    }
-
-    // 處理手術數據
-    if (dataSources.surgery?.rObject) {
-      const processedSurgery = surgeryProcessor.processSurgeryData(
-        dataSources.surgery
-      );
-      setters.setSurgeryData(processedSurgery);
-      results.surgery = processedSurgery;
-    }
-
-    // 處理出院數據
-    if (dataSources.discharge?.rObject) {
-      const processedDischarge = dischargeProcessor.processDischargeData(
-        dataSources.discharge
-      );
-      setters.setDischargeData(processedDischarge);
-      results.discharge = processedDischarge;
-    }
-
-    // 處理餘藥數據
-    if (dataSources.medDays?.rObject) {
-      const processedMedDays = medDaysProcessor.processMedDaysData(
-        dataSources.medDays
-      );
-      setters.setMedDaysData(processedMedDays);
-      results.medDays = processedMedDays;
-    }
-
-    // 處理病患概要數據
-    if (dataSources.patientsummary?.rObject) {
-      const processedPatientSummary = patientSummaryProcessor.processPatientSummaryData(
-        dataSources.patientsummary
-      );
-      setters.setPatientSummaryData(processedPatientSummary);
-      results.patientSummary = processedPatientSummary;
-    } else if (dataSources.patientSummary?.rObject) {
-      // 嘗試使用大寫S作為後備
-      const processedPatientSummary = patientSummaryProcessor.processPatientSummaryData(
-        dataSources.patientSummary
-      );
-      setters.setPatientSummaryData(processedPatientSummary);
-      results.patientSummary = processedPatientSummary;
-    }
-
-    // 處理儀表板數據 (dashboard)
-    if (dataSources.medication?.rObject && dataSources.chinesemed?.rObject) {
-      const processedDashboard = dashboardProcessor.processDashboardData({
-        medicationData: dataSources.medication,
-        chineseMedData: dataSources.chinesemed,
-      });
-      setters.setDashboardData(processedDashboard);
-      results.dashboard = processedDashboard;
+    // 處理每個資料類型
+    for (const [, { process }] of dataProcessors) {
+      await process();
     }
 
     return results;
@@ -144,8 +160,7 @@ export const collectDataSources = () => {
     surgery: window.lastInterceptedSurgeryData,
     discharge: window.lastInterceptedDischargeData,
     medDays: window.lastInterceptedMedDaysData,
-    patientsummary: window.lastInterceptedPatientSummaryData,
-    patientSummary: window.lastInterceptedPatientSummaryData || window.lastInterceptedPatientSummaryData
+    patientSummary: window.lastInterceptedPatientSummaryData
   };
 
   return sources;
@@ -159,31 +174,28 @@ export const collectDataSources = () => {
  * @param {Function} setter - 設置狀態的函數
  */
 export const reprocessData = async (dataType, data, settings, setter) => {
-  if (!data) return;
+  if (!data || !data.rObject) return;
 
   try {
-    switch (dataType) {
-      case 'medication':
-        if (data.rObject) {
-          const processed = await medicationProcessor.processMedicationData(data, settings);
-          setter(processed);
-        }
-        break;
-      case 'lab':
-        if (data.rObject) {
-          const processed = labProcessor.processLabData(data, settings);
-          setter(processed);
-        }
-        break;
-      case 'chinesemed':
-        if (data.rObject) {
-          const processed = chineseMedProcessor.processChineseMedData(data);
-          setter(processed);
-        }
-        break;
+    const processors = new Map([
+      ['medication', async (data, settings) => {
+        return await medicationProcessor.processMedicationData(data, settings);
+      }],
+      ['lab', (data, settings) => {
+        return labProcessor.processLabData(data, settings);
+      }],
+      ['chinesemed', (data) => {
+        return chineseMedProcessor.processChineseMedData(data);
+      }]
       // 可以根據需要添加更多的數據類型處理
-      default:
-        console.log(`No processing method for data type: ${dataType}`);
+    ]);
+
+    const processor = processors.get(dataType);
+    if (processor) {
+      const processed = await processor(data, settings);
+      setter(processed);
+    } else {
+      console.log(`No processing method for data type: ${dataType}`);
     }
   } catch (error) {
     console.error(`Error reprocessing ${dataType} data:`, error);

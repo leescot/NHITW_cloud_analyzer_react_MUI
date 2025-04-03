@@ -185,37 +185,6 @@ export const handleSettingChangeMessage = (message, settingsUpdateCallback) => {
 };
 
 /**
- * 處理數據加載完成事件中的設置變更
- * @param {Object} event - 事件對象
- * @param {Object} currentSettings - 當前設置
- * @param {Function} updateCallback - 設置更新時的回調函數
- * @param {Object} callbacks - 各種數據處理回調函數
- */
-export const handleDataFetchCompletedSettingsChange = (event, currentSettings, updateCallback, callbacks) => {
-  // Handle setting changes
-  if (event.detail?.settingsChanged) {
-    // 根據不同的設置類型處理
-    switch (event.detail.settingType) {
-      case "chinesemed":
-        handleChineseMedSettingsChange(event, currentSettings, updateCallback, callbacks);
-        break;
-      case "labsettings":
-        handleLabSettingsChange(event, currentSettings, updateCallback, callbacks);
-        break;
-      case "overview":
-        handleOverviewSettingsChange(event, currentSettings, updateCallback, callbacks);
-        break;
-      case "generalDisplay":
-        handleGeneralDisplaySettingsChange(event, updateCallback);
-        break;
-      default:
-        // 未知類型，可能需要加載所有設置
-        loadAllSettings().then(updateCallback);
-    }
-  }
-};
-
-/**
  * 處理中藥設置變更
  */
 const handleChineseMedSettingsChange = (event, currentSettings, updateCallback, callbacks) => {
@@ -358,5 +327,36 @@ const handleGeneralDisplaySettingsChange = (event, updateGeneralDisplaySettings)
       ...prevSettings,
       [event.detail.setting]: event.detail.value
     }));
+  }
+};
+
+/**
+ * 處理數據加載完成事件中的設置變更
+ * @param {Object} event - 事件對象
+ * @param {Object} currentSettings - 當前設置
+ * @param {Function} updateCallback - 設置更新時的回調函數
+ * @param {Object} callbacks - 各種數據處理回調函數
+ */
+export const handleDataFetchCompletedSettingsChange = (event, currentSettings, updateCallback, callbacks) => {
+  // Handle setting changes
+  if (event.detail?.settingsChanged) {
+    // 使用 Map 替代 switch 結構
+    const settingTypeHandlers = new Map([
+      ['chinesemed', () => handleChineseMedSettingsChange(event, currentSettings, updateCallback, callbacks)],
+      ['labsettings', () => handleLabSettingsChange(event, currentSettings, updateCallback, callbacks)],
+      ['overview', () => handleOverviewSettingsChange(event, currentSettings, updateCallback, callbacks)],
+      ['generalDisplay', () => handleGeneralDisplaySettingsChange(event, updateCallback)]
+    ]);
+
+    // 從 Map 中獲取並執行對應的處理函數
+    const handler = settingTypeHandlers.get(event.detail.settingType);
+    
+    // 如果找到對應的處理函數則執行，否則加載所有設置
+    if (handler) {
+      handler();
+    } else {
+      // 未知類型，可能需要加載所有設置
+      loadAllSettings().then(updateCallback);
+    }
   }
 };

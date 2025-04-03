@@ -85,115 +85,165 @@ const TypeBasedLayout = ({
     </Paper>
   );
 
-  // 四個或以上的類型時，優化為三欄佈局: 兩個最大的類型各佔一欄，其餘合併為一欄
-  if (groupKeys.length >= 4) {
-    // 對類型按項目數量排序
-    const sortedGroups = [...groupKeys].sort((a, b) => labsByType[b].length - labsByType[a].length);
-
-    // 取出項目數最多的兩個類型
-    const largestGroup = sortedGroups[0];
-    const secondLargestGroup = sortedGroups[1];
-
-    // 其餘類型
-    const remainingGroups = sortedGroups.slice(2);
-
-    return (
-      <Grid container spacing={2}>
-        {/* 最大類型組 */}
-        <Grid item xs={12} sm={4} key="largest">
-          {renderTypeGroup(largestGroup, labsByType[largestGroup])}
-        </Grid>
-
-        {/* 第二大類型組 */}
-        <Grid item xs={12} sm={4} key="second-largest">
-          {renderTypeGroup(secondLargestGroup, labsByType[secondLargestGroup])}
-        </Grid>
-
-        {/* 其餘類型組合併 */}
-        <Grid item xs={12} sm={4} key="remaining">
-          <Box>
-            {remainingGroups.map((type, typeIndex) => (
-              <React.Fragment key={typeIndex}>
-                {renderTypeGroup(type, labsByType[type])}
-              </React.Fragment>
-            ))}
-          </Box>
-        </Grid>
-      </Grid>
-    );
-  }
-  else if (groupKeys.length === 2) {
-    const group1 = groupKeys[0];
-    const group2 = groupKeys[1];
-    const group1Count = labsByType[group1].length;
-    const group2Count = labsByType[group2].length;
-
-    // 確定哪個組更大，哪個更小
-    let smallerGroup, largerGroup, smallerCount, largerCount;
-    if (group1Count <= group2Count) {
-      smallerGroup = group1;
-      largerGroup = group2;
-      smallerCount = group1Count;
-      largerCount = group2Count;
-    } else {
-      smallerGroup = group2;
-      largerGroup = group1;
-      smallerCount = group2Count;
-      largerCount = group1Count;
-    }
-
-    // 創建優化的佈局組件
-    if (largerCount > 2 * smallerCount) {
-      // 情況1: 大組比小組的項目數多於兩倍 - 將大組平均分成兩欄
-      const halfLargerCount = Math.ceil(largerCount / 2);
-      const firstHalf = labsByType[largerGroup].slice(0, halfLargerCount);
-      const secondHalf = labsByType[largerGroup].slice(halfLargerCount);
-
-      return (
+  // 使用 Map 來定義不同分組數量的佈局策略
+  const layoutStrategies = new Map([
+    // 4個或以上的類型 - 三欄佈局
+    [
+      groupCount => groupCount >= 4,
+      () => {
+        // 對類型按項目數量排序
+        const sortedGroups = [...groupKeys].sort((a, b) => labsByType[b].length - labsByType[a].length);
+        
+        // 取出項目數最多的兩個類型
+        const largestGroup = sortedGroups[0];
+        const secondLargestGroup = sortedGroups[1];
+        
+        // 其餘類型
+        const remainingGroups = sortedGroups.slice(2);
+        
+        return (
+          <Grid container spacing={2}>
+            {/* 最大類型組 */}
+            <Grid item xs={12} sm={4} key="largest">
+              {renderTypeGroup(largestGroup, labsByType[largestGroup])}
+            </Grid>
+            
+            {/* 第二大類型組 */}
+            <Grid item xs={12} sm={4} key="second-largest">
+              {renderTypeGroup(secondLargestGroup, labsByType[secondLargestGroup])}
+            </Grid>
+            
+            {/* 其餘類型組合併 */}
+            <Grid item xs={12} sm={4} key="remaining">
+              <Box>
+                {remainingGroups.map((type, typeIndex) => (
+                  <React.Fragment key={typeIndex}>
+                    {renderTypeGroup(type, labsByType[type])}
+                  </React.Fragment>
+                ))}
+              </Box>
+            </Grid>
+          </Grid>
+        );
+      }
+    ],
+    // 剛好2種類型的特殊佈局
+    [
+      groupCount => groupCount === 2,
+      () => {
+        const group1 = groupKeys[0];
+        const group2 = groupKeys[1];
+        const group1Count = labsByType[group1].length;
+        const group2Count = labsByType[group2].length;
+        
+        // 確定哪個組更大，哪個更小
+        let smallerGroup, largerGroup, smallerCount, largerCount;
+        if (group1Count <= group2Count) {
+          smallerGroup = group1;
+          largerGroup = group2;
+          smallerCount = group1Count;
+          largerCount = group2Count;
+        } else {
+          smallerGroup = group2;
+          largerGroup = group1;
+          smallerCount = group2Count;
+          largerCount = group1Count;
+        }
+        
+        // 根據組大小比例選擇不同佈局策略
+        const layoutOptions = new Map([
+          // 大組比小組的項目數多於兩倍
+          [
+            () => largerCount > 2 * smallerCount,
+            () => {
+              const halfLargerCount = Math.ceil(largerCount / 2);
+              const firstHalf = labsByType[largerGroup].slice(0, halfLargerCount);
+              const secondHalf = labsByType[largerGroup].slice(halfLargerCount);
+              
+              return (
+                <Grid container spacing={2}>
+                  {/* 小組區域 */}
+                  <Grid item xs={12} sm={4} key="smaller">
+                    {renderTypeGroup(smallerGroup, labsByType[smallerGroup])}
+                  </Grid>
+                  
+                  {/* 大組第一欄 */}
+                  <Grid item xs={12} sm={4} key="larger-1">
+                    {renderTypeGroup(largerGroup, firstHalf, `${largerGroup} (一)`)}
+                  </Grid>
+                  
+                  {/* 大組第二欄 */}
+                  <Grid item xs={12} sm={4} key="larger-2">
+                    {renderTypeGroup(largerGroup, secondHalf, `${largerGroup} (二)`)}
+                  </Grid>
+                </Grid>
+              );
+            }
+          ],
+          // 大組比小組的項目數少於兩倍
+          [
+            () => largerCount < 2 * smallerCount,
+            () => {
+              const firstPart = labsByType[largerGroup].slice(0, smallerCount);
+              const secondPart = labsByType[largerGroup].slice(smallerCount);
+              
+              return (
+                <Grid container spacing={2}>
+                  {/* 小組區域 */}
+                  <Grid item xs={12} sm={4} key="smaller">
+                    {renderTypeGroup(smallerGroup, labsByType[smallerGroup])}
+                  </Grid>
+                  
+                  {/* 大組第一欄 */}
+                  <Grid item xs={12} sm={4} key="larger-1">
+                    {renderTypeGroup(largerGroup, firstPart, `${largerGroup} (一)`)}
+                  </Grid>
+                  
+                  {/* 大組第二欄 */}
+                  <Grid item xs={12} sm={4} key="larger-2">
+                    {renderTypeGroup(largerGroup, secondPart, `${largerGroup} (二)`)}
+                  </Grid>
+                </Grid>
+              );
+            }
+          ]
+        ]);
+        
+        // 遍歷佈局選項，找到匹配的佈局
+        for (const [condition, renderer] of layoutOptions) {
+          if (condition()) {
+            return renderer();
+          }
+        }
+        
+        // 如果沒有特殊條件匹配，回到默認佈局
+        return null;
+      }
+    ],
+    // 默認佈局 - 所有其他情況
+    [
+      () => true,
+      () => (
         <Grid container spacing={2}>
-          {/* 小組區域 */}
-          <Grid item xs={12} sm={4} key="smaller">
-            {renderTypeGroup(smallerGroup, labsByType[smallerGroup])}
-          </Grid>
-
-          {/* 大組第一欄 */}
-          <Grid item xs={12} sm={4} key="larger-1">
-            {renderTypeGroup(largerGroup, firstHalf, `${largerGroup} (一)`)}
-          </Grid>
-
-          {/* 大組第二欄 */}
-          <Grid item xs={12} sm={4} key="larger-2">
-            {renderTypeGroup(largerGroup, secondHalf, `${largerGroup} (二)`)}
-          </Grid>
+          {Object.entries(labsByType).map(([type, typeLabs], typeIndex) => (
+            <Grid item xs={12} sm={6} md={4} key={typeIndex}>
+              {renderTypeGroup(type, typeLabs)}
+            </Grid>
+          ))}
         </Grid>
-      );
-    } else if (largerCount < 2 * smallerCount) {
-      // 情況2: 大組比小組的項目數少於兩倍 - 大組第一欄的項目數等於小組
-      const firstPart = labsByType[largerGroup].slice(0, smallerCount);
-      const secondPart = labsByType[largerGroup].slice(smallerCount);
-
-      return (
-        <Grid container spacing={2}>
-          {/* 小組區域 */}
-          <Grid item xs={12} sm={4} key="smaller">
-            {renderTypeGroup(smallerGroup, labsByType[smallerGroup])}
-          </Grid>
-
-          {/* 大組第一欄 */}
-          <Grid item xs={12} sm={4} key="larger-1">
-            {renderTypeGroup(largerGroup, firstPart, `${largerGroup} (一)`)}
-          </Grid>
-
-          {/* 大組第二欄 */}
-          <Grid item xs={12} sm={4} key="larger-2">
-            {renderTypeGroup(largerGroup, secondPart, `${largerGroup} (二)`)}
-          </Grid>
-        </Grid>
-      );
+      )
+    ]
+  ]);
+  
+  // 遍歷佈局策略，找到匹配的佈局
+  for (const [condition, renderer] of layoutStrategies) {
+    if (condition(groupKeys.length)) {
+      const layout = renderer();
+      if (layout) return layout;
     }
   }
-
-  // 超過兩種類型或其他情況 - 使用預設的顯示方式
+  
+  // 以防萬一，提供默認佈局
   return (
     <Grid container spacing={2}>
       {Object.entries(labsByType).map(([type, typeLabs], typeIndex) => (

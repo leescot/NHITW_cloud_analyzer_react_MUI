@@ -22,63 +22,55 @@ export const extractGFRValue = (patientSummaryData) => {
 export const getCKDStage = (gfrValue) => {
   if (gfrValue === null) return null;
 
-  if (gfrValue >= 30 && gfrValue < 60) {
-    return 3;
-  } else if (gfrValue >= 15 && gfrValue < 30) {
-    return 4;
-  } else if (gfrValue < 15) {
-    return 5;
+  // 使用 Map 定義 GFR 範圍與對應的 CKD 階段
+  const ckdStageMap = new Map([
+    [(value) => value >= 30 && value < 60, 3],
+    [(value) => value >= 15 && value < 30, 4],
+    [(value) => value < 15, 5]
+  ]);
+
+  // 尋找匹配的 CKD 階段
+  for (const [condition, stage] of ckdStageMap) {
+    if (condition(gfrValue)) {
+      return stage;
+    }
   }
 
-  return null; // No CKD or data not available
+  return null; // 沒有 CKD 或數據不可用
+};
+
+// 檢查是否有 90 天內的影像檢查的通用函數
+const hasRecentScan = (imagingData, orderCodes) => {
+  if (!imagingData || (!imagingData.withReport && !imagingData.withoutReport)) {
+    return false;
+  }
+
+  const ninetyDaysAgo = new Date();
+  ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
+
+  // 檢查有報告的影像
+  const hasInReports = imagingData.withReport.some(item => {
+    const scanDate = new Date(item.date);
+    return orderCodes.includes(item.order_code) && scanDate >= ninetyDaysAgo;
+  });
+
+  // 檢查無報告的影像
+  const hasInPending = imagingData.withoutReport.some(item => {
+    const scanDate = new Date(item.date);
+    return orderCodes.includes(item.order_code) && scanDate >= ninetyDaysAgo;
+  });
+
+  return hasInReports || hasInPending;
 };
 
 // 檢查是否有 90 天內的 CT 檢查
 export const hasRecentCTScan = (imagingData) => {
-  if (!imagingData || (!imagingData.withReport && !imagingData.withoutReport)) {
-    return false;
-  }
-
   const ctOrderCodes = ['33072B', '33070B'];
-  const ninetyDaysAgo = new Date();
-  ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
-
-  // 檢查有報告的影像
-  const hasCtInReports = imagingData.withReport.some(item => {
-    const scanDate = new Date(item.date);
-    return ctOrderCodes.includes(item.order_code) && scanDate >= ninetyDaysAgo;
-  });
-
-  // 檢查無報告的影像
-  const hasCtInPending = imagingData.withoutReport.some(item => {
-    const scanDate = new Date(item.date);
-    return ctOrderCodes.includes(item.order_code) && scanDate >= ninetyDaysAgo;
-  });
-
-  return hasCtInReports || hasCtInPending;
+  return hasRecentScan(imagingData, ctOrderCodes);
 };
 
 // 檢查是否有 90 天內的 MRI 檢查
 export const hasRecentMRIScan = (imagingData) => {
-  if (!imagingData || (!imagingData.withReport && !imagingData.withoutReport)) {
-    return false;
-  }
-
   const mriOrderCodes = ['33085B', '33084B'];
-  const ninetyDaysAgo = new Date();
-  ninetyDaysAgo.setDate(ninetyDaysAgo.getDate() - 90);
-
-  // 檢查有報告的影像
-  const hasMriInReports = imagingData.withReport.some(item => {
-    const scanDate = new Date(item.date);
-    return mriOrderCodes.includes(item.order_code) && scanDate >= ninetyDaysAgo;
-  });
-
-  // 檢查無報告的影像
-  const hasMriInPending = imagingData.withoutReport.some(item => {
-    const scanDate = new Date(item.date);
-    return mriOrderCodes.includes(item.order_code) && scanDate >= ninetyDaysAgo;
-  });
-
-  return hasMriInReports || hasMriInPending;
+  return hasRecentScan(imagingData, mriOrderCodes);
 };

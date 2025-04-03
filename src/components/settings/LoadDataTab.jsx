@@ -20,17 +20,17 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import DownloadIcon from '@mui/icons-material/Download';
 
 // 資料類型對照表
-const dataTypeMap = {
-  'medication': '西藥處方',
-  'labData': '檢驗報告',
-  'chineseMed': '中藥處方',
-  'imaging': '醫療影像',
-  'allergy': '過敏資料',
-  'surgery': '手術記錄',
-  'discharge': '出院病摘',
-  'medDays': '餘藥資料',
-  'patientSummary': '病患摘要'
-};
+const dataTypeMap = new Map([
+  ['medication', '西藥處方'],
+  ['labData', '檢驗報告'],
+  ['chineseMed', '中藥處方'],
+  ['imaging', '醫療影像'],
+  ['allergy', '過敏資料'],
+  ['surgery', '手術記錄'],
+  ['discharge', '出院病摘'],
+  ['medDays', '餘藥資料'],
+  ['patientSummary', '病患摘要']
+]);
 
 // 新增下載功能
 const handleDownloadJSON = (setDownloading, setSnackbar) => {
@@ -181,7 +181,7 @@ const LoadDataTab = ({ localDataStatus, setSnackbar }) => {
           if (response && response.success) {
             setSnackbar({
               open: true,
-              message: `成功載入資料：${response.loadedTypes.map(type => dataTypeMap[type] || type).join(', ')}`,
+              message: `成功載入資料：${response.loadedTypes.map(type => dataTypeMap.get(type) || type).join(', ')}`,
               severity: 'success'
             });
           } else {
@@ -282,7 +282,7 @@ const LoadDataTab = ({ localDataStatus, setSnackbar }) => {
             {localDataStatus.types.map((type) => (
               <Chip
                 key={type}
-                label={dataTypeMap[type] || type}
+                label={dataTypeMap.get(type) || type}
                 size="small"
                 color="primary"
                 variant="outlined"

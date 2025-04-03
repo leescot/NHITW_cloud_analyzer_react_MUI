@@ -22,7 +22,7 @@ import TypographySizeWrapper from "../utils/TypographySizeWrapper";
 
 const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings }) => {
   // 添加過濾選項的狀態
-  const [dayFilter, setDayFilter] = useState("gte14"); // 默認顯示>=7天藥物
+  const [dayFilter, setDayFilter] = useState("gte14"); // 默認顯示>=14天藥物
   // 追蹤是否有 ATC5 顏色藥物
   const [hasATC5ColoredMeds, setHasATC5ColoredMeds] = useState(false);
 
@@ -217,31 +217,29 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
 
   // 對藥物按天數進行過濾的函數
   const filterMedicinesByDays = (medicines) => {
+    // 使用 Map 結構代替 switch 語句來定義不同過濾條件的處理邏輯
+    const filterConditions = new Map([
+      ["all", () => true],
+      ["gte7", (days) => days >= 7],
+      ["14_to_28", (days) => days >= 14 && days <= 28],
+      ["gt28", (days) => days > 28],
+      ["lt7", (days) => days < 7],
+      ["lt14", (days) => days < 14],
+      ["gte14", (days) => days >= 14],
+      ["colored_only", (_, medName) => getMedicationColor(medName) !== null]
+    ]);
+
+    // 獲取當前過濾條件的處理函數，如果沒有找到則返回一個總是為 true 的函數
+    const getFilterCondition = (filter) => filterConditions.get(filter) || (() => true);
+
     return Array.from(medicines).filter(([medName, dateMap]) => {
+      // 獲取當前過濾條件
+      const filterFn = getFilterCondition(dayFilter);
+      
       // 檢查藥物是否有任何符合過濾條件的日期記錄
       return Array.from(dateMap.values()).some((medData) => {
         const days = parseInt(medData.days) || 0;
-        switch (dayFilter) {
-          case "all":
-            return true;
-          case "gte7":
-            return days >= 7;
-          case "14_to_28":
-            return days >= 14 && days <= 28;
-          case "gt28":
-            return days > 28;
-          case "lt7":
-            return days < 7;
-          case "lt14":
-            return days < 14;
-          case "gte14":
-            return days >= 14;
-          case "colored_only":
-            // 只顯示有ATC5顏色的藥物
-            return getMedicationColor(medName) !== null;
-          default:
-            return true;
-        }
+        return filterFn(days, medName);
       });
     });
   };
@@ -252,31 +250,23 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
       return processedData.dates;
     }
 
+    // 使用 Map 結構代替 switch 語句來定義不同過濾條件的處理邏輯
+    const filterConditions = new Map([
+      ["lte7", (days) => days <= 7],
+      ["gte7", (days) => days >= 7],
+      ["gte14", (days) => days >= 14],
+      ["colored_only", (_, medName) => getMedicationColor(medName) !== null]
+    ]);
+
+    // 獲取當前過濾條件的處理函數，如果沒有找到則返回一個總是為 true 的函數
+    const filterFn = filterConditions.get(dayFilter) || (() => true);
+
     const datesWithData = new Set();
 
     filteredMedicines.forEach(([medName, dateMap]) => {
       dateMap.forEach((medData, date) => {
         const days = parseInt(medData.days) || 0;
-        let shouldInclude = false;
-
-        switch (dayFilter) {
-          case "lte7":
-            shouldInclude = days <= 7;
-            break;
-          case "gte7":
-            shouldInclude = days >= 7;
-            break;
-          case "gte14":
-            shouldInclude = days >= 14;
-            break;
-          case "colored_only":
-            shouldInclude = getMedicationColor(medName) !== null;
-            break;
-          default:
-            shouldInclude = true;
-        }
-
-        if (shouldInclude) {
+        if (filterFn(days, medName)) {
           datesWithData.add(date);
         }
       });
@@ -291,23 +281,22 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
   };
 
   const getMostRecentDate = (dateMap, medName) => {
+    // 使用 Map 結構代替 switch 語句來定義不同過濾條件的處理邏輯
+    const filterConditions = new Map([
+      ["all", () => true],
+      ["lte7", (days) => days <= 7],
+      ["gte7", (days) => days >= 7],
+      ["gte14", (days) => days >= 14],
+      ["colored_only", () => true]
+    ]);
+
+    // 獲取當前過濾條件的處理函數，如果沒有找到則返回一個總是為 true 的函數
+    const filterFn = filterConditions.get(dayFilter) || (() => true);
+
     const filteredDates = Array.from(dateMap.entries())
-      .filter(([date, medData]) => {
+      .filter(([_, medData]) => {
         const days = parseInt(medData.days) || 0;
-        switch (dayFilter) {
-          case "all":
-            return true;
-          case "lte7":
-            return days <= 7;
-          case "gte7":
-            return days >= 7;
-          case "gte14":
-            return days >= 14;
-          case "colored_only":
-            return true;
-          default:
-            return true;
-        }
+        return filterFn(days);
       })
       .sort((a, b) => b[0].localeCompare(a[0]));
 
@@ -591,19 +580,17 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
                         let shouldDisplay = !!medData;
 
                         if (shouldDisplay && dayFilter !== "all") {
-                          switch (dayFilter) {
-                            case "lte7":
-                              shouldDisplay = days <= 7;
-                              break;
-                            case "gte7":
-                              shouldDisplay = days >= 7;
-                              break;
-                            case "gte14":
-                              shouldDisplay = days >= 14;
-                              break;
-                            case "colored_only":
-                              shouldDisplay = getMedicationColor(name) !== null;
-                              break;
+                          // 使用 Map 結構代替 switch 語句來判斷是否顯示
+                          const displayConditions = new Map([
+                            ["lte7", (d) => d <= 7],
+                            ["gte7", (d) => d >= 7],
+                            ["gte14", (d) => d >= 14],
+                            ["colored_only", () => getMedicationColor(name) !== null]
+                          ]);
+
+                          const conditionFn = displayConditions.get(dayFilter);
+                          if (conditionFn) {
+                            shouldDisplay = conditionFn(days);
                           }
                         }
 

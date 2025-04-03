@@ -616,21 +616,31 @@ const ImagingData = ({ imagingData, generalDisplaySettings }) => {
   // 是否顯示過濾選項
   const shouldShowFilter = hasCTMRIReports || hasUltrasoundReports;
 
+  // 使用 Map 實現過濾邏輯，根據過濾選項取得對應的資料處理函數
+  const filterMap = React.useMemo(() => new Map([
+    // # zh-TW: 顯示所有報告
+    ['all', () => processedData.withReport],
+    // # zh-TW: 只顯示 CT & MRI 的報告
+    ['ctmri', () => processedData.withReport.filter(item => 
+      ctMriOrderCodes.includes(item.order_code)
+    )],
+    // # zh-TW: 只顯示超音波的報告
+    ['ultrasound', () => processedData.withReport.filter(item => 
+      ultrasoundOrderCodes.includes(item.order_code)
+    )]
+  ]), [processedData.withReport, ctMriOrderCodes, ultrasoundOrderCodes]);
+
   // 根據過濾選項過濾報告資料
   const filteredReportData = React.useMemo(() => {
-    if (!shouldShowFilter || filterOption === 'all') {
+    // # zh-TW: 如果不應該顯示過濾選項，則直接返回所有報告
+    if (!shouldShowFilter) {
       return processedData.withReport;
-    } else if (filterOption === 'ctmri') {
-      return processedData.withReport.filter(item =>
-        ctMriOrderCodes.includes(item.order_code)
-      );
-    } else if (filterOption === 'ultrasound') {
-      return processedData.withReport.filter(item =>
-        ultrasoundOrderCodes.includes(item.order_code)
-      );
     }
-    return processedData.withReport;
-  }, [processedData.withReport, filterOption, shouldShowFilter]);
+    
+    // # zh-TW: 從 Map 獲取對應的過濾函數並執行
+    const filterFunction = filterMap.get(filterOption);
+    return filterFunction ? filterFunction() : processedData.withReport;
+  }, [processedData.withReport, filterOption, shouldShowFilter, filterMap]);
 
   // 根據待取報告數量調整欄位寬度
   const pendingColSize = processedData.withoutReport.length === 0 ? 2 : 4;

@@ -86,51 +86,57 @@ const Overview_ImportantMedications = ({
     });
   });
 
-  // Helper function to check if date is within last N days
+  // isWithinLastNDays 函數重構使用 Map 來處理不同的日期格式
   function isWithinLastNDays(dateStr, days) {
     if (!dateStr) {
       return false;
     }
 
-    // Parse the date string, handling different formats
+    // 嘗試解析日期字符串
     let date;
     try {
-      // First try direct parsing
+      // 先嘗試直接解析
       date = new Date(dateStr);
 
-      // If invalid, try common format transformations
+      // 如果無效，嘗試常見格式轉換
       if (isNaN(date.getTime())) {
-        // Try DD/MM/YYYY format
-        if (dateStr.includes('/')) {
-          const parts = dateStr.split('/');
-          // Assume YYYY/MM/DD if first part is 4 digits
-          if (parts[0].length === 4) {
-            date = new Date(parts[0], parts[1] - 1, parts[2]);
-          } else {
-            // Otherwise assume DD/MM/YYYY
-            date = new Date(parts[2], parts[1] - 1, parts[0]);
+        // 定義處理不同格式的策略 Map
+        const dateParsingStrategies = new Map([
+          // 處理包含 '/' 的日期格式
+          [() => dateStr.includes('/'), () => {
+            const parts = dateStr.split('/');
+            // 假設 YYYY/MM/DD 如果第一部分是 4 位數
+            return parts[0].length === 4 
+              ? new Date(parts[0], parts[1] - 1, parts[2])
+              : new Date(parts[2], parts[1] - 1, parts[0]); // 否則假設 DD/MM/YYYY
+          }],
+          // 處理包含 '-' 的日期格式
+          [() => dateStr.includes('-'), () => new Date(dateStr.replace(/-/g, '/'))]
+        ]);
+
+        // 執行第一個匹配的策略
+        for (const [condition, parser] of dateParsingStrategies) {
+          if (condition()) {
+            date = parser();
+            break;
           }
-        }
-        // Try YYYY-MM-DD format
-        else if (dateStr.includes('-')) {
-          date = new Date(dateStr.replace(/-/g, '/'));
         }
       }
     } catch (e) {
       return false;
     }
 
-    // Verify the date is valid
+    // 驗證日期是否有效
     if (isNaN(date.getTime())) {
       return false;
     }
 
     const now = new Date();
 
-    // Calculate the threshold date (N days ago)
+    // 計算閾值日期（N 天前）
     const timeThreshold = now.getTime() - days * 24 * 60 * 60 * 1000;
 
-    // Check if the date is after the threshold
+    // 檢查日期是否在閾值之後
     return date.getTime() >= timeThreshold;
   }
 
@@ -254,30 +260,31 @@ const Overview_ImportantMedications = ({
     });
   }
 
-  // Helper function to get color info based on ATC5 group
+  // 修改 getColorInfo 函數，使用 Map 代替 if-else
   const getColorInfo = (colorName) => {
-    const colorMap = {
-      'red': {
+    const colorMap = new Map([
+      ['red', {
         light: alpha('#f44336', 0.15),
         medium: '#e53935',
         dark: '#b71c1c',
         name: '紅色'
-      },
-      'orange': {
+      }],
+      ['orange', {
         light: alpha('#ff9800', 0.18),
         medium: '#fb8c00',
         dark: '#e65100',
         name: '橘色'
-      },
-      'green': {
+      }],
+      ['green', {
         light: alpha('#4caf50', 0.2),
         medium: '#43a047',
         dark: '#1b5e20',
         name: '綠色'
-      }
-    };
+      }]
+    ]);
 
-    return colorMap[colorName] || {
+    // 返回對應顏色或預設灰色
+    return colorMap.get(colorName) || {
       light: alpha('#e0e0e0', 0.3),
       medium: '#bdbdbd',
       dark: '#757575',
@@ -285,16 +292,17 @@ const Overview_ImportantMedications = ({
     };
   };
 
-  // Helper function to get the appropriate icon for each group
+  // 修改 getCategoryIcon 函數，使用 Map 代替 if-else
   const getCategoryIcon = (groupName) => {
-    const iconMap = {
-      'NSAID': <MedicationIcon fontSize="small" sx={{ fontSize: '0.85rem' }} />,
-      'ACEI': <LocalPharmacyIcon fontSize="small" sx={{ fontSize: '0.85rem' }} />,
-      'ARB': <HealingIcon fontSize="small" sx={{ fontSize: '0.85rem' }} />,
-      'STATIN': <HealthAndSafetyIcon fontSize="small" sx={{ fontSize: '0.85rem' }} />
-    };
+    const iconMap = new Map([
+      ['NSAID', <MedicationIcon fontSize="small" sx={{ fontSize: '0.85rem' }} />],
+      ['ACEI', <LocalPharmacyIcon fontSize="small" sx={{ fontSize: '0.85rem' }} />],
+      ['ARB', <HealingIcon fontSize="small" sx={{ fontSize: '0.85rem' }} />],
+      ['STATIN', <HealthAndSafetyIcon fontSize="small" sx={{ fontSize: '0.85rem' }} />]
+    ]);
 
-    return iconMap[groupName] || <MedicationIcon fontSize="small" sx={{ fontSize: '0.85rem' }} />;
+    // 返回對應圖標或預設藥物圖標
+    return iconMap.get(groupName) || <MedicationIcon fontSize="small" sx={{ fontSize: '0.85rem' }} />;
   };
 
   // Helper function to create category badge

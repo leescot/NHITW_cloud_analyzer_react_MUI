@@ -48,6 +48,13 @@ export const HorizontalLayout = ({
 }) => {
   const { enableAbbrev, showUnit, showReference, highlightAbnormal } = labSettings;
 
+  // 使用 Map 來映射狀態和顏色 - 提高可讀性和效率
+  const statusColorMap = new Map([
+    ["high", "#c62828"], // 紅色
+    ["low", "#006400"],  // 深綠色
+    ["default", "inherit"] // 正常值
+  ]);
+
   // 這個布局不會顯示複選框，只處理橫式排列
   return (
     <Paper
@@ -66,12 +73,10 @@ export const HorizontalLayout = ({
       >
         <div style={{ display: 'flex', flexWrap: 'wrap' }}>
           {labs.map((lab, labIndex) => {
+            // 使用 Map 取代 if-else 結構的 getStatusColor 函數
             const getStatusColor = () => {
               if (!lab || !highlightAbnormal) return "inherit";
-
-              if (lab.valueStatus === "high") return "#c62828"; // 紅色
-              if (lab.valueStatus === "low") return "#006400";  // 深綠色
-              return "inherit"; // 正常值
+              return statusColorMap.get(lab.valueStatus) || statusColorMap.get("default");
             };
 
             return (

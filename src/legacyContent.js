@@ -206,27 +206,50 @@ function isOnLoginPage() {
 // 檢查是否在目標頁面
 function isOnTargetPage() {
   const url = window.location.href;
-  return (
-    url.includes("medcloud2.nhi.gov.tw/imu/IMUE1000/IMUE0008") ||
-    url.includes("medcloud2.nhi.gov.tw/imu/IMUE1000/IMUE0060") ||
-    url.includes("medcloud2.nhi.gov.tw/imu/IMUE1000/IMUE0090") || // Chinese medicine
-    url.includes("medcloud2.nhi.gov.tw/imu/IMUE1000/IMUE0130") || // Imaging
-    url.includes("medcloud2.nhi.gov.tw/imu/IMUE2000/IMUE2000")
-  ); // Patient summary
+  
+  // 使用 Map 存儲目標頁面路徑
+  const targetPaths = new Map([
+    ["medcloud2.nhi.gov.tw/imu/IMUE1000/IMUE0008", "用藥紀錄"],
+    ["medcloud2.nhi.gov.tw/imu/IMUE1000/IMUE0060", "檢驗報告"],
+    ["medcloud2.nhi.gov.tw/imu/IMUE1000/IMUE0090", "中醫用藥"],  // Chinese medicine
+    ["medcloud2.nhi.gov.tw/imu/IMUE1000/IMUE0130", "影像報告"],  // Imaging
+    ["medcloud2.nhi.gov.tw/imu/IMUE2000/IMUE2000", "病人摘要"]   // Patient summary
+  ]);
+
+  // 檢查 URL 是否包含任何目標路徑
+  for (const [path] of targetPaths) {
+    if (url.includes(path)) {
+      return true;
+    }
+  }
+  
+  return false;
 }
+
+// 使用 Map 來判斷頁面類型
+const pageTypeMap = new Map([
+  ["/IMUE0008", "medication"],
+  ["/IMUE0060", "labdata"],
+  ["/IMUE0090", "chinesemed"],
+  ["/IMUE0130", "imaging"],
+  ["/IMUE0040", "allergy"],
+  ["/IMUE0020", "surgery"],
+  ["/IMUE0070", "discharge"],
+  ["/IMUE0120", "medDays"],
+  ["/IMUE2000", "patientsummary"]
+]);
 
 // 判斷頁面類型
 function getPageType() {
   const url = window.location.href;
-  if (url.includes("/IMUE0008")) return "medication";
-  if (url.includes("/IMUE0060")) return "labdata";
-  if (url.includes("/IMUE0090")) return "chinesemed";
-  if (url.includes("/IMUE0130")) return "imaging";
-  if (url.includes("/IMUE0040")) return "allergy";
-  if (url.includes("/IMUE0020")) return "surgery";
-  if (url.includes("/IMUE0070")) return "discharge";
-  if (url.includes("/IMUE0120")) return "medDays";
-  if (url.includes("/IMUE2000")) return "patientsummary";
+  
+  // 檢查 URL 是否包含定義在 Map 中的任何一個路徑
+  for (const [path, type] of pageTypeMap.entries()) {
+    if (url.includes(path)) {
+      return type;
+    }
+  }
+  
   return "unknown";
 }
 
@@ -456,6 +479,33 @@ function observeUrlChanges() {
   }, 1000);
 }
 
+// API URL 模式映射表
+const API_URL_PATTERNS = new Map([
+  ["medication", "/imu/api/imue0008/imue0008s02/get-data"],
+  ["labdata", "/imu/api/imue0060/imue0060s02/get-data"],
+  ["chinesemed", "/imu/api/imue0090/imue0090s02/get-data"],
+  ["imaging", "/imu/api/imue0130/imue0130s02/get-data"],
+  ["allergy", "/imu/api/imue0040/imue0040s02/get-data"],
+  ["surgery", "/imu/api/imue0020/imue0020s02/get-data"],
+  ["discharge", "/imu/api/imue0070/imue0070s02/get-data"],
+  ["medDays", "/imu/api/imue0120/imue0120s01/pres-med-day"],
+  ["patientsummary", "/imu/api/imue2000/imue2000s01/get-summary"],
+  ["masterMenu", "/imu/api/imue1000/imue1000s02/master-menu"],
+  ["rehabilitation", "/imu/api/imue0080/imue0080s02/get-data"],
+  ["acupuncture", "/imu/api/imue0160/imue0160s02/get-data"],
+  ["specialChineseMedCare", "/imu/api/imue0170/imue0170s02/get-data"]
+]);
+
+// 從 URL 獲取數據類型的函數
+function getDataTypeFromUrl(url) {
+  for (const [dataType, pattern] of API_URL_PATTERNS.entries()) {
+    if (url.includes(pattern)) {
+      return dataType;
+    }
+  }
+  return null;
+}
+
 // 監聽設置
 function setupMonitoring() {
   if (isMonitoring) {
@@ -466,25 +516,6 @@ function setupMonitoring() {
   console.log("Setting up API monitoring");
   isMonitoring = true;
   hasExtractedToken = false; // 重置令牌狀態
-
-  // API URL 模式
-  const MEDICATION_API_URL_PATTERN = "/imu/api/imue0008/imue0008s02/get-data";
-  const LABDATA_API_URL_PATTERN = "/imu/api/imue0060/imue0060s02/get-data";
-  const CHINESE_MED_API_URL_PATTERN = "/imu/api/imue0090/imue0090s02/get-data";
-  const IMAGING_API_URL_PATTERN = "/imu/api/imue0130/imue0130s02/get-data";
-  const ALLERGY_API_URL_PATTERN = "/imu/api/imue0040/imue0040s02/get-data";
-  const SURGERY_API_URL_PATTERN = "/imu/api/imue0020/imue0020s02/get-data";
-  const DISCHARGE_API_URL_PATTERN = "/imu/api/imue0070/imue0070s02/get-data";
-  const MED_DAYS_API_URL_PATTERN = "/imu/api/imue0120/imue0120s01/pres-med-day";
-  const PATIENT_SUMMARY_API_URL_PATTERN =
-    "/imu/api/imue2000/imue2000s01/get-summary";
-  const MASTER_MENU_API_URL_PATTERN =
-    "/imu/api/imue1000/imue1000s02/master-menu";
-  const REHABILITATION_API_URL_PATTERN =
-    "/imu/api/imue0080/imue0080s02/get-data";
-  const ACUPUNCTURE_API_URL_PATTERN = "/imu/api/imue0160/imue0160s02/get-data";
-  const SPECIAL_CHINESE_MED_CARE_API_URL_PATTERN =
-    "/imu/api/imue0170/imue0170s02/get-data";
 
   // 設置請求頭捕獲
   captureXhrRequestHeaders();
@@ -509,23 +540,12 @@ function setupMonitoring() {
     this.addEventListener = function (event, handler) {
       if (event === "load" || event === "readystatechange") {
         const newHandler = function () {
-          // 只處理目標 API 請求
-          if (
-            originalUrl &&
-            (originalUrl.includes(MEDICATION_API_URL_PATTERN) ||
-              originalUrl.includes(LABDATA_API_URL_PATTERN) ||
-              originalUrl.includes(CHINESE_MED_API_URL_PATTERN) ||
-              originalUrl.includes(IMAGING_API_URL_PATTERN) ||
-              originalUrl.includes(ALLERGY_API_URL_PATTERN) ||
-              originalUrl.includes(SURGERY_API_URL_PATTERN) ||
-              originalUrl.includes(DISCHARGE_API_URL_PATTERN) ||
-              originalUrl.includes(MED_DAYS_API_URL_PATTERN) ||
-              originalUrl.includes(PATIENT_SUMMARY_API_URL_PATTERN) ||
-              originalUrl.includes(MASTER_MENU_API_URL_PATTERN) ||
-              originalUrl.includes(REHABILITATION_API_URL_PATTERN) ||
-              originalUrl.includes(ACUPUNCTURE_API_URL_PATTERN) ||
-              originalUrl.includes(SPECIAL_CHINESE_MED_CARE_API_URL_PATTERN))
-          ) {
+          // 檢查 URL 是否匹配任一 API 模式
+          const isTargetUrl = Array.from(API_URL_PATTERNS.values()).some(pattern => 
+            originalUrl && originalUrl.includes(pattern)
+          );
+          
+          if (isTargetUrl) {
             console.log(
               `XHR ${event} event fired for: ${originalUrl}, readyState: ${this.readyState}, status: ${this.status}`
             );
@@ -539,7 +559,7 @@ function setupMonitoring() {
                 const data = JSON.parse(this.responseText);
 
                 // For master-menu, log the response data
-                if (originalUrl.includes(MASTER_MENU_API_URL_PATTERN)) {
+                if (originalUrl.includes(API_URL_PATTERNS.get("masterMenu"))) {
                   console.log(
                     "Master Menu API Response:",
                     JSON.stringify(data, null, 2)
@@ -550,96 +570,45 @@ function setupMonitoring() {
                 const recordsArray = data.rObject || data.robject;
 
                 // 強化資料格式檢查
+                const isMasterMenu = originalUrl.includes(API_URL_PATTERNS.get("masterMenu"));
                 if (
                   data &&
                   ((recordsArray && Array.isArray(recordsArray)) ||
-                    originalUrl.includes(MASTER_MENU_API_URL_PATTERN))
+                    isMasterMenu)
                 ) {
                   // 統一格式
                   const normalizedData = {
-                    rObject: originalUrl.includes(MASTER_MENU_API_URL_PATTERN)
+                    rObject: isMasterMenu
                       ? [data]
                       : recordsArray,
                     originalData: data,
                   };
 
-                  // 判斷是藥歷還是檢驗資料
-                  const dataType = originalUrl.includes(
-                    MEDICATION_API_URL_PATTERN
-                  )
-                    ? "medication"
-                    : originalUrl.includes(LABDATA_API_URL_PATTERN)
-                    ? "labdata"
-                    : originalUrl.includes(CHINESE_MED_API_URL_PATTERN)
-                    ? "chinesemed"
-                    : originalUrl.includes(IMAGING_API_URL_PATTERN)
-                    ? "imaging"
-                    : originalUrl.includes(ALLERGY_API_URL_PATTERN)
-                    ? "allergy"
-                    : originalUrl.includes(SURGERY_API_URL_PATTERN)
-                    ? "surgery"
-                    : originalUrl.includes(DISCHARGE_API_URL_PATTERN)
-                    ? "discharge"
-                    : originalUrl.includes(MED_DAYS_API_URL_PATTERN)
-                    ? "medDays"
-                    : originalUrl.includes(PATIENT_SUMMARY_API_URL_PATTERN)
-                    ? "patientsummary"
-                    : originalUrl.includes(MASTER_MENU_API_URL_PATTERN)
-                    ? "masterMenu"
-                    : originalUrl.includes(REHABILITATION_API_URL_PATTERN)
-                    ? "rehabilitation"
-                    : originalUrl.includes(ACUPUNCTURE_API_URL_PATTERN)
-                    ? "acupuncture"
-                    : originalUrl.includes(
-                        SPECIAL_CHINESE_MED_CARE_API_URL_PATTERN
-                      )
-                    ? "specialChineseMedCare"
-                    : null;
+                  // 判斷數據類型
+                  const dataType = getDataTypeFromUrl(originalUrl);
 
                   if (dataType) {
-                    switch (dataType) {
-                      case "medication":
-                        window.lastInterceptedMedicationData = normalizedData;
-                        break;
-                      case "labdata":
-                        window.lastInterceptedLabData = normalizedData;
-                        break;
-                      case "chinesemed":
-                        window.lastInterceptedChineseMedData = normalizedData;
-                        break;
-                      case "imaging":
-                        window.lastInterceptedImagingData = normalizedData;
-                        break;
-                      case "allergy":
-                        window.lastInterceptedAllergyData = normalizedData;
-                        break;
-                      case "surgery":
-                        window.lastInterceptedSurgeryData = normalizedData;
-                        break;
-                      case "discharge":
-                        window.lastInterceptedDischargeData = normalizedData;
-                        break;
-                      case "medDays":
-                        window.lastInterceptedMedDaysData = normalizedData;
-                        break;
-                      case "patientsummary":
-                        window.lastInterceptedPatientSummaryData =
-                          normalizedData;
-                        break;
-                      case "masterMenu":
-                        window.lastInterceptedMasterMenuData = normalizedData;
-                        break;
-                      case "rehabilitation":
-                        window.lastInterceptedRehabilitationData =
-                          normalizedData;
-                        break;
-                      case "acupuncture":
-                        window.lastInterceptedAcupunctureData = normalizedData;
-                        break;
-                      case "specialChineseMedCare":
-                        window.lastInterceptedSpecialChineseMedCareData =
-                          normalizedData;
-                        break;
+                    // 使用 Map 保存數據類型和對應的變數名
+                    const dataVarMap = new Map([
+                      ["medication", "lastInterceptedMedicationData"],
+                      ["labdata", "lastInterceptedLabData"],
+                      ["chinesemed", "lastInterceptedChineseMedData"],
+                      ["imaging", "lastInterceptedImagingData"],
+                      ["allergy", "lastInterceptedAllergyData"],
+                      ["surgery", "lastInterceptedSurgeryData"],
+                      ["discharge", "lastInterceptedDischargeData"],
+                      ["medDays", "lastInterceptedMedDaysData"],
+                      ["patientsummary", "lastInterceptedPatientSummaryData"],
+                      ["masterMenu", "lastInterceptedMasterMenuData"],
+                      ["rehabilitation", "lastInterceptedRehabilitationData"],
+                      ["acupuncture", "lastInterceptedAcupunctureData"],
+                      ["specialChineseMedCare", "lastInterceptedSpecialChineseMedCareData"]
+                    ]);
+                    
+                    // 設置對應的全局變數
+                    const varName = dataVarMap.get(dataType);
+                    if (varName) {
+                      window[varName] = normalizedData;
                     }
 
                     console.log(
@@ -676,22 +645,12 @@ function setupMonitoring() {
       }
     };
 
-    if (
-      originalUrl &&
-      (originalUrl.includes(MEDICATION_API_URL_PATTERN) ||
-        originalUrl.includes(LABDATA_API_URL_PATTERN) ||
-        originalUrl.includes(CHINESE_MED_API_URL_PATTERN) ||
-        originalUrl.includes(IMAGING_API_URL_PATTERN) ||
-        originalUrl.includes(ALLERGY_API_URL_PATTERN) ||
-        originalUrl.includes(SURGERY_API_URL_PATTERN) ||
-        originalUrl.includes(DISCHARGE_API_URL_PATTERN) ||
-        originalUrl.includes(MED_DAYS_API_URL_PATTERN) ||
-        originalUrl.includes(PATIENT_SUMMARY_API_URL_PATTERN) ||
-        originalUrl.includes(MASTER_MENU_API_URL_PATTERN) ||
-        originalUrl.includes(REHABILITATION_API_URL_PATTERN) ||
-        originalUrl.includes(ACUPUNCTURE_API_URL_PATTERN) ||
-        originalUrl.includes(SPECIAL_CHINESE_MED_CARE_API_URL_PATTERN))
-    ) {
+    // 檢查 URL 是否匹配任一 API 模式
+    const isTargetUrl = Array.from(API_URL_PATTERNS.values()).some(pattern => 
+      originalUrl && originalUrl.includes(pattern)
+    );
+    
+    if (isTargetUrl) {
       console.log(`Monitoring XHR request to: ${originalUrl}`);
     }
 
@@ -710,22 +669,12 @@ function setupMonitoring() {
         ? input.url
         : null;
 
-    if (
-      url &&
-      (url.includes(MEDICATION_API_URL_PATTERN) ||
-        url.includes(LABDATA_API_URL_PATTERN) ||
-        url.includes(CHINESE_MED_API_URL_PATTERN) ||
-        url.includes(IMAGING_API_URL_PATTERN) ||
-        url.includes(ALLERGY_API_URL_PATTERN) ||
-        url.includes(SURGERY_API_URL_PATTERN) ||
-        url.includes(DISCHARGE_API_URL_PATTERN) ||
-        url.includes(MED_DAYS_API_URL_PATTERN) ||
-        url.includes(PATIENT_SUMMARY_API_URL_PATTERN) ||
-        url.includes(MASTER_MENU_API_URL_PATTERN) ||
-        url.includes(REHABILITATION_API_URL_PATTERN) ||
-        url.includes(ACUPUNCTURE_API_URL_PATTERN) ||
-        url.includes(SPECIAL_CHINESE_MED_CARE_API_URL_PATTERN))
-    ) {
+    // 檢查 URL 是否匹配任一 API 模式
+    const isTargetUrl = Array.from(API_URL_PATTERNS.values()).some(pattern => 
+      url && url.includes(pattern)
+    );
+    
+    if (isTargetUrl) {
       console.log(`Monitoring fetch request to: ${url}`);
 
       try {
@@ -749,7 +698,7 @@ function setupMonitoring() {
                 const data = JSON.parse(text);
 
                 // For master-menu, log the response data
-                if (url.includes(MASTER_MENU_API_URL_PATTERN)) {
+                if (url.includes(API_URL_PATTERNS.get("masterMenu"))) {
                   console.log(
                     "Master Menu API Response:",
                     JSON.stringify(data, null, 2)
@@ -760,92 +709,45 @@ function setupMonitoring() {
                 const recordsArray = data.rObject || data.robject;
 
                 // 強化資料格式檢查
+                const isMasterMenu = url.includes(API_URL_PATTERNS.get("masterMenu"));
                 if (
                   data &&
                   ((recordsArray && Array.isArray(recordsArray)) ||
-                    url.includes(MASTER_MENU_API_URL_PATTERN))
+                    isMasterMenu)
                 ) {
                   // 統一格式
                   const normalizedData = {
-                    rObject: url.includes(MASTER_MENU_API_URL_PATTERN)
+                    rObject: isMasterMenu
                       ? [data]
                       : recordsArray,
                     originalData: data,
                   };
 
-                  // 判斷是藥歷還是檢驗資料
-                  const dataType = url.includes(MEDICATION_API_URL_PATTERN)
-                    ? "medication"
-                    : url.includes(LABDATA_API_URL_PATTERN)
-                    ? "labdata"
-                    : url.includes(CHINESE_MED_API_URL_PATTERN)
-                    ? "chinesemed"
-                    : url.includes(IMAGING_API_URL_PATTERN)
-                    ? "imaging"
-                    : url.includes(ALLERGY_API_URL_PATTERN)
-                    ? "allergy"
-                    : url.includes(SURGERY_API_URL_PATTERN)
-                    ? "surgery"
-                    : url.includes(DISCHARGE_API_URL_PATTERN)
-                    ? "discharge"
-                    : url.includes(MED_DAYS_API_URL_PATTERN)
-                    ? "medDays"
-                    : url.includes(PATIENT_SUMMARY_API_URL_PATTERN)
-                    ? "patientsummary"
-                    : url.includes(MASTER_MENU_API_URL_PATTERN)
-                    ? "masterMenu"
-                    : url.includes(REHABILITATION_API_URL_PATTERN)
-                    ? "rehabilitation"
-                    : url.includes(ACUPUNCTURE_API_URL_PATTERN)
-                    ? "acupuncture"
-                    : url.includes(SPECIAL_CHINESE_MED_CARE_API_URL_PATTERN)
-                    ? "specialChineseMedCare"
-                    : null;
+                  // 判斷數據類型
+                  const dataType = getDataTypeFromUrl(url);
 
                   if (dataType) {
-                    switch (dataType) {
-                      case "medication":
-                        window.lastInterceptedMedicationData = normalizedData;
-                        break;
-                      case "labdata":
-                        window.lastInterceptedLabData = normalizedData;
-                        break;
-                      case "chinesemed":
-                        window.lastInterceptedChineseMedData = normalizedData;
-                        break;
-                      case "imaging":
-                        window.lastInterceptedImagingData = normalizedData;
-                        break;
-                      case "allergy":
-                        window.lastInterceptedAllergyData = normalizedData;
-                        break;
-                      case "surgery":
-                        window.lastInterceptedSurgeryData = normalizedData;
-                        break;
-                      case "discharge":
-                        window.lastInterceptedDischargeData = normalizedData;
-                        break;
-                      case "medDays":
-                        window.lastInterceptedMedDaysData = normalizedData;
-                        break;
-                      case "patientsummary":
-                        window.lastInterceptedPatientSummaryData =
-                          normalizedData;
-                        break;
-                      case "masterMenu":
-                        window.lastInterceptedMasterMenuData = normalizedData;
-                        break;
-                      case "rehabilitation":
-                        window.lastInterceptedRehabilitationData =
-                          normalizedData;
-                        break;
-                      case "acupuncture":
-                        window.lastInterceptedAcupunctureData = normalizedData;
-                        break;
-                      case "specialChineseMedCare":
-                        window.lastInterceptedSpecialChineseMedCareData =
-                          normalizedData;
-                        break;
+                    // 使用 Map 保存數據類型和對應的變數名
+                    const dataVarMap = new Map([
+                      ["medication", "lastInterceptedMedicationData"],
+                      ["labdata", "lastInterceptedLabData"],
+                      ["chinesemed", "lastInterceptedChineseMedData"],
+                      ["imaging", "lastInterceptedImagingData"],
+                      ["allergy", "lastInterceptedAllergyData"],
+                      ["surgery", "lastInterceptedSurgeryData"],
+                      ["discharge", "lastInterceptedDischargeData"],
+                      ["medDays", "lastInterceptedMedDaysData"],
+                      ["patientsummary", "lastInterceptedPatientSummaryData"],
+                      ["masterMenu", "lastInterceptedMasterMenuData"],
+                      ["rehabilitation", "lastInterceptedRehabilitationData"],
+                      ["acupuncture", "lastInterceptedAcupunctureData"],
+                      ["specialChineseMedCare", "lastInterceptedSpecialChineseMedCareData"]
+                    ]);
+                    
+                    // 設置對應的全局變數
+                    const varName = dataVarMap.get(dataType);
+                    if (varName) {
+                      window[varName] = normalizedData;
                     }
 
                     console.log(
@@ -888,48 +790,62 @@ function setupMonitoring() {
   console.log("Fetch monitoring set up");
 }
 
+// 使用 Map 定義數據類型與對應的全局變數
+const dataVarMap = new Map([
+  ["medication", "lastInterceptedMedicationData"],
+  ["labdata", "lastInterceptedLabData"],
+  ["chinesemed", "lastInterceptedChineseMedData"],
+  ["imaging", "lastInterceptedImagingData"],
+  ["allergy", "lastInterceptedAllergyData"],
+  ["surgery", "lastInterceptedSurgeryData"],
+  ["discharge", "lastInterceptedDischargeData"],
+  ["medDays", "lastInterceptedMedDaysData"],
+  ["patientsummary", "lastInterceptedPatientSummaryData"],
+  ["masterMenu", "lastInterceptedMasterMenuData"],
+  ["rehabilitation", "lastInterceptedRehabilitationData"],
+  ["acupuncture", "lastInterceptedAcupunctureData"],
+  ["specialChineseMedCare", "lastInterceptedSpecialChineseMedCareData"]
+]);
+
+// 使用 Map 定義數據類型與對應的 action
+const actionMap = new Map([
+  ["medication", "saveMedicationData"],
+  ["labdata", "saveLabData"],
+  ["chinesemed", "saveChineseMedData"],
+  ["imaging", "saveImagingData"],
+  ["allergy", "saveAllergyData"],
+  ["surgery", "saveSurgeryData"],
+  ["discharge", "saveDischargeData"],
+  ["medDays", "saveMedDaysData"],
+  ["patientsummary", "savePatientSummaryData"],
+  ["masterMenu", "saveMasterMenuData"],
+  ["rehabilitation", "saveRehabilitationData"],
+  ["acupuncture", "saveAcupunctureData"],
+  ["specialChineseMedCare", "saveSpecialChineseMedCareData"]
+]);
+
+// 使用 Map 定義數據類型與對應的中文顯示文字
+const typeTextMap = new Map([
+  ["medication", "西醫藥歷"],
+  ["labdata", "檢驗資料"],
+  ["chinesemed", "中醫用藥"],
+  ["imaging", "醫療影像"],
+  ["allergy", "過敏資料"],
+  ["surgery", "手術記錄"],
+  ["discharge", "出院病摘"],
+  ["medDays", "藥品餘藥"],
+  ["patientsummary", "病患摘要"],
+  ["masterMenu", "主選單"],
+  ["rehabilitation", "復健治療"],
+  ["acupuncture", "針灸治療"],
+  ["specialChineseMedCare", "特殊中醫處置"]
+]);
+
 function saveData(data, dataType, source = "unknown") {
   // 先直接更新全局變數
-  switch (dataType) {
-    case "medication":
-      window.lastInterceptedMedicationData = data;
-      break;
-    case "labdata":
-      window.lastInterceptedLabData = data;
-      break;
-    case "chinesemed":
-      window.lastInterceptedChineseMedData = data;
-      break;
-    case "imaging":
-      window.lastInterceptedImagingData = data;
-      break;
-    case "allergy":
-      window.lastInterceptedAllergyData = data;
-      break;
-    case "surgery":
-      window.lastInterceptedSurgeryData = data;
-      break;
-    case "discharge":
-      window.lastInterceptedDischargeData = data;
-      break;
-    case "medDays":
-      window.lastInterceptedMedDaysData = data;
-      break;
-    case "patientsummary":
-      window.lastInterceptedPatientSummaryData = data;
-      break;
-    case "masterMenu":
-      window.lastInterceptedMasterMenuData = data;
-      break;
-    case "rehabilitation":
-      window.lastInterceptedRehabilitationData = data;
-      break;
-    case "acupuncture":
-      window.lastInterceptedAcupunctureData = data;
-      break;
-    case "specialChineseMedCare":
-      window.lastInterceptedSpecialChineseMedCareData = data;
-      break;
+  const varName = dataVarMap.get(dataType);
+  if (varName) {
+    window[varName] = data;
   }
 
   // 確保 data 有效 (對 masterMenu 類型特殊處理)
@@ -938,40 +854,8 @@ function saveData(data, dataType, source = "unknown") {
     return;
   }
 
-  const actionMap = {
-    medication: "saveMedicationData",
-    labdata: "saveLabData",
-    chinesemed: "saveChineseMedData",
-    imaging: "saveImagingData",
-    allergy: "saveAllergyData",
-    surgery: "saveSurgeryData",
-    discharge: "saveDischargeData",
-    medDays: "saveMedDaysData",
-    patientsummary: "savePatientSummaryData",
-    masterMenu: "saveMasterMenuData",
-    rehabilitation: "saveRehabilitationData",
-    acupuncture: "saveAcupunctureData",
-    specialChineseMedCare: "saveSpecialChineseMedCareData",
-  };
-
-  const typeTextMap = {
-    medication: "藥歷",
-    labdata: "檢驗資料",
-    chinesemed: "中醫用藥",
-    imaging: "醫療影像",
-    allergy: "過敏資料",
-    surgery: "手術記錄",
-    discharge: "出院病摘",
-    medDays: "藥品餘藥",
-    patientsummary: "病患摘要",
-    masterMenu: "主選單",
-    rehabilitation: "復健治療",
-    acupuncture: "針灸治療",
-    specialChineseMedCare: "特殊中醫處置",
-  };
-
-  const action = actionMap[dataType];
-  const typeText = typeTextMap[dataType];
+  const action = actionMap.get(dataType);
+  const typeText = typeTextMap.get(dataType);
 
   if (!action) {
     console.error(`不支援的資料類型: ${dataType}`);
@@ -1031,23 +915,12 @@ function captureXhrRequestHeaders() {
     this._method = method;
     this._url = url;
 
-    // 如果是目標API請求，添加事件監聽器來捕獲完整的請求頭
-    if (
-      url &&
-      (url.includes(MEDICATION_API_URL_PATTERN) ||
-        url.includes(LABDATA_API_URL_PATTERN) ||
-        url.includes(CHINESE_MED_API_URL_PATTERN) ||
-        url.includes(IMAGING_API_URL_PATTERN) ||
-        url.includes(ALLERGY_API_URL_PATTERN) ||
-        url.includes(SURGERY_API_URL_PATTERN) ||
-        url.includes(DISCHARGE_API_URL_PATTERN) ||
-        url.includes(MED_DAYS_API_URL_PATTERN) ||
-        url.includes(PATIENT_SUMMARY_API_URL_PATTERN) ||
-        url.includes(MASTER_MENU_API_URL_PATTERN) ||
-        url.includes(REHABILITATION_API_URL_PATTERN) ||
-        url.includes(ACUPUNCTURE_API_URL_PATTERN) ||
-        url.includes(SPECIAL_CHINESE_MED_CARE_API_URL_PATTERN))
-    ) {
+    // 檢查 URL 是否匹配任一 API 模式
+    const isTargetUrl = Array.from(API_URL_PATTERNS.values()).some(pattern => 
+      url && url.includes(pattern)
+    );
+    
+    if (isTargetUrl) {
       const xhr = this;
       this.addEventListener("loadend", function () {
         if (xhr.status === 200 && xhr._requestHeaders) {
@@ -1324,42 +1197,44 @@ function fetchAllDataTypes() {
     .then((results) => {
       // console.log("所有資料獲取完成，結果:", results);
 
-      // Create counts object for all data types
-      const counts = {
-        medication:
-          results.find((r) => r.dataType === "medication")?.recordCount || 0,
-        labData:
-          results.find((r) => r.dataType === "labdata")?.recordCount || 0,
-        chineseMed:
-          results.find((r) => r.dataType === "chinesemed")?.recordCount || 0,
-        imaging:
-          results.find((r) => r.dataType === "imaging")?.recordCount || 0,
-        allergy:
-          results.find((r) => r.dataType === "allergy")?.recordCount || 0,
-        surgery:
-          results.find((r) => r.dataType === "surgery")?.recordCount || 0,
-        discharge:
-          results.find((r) => r.dataType === "discharge")?.recordCount || 0,
-        medDays:
-          results.find((r) => r.dataType === "medDays")?.recordCount || 0,
-        patientSummary:
-          results.find((r) => r.dataType === "patientsummary")?.recordCount ||
-          0,
-        masterMenu: 1, // 主選單資料已獲取
-      };
+      // 使用 Map 創建計數對象
+      const countsMap = new Map([
+        ["medication", 0],
+        ["labData", 0],
+        ["chineseMed", 0],
+        ["imaging", 0],
+        ["allergy", 0],
+        ["surgery", 0],
+        ["discharge", 0],
+        ["medDays", 0],
+        ["patientSummary", 0],
+        ["masterMenu", 1] // 主選單資料已獲取
+      ]);
+      
+      // 填充實際計數
+      results.forEach(result => {
+        if (result.dataType === "medication") countsMap.set("medication", result.recordCount || 0);
+        else if (result.dataType === "labdata") countsMap.set("labData", result.recordCount || 0);
+        else if (result.dataType === "chinesemed") countsMap.set("chineseMed", result.recordCount || 0);
+        else if (result.dataType === "imaging") countsMap.set("imaging", result.recordCount || 0);
+        else if (result.dataType === "allergy") countsMap.set("allergy", result.recordCount || 0);
+        else if (result.dataType === "surgery") countsMap.set("surgery", result.recordCount || 0);
+        else if (result.dataType === "discharge") countsMap.set("discharge", result.recordCount || 0);
+        else if (result.dataType === "medDays") countsMap.set("medDays", result.recordCount || 0);
+        else if (result.dataType === "patientsummary") countsMap.set("patientSummary", result.recordCount || 0);
+      });
 
       // Build notification text
       const dataCounts = [];
-      if (counts.medication > 0) dataCounts.push(`${counts.medication} 筆藥歷`);
-      if (counts.labData > 0) dataCounts.push(`${counts.labData} 筆檢驗`);
-      if (counts.chineseMed > 0) dataCounts.push(`${counts.chineseMed} 筆中醫`);
-      if (counts.imaging > 0) dataCounts.push(`${counts.imaging} 筆影像`);
-      if (counts.allergy > 0) dataCounts.push(`${counts.allergy} 筆過敏`);
-      if (counts.surgery > 0) dataCounts.push(`${counts.surgery} 筆手術`);
-      if (counts.discharge > 0) dataCounts.push(`${counts.discharge} 筆病摘`);
-      if (counts.medDays > 0) dataCounts.push(`${counts.medDays} 筆餘藥`);
-      if (counts.patientSummary > 0)
-        dataCounts.push(`${counts.patientSummary} 筆摘要`);
+      if (countsMap.get("medication") > 0) dataCounts.push(`${countsMap.get("medication")} 筆藥歷`);
+      if (countsMap.get("labData") > 0) dataCounts.push(`${countsMap.get("labData")} 筆檢驗`);
+      if (countsMap.get("chineseMed") > 0) dataCounts.push(`${countsMap.get("chineseMed")} 筆中醫`);
+      if (countsMap.get("imaging") > 0) dataCounts.push(`${countsMap.get("imaging")} 筆影像`);
+      if (countsMap.get("allergy") > 0) dataCounts.push(`${countsMap.get("allergy")} 筆過敏`);
+      if (countsMap.get("surgery") > 0) dataCounts.push(`${countsMap.get("surgery")} 筆手術`);
+      if (countsMap.get("discharge") > 0) dataCounts.push(`${countsMap.get("discharge")} 筆病摘`);
+      if (countsMap.get("medDays") > 0) dataCounts.push(`${countsMap.get("medDays")} 筆餘藥`);
+      if (countsMap.get("patientSummary") > 0) dataCounts.push(`${countsMap.get("patientSummary")} 筆摘要`);
 
       let notificationText;
       if (dataCounts.length === 0) {
@@ -1397,6 +1272,23 @@ function fetchAllDataTypes() {
       });
     });
 }
+
+// 使用 Map 定義 API 路徑
+const apiPathMap = new Map([
+  ["medication", "imue0008/imue0008s02/get-data"],
+  ["labdata", "imue0060/imue0060s02/get-data"],
+  ["chinesemed", "imue0090/imue0090s02/get-data"],
+  ["imaging", "imue0130/imue0130s02/get-data"],
+  ["allergy", "imue0040/imue0040s02/get-data"],
+  ["surgery", "imue0020/imue0020s02/get-data"],
+  ["discharge", "imue0070/imue0070s02/get-data"],
+  ["medDays", "imue0120/imue0120s01/pres-med-day"],
+  ["patientsummary", "imue2000/imue2000s01/get-summary"],
+  ["masterMenu", "imue1000/imue1000s02/master-menu"],
+  ["rehabilitation", "imue0080/imue0080s02/get-data"],
+  ["acupuncture", "imue0160/imue0160s02/get-data"],
+  ["specialChineseMedCare", "imue0170/imue0170s02/get-data"]
+]);
 
 function enhancedFetchData(dataType, options = {}) {
   const {
@@ -1439,45 +1331,13 @@ function enhancedFetchData(dataType, options = {}) {
   let retryCount = 0;
   // console.log(`開始獲取 ${dataType} 資料 - ${new Date().toISOString()}`);
 
-  // 資料類型的顯示文字對照表
-  const typeTextMap = {
-    medication: "藥歷",
-    labdata: "檢驗資料",
-    chinesemed: "中醫用藥",
-    imaging: "醫療影像",
-    allergy: "過敏資料",
-    surgery: "手術記錄",
-    discharge: "出院病摘",
-    medDays: "藥品餘藥",
-    patientsummary: "病患摘要",
-    masterMenu: "主選單",
-    rehabilitation: "復健治療",
-    acupuncture: "針灸治療",
-    specialChineseMedCare: "特殊中醫處置",
-  };
-
-  // API 路徑對照表
-  const apiPath = {
-    medication: "imue0008/imue0008s02/get-data",
-    labdata: "imue0060/imue0060s02/get-data",
-    chinesemed: "imue0090/imue0090s02/get-data",
-    imaging: "imue0130/imue0130s02/get-data",
-    allergy: "imue0040/imue0040s02/get-data",
-    surgery: "imue0020/imue0020s02/get-data",
-    discharge: "imue0070/imue0070s02/get-data",
-    medDays: "imue0120/imue0120s01/pres-med-day",
-    patientsummary: "imue2000/imue2000s01/get-summary",
-    masterMenu: "imue1000/imue1000s02/master-menu",
-    rehabilitation: "imue0080/imue0080s02/get-data",
-    acupuncture: "imue0160/imue0160s02/get-data",
-    specialChineseMedCare: "imue0170/imue0170s02/get-data",
-  }[dataType];
-
   // 主要的獲取邏輯
   const attemptFetch = () => {
     return new Promise((resolve, reject) => {
       // 構建 API URL
+      const apiPath = apiPathMap.get(dataType);
       let apiUrl;
+      
       if (dataType === "patientsummary") {
         apiUrl =
           `https://medcloud2.nhi.gov.tw/imu/api/${apiPath}?drug_phet=false&drug_hemo=false&ctmri_assay=false&ctmri_dent=true&cli_datetime=` +
@@ -1546,59 +1406,29 @@ function enhancedFetchData(dataType, options = {}) {
               dataType === "patientsummary" ||
               dataType === "masterMenu")
           ) {
+            let rObject;
+            
+            if (dataType === "medDays") {
+              rObject = Array.isArray(data) ? data : [data];
+            } else if (dataType === "patientsummary") {
+              rObject = Array.isArray(recordsArray) ? recordsArray : (recordsArray ? [recordsArray] : []);
+            } else if (dataType === "masterMenu") {
+              rObject = [data]; // For masterMenu, wrap the entire response in an array
+            } else {
+              rObject = Array.isArray(recordsArray) ? recordsArray : [];
+            }
+            
             const normalizedData = {
-              rObject:
-                dataType === "medDays"
-                  ? Array.isArray(data)
-                    ? data
-                    : [data]
-                  : dataType === "patientsummary"
-                  ? Array.isArray(recordsArray)
-                    ? recordsArray
-                    : recordsArray
-                    ? [recordsArray]
-                    : []
-                  : dataType === "masterMenu"
-                  ? [data] // For masterMenu, wrap the entire response in an array
-                  : Array.isArray(recordsArray)
-                  ? recordsArray
-                  : [],
+              rObject: rObject,
               originalData: data,
             };
-            switch (dataType) {
-              case "medication":
-                window.lastInterceptedMedicationData = normalizedData;
-                break;
-              case "labdata":
-                window.lastInterceptedLabData = normalizedData;
-                break;
-              case "chinesemed":
-                window.lastInterceptedChineseMedData = normalizedData;
-                break;
-              case "imaging":
-                window.lastInterceptedImagingData = normalizedData;
-                break;
-              case "allergy":
-                window.lastInterceptedAllergyData = normalizedData;
-                break;
-              case "surgery":
-                window.lastInterceptedSurgeryData = normalizedData;
-                break;
-              case "discharge":
-                window.lastInterceptedDischargeData = normalizedData;
-                break;
-              case "medDays":
-                window.lastInterceptedMedDaysData = normalizedData;
-                break;
-              case "patientsummary":
-                window.lastInterceptedPatientSummaryData = normalizedData;
-                break;
-              case "masterMenu":
-                window.lastInterceptedMasterMenuData = normalizedData;
-                // Log the master menu data for debugging
-                // console.log('Master Menu data captured:', JSON.stringify(data, null, 2));
-                break;
+            
+            // 使用 Map 更新全局變數
+            const varName = dataVarMap.get(dataType);
+            if (varName) {
+              window[varName] = normalizedData;
             }
+            
             saveData(normalizedData, dataType, "direct");
             const recordCount = normalizedData.rObject.length;
             // console.log(`${dataType} 請求完成 - ${new Date().toISOString()}`);
@@ -1643,39 +1473,24 @@ function extractAndSaveToken() {
 
 // 新增輔助函數來獲取資料類型的中文名稱
 function getTypeText(type) {
-  const typeTextMap = {
-    medication: "西醫藥歷",
-    lab: "檢驗",
-    chinesemed: "中醫用藥",
-    imaging: "醫療影像",
-    allergy: "過敏",
-    surgery: "手術記錄",
-    discharge: "出院病摘",
-    medDays: "藥品餘藥",
-    patientsummary: "病患摘要",
-    masterMenu: "主選單",
-    rehabilitation: "復健治療",
-    acupuncture: "針灸治療",
-    specialChineseMedCare: "特殊中醫處置",
-  };
-  return typeTextMap[type] || type;
+  return typeTextMap.get(type) || type;
 }
 
 // 新增: 節點ID與資料類型對應表
-const nodeToDataTypeMap = {
-  1.1: "patientsummary",
-  2.1: "medication",
-  2.4: "medDays",
-  3.1: "chinesemed",
-  3.2: "acupuncture",
-  3.3: "specialChineseMedCare",
-  5.1: "allergy",
-  6.1: "labdata",
-  6.2: "imaging",
-  7.1: "surgery",
-  8.1: "discharge",
-  9.1: "rehabilitation",
-};
+const nodeToDataTypeMap = new Map([
+  ["1.1", "patientsummary"],
+  ["2.1", "medication"],
+  ["2.4", "medDays"],
+  ["3.1", "chinesemed"],
+  ["3.2", "acupuncture"],
+  ["3.3", "specialChineseMedCare"],
+  ["5.1", "allergy"],
+  ["6.1", "labdata"],
+  ["6.2", "imaging"],
+  ["7.1", "surgery"],
+  ["8.1", "discharge"],
+  ["9.1", "rehabilitation"]
+]);
 
 // 新增: 檢查資料類型是否有授權
 function isDataTypeAuthorized(dataType) {
@@ -1689,9 +1504,12 @@ function isDataTypeAuthorized(dataType) {
     const prsnAuth = masterMenuData.prsnAuth || [];
 
     // 反向查找: 從資料類型找到對應的節點ID
-    const nodeIds = Object.entries(nodeToDataTypeMap)
-      .filter(([node, type]) => type === dataType)
-      .map(([node, type]) => node);
+    const nodeIds = [];
+    for (const [node, type] of nodeToDataTypeMap.entries()) {
+      if (type === dataType) {
+        nodeIds.push(node);
+      }
+    }
 
     // 檢查任何對應的節點ID是否在授權列表中
     return nodeIds.some((nodeId) => prsnAuth.includes(nodeId));
@@ -1710,47 +1528,10 @@ function createEmptyDataResult(dataType) {
     originalData: { rObject: [] },
   };
 
-  // Update corresponding window variable to ensure previous data doesn't persist
-  switch (dataType) {
-    case "medication":
-      window.lastInterceptedMedicationData = emptyData;
-      break;
-    case "labdata":
-      window.lastInterceptedLabData = emptyData;
-      break;
-    case "chinesemed":
-      window.lastInterceptedChineseMedData = emptyData;
-      break;
-    case "imaging":
-      window.lastInterceptedImagingData = emptyData;
-      break;
-    case "allergy":
-      window.lastInterceptedAllergyData = emptyData;
-      break;
-    case "surgery":
-      window.lastInterceptedSurgeryData = emptyData;
-      break;
-    case "discharge":
-      window.lastInterceptedDischargeData = emptyData;
-      break;
-    case "medDays":
-      window.lastInterceptedMedDaysData = emptyData;
-      break;
-    case "patientsummary":
-      window.lastInterceptedPatientSummaryData = emptyData;
-      break;
-    case "masterMenu":
-      window.lastInterceptedMasterMenuData = emptyData;
-      break;
-    case "rehabilitation":
-      window.lastInterceptedRehabilitationData = emptyData;
-      break;
-    case "acupuncture":
-      window.lastInterceptedAcupunctureData = emptyData;
-      break;
-    case "specialChineseMedCare":
-      window.lastInterceptedSpecialChineseMedCareData = emptyData;
-      break;
+  // 使用 Map 更新對應的全局變數
+  const varName = dataVarMap.get(dataType);
+  if (varName) {
+    window[varName] = emptyData;
   }
 
   return {
@@ -1835,19 +1616,9 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action === "dataCleared") {
     console.log("Data cleared from popup");
     // Reset local data variables
-    window.lastInterceptedMedicationData = null;
-    window.lastInterceptedLabData = null;
-    window.lastInterceptedChineseMedData = null;
-    window.lastInterceptedImagingData = null;
-    window.lastInterceptedAllergyData = null;
-    window.lastInterceptedSurgeryData = null;
-    window.lastInterceptedDischargeData = null;
-    window.lastInterceptedMedDaysData = null;
-    window.lastInterceptedPatientSummaryData = null;
-    window.lastInterceptedMasterMenuData = null;
-    window.lastInterceptedRehabilitationData = null;
-    window.lastInterceptedAcupunctureData = null;
-    window.lastInterceptedSpecialChineseMedCareData = null;
+    for (const varName of dataVarMap.values()) {
+      window[varName] = null;
+    }
 
     sendResponse({ status: "cleared" });
     return true;

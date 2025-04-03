@@ -41,39 +41,33 @@ function injectLegacyContent() {
     .then((localDataHandler) => {
       console.log("Local data handler loaded");
 
-      // 設置消息監聽器處理本地資料載入
-      chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-        // 處理載入本地資料的請求
-        if (message.action === "loadLocalData") {
+      // 使用 Map 处理不同的消息动作
+      const messageHandlers = new Map([
+        ["loadLocalData", (message, sendResponse) => {
           console.log("Received loadLocalData request");
-
-          // 使用本地資料處理器處理資料
           const result = localDataHandler.processLocalData(
             message.data,
             message.filename
           );
-
-          // 發送處理結果
           sendResponse(result);
-          return true; // 保持消息通道開啟以進行非同步回應
-        }
-
-        // 處理清除本地資料的請求
-        if (message.action === "clearLocalData") {
+        }],
+        ["clearLocalData", (message, sendResponse) => {
           console.log("Received clearLocalData request");
-
-          // 清除本地資料
           const result = localDataHandler.clearLocalData();
-
-          // 發送處理結果
           sendResponse(result);
-          return true;
-        }
-
-        // 處理獲取患者資料的請求
-        if (message.action === "getPatientData") {
-          // 這部分保持原有的實現邏輯
+        }],
+        ["getPatientData", (message, sendResponse) => {
+          // 这部分保持原有的实现逻辑
           // ...
+        }]
+      ]);
+
+      // 设置消息监听器处理本地数据加载
+      chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
+        const handler = messageHandlers.get(message.action);
+        if (handler) {
+          handler(message, sendResponse);
+          return true; // 保持消息通道开启以进行异步响应
         }
       });
     })
@@ -81,52 +75,38 @@ function injectLegacyContent() {
       console.error("Error loading local data handler:", error);
     });
 
-  // 在您現有的 message 監聽器中添加對 dataForExtension 消息的處理
+  // 使用 Map 存储数据类型与对应处理函数的映射
+  const dataTypeHandlers = new Map([
+    ["medication", (data) => { window.lastInterceptedMedicationData = data; }],
+    ["lab", (data) => { window.lastInterceptedLabData = data; }],
+    ["chinesemed", (data) => { window.lastInterceptedChineseMedData = data; }],
+    ["imaging", (data) => { window.lastInterceptedImagingData = data; }],
+    ["allergy", (data) => { window.lastInterceptedAllergyData = data; }],
+    ["surgery", (data) => { window.lastInterceptedSurgeryData = data; }],
+    ["discharge", (data) => { window.lastInterceptedDischargeData = data; }],
+    ["medDays", (data) => { window.lastInterceptedMedDaysData = data; }],
+    ["patientSummary", (data) => { window.lastInterceptedPatientSummaryData = data; }]
+  ]);
+
+  // 在您现有的 message 监听器中添加对 dataForExtension 消息的处理
   window.addEventListener("message", (event) => {
-    // 確保消息來自我們的頁面
+    // 确保消息来自我们的页面
     if (event.source !== window) return;
 
     try {
       if (event.data && event.data.type === "dataForExtension") {
-        // console.log("擴充功能收到頁面傳來的數據:", event.data.dataType);
+        // console.log("扩充功能收到页面传来的数据:", event.data.dataType);
 
-        // 創建安全的數據副本
+        // 创建安全的数据副本
         const safeData = JSON.parse(JSON.stringify(event.data.data));
-
-        // 設置相應的全局變量
-        switch (event.data.dataType) {
-          case "medication":
-            window.lastInterceptedMedicationData = safeData;
-            // console.log("擴充功能設置了 medication 數據");
-            break;
-          case "lab":
-            window.lastInterceptedLabData = safeData;
-            break;
-          case "chinesemed":
-            window.lastInterceptedChineseMedData = safeData;
-            break;
-          case "imaging":
-            window.lastInterceptedImagingData = safeData;
-            break;
-          case "allergy":
-            window.lastInterceptedAllergyData = safeData;
-            break;
-          case "surgery":
-            window.lastInterceptedSurgeryData = safeData;
-            break;
-          case "discharge":
-            window.lastInterceptedDischargeData = safeData;
-            break;
-          case "medDays":
-            window.lastInterceptedMedDaysData = safeData;
-            break;
-          case "patientSummary":
-            window.lastInterceptedPatientSummaryData = safeData;
-            // console.log("patientsummary - Data stored in global variable:", safeData);
-            break;
+        
+        // 使用 Map 查找并执行相应的处理函数
+        const handler = dataTypeHandlers.get(event.data.dataType);
+        if (handler) {
+          handler(safeData);
         }
 
-        // 使用 setTimeout 確保變量已完全初始化後再觸發事件
+        // 使用 setTimeout 确保变量已完全初始化后再触发事件
         setTimeout(() => {
           const customEvent = new CustomEvent("dataFetchCompleted", {
             detail: { type: event.data.dataType },
@@ -135,11 +115,11 @@ function injectLegacyContent() {
         }, 100);
       }
 
-      // 處理本地數據清除消息
+      // 处理本地数据清除消息
       if (event.data && event.data.type === "localDataCleared") {
         console.log("收到本地數據清除消息");
 
-        // 可以添加一些清除本地數據的邏輯
+        // 可以添加一些清除本地数据的逻辑
         // ...
       }
     } catch (error) {

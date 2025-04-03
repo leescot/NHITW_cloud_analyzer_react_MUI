@@ -21,19 +21,19 @@ const DataStatusTab = ({ dataStatus }) => {
 
   // Helper function to get the appropriate icon for each data type
   const getDataTypeIcon = (key) => {
-    const icons = {
-      medication: <LocalPharmacyIcon fontSize="large" />,
-      labData: <ScienceIcon fontSize="large" />,
-      chineseMed: <GrassIcon fontSize="large" />,
-      imaging: <ImageIcon fontSize="large" />,
-      allergy: <WarningIcon fontSize="large" />,
-      surgery: <MedicalServicesIcon fontSize="large" />,
-      discharge: <DescriptionIcon fontSize="large" />,
-      medDays: <AccessTimeIcon fontSize="large" />,
-      patientSummary: <SummarizeIcon fontSize="large" />
-    };
+    const icons = new Map([
+      ['medication', <LocalPharmacyIcon fontSize="large" />],
+      ['labData', <ScienceIcon fontSize="large" />],
+      ['chineseMed', <GrassIcon fontSize="large" />],
+      ['imaging', <ImageIcon fontSize="large" />],
+      ['allergy', <WarningIcon fontSize="large" />],
+      ['surgery', <MedicalServicesIcon fontSize="large" />],
+      ['discharge', <DescriptionIcon fontSize="large" />],
+      ['medDays', <AccessTimeIcon fontSize="large" />],
+      ['patientSummary', <SummarizeIcon fontSize="large" />]
+    ]);
 
-    return icons[key] || <DescriptionIcon fontSize="large" />;
+    return icons.get(key) || <DescriptionIcon fontSize="large" />;
   };
 
   // Monitor for loading state
@@ -99,19 +99,21 @@ const DataStatusTab = ({ dataStatus }) => {
 
 // Helper function to get short data type labels
 const getShortLabel = (key) => {
-  const labels = {
-    medication: '西藥',
-    labData: '檢驗',
-    chineseMed: '中藥',
-    imaging: '影像',
-    allergy: '過敏',
-    surgery: '手術',
-    discharge: '出院',
-    medDays: '餘藥',
-    patientSummary: '摘要'
-  };
+  // # zh-TW: 使用 Map 來保存資料類型與對應短標籤的映射關係
+  const labels = new Map([
+    ['medication', '西藥'],
+    ['labData', '檢驗'],
+    ['chineseMed', '中藥'],
+    ['imaging', '影像'],
+    ['allergy', '過敏'],
+    ['surgery', '手術'],
+    ['discharge', '出院'],
+    ['medDays', '餘藥'],
+    ['patientSummary', '摘要']
+  ]);
 
-  return labels[key] || key;
+  // 返回對應的短標籤，若找不到則返回原始 key
+  return labels.get(key) || key;
 };
 
 export default DataStatusTab;

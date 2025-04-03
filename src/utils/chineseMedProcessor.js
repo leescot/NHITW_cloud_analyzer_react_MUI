@@ -99,38 +99,43 @@ export const chineseMedProcessor = {
     return dailyDosage.toString();
   },
 
-  // Add calculation for per-dose amount
+  // 使用 Map 計算每次劑量
   calculatePerDosage(dosage, frequency, days) {
     if (!dosage || !frequency || !days) return '';
 
-    const frequencyMap = {
-      'QD': 1, 'QDP': 1, 'DAILY': 1,
-      'QAM': 1, 'QPM': 1,
-      'QL': 1, 'QN': 1,
-      'HS': 1, 'HSP': 1,
-      'BID': 2, 'BIDP': 2,
-      'TID': 3, 'TIDP': 3,
-      'QID': 4, 'QIDP': 4,
-      'Q2H': 12, 'Q4H': 6, 'Q6H': 4, 'Q8H': 3, 'Q12H': 2,
+    // 使用 Map 替代 if-else 結構，映射頻率到每日次數
+    const frequencyMap = new Map([
+      // 每日 1 次
+      ['QD', 1], ['QDP', 1], ['DAILY', 1],
+      ['QAM', 1], ['QPM', 1],
+      ['QL', 1], ['QN', 1],
+      ['HS', 1], ['HSP', 1],
+      // 每日多次
+      ['BID', 2], ['BIDP', 2],
+      ['TID', 3], ['TIDP', 3],
+      ['QID', 4], ['QIDP', 4],
+      ['Q2H', 12], ['Q4H', 6], ['Q6H', 4], ['Q8H', 3], ['Q12H', 2],
+      // 少於每日 1 次
+      ['QOD', 1/2], ['Q2D', 1/2],
+      ['QW', 1/7], ['BIW', 2/7], ['TIW', 3/7],
+      // 特殊情況
+      ['PRN', null], ['PRNB', null], ['ASORDER', null], ['ONCE', null], ['需要時', null],
+      ['STAT', null], ['ST', null],
+    ]);
 
-      // frequency below QD
-      'QOD': 1/2, 'Q2D': 1/2,
-      'QW': 1/7, 'BIW': 2/7, 'TIW': 3/7,
-
-      // known special
-      'PRN': null, 'PRNB': null, 'ASORDER': null, 'ONCE': null, '需要時': null,
-      'STAT': null, 'ST': null,
-    };
-    const freqRegexStr = Object.keys(frequencyMap).join("|");
+    // 建立正則表達式模式
+    const freqRegexStr = Array.from(frequencyMap.keys()).join("|");
     const freqRegex = new RegExp(freqRegexStr, "i");
     const freqMatch = frequency.match(freqRegex);
+
     if (!freqMatch) {
       console.log('無法識別的頻次:', frequency);
       return 'SPECIAL';
     }
 
     const freq = freqMatch[0].toUpperCase();
-    const timesPerDay = frequencyMap[freq];
+    const timesPerDay = frequencyMap.get(freq);
+
     if (!Number.isFinite(timesPerDay)) {
       return 'SPECIAL';
     }
@@ -173,7 +178,7 @@ export const chineseMedProcessor = {
     return (dateOrder + days * msPerDay - dateNow) / msPerDay;
   },
 
-  // Update formatChineseMedData
+  // 格式化中藥資料
   formatChineseMedData(med) {
     const perDosage = this.calculatePerDosage(med.order_qty, med.drug_fre, med.day);
     const dailyDosage = this.calculateDailyDosage(med.order_qty, med.day);
@@ -187,8 +192,8 @@ export const chineseMedProcessor = {
       type: med.cdrug_dose_name,
       isMulti: med.drug_multi_mark === 'Y',
       sosc_name: med.cdrug_sosc_name || '',
-      perDosage: perDosage, // Add the per-dose calculation
-      dailyDosage: dailyDosage // Add the daily dosage calculation
+      perDosage: perDosage, // 加入每次劑量計算
+      dailyDosage: dailyDosage // 加入每日劑量計算
     };
   },
 
@@ -261,6 +266,7 @@ export const chineseMedProcessor = {
     return [...medications].sort((a, b) => b.dosage - a.dosage);
   },
 
+  // 使用 Map 處理不同的顯示格式
   getMedicationText(med, {
     copyFormat,
     showEffectName = false,
@@ -270,18 +276,19 @@ export const chineseMedProcessor = {
     const dosageText = `${doseFormat === 'perDose' ? med.perDosage : med.dailyDosage}g`;
     const effectText = med.sosc_name && showEffectName ? ` - ${med.sosc_name}` : '';
 
-    switch (copyFormat) {
-      case 'nameWithDosageVertical':
-      case 'nameWithDosageHorizontal':
-        return `${nameText} ${dosageText}${effectText}`;
-      case 'nameVertical':
-      case 'nameHorizontal':
-      default:
-        return nameText;
-    }
+    // 使用 Map 映射不同的格式
+    const formatMap = new Map([
+      ['nameWithDosageVertical', `${nameText} ${dosageText}${effectText}`],
+      ['nameWithDosageHorizontal', `${nameText} ${dosageText}${effectText}`],
+      ['nameVertical', nameText],
+      ['nameHorizontal', nameText]
+    ]);
+
+    // 返回對應格式的文字，如果找不到則返回預設值
+    return formatMap.get(copyFormat) || nameText;
   },
 
-  // Format Chinese medicine group for copying with different formats
+  // 格式化中藥組清單
   formatChineseMedList(group, {
     copyFormat,
     showDiagnosis = true,
@@ -292,7 +299,7 @@ export const chineseMedProcessor = {
       return '';
     }
 
-    // Format the header with date, hospital, days and diagnosis
+    // 格式化標頭，包含日期、醫院、天數和診斷
     let header = `${group.date} - ${group.hosp} ${group.days}天 ${group.freq}`;
     if (showDiagnosis && group.icd_code && group.icd_name) {
       header += ` [${group.icd_code} ${group.icd_name}]`;
@@ -303,11 +310,12 @@ export const chineseMedProcessor = {
 
     const medicationTexts = sortedMedications.map(med => this.getMedicationText(med, {copyFormat, showEffectName, doseFormat}));
 
-    // Format the full output with header
-    if (copyFormat.includes('Horizontal')) {
-      return `${header}\n${medicationTexts.join(', ')}`;
-    } else {
-      return `${header}\n${medicationTexts.join('\n')}`;
-    }
+    // 使用 Map 決定輸出格式
+    const outputFormatMap = new Map([
+      [true, `${header}\n${medicationTexts.join(', ')}`], // 水平格式
+      [false, `${header}\n${medicationTexts.join('\n')}`] // 垂直格式
+    ]);
+
+    return outputFormatMap.get(copyFormat.includes('Horizontal'));
   },
 };

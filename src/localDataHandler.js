@@ -23,69 +23,60 @@ export function processLocalData(jsonData, filename) {
     // 重置資料類型追蹤
     const loadedTypes = [];
 
-    // 檢查不同種類的資料並處理
-    if (jsonData.medication) {
-      window.lastInterceptedMedicationData = JSON.parse(JSON.stringify(jsonData.medication));
-      loadedTypes.push('medication');
+    // 使用 Map 定義資料類型及其處理邏輯
+    const dataTypeHandlers = new Map([
+      ['medication', () => {
+        window.lastInterceptedMedicationData = JSON.parse(JSON.stringify(jsonData.medication));
+        loadedTypes.push('medication');
+        triggerDataFetchCompleted('medication');
+      }],
+      ['lab', () => {
+        window.lastInterceptedLabData = JSON.parse(JSON.stringify(jsonData.lab));
+        loadedTypes.push('labData');
+        triggerDataFetchCompleted('lab');
+      }],
+      ['chinesemed', () => {
+        window.lastInterceptedChineseMedData = JSON.parse(JSON.stringify(jsonData.chinesemed));
+        loadedTypes.push('chineseMed');
+        triggerDataFetchCompleted('chinesemed');
+      }],
+      ['imaging', () => {
+        window.lastInterceptedImagingData = JSON.parse(JSON.stringify(jsonData.imaging));
+        loadedTypes.push('imaging');
+        triggerDataFetchCompleted('imaging');
+      }],
+      ['allergy', () => {
+        window.lastInterceptedAllergyData = JSON.parse(JSON.stringify(jsonData.allergy));
+        loadedTypes.push('allergy');
+        triggerDataFetchCompleted('allergy');
+      }],
+      ['surgery', () => {
+        window.lastInterceptedSurgeryData = JSON.parse(JSON.stringify(jsonData.surgery));
+        loadedTypes.push('surgery');
+        triggerDataFetchCompleted('surgery');
+      }],
+      ['discharge', () => {
+        window.lastInterceptedDischargeData = JSON.parse(JSON.stringify(jsonData.discharge));
+        loadedTypes.push('discharge');
+        triggerDataFetchCompleted('discharge');
+      }],
+      ['medDays', () => {
+        window.lastInterceptedMedDaysData = JSON.parse(JSON.stringify(jsonData.medDays));
+        loadedTypes.push('medDays');
+        triggerDataFetchCompleted('medDays');
+      }],
+      ['patientSummary', () => {
+        window.lastInterceptedPatientSummaryData = JSON.parse(JSON.stringify(jsonData.patientSummary));
+        loadedTypes.push('patientSummary');
+        triggerDataFetchCompleted('patientSummary');
+      }]
+    ]);
 
-      // 觸發資料載入完成事件
-      triggerDataFetchCompleted('medication');
-    }
-
-    if (jsonData.lab) {
-      window.lastInterceptedLabData = JSON.parse(JSON.stringify(jsonData.lab));
-      loadedTypes.push('labData');
-
-      triggerDataFetchCompleted('lab');
-    }
-
-    if (jsonData.chinesemed) {
-      window.lastInterceptedChineseMedData = JSON.parse(JSON.stringify(jsonData.chinesemed));
-      loadedTypes.push('chineseMed');
-
-      triggerDataFetchCompleted('chinesemed');
-    }
-
-    if (jsonData.imaging) {
-      window.lastInterceptedImagingData = JSON.parse(JSON.stringify(jsonData.imaging));
-      loadedTypes.push('imaging');
-
-      triggerDataFetchCompleted('imaging');
-    }
-
-    if (jsonData.allergy) {
-      window.lastInterceptedAllergyData = JSON.parse(JSON.stringify(jsonData.allergy));
-      loadedTypes.push('allergy');
-
-      triggerDataFetchCompleted('allergy');
-    }
-
-    if (jsonData.surgery) {
-      window.lastInterceptedSurgeryData = JSON.parse(JSON.stringify(jsonData.surgery));
-      loadedTypes.push('surgery');
-
-      triggerDataFetchCompleted('surgery');
-    }
-
-    if (jsonData.discharge) {
-      window.lastInterceptedDischargeData = JSON.parse(JSON.stringify(jsonData.discharge));
-      loadedTypes.push('discharge');
-
-      triggerDataFetchCompleted('discharge');
-    }
-
-    if (jsonData.medDays) {
-      window.lastInterceptedMedDaysData = JSON.parse(JSON.stringify(jsonData.medDays));
-      loadedTypes.push('medDays');
-
-      triggerDataFetchCompleted('medDays');
-    }
-
-    if (jsonData.patientSummary) {
-      window.lastInterceptedPatientSummaryData = JSON.parse(JSON.stringify(jsonData.patientSummary));
-      loadedTypes.push('patientSummary');
-
-      triggerDataFetchCompleted('patientSummary');
+    // 檢查並處理每種資料類型
+    for (const [dataType, handler] of dataTypeHandlers.entries()) {
+      if (jsonData[dataType]) {
+        handler();
+      }
     }
 
     // 更新資料狀態
@@ -155,16 +146,23 @@ function notifyExtensionDataLoaded(source, dataTypes) {
  */
 export function clearLocalData() {
   try {
-    // 清除全局變數
-    window.lastInterceptedMedicationData = undefined;
-    window.lastInterceptedLabData = undefined;
-    window.lastInterceptedChineseMedData = undefined;
-    window.lastInterceptedImagingData = undefined;
-    window.lastInterceptedAllergyData = undefined;
-    window.lastInterceptedSurgeryData = undefined;
-    window.lastInterceptedDischargeData = undefined;
-    window.lastInterceptedMedDaysData = undefined;
-    window.lastInterceptedPatientSummaryData = undefined;
+    // 定義需要清除的全局變數名稱
+    const globalVarsToReset = [
+      'lastInterceptedMedicationData',
+      'lastInterceptedLabData',
+      'lastInterceptedChineseMedData',
+      'lastInterceptedImagingData',
+      'lastInterceptedAllergyData',
+      'lastInterceptedSurgeryData',
+      'lastInterceptedDischargeData',
+      'lastInterceptedMedDaysData',
+      'lastInterceptedPatientSummaryData'
+    ];
+
+    // 清除所有全局變數
+    globalVarsToReset.forEach(varName => {
+      window[varName] = undefined;
+    });
 
     // 重置狀態
     localDataStatus = {

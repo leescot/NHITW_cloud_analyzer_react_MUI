@@ -1,12 +1,12 @@
 /**
  * Overview_RecentDiagnosis Component
  *
- * This component displays recent diagnosis information from the past 180 days,
- * categorized by visit type (outpatient/emergency/inpatient).
- * - Outpatient and emergency diagnoses are sorted by frequency (most frequent first)
- * - Inpatient diagnoses show the first occurrence with date
- * - Each category shows up to 5 items, with a tooltip for viewing all if more than 5 items
- * - Vaccine records (ICD Z23-Z27) are displayed separately in their own category
+ * 此組件顯示過去180天的最近診斷信息，
+ * 按訪問類型分類（門診/急診/住診）。
+ * - 門診和急診診斷按頻率排序（最頻繁的優先）
+ * - 住診診斷顯示首次發生日期
+ * - 每個類別最多顯示5項，如果超過5項則顯示查看全部提示
+ * - 疫苗記錄（ICD Z23-Z27）單獨顯示在各自的類別中
  */
 
 import React, { useMemo } from "react";
@@ -35,28 +35,28 @@ const Overview_RecentDiagnosis = ({
   generalDisplaySettings = {},
   trackingDays = 180
 }) => {
-  // Process diagnosis data from medication and Chinese medicine records
+  // 處理來自藥物和中藥記錄的診斷數據
   const diagnosisData = useMemo(() => {
     const now = new Date();
     const cutoffDate = new Date();
     cutoffDate.setDate(now.getDate() - trackingDays);
 
     const outpatientDiagnoses = {};
-    const emergencyDiagnoses = [];  // Changed from object to array to store date info
+    const emergencyDiagnoses = [];  // 從物件改為數組以存儲日期信息
     const inpatientDiagnoses = [];
-    const vaccineRecords = [];      // New array for vaccine records
+    const vaccineRecords = [];      // 疫苗記錄的新數組
 
-    // Helper function to safely parse dates in various formats
+    // 輔助函數，用於安全解析各種格式的日期
     const parseDate = (dateStr) => {
       if (!dateStr) return null;
 
-      // Handle yyyy/mm/dd and yyyy-mm-dd formats
+      // 處理 yyyy/mm/dd 和 yyyy-mm-dd 格式
       let normalizedDate = dateStr.replace(/\//g, '-');
 
-      // Try parsing the date
+      // 嘗試解析日期
       const parsedDate = new Date(normalizedDate);
 
-      // Check if date is valid
+      // 檢查日期是否有效
       if (isNaN(parsedDate.getTime())) {
         return null;
       }
@@ -64,11 +64,11 @@ const Overview_RecentDiagnosis = ({
       return parsedDate;
     };
 
-    // Helper function to check if an ICD code is a vaccine code
+    // 輔助函數，檢查 ICD 代碼是否為疫苗代碼
     const isVaccineCode = (icdCode) => {
       if (!icdCode) return false;
 
-      // Check if it starts with Z23, Z24, Z25, Z26, or Z27
+      // 檢查是否以 Z23、Z24、Z25、Z26 或 Z27 開頭
       const normalizedCode = icdCode.toUpperCase();
       return normalizedCode.startsWith('Z23') ||
              normalizedCode.startsWith('Z24') ||
@@ -77,259 +77,193 @@ const Overview_RecentDiagnosis = ({
              normalizedCode.startsWith('Z27');
     };
 
-    // Process western medications
-    groupedMedications.forEach(group => {
-      // Skip entries older than the tracking period
+    // 使用 Map 來定義不同訪問類型的處理邏輯
+    const visitTypeHandlers = new Map([
+      ["門診", (diagnosisKey, isChineseMed) => {
+        outpatientDiagnoses[diagnosisKey] = {
+          count: (outpatientDiagnoses[diagnosisKey]?.count || 0) + 1,
+          isChineseMed
+        };
+      }],
+      ["藥局", (diagnosisKey, isChineseMed) => {
+        outpatientDiagnoses[diagnosisKey] = {
+          count: (outpatientDiagnoses[diagnosisKey]?.count || 0) + 1,
+          isChineseMed
+        };
+      }],
+      ["急診", (diagnosisKey, isChineseMed, group, normalizedIcdCode) => {
+        emergencyDiagnoses.push({
+          date: group.date,
+          code: normalizedIcdCode,
+          name: group.icd_name,
+          key: diagnosisKey,
+          isChineseMed,
+          hospital: group.hosp || group.hospital || ''
+        });
+      }],
+      ["住診", (diagnosisKey, isChineseMed, group, normalizedIcdCode) => {
+        const existingEntry = inpatientDiagnoses.find(entry => entry.code === normalizedIcdCode);
+        if (!existingEntry) {
+          inpatientDiagnoses.push({
+            date: group.date,
+            code: normalizedIcdCode,
+            name: group.icd_name,
+            key: diagnosisKey,
+            isChineseMed,
+            hospital: group.hosp || group.hospital || ''
+          });
+        }
+      }]
+    ]);
+
+    // 設定默認處理邏輯（用於未分類的訪問類型）
+    const defaultHandler = (diagnosisKey, isChineseMed) => {
+      outpatientDiagnoses[diagnosisKey] = {
+        count: (outpatientDiagnoses[diagnosisKey]?.count || 0) + 1,
+        isChineseMed
+      };
+    };
+
+    // 處理疫苗記錄的輔助函數
+    const processVaccineRecord = (group, normalizedIcdCode, diagnosisKey, isChineseMed) => {
+      // 檢查是否有J07開頭的疫苗藥物
+      let hasVaccineMedication = false;
+      let medicationNames = [];
+
+      if (Array.isArray(group.medications) && group.medications.length > 0) {
+        // 過濾出有J07開頭ATC碼的藥物
+        const vaccineFilteredMeds = group.medications.filter(med => med.atc_code && med.atc_code.startsWith('J07'));
+
+        // 如果有J07藥物，則記錄該筆為疫苗記錄
+        if (vaccineFilteredMeds.length > 0) {
+          hasVaccineMedication = true;
+          medicationNames = vaccineFilteredMeds.map(med => med.name || med.drugName || '').filter(Boolean);
+        }
+      } else if (group.atc_code && group.atc_code.startsWith('J07')) {
+        // 單一藥物情況
+        hasVaccineMedication = true;
+        medicationNames = [group.name || group.drugName].filter(Boolean);
+      }
+
+      // 只有當既有疫苗診斷碼又有J07藥物時，才加入疫苗記錄
+      if (hasVaccineMedication && medicationNames.length > 0) {
+        vaccineRecords.push({
+          date: group.date,
+          code: normalizedIcdCode,
+          name: group.icd_name,
+          hospital: group.hosp || group.hospital || '',
+          medications: medicationNames,
+          key: diagnosisKey,
+          isChineseMed
+        });
+        return true;
+      }
+      return false;
+    };
+
+    // 處理西藥
+    const processMedication = (group, isChineseMed = false) => {
+      // 跳過跟踪期間之前的條目
       const groupDate = parseDate(group.date);
-      if (!groupDate) {
+      if (!groupDate || groupDate < cutoffDate) {
         return;
       }
 
-      if (groupDate < cutoffDate) {
-        return;
-      }
-
-      // Skip entries without diagnosis info
+      // 跳過沒有診斷信息的條目
       if (!group.icd_code || !group.icd_name) {
         return;
       }
 
-      // Normalize ICD code to handle case sensitivity issues
-      const normalizedIcdCode = group.icd_code.toUpperCase();
-
-      const diagnosisKey = `${normalizedIcdCode}|${group.icd_name}`;
-
-      // 檢查診斷碼和藥物，只有當診斷碼是疫苗相關且至少有一個藥物是J07開頭ATC碼時，才將其視為疫苗記錄
-      if (isVaccineCode(normalizedIcdCode)) {
-        // 檢查是否有J07開頭的疫苗藥物
-        let hasVaccineMedication = false;
-        let medicationNames = [];
-
-        if (Array.isArray(group.medications) && group.medications.length > 0) {
-          // 過濾出有J07開頭ATC碼的藥物
-          const vaccineFilteredMeds = group.medications.filter(med => med.atc_code && med.atc_code.startsWith('J07'));
-
-          // 如果有J07藥物，則記錄該筆為疫苗記錄
-          if (vaccineFilteredMeds.length > 0) {
-            hasVaccineMedication = true;
-            medicationNames = vaccineFilteredMeds.map(med => med.name || med.drugName || '').filter(Boolean);
-          }
-        } else if (group.name || group.drugName) {
-          // 單一藥物情況
-          if (group.atc_code && group.atc_code.startsWith('J07')) {
-            hasVaccineMedication = true;
-            medicationNames = [group.name || group.drugName];
-          }
-        }
-
-        // 只有當既有疫苗診斷碼又有J07藥物時，才加入疫苗記錄
-        if (hasVaccineMedication && medicationNames.length > 0) {
-          vaccineRecords.push({
-          date: group.date,
-          code: normalizedIcdCode,
-          name: group.icd_name,
-          hospital: group.hosp || group.hospital || '',
-          medications: medicationNames,
-          key: diagnosisKey,
-          isChineseMed: false
-        });
-        }
-      } else {
-        // Normal diagnosis processing
-        if (group.visitType === "門診" || group.visitType === "藥局") {
-          // Always increment the count by 1 for each record
-          outpatientDiagnoses[diagnosisKey] = {
-            count: (outpatientDiagnoses[diagnosisKey]?.count || 0) + 1,
-            isChineseMed: false
-          };
-        } else if (group.visitType === "急診") {
-          // For emergency, just add one entry per record
-          emergencyDiagnoses.push({
-            date: group.date,
-            code: normalizedIcdCode,
-            name: group.icd_name,
-            key: diagnosisKey,
-            isChineseMed: false
-          });
-        } else if (group.visitType === "住診") {
-          // For inpatient, still just record the first occurrence
-          const existingEntry = inpatientDiagnoses.find(entry => entry.code === normalizedIcdCode);
-          if (!existingEntry) {
-            inpatientDiagnoses.push({
-              date: group.date,
-              code: normalizedIcdCode,
-              name: group.icd_name,
-              key: diagnosisKey,
-              isChineseMed: false
-            });
-          }
-        } else {
-          // Default to outpatient for any other visit type (including "藥局" if not caught earlier)
-          outpatientDiagnoses[diagnosisKey] = {
-            count: (outpatientDiagnoses[diagnosisKey]?.count || 0) + 1,
-            isChineseMed: false
-          };
-        }
-      }
-    });
-
-    // Process Chinese medications - apply the same fix
-    groupedChineseMeds.forEach(group => {
-      // Skip entries older than the tracking period
-      const groupDate = parseDate(group.date);
-      if (!groupDate || groupDate < cutoffDate) return;
-
-      // Skip entries without diagnosis info
-      if (!group.icd_code || !group.icd_name) return;
-
-      // Normalize ICD code
+      // 規範化 ICD 代碼以處理大小寫敏感性問題
       const normalizedIcdCode = group.icd_code.toUpperCase();
       const diagnosisKey = `${normalizedIcdCode}|${group.icd_name}`;
 
-      // 檢查診斷碼和藥物，只有當診斷碼是疫苗相關且至少有一個藥物是J07開頭ATC碼時，才將其視為疫苗記錄
+      // 檢查診斷碼是否為疫苗相關
       if (isVaccineCode(normalizedIcdCode)) {
-        // 檢查是否有J07開頭的疫苗藥物
-        let hasVaccineMedication = false;
-        let medicationNames = [];
+        // 處理疫苗記錄
+        const isProcessed = processVaccineRecord(group, normalizedIcdCode, diagnosisKey, isChineseMed);
+        if (isProcessed) return;
+      }
 
-        if (Array.isArray(group.medications) && group.medications.length > 0) {
-          // 過濾出有J07開頭ATC碼的藥物
-          const vaccineFilteredMeds = group.medications.filter(med => med.atc_code && med.atc_code.startsWith('J07'));
+      // 使用 Map 選擇適當的處理邏輯
+      const handler = visitTypeHandlers.get(group.visitType) || defaultHandler;
+      handler(diagnosisKey, isChineseMed, group, normalizedIcdCode);
+    };
 
-          // 如果有J07藥物，則記錄該筆為疫苗記錄
-          if (vaccineFilteredMeds.length > 0) {
-            hasVaccineMedication = true;
-            medicationNames = vaccineFilteredMeds.map(med => med.name || med.drugName || '').filter(Boolean);
+    // 處理西藥
+    groupedMedications.forEach(group => processMedication(group, false));
+    
+    // 處理中藥
+    groupedChineseMeds.forEach(group => processMedication(group, true));
+
+    // 使用Map定義每種類別的排序邏輯
+    const sorters = new Map([
+      ["outpatient", (data) => {
+        return Object.entries(data).map(([key, data]) => {
+          const [code, name] = key.split('|');
+          return {
+            code,
+            name,
+            count: data.count,
+            isChineseMed: data.isChineseMed,
+            key
+          };
+        }).sort((a, b) => {
+          // 先按計數排序（降序）
+          if (b.count !== a.count) {
+            return b.count - a.count;
           }
-        } else if (group.name || group.drugName) {
-          // 單一藥物情況
-          if (group.atc_code && group.atc_code.startsWith('J07')) {
-            hasVaccineMedication = true;
-            medicationNames = [group.name || group.drugName];
-          }
-        }
-
-        // 只有當既有疫苗診斷碼又有J07藥物時，才加入疫苗記錄
-        if (hasVaccineMedication && medicationNames.length > 0) {
-          vaccineRecords.push({
-          date: group.date,
-          code: normalizedIcdCode,
-          name: group.icd_name,
-          hospital: group.hosp || group.hospital || '',
-          medications: medicationNames,
-          key: diagnosisKey,
-          isChineseMed: true
+          // 如果計數相同，按 ICD 代碼排序（升序）
+          return a.code.localeCompare(b.code);
         });
-        }
-      } else {
-        // Fix: Same approach as with western medications
-        if (group.visitType === "門診" || group.visitType === "藥局") {
-          // Always increment the count by 1 for each record
-          const existing = outpatientDiagnoses[diagnosisKey];
-          outpatientDiagnoses[diagnosisKey] = {
-            count: (existing?.count || 0) + 1,
-            isChineseMed: true
-          };
-        } else if (group.visitType === "急診") {
-          // For emergency, just add one entry per record
-          emergencyDiagnoses.push({
-            date: group.date,
-            code: normalizedIcdCode,
-            name: group.icd_name,
-            key: diagnosisKey,
-            isChineseMed: true
-          });
-        } else if (group.visitType === "住診") {
-          // For inpatient, still just record the first occurrence
-          const existingEntry = inpatientDiagnoses.find(entry => entry.code === normalizedIcdCode);
-          if (!existingEntry) {
-            inpatientDiagnoses.push({
-              date: group.date,
-              code: normalizedIcdCode,
-              name: group.icd_name,
-              key: diagnosisKey,
-              isChineseMed: true
-            });
+      }],
+      ["emergency", (data) => {
+        return [...data].sort((a, b) => {
+          const dateA = parseDate(a.date);
+          const dateB = parseDate(b.date);
+          
+          if (!dateA || !dateB) {
+            return a.date.localeCompare(b.date);
           }
-        } else {
-          // Default to outpatient for any other visit type (including "藥局" if not caught earlier)
-          const existing = outpatientDiagnoses[diagnosisKey];
-          outpatientDiagnoses[diagnosisKey] = {
-            count: (existing?.count || 0) + 1,
-            isChineseMed: true
-          };
-        }
-      }
-    });
-
-    // Convert to arrays and sort by frequency (most frequent first)
-    const sortedOutpatient = Object.entries(outpatientDiagnoses).map(([key, data]) => {
-      const [code, name] = key.split('|');
-      return {
-        code,
-        name,
-        count: data.count,
-        isChineseMed: data.isChineseMed,
-        key
-      };
-    }).sort((a, b) => {
-      // First sort by count (descending)
-      if (b.count !== a.count) {
-        return b.count - a.count;
-      }
-      // If counts are the same, sort by ICD code (ascending)
-      return a.code.localeCompare(b.code);
-    });
-
-    // Emergency diagnoses - sort by date (newest first)
-    const sortedEmergency = [...emergencyDiagnoses].sort((a, b) => {
-      // Handle different date formats (yyyy/mm/dd or yyyy-mm-dd)
-      const dateA = parseDate(a.date);
-      const dateB = parseDate(b.date);
-
-      // If either date is invalid, fall back to string comparison
-      if (!dateA || !dateB) {
-        return a.date.localeCompare(b.date);
-      }
-
-      return dateB - dateA;
-    });
-
-    // Inpatient diagnoses are already an array - sort by date (newest first)
-    const sortedInpatient = [...inpatientDiagnoses].sort((a, b) => {
-      // Handle different date formats (yyyy/mm/dd or yyyy-mm-dd)
-      const dateA = parseDate(a.date);
-      const dateB = parseDate(b.date);
-
-      // If either date is invalid, fall back to string comparison
-      if (!dateA || !dateB) {
-        return a.date.localeCompare(b.date);
-      }
-
-      return dateB - dateA;
-    });
-
-    // Sort vaccine records by date (newest first)
-    const sortedVaccines = [...vaccineRecords].sort((a, b) => {
-      const dateA = parseDate(a.date);
-      const dateB = parseDate(b.date);
-
-      if (!dateA || !dateB) {
-        return a.date.localeCompare(b.date);
-      }
-
-      return dateB - dateA;
-    });
+          
+          return dateB - dateA;
+        });
+      }],
+      ["inpatient", (data) => {
+        return [...data].sort((a, b) => {
+          const dateA = parseDate(a.date);
+          const dateB = parseDate(b.date);
+          
+          if (!dateA || !dateB) {
+            return a.date.localeCompare(b.date);
+          }
+          
+          return dateB - dateA;
+        });
+      }],
+      ["vaccines", (data) => {
+        return [...data].sort((a, b) => {
+          const dateA = parseDate(a.date);
+          const dateB = parseDate(b.date);
+          
+          if (!dateA || !dateB) {
+            return a.date.localeCompare(b.date);
+          }
+          
+          return dateB - dateA;
+        });
+      }]
+    ]);
 
     return {
-      outpatient: sortedOutpatient,
-      emergency: sortedEmergency,
-      inpatient: sortedInpatient,
-      vaccines: sortedVaccines
+      outpatient: sorters.get("outpatient")(outpatientDiagnoses),
+      emergency: sorters.get("emergency")(emergencyDiagnoses),
+      inpatient: sorters.get("inpatient")(inpatientDiagnoses),
+      vaccines: sorters.get("vaccines")(vaccineRecords)
     };
   }, [groupedMedications, groupedChineseMeds, trackingDays]);
 
-  // Check if there's any diagnosis data
+  // 檢查是否有診斷數據
   const hasDiagnoses = useMemo(() => {
     return diagnosisData.outpatient.length > 0 ||
            diagnosisData.emergency.length > 0 ||
@@ -337,30 +271,54 @@ const Overview_RecentDiagnosis = ({
            diagnosisData.vaccines.length > 0;
   }, [diagnosisData]);
 
-  // Render a diagnosis category table row
-  const renderDiagnosisCategory = (title, diagnoses, isInpatient = false, isEmergency = false, isVaccine = false) => {
-    // Return nothing if no diagnoses in this category
+  // 使用Map來定義類別顯示配置
+  const categoryConfig = new Map([
+    ["門診", { 
+      shortTitle: "門", 
+      color: "primary.main", 
+      bgColor: alpha("#2196f3", 0.15),
+      isInpatient: false, 
+      isEmergency: false, 
+      isVaccine: false 
+    }],
+    ["急診", { 
+      shortTitle: "急", 
+      color: "#c62828", 
+      bgColor: alpha("#c62828", 0.15),
+      isInpatient: false, 
+      isEmergency: true, 
+      isVaccine: false 
+    }],
+    ["住診", { 
+      shortTitle: "住", 
+      color: "#388e3c", 
+      bgColor: alpha("#388e3c", 0.2),
+      isInpatient: true, 
+      isEmergency: false, 
+      isVaccine: false 
+    }],
+    ["疫苗", { 
+      shortTitle: "疫", 
+      color: "#1565c0", 
+      bgColor: alpha("#1565c0", 0.18),
+      isInpatient: false, 
+      isEmergency: false, 
+      isVaccine: true 
+    }]
+  ]);
+
+  // 渲染診斷類別表格行
+  const renderDiagnosisCategory = (title, diagnoses) => {
+    // 如果此類別中沒有診斷，則不返回任何內容
     if (diagnoses.length === 0) return null;
 
-    // Display up to 5 diagnoses, then show tooltip for more
+    // 顯示最多5個診斷，然後顯示更多提示
     const visibleDiagnoses = diagnoses.slice(0, 5);
     const hasMore = diagnoses.length > 5;
 
-    // Determine color based on category
-    const categoryColor = isEmergency ? "#c62828" :
-                         (isInpatient ? "#388e3c" :
-                         (isVaccine ? "#1565c0" : "primary.main"));
-
-    // Get background color (lighter version of the category color)
-    const bgColor = isEmergency ? alpha("#c62828", 0.15) :
-                   (isInpatient ? alpha("#388e3c", 0.2) :
-                   (isVaccine ? alpha("#1565c0", 0.18) : alpha("#2196f3", 0.15)));
-
-    // Convert full title to single character
-    const shortTitle = title === "門診" ? "門" :
-                      (title === "急診" ? "急" :
-                      (title === "住診" ? "住" :
-                      (title === "疫苗" ? "疫" : title)));
+    // 從Map中獲取類別配置
+    const config = categoryConfig.get(title) || categoryConfig.get("門診"); // 默認為門診配置
+    const { shortTitle, color, bgColor, isInpatient, isEmergency, isVaccine } = config;
 
     return (
       <TableRow>
@@ -370,7 +328,7 @@ const Overview_RecentDiagnosis = ({
           align="center"
           sx={{
             width: '10%',
-            verticalAlign: 'middle', // Center the content vertically
+            verticalAlign: 'middle',
             borderBottom: 'none',
             padding: '8px 2px',
             backgroundColor: bgColor,
@@ -381,10 +339,10 @@ const Overview_RecentDiagnosis = ({
               display: 'flex',
               alignItems: 'center',
               justifyContent: 'center',
-              borderRadius: '50%', // Make it circular
-              border: `1px solid ${categoryColor}`,
+              borderRadius: '50%',
+              border: `1px solid ${color}`,
               backgroundColor: 'white',
-              color: categoryColor,
+              color: color,
               fontSize: '0.75rem',
               width: '28px',
               height: '28px',
@@ -415,8 +373,8 @@ const Overview_RecentDiagnosis = ({
                       mr: 1,
                       bgcolor: 'transparent',
                       border: '1px solid',
-                      borderColor: categoryColor,
-                      color: categoryColor,
+                      borderColor: color,
+                      color: color,
                       '& .MuiChip-label': { px: 1 }
                     }}
                   />
@@ -433,8 +391,8 @@ const Overview_RecentDiagnosis = ({
                         mb: 0.3,
                         bgcolor: 'transparent',
                         border: '1px solid',
-                        borderColor: categoryColor,
-                        color: categoryColor,
+                        borderColor: color,
+                        color: color,
                         '& .MuiChip-label': { px: 1 }
                       }}
                     />
@@ -445,8 +403,8 @@ const Overview_RecentDiagnosis = ({
                         sx={{
                           fontSize: '0.65rem',
                           height: '18px',
-                          bgcolor: alpha(categoryColor, 0.08),
-                          color: categoryColor,
+                          bgcolor: alpha(color, 0.08),
+                          color: color,
                           '& .MuiChip-label': { px: 1 }
                         }}
                       />
@@ -460,18 +418,18 @@ const Overview_RecentDiagnosis = ({
                   sx={{ mr: 1 }}
                 >
                   {isVaccine ? (
-                    // For vaccines, show medication names only (date and hospital now in chip)
+                    // 對於疫苗，僅顯示藥物名稱（日期和醫院現在在芯片中）
                     <>{diagnosis.medications?.join(', ')}</>
                   ) : isInpatient || isEmergency ? (
-                    // For inpatient and emergency, show the diagnosis name only
+                    // 對於住院和急診，僅顯示診斷名稱
                     <>{diagnosis.name}</>
                   ) : (
-                    // For outpatient, show code, name and count (no change)
+                    // 對於門診，顯示代碼、名稱和計數（無變化）
                     <>{diagnosis.code} {diagnosis.name}</>
                   )}
                 </TypographySizeWrapper>
 
-                {/* Add Chinese Medicine icon if diagnosis is from Chinese medicine */}
+                {/* 如果診斷來自中醫，添加中醫圖標 */}
                 {diagnosis.isChineseMed && (
                   <Tooltip title="中醫診斷">
                     <GrassIcon
@@ -563,10 +521,10 @@ const Overview_RecentDiagnosis = ({
         ) : (
           <Table size="small" sx={{ '& .MuiTableCell-root': { padding: '4px 8px' } }}>
             <TableBody>
-              {/* Render the outpatient diagnoses */}
+              {/* 渲染門診診斷 */}
               {renderDiagnosisCategory("門診", diagnosisData.outpatient)}
 
-              {/* Add divider if there are more categories */}
+              {/* 添加分隔線（如果有更多類別） */}
               {diagnosisData.outpatient.length > 0 &&
                (diagnosisData.emergency.length > 0 ||
                 diagnosisData.inpatient.length > 0 ||
@@ -578,10 +536,10 @@ const Overview_RecentDiagnosis = ({
                 </TableRow>
               )}
 
-              {/* Render emergency diagnoses */}
-              {renderDiagnosisCategory("急診", diagnosisData.emergency, false, true)}
+              {/* 渲染急診診斷 */}
+              {renderDiagnosisCategory("急診", diagnosisData.emergency)}
 
-              {/* Add divider if needed */}
+              {/* 如果需要添加分隔線 */}
               {diagnosisData.emergency.length > 0 &&
                (diagnosisData.inpatient.length > 0 ||
                 diagnosisData.vaccines.length > 0) && (
@@ -592,10 +550,10 @@ const Overview_RecentDiagnosis = ({
                 </TableRow>
               )}
 
-              {/* Render inpatient diagnoses */}
-              {renderDiagnosisCategory("住診", diagnosisData.inpatient, true)}
+              {/* 渲染住院診斷 */}
+              {renderDiagnosisCategory("住診", diagnosisData.inpatient)}
 
-              {/* Add divider before vaccines if needed */}
+              {/* 添加疫苗前的分隔線（如果需要） */}
               {diagnosisData.inpatient.length > 0 &&
                diagnosisData.vaccines.length > 0 && (
                 <TableRow>
@@ -605,8 +563,8 @@ const Overview_RecentDiagnosis = ({
                 </TableRow>
               )}
 
-              {/* Render vaccine records */}
-              {renderDiagnosisCategory("疫苗", diagnosisData.vaccines, false, false, true)}
+              {/* 渲染疫苗記錄 */}
+              {renderDiagnosisCategory("疫苗", diagnosisData.vaccines)}
             </TableBody>
           </Table>
         )}

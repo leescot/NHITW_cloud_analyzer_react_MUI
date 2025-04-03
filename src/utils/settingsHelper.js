@@ -7,7 +7,7 @@ export const updateDataStatus = (setDataStatus) => {
       // Make a copy to avoid direct state mutation
       const updatedStatus = { ...response.dataStatus };
 
-      // Add any missing entries with default values
+      // 使用 Map 存儲預期的鍵和默認值
       const expectedKeys = [
         'medication', 'labData', 'chineseMed', 'imaging',
         'allergy', 'surgery', 'discharge', 'medDays', 'patientSummary'
@@ -25,20 +25,22 @@ export const updateDataStatus = (setDataStatus) => {
   });
 };
 
+// 從存儲鍵獲取狀態鍵的輔助函數 - 使用 Map 代替對象映射
+const storageToStatusKeyMap = new Map([
+  ['medicationData', 'medication'],
+  ['labData', 'labData'],
+  ['chinesemedData', 'chineseMed'],
+  ['imagingData', 'imaging'],
+  ['allergyData', 'allergy'],
+  ['surgeryData', 'surgery'],
+  ['dischargeData', 'discharge'],
+  ['medDaysData', 'medDays'],
+  ['patientSummaryData', 'patientSummary']
+]);
+
 // 從存儲鍵獲取狀態鍵的輔助函數
 const getStatusKeyFromStorageKey = (storageKey) => {
-  const mapping = {
-    'medicationData': 'medication',
-    'labData': 'labData',
-    'chinesemedData': 'chineseMed',
-    'imagingData': 'imaging',
-    'allergyData': 'allergy',
-    'surgeryData': 'surgery',
-    'dischargeData': 'discharge',
-    'medDaysData': 'medDays',
-    'patientSummaryData': 'patientSummary'
-  };
-  return mapping[storageKey] || storageKey;
+  return storageToStatusKeyMap.get(storageKey) || storageKey;
 };
 
 // 設定變更處理函數
@@ -91,7 +93,8 @@ export const handleFetchData = (setDataStatus) => {
 
 // 清除資料處理函數
 export const handleClearData = (setDataStatus) => {
-  chrome.storage.local.remove([
+  // 使用 Array 存儲需要清除的數據鍵
+  const dataKeysToRemove = [
     'medicationData',
     'labData',
     'chinesemedData',
@@ -100,7 +103,9 @@ export const handleClearData = (setDataStatus) => {
     'surgeryData',
     'dischargeData',
     'medDaysData'
-  ], () => {
+  ];
+
+  chrome.storage.local.remove(dataKeysToRemove, () => {
     console.log('All data cleared from storage');
     updateDataStatus(setDataStatus);
 

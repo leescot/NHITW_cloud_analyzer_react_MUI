@@ -73,21 +73,31 @@ const MedicationList = ({
     // 先用訪問類型過濾
     let visitTypeFiltered = [];
 
-    if (!selectedVisitType || selectedVisitType === "顯示所有項目") {
-      visitTypeFiltered = groupedMedications;
-    } else if (selectedVisitType === "門診+急診") {
-      visitTypeFiltered = groupedMedications.filter(
+    // 使用 Map 來處理訪問類型過濾邏輯
+    const visitTypeFilterMap = new Map([
+      ["", () => groupedMedications],
+      ["顯示所有項目", () => groupedMedications],
+      ["門診+急診", () => groupedMedications.filter(
         group => group.visitType === "門診" || group.visitType === "急診" || group.visitType === "藥局"
-      );
-    } else if (selectedVisitType === "門診") {
-      visitTypeFiltered = groupedMedications.filter(
+      )],
+      ["門診", () => groupedMedications.filter(
         group => group.visitType === "門診" || group.visitType === "藥局"
-      );
-    } else {
-      visitTypeFiltered = groupedMedications.filter(
-        group => group.visitType === selectedVisitType
-      );
-    }
+      )],
+      // 默認過濾器，處理特定訪問類型的情況
+      ["default", (visitType) => groupedMedications.filter(
+        group => group.visitType === visitType
+      )]
+    ]);
+
+    // 獲取對應的過濾函數
+    const filterFunc = visitTypeFilterMap.get(selectedVisitType) || 
+                      ((visitType) => visitTypeFilterMap.get("default")(visitType));
+
+    // 執行過濾
+    visitTypeFiltered = selectedVisitType === "" || selectedVisitType === "顯示所有項目" ? 
+                       filterFunc() : 
+                       (selectedVisitType === "門診+急診" || selectedVisitType === "門診" ? 
+                       filterFunc() : filterFunc(selectedVisitType));
 
     // 如果有搜尋文字，再進一步過濾藥物
     if (searchText.trim() !== "") {
@@ -221,12 +231,20 @@ const MedicationList = ({
     // 檢查群組是否被分配到顏色
     const colorGroups = settings.atc5ColorGroups || { red: [], orange: [], green: [] };
 
+    // 使用 Map 來映射顏色組名到顏色值
+    const colorMap = new Map([
+      ['red', { name: 'red', color: '#f44336' }],
+      ['orange', { name: 'orange', color: '#ed6c02' }],
+      ['green', { name: 'green', color: '#2e7d32' }]
+    ]);
+
+    // 檢查群組是否在各顏色組中
     if (colorGroups.red && colorGroups.red.includes(groupName)) {
-      return { name: 'red', color: '#f44336' };
+      return colorMap.get('red');
     } else if (colorGroups.orange && colorGroups.orange.includes(groupName)) {
-      return { name: 'orange', color: '#ed6c02' };
+      return colorMap.get('orange');
     } else if (colorGroups.green && colorGroups.green.includes(groupName)) {
-      return { name: 'green', color: '#2e7d32' };
+      return colorMap.get('green');
     }
 
     return null;
@@ -273,15 +291,17 @@ const MedicationList = ({
 
   // 根據看診類型獲取顏色
   const getVisitTypeColor = (visitType) => {
-    switch(visitType) {
-      case "急診":
-        return "#c62828"; // 較柔和的紅色
-      case "住診":
-        return "#388e3c"; // 較柔和的綠色
-      case "門診":
-      default:
-        return "primary.main"; // 預設藍色
-    }
+    // 使用 Map 取代 switch 結構
+    const visitTypeColorMap = new Map([
+      ["急診", "#c62828"], // 較柔和的紅色
+      ["住診", "#388e3c"], // 較柔和的綠色
+      ["門診", "primary.main"], // 預設藍色
+      // 其他任何未定義的訪問類型默認為 primary.main
+      ["default", "primary.main"]
+    ]);
+
+    // 返回相應顏色或默認顏色
+    return visitTypeColorMap.get(visitType) || visitTypeColorMap.get("default");
   };
 
   // Add new function to handle drug image link click

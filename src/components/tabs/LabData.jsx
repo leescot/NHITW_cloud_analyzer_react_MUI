@@ -43,6 +43,46 @@ const LabData = ({ groupedLabs, settings, labSettings, generalDisplaySettings })
     if (completeLabSettings.enableCustomCopy && groupedLabs.length > 0) {
       const initialSelections = {};
 
+      // 創建特殊檢驗項目判斷邏輯的 Map
+      // # zh-TW: 建立特殊檢驗代碼與其對應條件的對照表
+      const specialOrderCodesMap = new Map([
+        ['08011C', new Map([
+          ['08011C-WBC', lab => 
+            lab.itemName?.toLowerCase().includes('wbc') || 
+            lab.itemName?.toLowerCase().includes('白血球')],
+          ['08011C-Hb', lab => 
+            lab.itemName?.toLowerCase().includes('hb') || 
+            lab.itemName?.toLowerCase().includes('hgb') || 
+            lab.itemName?.toLowerCase().includes('血色素') || 
+            lab.itemName?.toLowerCase().includes('hemoglobin')],
+          ['08011C-Platelet', lab => 
+            lab.itemName?.toLowerCase().includes('plt') || 
+            lab.itemName?.toLowerCase().includes('platelet') || 
+            lab.itemName?.toLowerCase().includes('血小板')]
+        ])],
+        ['09015C', new Map([
+          ['09015C', () => true]  // 對於09015C代碼，總是選中
+        ])],
+        ['09040C', new Map([
+          ['09040C', lab => 
+            lab.abbrName === 'UPCR' || 
+            (lab.itemName && (
+              lab.itemName.includes('UPCR') || 
+              lab.itemName.includes('蛋白/肌酸酐比值') || 
+              lab.itemName.includes('protein/Creatinine')
+            ))]
+        ])],
+        ['12111C', new Map([
+          ['12111C', lab => 
+            lab.abbrName === 'UACR' || 
+            (lab.itemName && (
+              lab.itemName.toLowerCase().includes('u-acr') || 
+              lab.itemName.toLowerCase().includes('albumin/creatinine') || 
+              lab.itemName.toLowerCase().includes('/cre')
+            ))]
+        ])]
+      ]);
+
       groupedLabs.forEach((group, groupIndex) => {
         initialSelections[groupIndex] = {};
 
@@ -56,53 +96,18 @@ const LabData = ({ groupedLabs, settings, labSettings, generalDisplaySettings })
               .filter(item => item.enabled)
               .map(item => item.orderCode);
 
-            // 特殊處理 08011C (WBC, Hb, Platelet)
-            if (lab.orderCode === '08011C') {
-              if (enabledOrderCodes.includes('08011C-WBC') &&
-                  (lab.itemName?.toLowerCase().includes('wbc') ||
-                   lab.itemName?.toLowerCase().includes('白血球'))) {
-                isPreselected = true;
+            // 使用 Map 處理特殊代碼邏輯
+            // # zh-TW: 檢查是否為特殊處理的檢驗代碼
+            if (specialOrderCodesMap.has(lab.orderCode)) {
+              const specialConditions = specialOrderCodesMap.get(lab.orderCode);
+              // # zh-TW: 遍歷特殊代碼的所有條件
+              for (const [code, conditionFn] of specialConditions.entries()) {
+                if (enabledOrderCodes.includes(code) && conditionFn(lab)) {
+                  isPreselected = true;
+                  break;
+                }
               }
-              if (enabledOrderCodes.includes('08011C-Hb') &&
-                  (lab.itemName?.toLowerCase().includes('hb') ||
-                   lab.itemName?.toLowerCase().includes('hgb') ||
-                   lab.itemName?.toLowerCase().includes('血色素') ||
-                   lab.itemName?.toLowerCase().includes('Hemoglobin'))) {
-                isPreselected = true;
-              }
-              if (enabledOrderCodes.includes('08011C-Platelet') &&
-                  (lab.itemName?.toLowerCase().includes('plt') ||
-                   lab.itemName?.toLowerCase().includes('platelet') ||
-                   lab.itemName?.toLowerCase().includes('血小板'))) {
-                isPreselected = true;
-              }
-            }
-            // 特殊處理 09015C (Cr 和 GFR)
-            else if (lab.orderCode === '09015C') {
-              if (enabledOrderCodes.includes('09015C')) {
-                isPreselected = true;
-              }
-            }
-            // 特殊處理 09040C (UPCR)
-            else if (lab.orderCode === '09040C') {
-              if (enabledOrderCodes.includes('09040C') &&
-                  (lab.abbrName === 'UPCR' ||
-                  (lab.itemName && (lab.itemName.includes('UPCR') ||
-                                    lab.itemName.includes('蛋白/肌酸酐比值') ||
-                                    lab.itemName.includes('protein/Creatinine'))))) {
-                isPreselected = true;
-              }
-            }
-            // 特殊處理 12111C (UACR)
-            else if (lab.orderCode === '12111C') {
-              if (enabledOrderCodes.includes('12111C') &&
-                  (lab.abbrName === 'UACR' ||
-                  (lab.itemName && (lab.itemName.toLowerCase().includes('u-acr') ||
-                                    lab.itemName.toLowerCase().includes('albumin/creatinine') ||
-                                    lab.itemName.toLowerCase().includes('/cre'))))) {
-                isPreselected = true;
-              }
-            }
+            } 
             // 標準處理其他項目
             else if (enabledOrderCodes.includes(lab.orderCode)) {
               isPreselected = true;
@@ -150,14 +155,76 @@ const LabData = ({ groupedLabs, settings, labSettings, generalDisplaySettings })
     copyUserSelectedLabData(group, groupIndex, selectedLabItems, completeLabSettings);
   };
 
-  // 確定欄數設置 (可以根據需要調整)
+  // 使用 Map 來取代 switch-case 結構
+  // # zh-TW: 使用 Map 定義不同顯示格式對應的欄數
+  const columnCountMap = new Map([
+    ["twoColumn", 2],
+    ["threeColumn", 3],
+    ["fourColumn", 4],
+    ["byType", 0],  // 特殊情況，按類型分群
+    ["default", 1]  // 'vertical' 或其他情況
+  ]);
+
+  // 確定欄數設置
   const getColumnCount = () => {
-    switch(completeLabSettings.displayFormat) {
-      case "twoColumn": return 2;
-      case "threeColumn": return 3;
-      case "fourColumn": return 4;
-      case "byType": return 0; // 特殊情況，按類型分群
-      default: return 1; // 'vertical' 或其他情況
+    return columnCountMap.get(completeLabSettings.displayFormat) || columnCountMap.get("default");
+  };
+
+  // 使用 Map 來儲存不同的布局組件
+  // # zh-TW: 使用 Map 來決定要渲染的布局組件
+  const layoutComponentMap = new Map([
+    ["byType", (group, index) => (
+      <TypeBasedLayout
+        labs={group.labs}
+        groupIndex={index}
+        selectedLabItems={selectedLabItems}
+        handleToggleLabItem={handleToggleLabItem}
+        generalDisplaySettings={generalDisplaySettings}
+        labSettings={completeLabSettings}
+      />
+    )],
+    ["horizontal", (group, index) => (
+      <HorizontalLayout
+        labs={group.labs}
+        groupIndex={index}
+        generalDisplaySettings={generalDisplaySettings}
+        labSettings={completeLabSettings}
+      />
+    )],
+    ["multiColumn", (group, index) => (
+      <MultiColumnLayout
+        labs={group.labs}
+        columnCount={getColumnCount()}
+        groupIndex={index}
+        selectedLabItems={selectedLabItems}
+        handleToggleLabItem={handleToggleLabItem}
+        generalDisplaySettings={generalDisplaySettings}
+        labSettings={completeLabSettings}
+      />
+    )],
+    ["vertical", (group, index) => (
+      <VerticalLayout
+        labs={group.labs}
+        groupIndex={index}
+        selectedLabItems={selectedLabItems}
+        handleToggleLabItem={handleToggleLabItem}
+        generalDisplaySettings={generalDisplaySettings}
+        labSettings={completeLabSettings}
+      />
+    )]
+  ]);
+
+  // 決定要使用哪種布局
+  // # zh-TW: 根據設定和條件決定要使用的布局類型
+  const getLayoutComponent = (group, index) => {
+    if (completeLabSettings.displayFormat === "byType") {
+      return layoutComponentMap.get("byType")(group, index);
+    } else if (completeLabSettings.displayFormat === "horizontal") {
+      return layoutComponentMap.get("horizontal")(group, index);
+    } else if (getColumnCount() > 1) {
+      return layoutComponentMap.get("multiColumn")(group, index);
+    } else {
+      return layoutComponentMap.get("vertical")(group, index);
     }
   };
 
@@ -187,48 +254,9 @@ const LabData = ({ groupedLabs, settings, labSettings, generalDisplaySettings })
               hasSelectedItems={hasSelectedItems}
             />
 
-            {/* 根據設置選擇顯示格式 */}
+            {/* 根據設置選擇顯示格式，使用 Map 優化邏輯 */}
             <Box sx={{ ml: 2, mb: 1 }}>
-              {completeLabSettings.displayFormat === "byType" ? (
-                // 按類型分組顯示 - 使用提取出的 TypeBasedLayout 組件
-                <TypeBasedLayout
-                  labs={group.labs}
-                  groupIndex={index}
-                  selectedLabItems={selectedLabItems}
-                  handleToggleLabItem={handleToggleLabItem}
-                  generalDisplaySettings={generalDisplaySettings}
-                  labSettings={completeLabSettings}
-                />
-              ) : completeLabSettings.displayFormat === "horizontal" ? (
-                // 橫式布局 - 使用提取出的 HorizontalLayout 組件
-                <HorizontalLayout
-                  labs={group.labs}
-                  groupIndex={index}
-                  generalDisplaySettings={generalDisplaySettings}
-                  labSettings={completeLabSettings}
-                />
-              ) : getColumnCount() > 1 ? (
-                // 多欄布局 - 使用提取出的 MultiColumnLayout 組件
-                <MultiColumnLayout
-                  labs={group.labs}
-                  columnCount={getColumnCount()}
-                  groupIndex={index}
-                  selectedLabItems={selectedLabItems}
-                  handleToggleLabItem={handleToggleLabItem}
-                  generalDisplaySettings={generalDisplaySettings}
-                  labSettings={completeLabSettings}
-                />
-              ) : (
-                // 垂直布局 - 使用提取出的 VerticalLayout 組件
-                <VerticalLayout
-                  labs={group.labs}
-                  groupIndex={index}
-                  selectedLabItems={selectedLabItems}
-                  handleToggleLabItem={handleToggleLabItem}
-                  generalDisplaySettings={generalDisplaySettings}
-                  labSettings={completeLabSettings}
-                />
-              )}
+              {getLayoutComponent(group, index)}
             </Box>
 
             {index < groupedLabs.length - 1 && <Divider sx={{ my: 1.5 }} />}

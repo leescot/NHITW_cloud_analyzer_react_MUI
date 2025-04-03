@@ -128,20 +128,20 @@ const Overview_LabTests = ({ groupedLabs = [], labData, overviewSettings = {}, g
           const targetOrderCodes = labTestsConfig.map(test => test.orderCode);
 
           // Create a mapping to handle various codes for CBC (08011C)
-          // This helps when the data structure might use different order codes or variations
-          const cbcVariants = {
-            '08011C': true,      // Standard code
-            '08011': true,       // Without the 'C'
-            '08011c': true,      // Lowercase 'c'
-            '08011C-WBC': true,  // Our specialized code for WBC
-            '08011C-Hb': true,   // Our specialized code for Hb
-            '08011C-Platelet': true  // Our specialized code for Platelet
-          };
+          // 使用 Map 來處理各種 CBC 相關的代碼變體
+          const cbcVariants = new Map([
+            ['08011C', true],      // 標準代碼
+            ['08011', true],       // 不帶 'C' 的版本
+            ['08011c', true],      // 小寫 'c' 的版本
+            ['08011C-WBC', true],  // 我們特定的 WBC 代碼
+            ['08011C-Hb', true],   // 我們特定的 Hb 代碼
+            ['08011C-Platelet', true]  // 我們特定的血小板代碼
+          ]);
 
-          // Helper function to check if a code is related to CBC
+          // 幫助函數來檢查代碼是否與 CBC 相關
           const isCBCCode = (code) => {
             if (!code) return false;
-            return cbcVariants[code] || code.startsWith('08011');
+            return cbcVariants.has(code) || code.startsWith('08011');
           };
 
           // Filter labs from the last tracking days instead of hardcoded 90
@@ -215,86 +215,84 @@ const Overview_LabTests = ({ groupedLabs = [], labData, overviewSettings = {}, g
             const containsText = (source, targets) => {
               if (!source) return false;
 
-              // Clean and normalize the source text
+              // 清理並標準化來源文本
               const lowerSource = source.toLowerCase().trim();
 
-              // Standard contains check
-              if (targets.some(target => lowerSource.includes(target.toLowerCase()))) {
-                return true;
-              }
-
-              // Word boundary check - for exact word matches (useful for short codes like Hb, PLT)
+              // 使用 some() 方法檢查是否包含任何目標文本
               return targets.some(target => {
                 const lowerTarget = target.toLowerCase();
-                // Exact match at word boundaries
-                return new RegExp(`\\b${lowerTarget}\\b`).test(lowerSource) ||
-                       // Or exact match at beginning or end
+                
+                // 使用多種匹配方式：包含、完全匹配、邊界匹配等
+                return lowerSource.includes(lowerTarget) || 
                        lowerSource === lowerTarget ||
                        lowerSource.startsWith(lowerTarget + ' ') ||
-                       lowerSource.endsWith(' ' + lowerTarget);
+                       lowerSource.endsWith(' ' + lowerTarget) ||
+                       new RegExp(`\\b${lowerTarget}\\b`).test(lowerSource);
               });
             };
 
-            // Only process CBC items when we are processing a CBC (08011C) lab order
-            // This array will contain all CBC items in this lab group
-            const cbcItems = [];
+            // 使用 Map 建立 CBC 項目類型映射
+            const cbcItemTypes = new Map([
+              ['WBC', {
+                keywords: ['WBC', '白血球'],
+                orderCode: '08011C-WBC',
+                displayName: 'WBC'
+              }],
+              ['Hb', {
+                keywords: ['Hb', 'HGB', '血色素', 'Hemoglobin'],
+                orderCode: '08011C-Hb',
+                displayName: 'Hb'
+              }],
+              ['PLT', {
+                keywords: ['PLT', 'Platelet', '血小板'],
+                orderCode: '08011C-Platelet',
+                displayName: 'PLT'
+              }]
+            ]);
 
-            // If we're dealing with a CBC bundle, process all items in the bundle
+            // 只處理 CBC 訂單相關項目
             if (lab.orderCode === '08011C' && lab.orderName && lab.orderName.toLowerCase().includes('cbc')) {
-              // First, try to find the exact WBC, Hb, and Platelet items
-              // WBC can be in this lab or in a "differential" lab
-              let wbcItem = null;
-              let hbItem = null;
-              let pltItem = null;
+              let foundItems = new Map();
 
-              // If this lab has a parent-child structure (common for CBC)
+              // 如果這個實驗室項目有父子結構（常見於 CBC）
               if (lab.items && Array.isArray(lab.items)) {
-                // Look through child items
+                // 遍歷子項目
                 for (const item of lab.items) {
-                  if (containsText(item.itemName, ['WBC', '白血球'])) {
-                    wbcItem = {...item, orderCode: '08011C-WBC', date, displayName: 'WBC'};
-                  } else if (containsText(item.itemName, ['Hb', 'HGB', '血色素', 'Hemoglobin'])) {
-                    hbItem = {...item, orderCode: '08011C-Hb', date, displayName: 'Hb'};
-                  } else if (containsText(item.itemName, ['PLT', 'Platelet', '血小板'])) {
-                    pltItem = {...item, orderCode: '08011C-Platelet', date, displayName: 'PLT'};
+                  for (const [type, config] of cbcItemTypes.entries()) {
+                    if (containsText(item.itemName, config.keywords)) {
+                      foundItems.set(type, {
+                        ...item, 
+                        orderCode: config.orderCode, 
+                        date, 
+                        displayName: config.displayName
+                      });
+                    }
+                  }
+                }
+              } 
+              // 如果是直接的實驗室項目（實驗室本身是 WBC、Hb 或 PLT）
+              else {
+                for (const [type, config] of cbcItemTypes.entries()) {
+                  if (containsText(lab.itemName, config.keywords)) {
+                    foundItems.set(type, {
+                      ...lab, 
+                      orderCode: config.orderCode, 
+                      date, 
+                      displayName: config.displayName
+                    });
                   }
                 }
               }
-              // If it's a direct lab item (the lab itself is the WBC, Hb or PLT)
-              else {
-                // Check if this lab's itemName matches WBC, Hb, or PLT
-                if (containsText(lab.itemName, ['WBC', '白血球'])) {
-                  wbcItem = {...lab, orderCode: '08011C-WBC', date, displayName: 'WBC'};
-                } else if (containsText(lab.itemName, ['Hb', 'HGB', '血色素', 'Hemoglobin'])) {
-                  hbItem = {...lab, orderCode: '08011C-Hb', date, displayName: 'Hb'};
-                } else if (containsText(lab.itemName, ['PLT', 'Platelet', '血小板'])) {
-                  pltItem = {...lab, orderCode: '08011C-Platelet', date, displayName: 'PLT'};
+
+              // 添加找到的項目到 matchingTests（如果它們在設置中啟用）
+              for (const [type, item] of foundItems.entries()) {
+                const orderCode = cbcItemTypes.get(type).orderCode;
+                if (targetOrderCodes.includes(orderCode)) {
+                  matchingTests.push({
+                    ...item,
+                    value: extractLabValue(item)
+                  });
                 }
-              }
-
-              // Add the found items to matchingTests if they're enabled in settings
-              if (wbcItem && targetOrderCodes.includes('08011C-WBC')) {
-                // console.log("Debug - Adding WBC to matchingTests:", wbcItem);
-                matchingTests.push({
-                  ...wbcItem,
-                  value: extractLabValue(wbcItem)
-                });
-              }
-
-              if (hbItem && targetOrderCodes.includes('08011C-Hb')) {
-                // console.log("Debug - Adding Hb to matchingTests:", hbItem);
-                matchingTests.push({
-                  ...hbItem,
-                  value: extractLabValue(hbItem)
-                });
-              }
-
-              if (pltItem && targetOrderCodes.includes('08011C-Platelet')) {
-                // console.log("Debug - Adding PLT to matchingTests:", pltItem);
-                matchingTests.push({
-                  ...pltItem,
-                  value: extractLabValue(pltItem)
-                });
               }
             }
           }
@@ -304,58 +302,60 @@ const Overview_LabTests = ({ groupedLabs = [], labData, overviewSettings = {}, g
             if (labGroup.labs && Array.isArray(labGroup.labs)) {
               labGroup.labs.forEach(lab => {
                 if (targetOrderCodes.includes(lab.orderCode)) {
-                  // Special handling for 09015C (Cr and GFR)
-                  if (lab.orderCode === '09015C') {
-                    // 使用 abbrName 來判斷是否為 GFR
-                    let displayName = 'Cr';  // 默認為 Cr
+                  // 使用 Map 為特殊處理的測試類型定義處理邏輯
+                  const specialTestHandlers = new Map([
+                    ['09015C', () => {
+                      // 使用 abbrName 來判斷是否為 GFR
+                      let displayName = 'Cr';  // 默認為 Cr
 
-                    if (lab.abbrName === 'GFR' ||
-                        (lab.itemName && (lab.itemName.includes('GFR') ||
-                                         lab.itemName.includes('腎絲球過濾率') ||
-                                         lab.itemName.includes('Ccr')))) {
-                      displayName = 'GFR';
-                    }
+                      if (lab.abbrName === 'GFR' ||
+                          (lab.itemName && (lab.itemName.includes('GFR') ||
+                                           lab.itemName.includes('腎絲球過濾率') ||
+                                           lab.itemName.includes('Ccr')))) {
+                        displayName = 'GFR';
+                      }
 
-                    matchingTests.push({
-                      ...lab,
-                      date: labGroup.date,
-                      displayName: displayName
-                    });
-                  }
-                  // Special handling for 09040C (UPCR)
-                  else if (lab.orderCode === '09040C') {
-                    // 根據 abbrName 或 itemName 判斷 - 只顯示 UPCR
-                    if (lab.abbrName === 'UPCR' ||
-                        (lab.itemName && (lab.itemName.includes('UPCR') ||
-                                         lab.itemName.includes('蛋白/肌酸酐比值') ||
-                                         lab.itemName.includes('protein/Creatinine')))) {
                       matchingTests.push({
                         ...lab,
                         date: labGroup.date,
-                        displayName: 'UPCR'
+                        displayName: displayName
                       });
-                    }
-                  }
-                  // Special handling for 12111C (UACR)
-                  else if (lab.orderCode === '12111C') {
-                    // 根據 abbrName 或 itemName 判斷 - 只顯示 UACR
-                    if (lab.abbrName === 'UACR' ||
-                       (lab.itemName && (lab.itemName.toLowerCase().includes('u-acr') ||
-                                        lab.itemName.toLowerCase().includes('albumin/creatinine') ||
-                                        lab.itemName.toLowerCase().includes('/cre')))) {
-                      matchingTests.push({
-                        ...lab,
-                        date: labGroup.date,
-                        displayName: 'UACR'
-                      });
-                    }
-                  }
-                  // Special handling for 08011C (WBC, Hb, Platelet) - now handled separately above
-                  else if (isCBCCode(lab.orderCode)) {
-                    // Use the specialized function for CBC processing
+                    }],
+                    ['09040C', () => {
+                      // 根據 abbrName 或 itemName 判斷 - 只顯示 UPCR
+                      if (lab.abbrName === 'UPCR' ||
+                          (lab.itemName && (lab.itemName.includes('UPCR') ||
+                                           lab.itemName.includes('蛋白/肌酸酐比值') ||
+                                           lab.itemName.includes('protein/Creatinine')))) {
+                        matchingTests.push({
+                          ...lab,
+                          date: labGroup.date,
+                          displayName: 'UPCR'
+                        });
+                      }
+                    }],
+                    ['12111C', () => {
+                      // 根據 abbrName 或 itemName 判斷 - 只顯示 UACR
+                      if (lab.abbrName === 'UACR' ||
+                         (lab.itemName && (lab.itemName.toLowerCase().includes('u-acr') ||
+                                          lab.itemName.toLowerCase().includes('albumin/creatinine') ||
+                                          lab.itemName.toLowerCase().includes('/cre')))) {
+                        matchingTests.push({
+                          ...lab,
+                          date: labGroup.date,
+                          displayName: 'UACR'
+                        });
+                      }
+                    }]
+                  ]);
+
+                  // 執行特殊處理邏輯或使用默認處理
+                  if (specialTestHandlers.has(lab.orderCode)) {
+                    specialTestHandlers.get(lab.orderCode)();
+                  } else if (isCBCCode(lab.orderCode)) {
+                    // CBC 特殊處理邏輯
                     processSpecialCBCItem(lab, labGroup.date, targetOrderCodes, matchingTests);
-                  }
-                  else {
+                  } else {
                     // 標準處理方式
                     matchingTests.push({
                       ...lab,
@@ -446,35 +446,40 @@ const Overview_LabTests = ({ groupedLabs = [], labData, overviewSettings = {}, g
 
             // Determine the display order based on the user's settings
             if (overviewSettings.focusedLabTests && Array.isArray(overviewSettings.focusedLabTests)) {
-              // Create a mapping from test code to display order
-              const orderByCode = {};
+              // 創建一個 Map 來存儲順序規則
+              const orderCodeToDisplayMap = new Map([
+                ['08011C-WBC', 'WBC'],
+                ['08011C-Hb', 'Hb'],
+                ['08011C-Platelet', 'PLT'],
+                ['09015C', ['Cr', 'GFR']],
+                ['09040C', 'UPCR'],
+                ['12111C', 'UACR']
+              ]);
 
-              // Assign order for regular tests
+              // Assign order for all tests based on configuration
               overviewSettings.focusedLabTests
                 .filter(test => test.enabled)
                 .forEach((test, index) => {
                   const orderCode = test.orderCode;
 
-                  // Direct mapping for regular tests
+                  // 處理直接映射的情況
                   if (test.displayName) {
                     displayOrder[test.displayName] = index;
                   }
-
-                  // Special mapping for CBC tests
-                  if (orderCode === '08011C-WBC') {
-                    displayOrder['WBC'] = index;
-                  } else if (orderCode === '08011C-Hb') {
-                    displayOrder['Hb'] = index;
-                  } else if (orderCode === '08011C-Platelet') {
-                    displayOrder['PLT'] = index;
-                  } else if (orderCode === '09015C') {
-                    // For Cr & GFR, add both display names with the same index
-                    displayOrder['Cr'] = index;
-                    displayOrder['GFR'] = index + 0.1; // Slight offset to keep them together
-                  } else if (orderCode === '09040C') {
-                    displayOrder['UPCR'] = index;
-                  } else if (orderCode === '12111C') {
-                    displayOrder['UACR'] = index;
+                  
+                  // 處理特殊映射的情況
+                  if (orderCodeToDisplayMap.has(orderCode)) {
+                    const displayNames = orderCodeToDisplayMap.get(orderCode);
+                    
+                    if (Array.isArray(displayNames)) {
+                      // 處理多個顯示名稱的情況 (例如 09015C -> Cr 及 GFR)
+                      displayNames.forEach((name, offset) => {
+                        displayOrder[name] = index + (offset * 0.1); // 使用小偏移以保持相關項目在一起
+                      });
+                    } else {
+                      // 處理單個顯示名稱的情況
+                      displayOrder[displayNames] = index;
+                    }
                   }
                 });
             }

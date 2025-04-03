@@ -356,16 +356,16 @@ const FloatingIcon = () => {
       background: "transparent",
     };
 
-    switch (generalDisplaySettings.floatingIconPosition) {
-      case "top-right":
-        return { ...baseStyle, top: "20px" };
-      case "middle-right":
-        return { ...baseStyle, top: "50%", transform: "translateY(-50%)" };
-      case "bottom-right":
-        return { ...baseStyle, bottom: "20px" };
-      default:
-        return { ...baseStyle, bottom: "20px" }; // Default to bottom-right
-    }
+    // 使用 Map 來存儲不同位置的樣式
+    const positionStyleMap = new Map([
+      ["top-right", { ...baseStyle, top: "20px" }],
+      ["middle-right", { ...baseStyle, top: "50%", transform: "translateY(-50%)" }],
+      ["bottom-right", { ...baseStyle, bottom: "20px" }]
+    ]);
+
+    // 返回匹配的樣式或默認值（底部右側）
+    return positionStyleMap.get(generalDisplaySettings.floatingIconPosition) || 
+           positionStyleMap.get("bottom-right");
   };
 
   return (

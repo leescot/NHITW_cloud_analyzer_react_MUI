@@ -72,118 +72,125 @@ export const medicationProcessor = {
     return simplifiedName.trim();
   },
 
-  // Rest of the code remains the same...
+  // 使用 Map 重構頻次映射表
   calculatePerDosage(dosage, frequency, days) {
     if (!dosage || !frequency || !days) return "";
 
-    const frequencyMap = {
-      QD: 1,
-      QDP: 1,
-      QAM: 1,
-      AM: 1,
-      AMPC: 1,
-      QPM: 1,
-      QDPM: 1,
-      PM: 1,
-      BID: 2,
-      BIDP: 2,
-      TID: 3,
-      TIDP: 3,
-      QID: 4,
-      QIDP: 4,
-      Q2H: 12,
-      Q4H: 6,
-      Q6H: 4,
-      Q8H: 3,
-      Q12H: 2,
-      HS: 1,
-      HSP: 1,
-      DAILY: 1,
-      QN: 1,
-      STAT: 1,
-      ST: 1,
-      ASORDER: 1, // 新增 ASORDER
-      PRN: 1,     // 新增 PRN (as needed)
-      QOD: 0.5,   // 新增 QOD (every other day)
-      ONCE: 1,    // 新增 ONCE (equivalent to STAT)
-      PRNB: 2,    // 新增 PRNB (PRN BID)
-      QW: 0.14,   // 新增 QW (once a week) - approximately 1/7
-      BIW: 0.29,  // 新增 BIW (twice a week) - approximately 2/7
-      TIW: 0.43,  // 新增 TIW (three times a week) - approximately 3/7
-    };
+    // 使用 Map 儲存頻次和對應的每日劑量次數
+    const frequencyMap = new Map([
+      ['QD', 1],
+      ['QDP', 1],
+      ['QAM', 1],
+      ['AM', 1],
+      ['AMPC', 1],
+      ['QPM', 1],
+      ['QDPM', 1],
+      ['PM', 1],
+      ['BID', 2],
+      ['BIDP', 2],
+      ['TID', 3],
+      ['TIDP', 3],
+      ['QID', 4],
+      ['QIDP', 4],
+      ['Q2H', 12],
+      ['Q4H', 6],
+      ['Q6H', 4],
+      ['Q8H', 3],
+      ['Q12H', 2],
+      ['HS', 1],
+      ['HSP', 1],
+      ['DAILY', 1],
+      ['QN', 1],
+      ['STAT', 1],
+      ['ST', 1],
+      ['ASORDER', 1], // 新增 ASORDER
+      ['PRN', 1],     // 新增 PRN (as needed)
+      ['QOD', 0.5],   // 新增 QOD (every other day)
+      ['ONCE', 1],    // 新增 ONCE (equivalent to STAT)
+      ['PRNB', 2],    // 新增 PRNB (PRN BID)
+      ['QW', 0.14],   // 新增 QW (once a week) - approximately 1/7
+      ['BIW', 0.29],  // 新增 BIW (twice a week) - approximately 2/7
+      ['TIW', 0.43],  // 新增 TIW (three times a week) - approximately 3/7
+    ]);
 
-    // 修改正則表達式，確保包含所有在 frequencyMap 中的頻次
-    const freqRegexStr = Object.keys(frequencyMap).join("|");
+    // 特殊頻次處理映射
+    const specialFreqMap = new Map([
+      ['QOD', (d) => Math.ceil(parseInt(d) / 2)],
+      ['Q2D', (d) => Math.ceil(parseInt(d) / 2)],
+      ['TIW', (d) => Math.ceil(parseInt(d) / 7) * 3],
+      ['BIW', (d) => Math.ceil(parseInt(d) / 7) * 2],
+      ['QW', (d) => Math.ceil(parseInt(d) / 7)]
+    ]);
+
+    // 常見的有效單位劑量
+    const validUnits = [
+      0.25, 0.5, 0.75, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 6.0, 7.0,
+      8.0, 9.0, 10.0,
+    ];
+
+    // 建立正則表達式來匹配所有可能的頻次
+    const freqRegexStr = Array.from(frequencyMap.keys()).join("|");
     const freqRegex = new RegExp(freqRegexStr, "i");
     const freqMatch = frequency.toUpperCase().match(freqRegex);
 
+    // 無法辨識的頻次且不是「需要時」，回傳 SPECIAL
     if (!freqMatch && !frequency.includes("需要時")) {
       console.log("無法識別的頻次:", frequency);
       return "SPECIAL";
     }
 
-    let totalDoses;
     // 從匹配到的頻次字串中獲取完整頻次
     const freq = freqMatch ? freqMatch[0].toUpperCase() : "PRN";
 
-    // QOD 特殊處理 - 確保同時支援正則表達式匹配和特殊邏輯
-    if (frequency.includes("QOD") || frequency.includes("Q2D")) {
-      totalDoses = Math.ceil(parseInt(days) / 2);
-    } else if (freq === "TIW" || frequency.includes("TIW")) {
-      totalDoses = Math.ceil(parseInt(days) / 7) * 3;
-    } else if (freq === "BIW" || frequency.includes("BIW")) {
-      totalDoses = Math.ceil(parseInt(days) / 7) * 2;
-    } else if (freq === "QW" || frequency.includes("QW")) {
-      totalDoses = Math.ceil(parseInt(days) / 7);
-    } else if (frequency.includes("PRN") || frequency.includes("需要時") || freq === "PRN" || freq === "PRNB") {
-      return "SPECIAL";
-    } else {
-      totalDoses = parseInt(days) * (frequencyMap[freq] || 1);
+    // 檢查是否是特殊頻次（QOD, TIW, BIW, QW）
+    let totalDoses;
+    
+    // 先檢查特殊頻次
+    for (const [specialFreq, doseCalculator] of specialFreqMap.entries()) {
+      if (frequency.includes(specialFreq)) {
+        totalDoses = doseCalculator(days);
+        break;
+      }
+    }
+
+    // 如果不是特殊頻次
+    if (totalDoses === undefined) {
+      // PRN 相關頻次或需要時，回傳 SPECIAL
+      if (frequency.includes("PRN") || frequency.includes("需要時") || freq === "PRN" || freq === "PRNB") {
+        return "SPECIAL";
+      } else {
+        // 一般頻次，按照 Map 中的值計算
+        totalDoses = parseInt(days) * (frequencyMap.get(freq) || 1);
+      }
     }
 
     const totalDosage = parseFloat(dosage);
     const singleDose = totalDosage / totalDoses;
 
     const threshold = 0.24;
-    const validUnits = [
-      0.25, 0.5, 0.75, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 6.0, 7.0,
-      8.0, 9.0, 10.0,
-    ];
-
+    
+    // 如果單次劑量過小，回傳 SPECIAL
     if (singleDose < threshold) {
       return "SPECIAL";
     }
 
-    // For TIW, BIW, QW cases, do more precise calculation
-    if (freq === "TIW" || frequency.includes("TIW")) {
-      // For a 30-day month, there are about 4.29 weeks (30/7)
-      // For TIW, that's about 12.87 doses per month
-      // If total is 26 and doses are ~13, then should be 2 pills per dose
+    // 特殊頻次的精確計算
+    if (['TIW', 'BIW', 'QW'].includes(freq) || ['TIW', 'BIW', 'QW'].some(f => frequency.includes(f))) {
+      // 計算週數和估計劑量
       const numWeeks = Math.ceil(parseInt(days) / 7);
-      const estimatedDoses = numWeeks * 3; // For TIW
-      const perDose = Math.round(totalDosage / estimatedDoses);
-
-      // Only return if it's a clean number
-      if (validUnits.includes(perDose)) {
-        return perDose.toString();
+      let estimatedDoses;
+      
+      if (freq === 'TIW' || frequency.includes('TIW')) {
+        estimatedDoses = numWeeks * 3;
+      } else if (freq === 'BIW' || frequency.includes('BIW')) {
+        estimatedDoses = numWeeks * 2;
+      } else { // QW
+        estimatedDoses = numWeeks;
       }
-    }
-
-    if (freq === "BIW" || frequency.includes("BIW")) {
-      const numWeeks = Math.ceil(parseInt(days) / 7);
-      const estimatedDoses = numWeeks * 2; // For BIW
+      
       const perDose = Math.round(totalDosage / estimatedDoses);
-
-      if (validUnits.includes(perDose)) {
-        return perDose.toString();
-      }
-    }
-
-    if (freq === "QW" || frequency.includes("QW")) {
-      const numWeeks = Math.ceil(parseInt(days) / 7);
-      const estimatedDoses = numWeeks; // For QW
-      const perDose = Math.round(totalDosage / estimatedDoses);
-
+      
+      // 只有在是標準單位劑量時才回傳
       if (validUnits.includes(perDose)) {
         return perDose.toString();
       }
@@ -301,7 +308,7 @@ export const medicationProcessor = {
     });
   },
 
-  // Format medication list for copying with different formats
+  // 使用 Map 重構格式處理邏輯
   formatMedicationList(medications, format, groupInfo) {
     if (format === "none") {
       return "";
@@ -316,32 +323,31 @@ export const medicationProcessor = {
       header += ` [${groupInfo.icd_code} ${groupInfo.icd_name}]`;
     }
 
-    const getMedicationText = (med) => {
-      const dosageText =
-        med.perDosage === "SPECIAL" ? `總量${med.dosage}` : `${med.perDosage}#`;
+    // 使用 Map 儲存不同格式的處理邏輯
+    const formatHandlers = new Map([
+      ['nameVertical', (med) => med.name],
+      ['nameWithDosageVertical', (med) => {
+        const dosageText = med.perDosage === "SPECIAL" ? `總量${med.dosage}` : `${med.perDosage}#`;
+        return `${med.name} ${dosageText} ${med.frequency} ${med.days}天`;
+      }],
+      ['nameHorizontal', (med) => med.name],
+      ['nameWithDosageHorizontal', (med) => {
+        const dosageText = med.perDosage === "SPECIAL" ? `總量${med.dosage}` : `${med.perDosage}#`;
+        return `${med.name} ${dosageText} ${med.frequency} ${med.days}天`;
+      }]
+    ]);
 
-      switch (format) {
-        case "nameVertical":
-          return med.name;
-        case "nameWithDosageVertical":
-          return `${med.name} ${dosageText} ${med.frequency} ${med.days}天`;
-        case "nameHorizontal":
-          return med.name;
-        case "nameWithDosageHorizontal":
-          return `${med.name} ${dosageText} ${med.frequency} ${med.days}天`;
-        default:
-          return med.name;
-      }
-    };
+    // 獲取適當的格式處理器
+    const formatHandler = formatHandlers.get(format) || ((med) => med.name);
+    
+    // 應用格式處理器到每個藥物
+    const medicationTexts = medications.map((med) => formatHandler(med));
 
-    const medicationTexts = medications.map((med) => getMedicationText(med));
-
-    // Format the full output with header
-    if (format.includes("Horizontal")) {
-      return `${header}\n${medicationTexts.join(", ")}`;
-    } else {
-      return `${header}\n${medicationTexts.join("\n")}`;
-    }
+    // 根據格式決定分隔符號
+    const separator = format.includes("Horizontal") ? ", " : "\n";
+    
+    // 格式化完整輸出
+    return `${header}\n${medicationTexts.join(separator)}`;
   },
 };
 

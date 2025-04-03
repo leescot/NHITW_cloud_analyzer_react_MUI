@@ -61,54 +61,79 @@ const LabTableView = ({ groupedLabs, labSettings, generalDisplaySettings }) => {
     setSelectedType(event.target.value);
   };
 
+  // 使用 Map 來定義日期格式轉換邏輯
+  const dateFormatterMap = new Map([
+    // 格式化日期顯示
+    ['valid', (parts) => {
+      const [year, month, day] = parts;
+      return (
+        <Box>
+          <TypographySizeWrapper
+            variant="caption"
+            textSizeType="note"
+            generalDisplaySettings={generalDisplaySettings}
+            color="text.secondary"
+            display="block"
+          >
+            {year}
+          </TypographySizeWrapper>
+          <TypographySizeWrapper
+            variant="body2"
+            textSizeType="content"
+            generalDisplaySettings={generalDisplaySettings}
+          >
+            {month}/{day}
+          </TypographySizeWrapper>
+        </Box>
+      );
+    }],
+    ['invalid', (dateStr) => dateStr],
+    ['empty', () => '']
+  ]);
+
   // 格式化日期顯示
   const formatDateHeader = (dateStr) => {
-    if (!dateStr) return '';
-
-    // 假設日期格式為 'YYYY-MM-DD'
+    // 日期為空的情況
+    if (!dateStr) return dateFormatterMap.get('empty')();
+    
+    // 嘗試分割日期字串
     const parts = dateStr.split('-');
-    if (parts.length !== 3) return dateStr;
-
-    const year = parts[0];
-    const month = parts[1];
-    const day = parts[2];
-
-    return (
-      <Box>
-        <TypographySizeWrapper
-          variant="caption"
-          textSizeType="note"
-          generalDisplaySettings={generalDisplaySettings}
-          color="text.secondary"
-          display="block"
-        >
-          {year}
-        </TypographySizeWrapper>
-        <TypographySizeWrapper
-          variant="body2"
-          textSizeType="content"
-          generalDisplaySettings={generalDisplaySettings}
-        >
-          {month}/{day}
-        </TypographySizeWrapper>
-      </Box>
-    );
+    
+    // 判斷日期格式是否有效
+    const dateStatus = parts.length === 3 ? 'valid' : 'invalid';
+    
+    // 使用 Map 獲取對應的格式化函數
+    return dateFormatterMap.get(dateStatus)(dateStatus === 'valid' ? parts : dateStr);
   };
+
+  // 使用 Map 定義異常值狀態對應的顏色
+  const statusColorMap = new Map([
+    ["high", "#c62828"], // 紅色
+    ["low", "#2e7d32"],  // 綠色
+    ["default", "inherit"] // 正常值
+  ]);
+
+  // 使用 Map 定義異常值狀態對應的背景色
+  const statusBackgroundColorMap = new Map([
+    ["high", "#fff0f0"], // 更明顯但不太強烈的淡紅色
+    ["low", "#f0fff0"],  // 更明顯但不太強烈的淡綠色
+    ["default", "inherit"] // 正常值
+  ]);
 
   // 定義根據異常值狀態獲取顏色的函數
   const getStatusColor = (valueStatus, highlightAbnormal) => {
+    // 如果不需要標示異常值，直接返回預設值
     if (!highlightAbnormal) return "inherit";
-    if (valueStatus === "high") return "#c62828"; // 紅色
-    if (valueStatus === "low") return "#2e7d32"; // 綠色
-    return "inherit"; // 正常值
+    // 根據狀態從 Map 中獲取顏色，若找不到則使用預設值
+    return statusColorMap.get(valueStatus) || statusColorMap.get("default");
   };
 
   // 定義根據異常值狀態獲取背景色的函數
   const getStatusBackgroundColor = (valueStatus, highlightAbnormal) => {
+    // 如果不需要標示異常值，直接返回預設值
     if (!highlightAbnormal) return "inherit";
-    if (valueStatus === "high") return "#fff0f0"; // 更明顯但不太強烈的淡紅色
-    if (valueStatus === "low") return "#f0fff0"; // 更明顯但不太強烈的淡綠色
-    return "inherit"; // 正常值
+    // 根據狀態從 Map 中獲取背景色，若找不到則使用預設值
+    return statusBackgroundColorMap.get(valueStatus) || statusBackgroundColorMap.get("default");
   };
 
   if (dates.length === 0 || items.length === 0) {

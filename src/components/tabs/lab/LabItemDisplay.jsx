@@ -25,15 +25,14 @@ const LabItemDisplay = ({
   const labId = `${groupIndex}-${labIndex}`;
   const isSelected = selectedLabItems[groupIndex]?.[labId] || false;
 
-  return (
-    <Box sx={{
-      display: 'flex',
-      alignItems: 'center',
-      mb: 0.25
-    }}>
-      {enableCustomCopy &&
-       (displayFormat !== 'vertical' &&
-        displayFormat !== 'horizontal') ? (
+  // 使用 Map 來決定渲染哪個組件
+  const displayComponents = new Map([
+    // 顯示帶有複選框的版本 - 當啟用自定義複製且顯示格式不是垂直或水平
+    [
+      () => enableCustomCopy && 
+            (displayFormat !== 'vertical' && 
+             displayFormat !== 'horizontal'),
+      () => (
         <FormControlLabel
           control={
             <Checkbox
@@ -88,7 +87,12 @@ const LabItemDisplay = ({
             paddingLeft: 0
           }}
         />
-      ) : (
+      )
+    ],
+    // 預設顯示 - 不帶複選框的簡化版
+    [
+      () => true,
+      () => (
         <TypographySizeWrapper
           variant="body2"
           textSizeType="content"
@@ -108,7 +112,26 @@ const LabItemDisplay = ({
           )}
           {formatReferenceRange(lab, showReference)}
         </TypographySizeWrapper>
-      )}
+      )
+    ]
+  ]);
+
+  // 渲染合適的組件
+  let renderedComponent = null;
+  for (const [condition, renderer] of displayComponents) {
+    if (condition()) {
+      renderedComponent = renderer();
+      break;
+    }
+  }
+
+  return (
+    <Box sx={{
+      display: 'flex',
+      alignItems: 'center',
+      mb: 0.25
+    }}>
+      {renderedComponent}
     </Box>
   );
 };

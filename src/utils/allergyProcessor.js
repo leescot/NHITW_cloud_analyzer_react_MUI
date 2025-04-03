@@ -38,12 +38,17 @@ export const allergyProcessor = {
     // 檢查日期
     if (!item.date) return false;
 
+    // 使用 Map 儲存無效藥物名稱列表
+    const invalidDrugNames = new Map([
+      ['未記錄', true],
+      ['NP', true],
+      ['N.P', true],
+      ['N.P.', true]
+    ]);
+
     // 檢查 drug_name
-    if (!item.drugName ||
-        item.drugName === '未記錄' ||
-        item.drugName === 'NP' ||
-        item.drugName === 'N.P' ||
-        item.drugName === 'N.P.' ||
+    if (!item.drugName || 
+        invalidDrugNames.has(item.drugName) || 
         item.drugName.includes('未過敏')) {
       return false;
     }
@@ -65,12 +70,21 @@ export const allergyProcessor = {
   },
 
   formatAllergyData(item) {
+    // 定義預設值的 Map
+    const defaultValues = new Map([
+      ['drugName', '未記錄'],
+      ['symptoms', '未記錄'],
+      ['severity', '未記錄'],
+      ['hospital', '未記錄']
+    ]);
+
+    // 格式化並返回過敏資料
     return {
       date: item.upload_d,
-      drugName: item.drug_name?.replace(/;;$/, '') || '未記錄', // 移除結尾的 ;;
-      symptoms: item.sympton_name?.split(';').filter(Boolean).join(', ') || '未記錄', // 分割並移除空值
-      severity: item.allerg_severity_level || '未記錄',
-      hospital: item.hosp?.split(';')[0] || '未記錄'
+      drugName: item.drug_name?.replace(/;;$/, '') || defaultValues.get('drugName'), // 移除結尾的 ;;
+      symptoms: item.sympton_name?.split(';').filter(Boolean).join(', ') || defaultValues.get('symptoms'), // 分割並移除空值
+      severity: item.allerg_severity_level || defaultValues.get('severity'),
+      hospital: item.hosp?.split(';')[0] || defaultValues.get('hospital')
     };
   }
 };
