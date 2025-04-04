@@ -117,7 +117,7 @@ export const handleCopyMedications = (medications, group, settings, setSnackbarM
   const groupInfo = {
     date: group.date,
     hosp: group.hosp,
-    visitType: group.visitType,
+    visitType: "", // 移除 visitType 的複製內容
     icd_code: group.icd_code,
     icd_name: group.icd_name,
     showDiagnosis: settings.showDiagnosis,

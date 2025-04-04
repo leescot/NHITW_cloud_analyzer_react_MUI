@@ -499,7 +499,7 @@ const FloatingIcon = () => {
                   icon={<TableChartIcon sx={{ fontSize: "1.125rem" }} />}
                   aria-label="西藥表格檢視"
                   sx={{
-                    minWidth: "40px", // Narrower width for icon-only tab
+                    minWidth: "60px", // Narrower width for icon-only tab
                     padding: "6px 6px",
                     color:
                       groupedMedications.length > 0 ? getTabColor(generalDisplaySettings, "medication") : "#9e9e9e",
@@ -539,7 +539,7 @@ const FloatingIcon = () => {
                   icon={<TableViewIcon sx={{ fontSize: "1.125rem" }} />}
                   aria-label="檢驗表格檢視"
                   sx={{
-                    minWidth: "40px", // Narrower width for icon-only tab
+                    minWidth: "60px", // Narrower width for icon-only tab
                     padding: "6px 6px",
                     color: groupedLabs.length > 0 ? getTabColor(generalDisplaySettings, "lab") : "#9e9e9e",
                     "&.Mui-selected": {

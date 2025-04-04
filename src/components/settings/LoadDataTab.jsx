@@ -242,9 +242,9 @@ const LoadDataTab = ({ localDataStatus, setSnackbar }) => {
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-      <Typography variant="h6" gutterBottom>
+      {/* <Typography variant="h6" gutterBottom>
         本地資料載入
-      </Typography>
+      </Typography> */}
 
       {/* 新增下載 JSON 資料檔的按鈕 */}
       <Paper variant="outlined" sx={{ p: 2 }}>
@@ -264,6 +264,44 @@ const LoadDataTab = ({ localDataStatus, setSnackbar }) => {
         {/* <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
           從健保雲端系統下載的資料可用於後續分析或載入到其他裝置上
         </Typography> */}
+      </Paper>
+
+      {/* 檔案上傳區 */}
+      <Paper variant="outlined" sx={{ p: 2 }}>
+        <Typography variant="subtitle1" gutterBottom>
+          選擇 JSON 檔案
+        </Typography>
+
+        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+          <Button
+            variant="contained"
+            component="label"
+            startIcon={<FolderOpenIcon />}
+            sx={{ mr: 2 }}
+          >
+            瀏覽...
+            <input
+              type="file"
+              accept=".json"
+              hidden
+              onChange={handleFileChange}
+            />
+          </Button>
+          <Typography variant="body2">
+            {selectedFile ? selectedFile.name : '未選擇檔案'}
+          </Typography>
+        </Box>
+
+        <Button
+          variant="contained"
+          color="primary"
+          fullWidth
+          startIcon={loading ? <CircularProgress size={24} color="inherit" /> : <CloudUploadIcon />}
+          onClick={handleLoadFile}
+          disabled={!selectedFile || loading}
+        >
+          {loading ? '載入中...' : '載入檔案'}
+        </Button>
       </Paper>
 
       {/* 資料狀態顯示 */}
@@ -305,43 +343,7 @@ const LoadDataTab = ({ localDataStatus, setSnackbar }) => {
         </Alert>
       )}
 
-      {/* 檔案上傳區 */}
-      <Paper variant="outlined" sx={{ p: 2 }}>
-        <Typography variant="subtitle1" gutterBottom>
-          選擇 JSON 檔案
-        </Typography>
-
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-          <Button
-            variant="contained"
-            component="label"
-            startIcon={<FolderOpenIcon />}
-            sx={{ mr: 2 }}
-          >
-            瀏覽...
-            <input
-              type="file"
-              accept=".json"
-              hidden
-              onChange={handleFileChange}
-            />
-          </Button>
-          <Typography variant="body2">
-            {selectedFile ? selectedFile.name : '未選擇檔案'}
-          </Typography>
-        </Box>
-
-        <Button
-          variant="contained"
-          color="primary"
-          fullWidth
-          startIcon={loading ? <CircularProgress size={24} color="inherit" /> : <CloudUploadIcon />}
-          onClick={handleLoadFile}
-          disabled={!selectedFile || loading}
-        >
-          {loading ? '載入中...' : '載入檔案'}
-        </Button>
-      </Paper>
+      
     </Box>
   );
 };

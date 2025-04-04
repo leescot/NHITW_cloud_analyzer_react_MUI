@@ -17,7 +17,8 @@ export const imagingProcessor = {
         date: this.formatDate(item.real_inspect_date || item.case_time || item.recipe_date),
         hosp: (item.hosp || '').split(';')[0],
         orderName: (item.order_name || '').replace(/;/g, '\n'),
-        inspectResult: item.inspect_result || '',
+        // 合併 inspect_result, path_diag_2, path_diag_3 欄位
+        inspectResult: this.combineReportFields(item),
         // 關鍵：加入 order_code 欄位，用於後續整合影像和報告
         order_code: item.order_code || '',
         // 關鍵：保存所有與影像查看相關的欄位
@@ -47,6 +48,26 @@ export const imagingProcessor = {
       withReport: withReport,
       withoutReport: withoutReport
     };
+  },
+
+  // 新增方法：合併報告欄位
+  combineReportFields(item) {
+    let report = '';
+    
+    // 依序加入 inspect_result, path_diag_2, path_diag_3
+    if (item.inspect_result) {
+      report += item.inspect_result;
+    }
+    
+    if (item.path_diag_2) {
+      report += item.path_diag_2;
+    }
+    
+    if (item.path_diag_3) {
+      report += item.path_diag_3;
+    }
+    
+    return report;
   },
 
   formatDate(dateStr) {

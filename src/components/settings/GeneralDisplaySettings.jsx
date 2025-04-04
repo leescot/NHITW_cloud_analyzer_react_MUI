@@ -299,7 +299,7 @@ const GeneralDisplaySettings = () => {
           <FormHelperText>讀卡後進入雲端網站自動開啟資料頁面</FormHelperText>
           <Divider sx={{ my: 2 }} />
 
-          <FormControl fullWidth sx={{ mb: 2 }}>
+          <FormControl fullWidth sx={{ mb: 1 }}>
             <InputLabel id="floating-icon-position-label">浮動圖標位置</InputLabel>
             <Select
               labelId="floating-icon-position-label"
@@ -314,54 +314,57 @@ const GeneralDisplaySettings = () => {
             </Select>
             <FormHelperText>設定浮動圖標在螢幕上的顯示位置</FormHelperText>
           </FormControl>
+          <Typography variant="subtitle1" sx={{ mb: 1 }}>文字大小設定</Typography>
+          <Box sx={{ display: 'flex', gap: 1, mb: 1 }}>
+            <FormControl sx={{ flex: 1 }}>
+              <InputLabel id="title-text-size-label">標題</InputLabel>
+              <Select
+                labelId="title-text-size-label"
+                id="title-text-size"
+                value={titleTextSize}
+                label="標題"
+                onChange={handleTitleTextSizeChange}
+                size="small"
+              >
+                <MenuItem value="small">小</MenuItem>
+                <MenuItem value="medium">中</MenuItem>
+                <MenuItem value="large">大</MenuItem>
+              </Select>
+            </FormControl>
 
-          <FormControl fullWidth sx={{ mb: 2 }}>
-            <InputLabel id="title-text-size-label">標題文字大小</InputLabel>
-            <Select
-              labelId="title-text-size-label"
-              id="title-text-size"
-              value={titleTextSize}
-              label="標題文字大小"
-              onChange={handleTitleTextSizeChange}
-            >
-              <MenuItem value="small">小</MenuItem>
-              <MenuItem value="medium">中</MenuItem>
-              <MenuItem value="large">大</MenuItem>
-            </Select>
-            <FormHelperText>影響所有標題的顯示大小</FormHelperText>
-          </FormControl>
+            <FormControl sx={{ flex: 1 }}>
+              <InputLabel id="content-text-size-label">內容</InputLabel>
+              <Select
+                labelId="content-text-size-label"
+                id="content-text-size"
+                value={contentTextSize}
+                label="內容"
+                onChange={handleContentTextSizeChange}
+                size="small"
+              >
+                <MenuItem value="small">小</MenuItem>
+                <MenuItem value="medium">中</MenuItem>
+                <MenuItem value="large">大</MenuItem>
+              </Select>
+            </FormControl>
 
-          <FormControl fullWidth sx={{ mb: 2 }}>
-            <InputLabel id="content-text-size-label">內容文字大小</InputLabel>
-            <Select
-              labelId="content-text-size-label"
-              id="content-text-size"
-              value={contentTextSize}
-              label="內容文字大小"
-              onChange={handleContentTextSizeChange}
-            >
-              <MenuItem value="small">小</MenuItem>
-              <MenuItem value="medium">中</MenuItem>
-              <MenuItem value="large">大</MenuItem>
-            </Select>
-            <FormHelperText>影響主要內容的顯示大小</FormHelperText>
-          </FormControl>
-
-          <FormControl fullWidth sx={{ mb: 2 }}>
-            <InputLabel id="note-text-size-label">備註文字大小</InputLabel>
-            <Select
-              labelId="note-text-size-label"
-              id="note-text-size"
-              value={noteTextSize}
-              label="備註文字大小"
-              onChange={handleNoteTextSizeChange}
-            >
-              <MenuItem value="small">小</MenuItem>
-              <MenuItem value="medium">中</MenuItem>
-              <MenuItem value="large">大</MenuItem>
-            </Select>
-            <FormHelperText>影響說明與備註的顯示大小</FormHelperText>
-          </FormControl>
+            <FormControl sx={{ flex: 1 }}>
+              <InputLabel id="note-text-size-label">備註</InputLabel>
+              <Select
+                labelId="note-text-size-label"
+                id="note-text-size"
+                value={noteTextSize}
+                label="備註"
+                onChange={handleNoteTextSizeChange}
+                size="small"
+              >
+                <MenuItem value="small">小</MenuItem>
+                <MenuItem value="medium">中</MenuItem>
+                <MenuItem value="large">大</MenuItem>
+              </Select>
+            </FormControl>
+          </Box>
+          <FormHelperText>分別設定標題、內容及備註文字的顯示大小</FormHelperText>
         </Box>
       </AccordionDetails>
     </Accordion>

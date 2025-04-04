@@ -242,21 +242,62 @@ const Overview_ImagingTests = ({
                   {test.inspectResult && (
                     <Tooltip
                       title={
-                        <Typography variant="caption" style={{ whiteSpace: 'pre-line' }}>
-                          {test.inspectResult.length > 200
-                            ? test.inspectResult.substring(0, 200) + '...'
-                            : test.inspectResult}
-                        </Typography>
+                        (() => {
+                          // Process inspectResult for tooltip
+                          let processedContent = test.inspectResult;
+                          const markers = ["Imaging findings:", "Imaging findings", "Sonographic Findings:", "Sonographic Findings", "報告內容:", "報告內容：", "報告內容"];
+                          for (const marker of markers) {
+                            if (processedContent.includes(marker)) {
+                              processedContent = processedContent.split(marker)[1];
+                              break;
+                            }
+                          }
+                          
+                          // Highlight specific terms
+                          const terms = [/diagnosis/i, /impression/i, /IMP/, /conclusion/i, /診斷/];
+                          let highlightedContent = processedContent;
+                          
+                          // Apply highlighting for tooltip (for all occurrences)
+                          terms.forEach(term => {
+                            highlightedContent = highlightedContent.replace(
+                              new RegExp(term.source, 'g' + term.flags), 
+                              match => `<span style="color: red; font-weight: bold;">${match}</span>`
+                            );
+                          });
+                          
+                          // Truncate if needed
+                          const finalContent = highlightedContent.length > 200 
+                            ? highlightedContent.substring(0, 200) + '...' 
+                            : highlightedContent;
+                            
+                          return (
+                            <Typography variant="caption" style={{ whiteSpace: 'pre-line' }}>
+                              <div dangerouslySetInnerHTML={{ __html: finalContent }} />
+                            </Typography>
+                          );
+                        })()
                       }
                     >
                       <IconButton
                         size="small"
                         color="primary"
-                        onClick={() => setReportDialog({
-                          open: true,
-                          title: `${test.orderName} - ${test.date}`,
-                          content: test.inspectResult
-                        })}
+                        onClick={() => {
+                          // Process inspectResult to filter content
+                          let processedContent = test.inspectResult;
+                          const markers = ["Imaging findings:", "Imaging findings", "Sonographic Findings:", "Sonographic Findings", "報告內容:", "報告內容：", "報告內容"];
+                          for (const marker of markers) {
+                            if (processedContent.includes(marker)) {
+                              processedContent = processedContent.split(marker)[1];
+                              break;
+                            }
+                          }
+                          
+                          setReportDialog({
+                            open: true,
+                            title: `${test.orderName} - ${test.date}`,
+                            content: processedContent
+                          })
+                        }}
                       >
                         <DescriptionIcon fontSize="small" />
                       </IconButton>
@@ -335,7 +376,23 @@ const Overview_ImagingTests = ({
             generalDisplaySettings={generalDisplaySettings}
             style={{ whiteSpace: 'pre-line' }}
           >
-            {reportDialog.content}
+            {(() => {
+              // Highlight specific terms in red
+              const terms = [/diagnosis/i, /impression/i, /IMP/, /conclusion/i, /診斷/];
+              let content = reportDialog.content;
+              
+              // Replace each term with a red-colored version (for all occurrences)
+              terms.forEach(term => {
+                // Use replaceAll with a regular expression that has the global flag
+                content = content.replace(
+                  new RegExp(term.source, 'g' + term.flags), 
+                  match => `<span style="color: red; font-weight: bold;">${match}</span>`
+                );
+              });
+              
+              // Return content with dangerouslySetInnerHTML
+              return <div dangerouslySetInnerHTML={{ __html: content }} />;
+            })()}
           </TypographySizeWrapper>
         </DialogContent>
         <DialogActions>

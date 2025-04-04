@@ -341,7 +341,7 @@ const OverviewSettings = () => {
 
   const medicationHelperText = (
     <span>
-      <span style={{ color: 'red' }}>關注藥物清單至西藥ACT5變色設定</span>
+      <span style={{ color: 'red' }}>關注藥物清單請至西藥ACT分類設定</span>
       /範圍: 1~180天
     </span>
   );

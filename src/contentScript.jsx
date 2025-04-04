@@ -6,9 +6,9 @@ function injectLegacyContent() {
   console.log("Injecting legacy content script");
 }
 
-// Create a self-executing function to avoid global scope pollution
-(function () {
-  console.log("Content script initialized");
+// 初始化主要功能
+function initializeExtension() {
+  console.log("Content script initializing");
 
   // Create a mount point for React components
   const rootDiv = document.createElement("div");
@@ -31,6 +31,20 @@ function injectLegacyContent() {
   import("./legacyContent.js")
     .then(() => {
       console.log("Legacy content script loaded");
+      
+      // 處理任何在初始化前收集的早期事件
+      if (window._earlyEvents && window._earlyEvents.length > 0) {
+        console.log(`處理 ${window._earlyEvents.length} 個早期事件`);
+        window._earlyEvents.forEach(event => {
+          // 觸發消息事件以使用正確設置的處理程序
+          window.dispatchEvent(new MessageEvent('message', {
+            source: window,
+            data: event.data
+          }));
+        });
+        // 清除早期事件
+        window._earlyEvents = [];
+      }
     })
     .catch((error) => {
       console.error("Error loading legacy content:", error);
@@ -126,4 +140,24 @@ function injectLegacyContent() {
       console.error("擴充功能處理數據消息時出錯:", error);
     }
   });
-})();
+}
+
+// 在 DOM 內容載入後安全地進行初始化
+if (document.readyState === 'loading') {
+  document.addEventListener('DOMContentLoaded', initializeExtension);
+} else {
+  // 如果 DOM 已經載入完成，立即初始化
+  initializeExtension();
+}
+
+// 預先設置關鍵監聽器以確保不會錯過早期事件
+window.addEventListener("message", (event) => {
+  // 將實際的處理邏輯延遲到初始化完成後
+  if (event.source !== window) return;
+  
+  // 儲存早期事件以便初始化後處理
+  if (event.data && (event.data.type === "dataForExtension" || event.data.type === "localDataCleared")) {
+    if (!window._earlyEvents) window._earlyEvents = [];
+    window._earlyEvents.push(event);
+  }
+});

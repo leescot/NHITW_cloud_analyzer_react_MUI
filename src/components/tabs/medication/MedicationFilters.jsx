@@ -77,7 +77,15 @@ const MedicationFilters = ({
         placeholder="可輸入商品名或學名..."
         value={searchText}
         onChange={handleSearchChange}
-        sx={{ mb: 1, mr: 2, flexGrow: 1, maxWidth: { xs: '100%', sm: '300px' } }}
+        sx={{ 
+          mb: 1, 
+          mr: 2, 
+          flexGrow: 1, 
+          maxWidth: { xs: '100%', sm: '300px' },
+          '& .MuiInputBase-root': {
+            height: '24px'
+          } 
+        }}
         InputProps={{
           startAdornment: (
             <InputAdornment position="start">

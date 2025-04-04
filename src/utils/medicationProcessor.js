@@ -314,11 +314,9 @@ export const medicationProcessor = {
       return "";
     }
 
-    // Format the header with date, hospital, visit type and diagnosis
+    // Format the header with date and hospital only (removed visitType)
     let header = `${groupInfo.date} - ${groupInfo.hosp}`;
-    if (groupInfo.visitType) {
-      header += ` (${groupInfo.visitType})`;
-    }
+    // Removed the visitType inclusion code
     if (groupInfo.showDiagnosis && groupInfo.icd_code && groupInfo.icd_name) {
       header += ` [${groupInfo.icd_code} ${groupInfo.icd_name}]`;
     }

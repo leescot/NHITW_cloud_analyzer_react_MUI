@@ -442,10 +442,14 @@ const ReportImagingTable = ({ data, generalDisplaySettings }) => {
           {data.map((item, index) => {
             const formattedName = formatOrderName(item.orderName);
             let reportResult = item.inspectResult || "";
-            if (reportResult.includes("報告內容:")) {
-              reportResult = reportResult.split("報告內容:")[1];
+            // Define the markers to filter report content
+            const markers = ["Imaging findings:", "Imaging findings", "Sonographic Findings:", "Sonographic Findings", "報告內容:", "報告內容：", "報告內容"];
+            for (const marker of markers) {
+              if (reportResult.includes(marker)) {
+                reportResult = reportResult.split(marker)[1];
+                break;
+              }
             }
-
             return (
               <TableRow key={index}>
                 <TableCell>
@@ -491,7 +495,23 @@ const ReportImagingTable = ({ data, generalDisplaySettings }) => {
                     textSizeType="content"
                     generalDisplaySettings={generalDisplaySettings}
                   >
-                    {reportResult}
+                    {(() => {
+                      // Highlight specific terms in red
+                      const terms = [/diagnosis/i, /impression/i, /IMP/, /conclusion/i, /診斷/];
+                      let content = reportResult;
+                      
+                      // Replace each term with a red-colored version (for all occurrences)
+                      terms.forEach(term => {
+                        // Use replaceAll with a regular expression that has the global flag
+                        content = content.replace(
+                          new RegExp(term.source, 'g' + term.flags), 
+                          match => `<span style="color: red; font-weight: bold;">${match}</span>`
+                        );
+                      });
+                      
+                      // Return content with dangerouslySetInnerHTML
+                      return <div dangerouslySetInnerHTML={{ __html: content }} />;
+                    })()}
                   </TypographySizeWrapper>
                 </TableCell>
                 <TableCell align="center">
