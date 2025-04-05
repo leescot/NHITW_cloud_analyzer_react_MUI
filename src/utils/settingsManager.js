@@ -17,9 +17,14 @@ export const loadAllSettings = async () => {
       showGenericName: DEFAULT_SETTINGS.western.showGenericName,
       showDiagnosis: DEFAULT_SETTINGS.western.showDiagnosis,
       showATC5Name: DEFAULT_SETTINGS.western.showATC5Name,
-      copyFormat: DEFAULT_SETTINGS.western.copyFormat,
+      medicationCopyFormat: DEFAULT_SETTINGS.western.medicationCopyFormat,
       separateShortTermMeds: DEFAULT_SETTINGS.western.separateShortTermMeds,
       showExternalDrugImage: DEFAULT_SETTINGS.western.showExternalDrugImage,
+      enableMedicationCustomCopyFormat: DEFAULT_SETTINGS.western.enableMedicationCustomCopyFormat || false,
+      enableMedicationCopyAll: DEFAULT_SETTINGS.western.enableMedicationCopyAll || false,
+      drugSeparator: DEFAULT_SETTINGS.western.drugSeparator || ',',
+      customMedicationHeaderCopyFormat: DEFAULT_SETTINGS.western.customMedicationHeaderCopyFormat,
+      customMedicationDrugCopyFormat: DEFAULT_SETTINGS.western.customMedicationDrugCopyFormat,
 
       // ATC5 Color settings
       enableATC5Colors: DEFAULT_SETTINGS.atc5.enableColors,
@@ -33,14 +38,14 @@ export const loadAllSettings = async () => {
       chineseMedCopyFormat: DEFAULT_SETTINGS.chinese.copyFormat,
 
       // Lab settings
-      labDisplayFormat: DEFAULT_SETTINGS.lab.displayFormat,
+      displayLabFormat: DEFAULT_SETTINGS.lab.displayLabFormat,
       showLabUnit: DEFAULT_SETTINGS.lab.showUnit,
       showLabReference: DEFAULT_SETTINGS.lab.showReference,
-      enableLabAbbrev: DEFAULT_SETTINGS.lab.enableAbbrev,
+      enableLabAbbrev: DEFAULT_SETTINGS.lab.enableLabAbbrev,
       highlightAbnormalLab: DEFAULT_SETTINGS.lab.highlightAbnormal,
-      labCopyFormat: DEFAULT_SETTINGS.lab.copyFormat,
-      enableCustomCopy: DEFAULT_SETTINGS.lab.enableCustomCopy,
-      customCopyItems: DEFAULT_SETTINGS.lab.customCopyItems,
+      copyLabFormat: DEFAULT_SETTINGS.lab.copyLabFormat,
+      enableLabChooseCopy: DEFAULT_SETTINGS.lab.enableLabChooseCopy,
+      labChooseCopyItems: DEFAULT_SETTINGS.lab.labChooseCopyItems,
 
       // Overview settings
       medicationTrackingDays: DEFAULT_SETTINGS.overview.medicationTrackingDays,
@@ -56,7 +61,7 @@ export const loadAllSettings = async () => {
       noteTextSize: DEFAULT_SETTINGS.general.noteTextSize,
       floatingIconPosition: DEFAULT_SETTINGS.general.floatingIconPosition,
       alwaysOpenOverviewTab: DEFAULT_SETTINGS.general.alwaysOpenOverviewTab,
-      useColorfulTabs: DEFAULT_SETTINGS.general.useColorfulTabs
+      useColorfulTabs: DEFAULT_SETTINGS.general.useColorfulTabs,
     }, (items) => {
       // 組織所有設置到一個結構化對象
       const allSettings = {
@@ -65,9 +70,14 @@ export const loadAllSettings = async () => {
           showGenericName: items.showGenericName,
           showDiagnosis: items.showDiagnosis,
           showATC5Name: items.showATC5Name,
-          copyFormat: items.copyFormat,
+          medicationCopyFormat: items.medicationCopyFormat,
           separateShortTermMeds: items.separateShortTermMeds,
           showExternalDrugImage: items.showExternalDrugImage,
+          enableMedicationCustomCopyFormat: items.enableMedicationCustomCopyFormat,
+          enableMedicationCopyAll: items.enableMedicationCopyAll,
+          customMedicationHeaderCopyFormat: items.customMedicationHeaderCopyFormat,
+          customMedicationDrugCopyFormat: items.customMedicationDrugCopyFormat,
+          drugSeparator: items.drugSeparator,
         },
         atc5: {
           enableColors: items.enableATC5Colors,
@@ -81,14 +91,14 @@ export const loadAllSettings = async () => {
           copyFormat: items.chineseMedCopyFormat,
         },
         lab: {
-          displayFormat: items.labDisplayFormat,
+          displayLabFormat: items.displayLabFormat,
           showUnit: items.showLabUnit,
           showReference: items.showLabReference,
-          enableAbbrev: items.enableLabAbbrev,
+          enableLabAbbrev: items.enableLabAbbrev,
           highlightAbnormal: items.highlightAbnormalLab,
-          copyFormat: items.labCopyFormat,
-          enableCustomCopy: items.enableCustomCopy,
-          customCopyItems: items.customCopyItems,
+          copyLabFormat: items.copyLabFormat,
+          enableLabChooseCopy: items.enableLabChooseCopy,
+          labChooseCopyItems: items.labChooseCopyItems,
         },
         overview: {
           medicationTrackingDays: items.medicationTrackingDays,
@@ -104,7 +114,7 @@ export const loadAllSettings = async () => {
           noteTextSize: items.noteTextSize,
           floatingIconPosition: items.floatingIconPosition,
           alwaysOpenOverviewTab: items.alwaysOpenOverviewTab,
-          useColorfulTabs: items.useColorfulTabs
+          useColorfulTabs: items.useColorfulTabs,
         }
       };
 
@@ -214,18 +224,22 @@ const handleChineseMedSettingsChange = (event, currentSettings, updateCallback, 
  * 處理檢驗設置變更
  */
 const handleLabSettingsChange = (event, currentSettings, updateCallback, callbacks) => {
+  console.log("Lab settings change event:", event.detail);
+  
   if (event.detail.allSettings) {
     // 更新所有檢驗設置
     const newLabSettings = {
-      displayFormat: event.detail.allSettings.labDisplayFormat,
+      displayLabFormat: event.detail.allSettings.displayLabFormat,
       showUnit: event.detail.allSettings.showLabUnit,
       showReference: event.detail.allSettings.showLabReference,
-      enableAbbrev: event.detail.allSettings.enableLabAbbrev,
+      enableLabAbbrev: event.detail.allSettings.enableLabAbbrev,
       highlightAbnormal: event.detail.allSettings.highlightAbnormalLab,
-      copyFormat: event.detail.allSettings.labCopyFormat,
-      enableCustomCopy: event.detail.allSettings.enableCustomCopy,
-      customCopyItems: event.detail.allSettings.customCopyItems,
+      copyLabFormat: event.detail.allSettings.copyLabFormat,
+      enableLabChooseCopy: event.detail.allSettings.enableLabChooseCopy,
+      labChooseCopyItems: event.detail.allSettings.labChooseCopyItems,
     };
+
+    console.log("Updating all lab settings:", newLabSettings);
 
     // 更新設置並重新處理數據
     updateCallback({
@@ -239,10 +253,44 @@ const handleLabSettingsChange = (event, currentSettings, updateCallback, callbac
     }
   } else {
     // 單一設置變更
+    let updatedValue = event.detail.value;
+    let settingKey = event.detail.setting;
+    
+    console.log(`Updating single lab setting: ${settingKey} = ${JSON.stringify(updatedValue)}`);
+    
+    // 特別處理 displayLabFormat
+    if (settingKey === 'displayLabFormat') {
+      console.log(`Special handling for display format: ${updatedValue}`);
+      
+      // 創建新的設置對象，確保 displayLabFormat 被正確設置
+      const updatedSettings = {
+        ...currentSettings.lab,
+        displayLabFormat: updatedValue
+      };
+      
+      console.log("Updated lab settings with new display format:", updatedSettings);
+      
+      // 更新設置
+      updateCallback({
+        ...currentSettings,
+        lab: updatedSettings
+      });
+      
+      // 重新處理檢驗數據
+      if (window.lastInterceptedLabData && callbacks.reprocessLab) {
+        callbacks.reprocessLab(window.lastInterceptedLabData, updatedSettings);
+      }
+      
+      return; // 提前返回，不執行後面的代碼
+    }
+    
+    // 其他設置的一般處理
     const updatedSettings = {
       ...currentSettings.lab,
-      [event.detail.setting]: event.detail.value
+      [settingKey]: updatedValue
     };
+
+    console.log("Updated lab settings:", updatedSettings);
 
     // 更新設置
     updateCallback({

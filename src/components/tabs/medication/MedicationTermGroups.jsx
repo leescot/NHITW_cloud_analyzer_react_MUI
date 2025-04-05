@@ -7,7 +7,7 @@ const MedicationTermGroups = ({
   longTermMeds,
   shortTermMeds,
   settings,
-  copyFormat,
+  medicationCopyFormat,
   generalDisplaySettings,
   setSnackbarMessage,
   setSnackbarOpen
@@ -42,7 +42,7 @@ const MedicationTermGroups = ({
                 key={index}
                 group={group}
                 settings={settings}
-                copyFormat={copyFormat}
+                copyFormat={medicationCopyFormat}
                 generalDisplaySettings={generalDisplaySettings}
                 isLast={index === longTermMeds.length - 1}
                 setSnackbarMessage={setSnackbarMessage}
@@ -81,7 +81,7 @@ const MedicationTermGroups = ({
                 key={index}
                 group={group}
                 settings={settings}
-                copyFormat={copyFormat}
+                copyFormat={medicationCopyFormat}
                 generalDisplaySettings={generalDisplaySettings}
                 isLast={index === shortTermMeds.length - 1}
                 setSnackbarMessage={setSnackbarMessage}

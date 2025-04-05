@@ -60,7 +60,7 @@ export const DEFAULT_LAB_TESTS = [
  *
  * 注意:
  * 1. 使用者可以透過設定界面自訂要複製的項目
- * 2. 設定會存儲在 Chrome storage 中的 customCopyItems 欄位
+ * 2. 設定會存儲在 Chrome storage 中的 labChooseCopyItems 欄位
  */
 export const DEFAULT_LAB_COPY_ITEMS = [
   { orderCode: '08011C-WBC', displayName: 'WBC', enabled: false },

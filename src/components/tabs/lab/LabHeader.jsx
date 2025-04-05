@@ -42,7 +42,7 @@ const LabHeader = ({
         )}
 
         {/* 複製按鈕 - 根據設定決定顯示一個還是兩個 */}
-        {labSettings.enableCustomCopy ? (
+        {labSettings.enableLabChooseCopy ? (
           <>
             <CopyAllButton onClick={() => handleCopyAllLabData(group)} style={copyButtonStyle} showLabel={true} />
             {/* 當選擇了項目時顯示 Sel 按鈕 */}

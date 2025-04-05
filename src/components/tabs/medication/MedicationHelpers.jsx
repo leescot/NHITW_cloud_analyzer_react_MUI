@@ -110,7 +110,7 @@ export const getVisitTypeColor = (visitType) => {
 
 // 複製藥物的函數
 export const handleCopyMedications = (medications, group, settings, setSnackbarMessage, setSnackbarOpen) => {
-  if (settings.copyFormat === "none") {
+  if (settings.medicationCopyFormat === "none") {
     return;
   }
 
@@ -125,7 +125,7 @@ export const handleCopyMedications = (medications, group, settings, setSnackbarM
 
   const formattedText = medicationProcessor.formatMedicationList(
     medications,
-    settings.copyFormat,
+    settings.medicationCopyFormat,
     groupInfo
   );
   navigator.clipboard

@@ -9,20 +9,65 @@ import TypeBasedLayout from "./lab/TypeBasedLayout";
 import { VerticalLayout, HorizontalLayout, MultiColumnLayout } from "./lab/LayoutComponents";
 
 const LabData = ({ groupedLabs, settings, labSettings, generalDisplaySettings }) => {
-  // console.log("LabData rendering with lab settings:", labSettings);
+  // Add detailed logging to see what's coming in from props
+  console.log("LabData props:", { settings, labSettings, displayLabFormat: labSettings?.displayLabFormat });
+  
+  // Function to map format names (handles legacy formats and ensures valid values)
+  const mapFormatName = (format) => {
+    // Log format value for debugging
+    console.log("FORMAT VALUE TO MAP:", format);
+
+    // Check if format is undefined or null, return default
+    if (format === undefined || format === null) {
+      console.log("FORMAT UNDEFINED/NULL, RETURNING DEFAULT");
+      return 'byType';
+    }
+
+    // Map of supported format names
+    const formatMap = {
+      'columns': 'twoColumn',    // Legacy format name
+      'column': 'twoColumn',     // Handle possible typo
+      'twoColumn': 'twoColumn',
+      'threeColumn': 'threeColumn',
+      'byType': 'byType',
+      'vertical': 'vertical',
+      'horizontal': 'horizontal'
+    };
+
+    // Check if this is a valid format and return mapped value (or default)
+    if (formatMap[format]) {
+      console.log(`MAPPED FORMAT from ${format} to ${formatMap[format]}`);
+      return formatMap[format];
+    } else {
+      console.log(`INVALID FORMAT: ${format}, DEFAULTING TO byType`);
+      return 'byType';
+    }
+  };
 
   // Ensure all required properties exist in labSettings with defaults
   const completeLabSettings = {
-    displayFormat: 'byType',
     showUnit: false,
     showReference: false,
-    enableAbbrev: true,
+    enableLabAbbrev: true,
     highlightAbnormal: true,
-    copyFormat: 'horizontal',
-    enableCustomCopy: false,
-    customCopyItems: [],
-    ...labSettings
+    copyLabFormat: 'horizontal',
+    enableLabChooseCopy: false,
+    labChooseCopyItems: [],
+    ...labSettings,
+    // Ensure display format is properly mapped
+    displayLabFormat: mapFormatName(labSettings?.displayLabFormat)
   };
+
+  // Log to help debug the display format
+  console.log("Lab settings after merge:", completeLabSettings);
+  console.log("Original format in props:", labSettings?.displayLabFormat);
+  console.log("Mapped display format:", completeLabSettings.displayLabFormat);
+
+  // Add an effect to respond to labSettings changes
+  useEffect(() => {
+    console.log("labSettings prop changed:", labSettings);
+    console.log("Current displayLabFormat:", labSettings?.displayLabFormat);
+  }, [labSettings]);
 
   // 使用自定義 Hook 處理複製功能
   const {
@@ -37,10 +82,10 @@ const LabData = ({ groupedLabs, settings, labSettings, generalDisplaySettings })
   // 使用 Map 來追蹤每個組別中選中的項目 { groupIndex: { labId: boolean } }
   const [selectedLabItems, setSelectedLabItems] = useState({});
 
-  // 初始化選擇狀態 (基於 customCopyItems)
-  // 當 enableCustomCopy 為 true 時，預先選中 customCopyItems 中的項目
+  // 初始化選擇狀態 (基於 labChooseCopyItems)
+  // 當 enableLabChooseCopy 為 true 時，預先選中 labChooseCopyItems 中的項目
   useEffect(() => {
-    if (completeLabSettings.enableCustomCopy && groupedLabs.length > 0) {
+    if (completeLabSettings.enableLabChooseCopy && groupedLabs.length > 0) {
       const initialSelections = {};
 
       // 創建特殊檢驗項目判斷邏輯的 Map
@@ -90,9 +135,9 @@ const LabData = ({ groupedLabs, settings, labSettings, generalDisplaySettings })
           const labId = `${groupIndex}-${labIndex}`;
           let isPreselected = false;
 
-          // 檢查此檢驗項目是否在 customCopyItems 中並且啟用
-          if (completeLabSettings.customCopyItems && Array.isArray(completeLabSettings.customCopyItems)) {
-            const enabledOrderCodes = completeLabSettings.customCopyItems
+          // 檢查此檢驗項目是否在 labChooseCopyItems 中並且啟用
+          if (completeLabSettings.labChooseCopyItems && Array.isArray(completeLabSettings.labChooseCopyItems)) {
+            const enabledOrderCodes = completeLabSettings.labChooseCopyItems
               .filter(item => item.enabled)
               .map(item => item.orderCode);
 
@@ -120,7 +165,7 @@ const LabData = ({ groupedLabs, settings, labSettings, generalDisplaySettings })
 
       setSelectedLabItems(initialSelections);
     }
-  }, [completeLabSettings.enableCustomCopy, completeLabSettings.customCopyItems, groupedLabs]);
+  }, [completeLabSettings.enableLabChooseCopy, completeLabSettings.labChooseCopyItems, groupedLabs]);
 
   // 切換檢驗項目選擇狀態
   const handleToggleLabItem = (groupIndex, labIndex) => {
@@ -160,14 +205,13 @@ const LabData = ({ groupedLabs, settings, labSettings, generalDisplaySettings })
   const columnCountMap = new Map([
     ["twoColumn", 2],
     ["threeColumn", 3],
-    ["fourColumn", 4],
     ["byType", 0],  // 特殊情況，按類型分群
     ["default", 1]  // 'vertical' 或其他情況
   ]);
 
   // 確定欄數設置
   const getColumnCount = () => {
-    return columnCountMap.get(completeLabSettings.displayFormat) || columnCountMap.get("default");
+    return columnCountMap.get(completeLabSettings.displayLabFormat) || columnCountMap.get("default");
   };
 
   // 使用 Map 來儲存不同的布局組件
@@ -191,10 +235,21 @@ const LabData = ({ groupedLabs, settings, labSettings, generalDisplaySettings })
         labSettings={completeLabSettings}
       />
     )],
-    ["multiColumn", (group, index) => (
+    ["twoColumn", (group, index) => (
       <MultiColumnLayout
         labs={group.labs}
-        columnCount={getColumnCount()}
+        columnCount={2}
+        groupIndex={index}
+        selectedLabItems={selectedLabItems}
+        handleToggleLabItem={handleToggleLabItem}
+        generalDisplaySettings={generalDisplaySettings}
+        labSettings={completeLabSettings}
+      />
+    )],
+    ["threeColumn", (group, index) => (
+      <MultiColumnLayout
+        labs={group.labs}
+        columnCount={3}
         groupIndex={index}
         selectedLabItems={selectedLabItems}
         handleToggleLabItem={handleToggleLabItem}
@@ -217,15 +272,13 @@ const LabData = ({ groupedLabs, settings, labSettings, generalDisplaySettings })
   // 決定要使用哪種布局
   // # zh-TW: 根據設定和條件決定要使用的布局類型
   const getLayoutComponent = (group, index) => {
-    if (completeLabSettings.displayFormat === "byType") {
-      return layoutComponentMap.get("byType")(group, index);
-    } else if (completeLabSettings.displayFormat === "horizontal") {
-      return layoutComponentMap.get("horizontal")(group, index);
-    } else if (getColumnCount() > 1) {
-      return layoutComponentMap.get("multiColumn")(group, index);
-    } else {
-      return layoutComponentMap.get("vertical")(group, index);
+    // 直接使用 Map 來獲取對應的布局組件
+    const layoutRenderer = layoutComponentMap.get(completeLabSettings.displayLabFormat);
+    if (layoutRenderer) {
+      return layoutRenderer(group, index);
     }
+    // 默認使用垂直布局
+    return layoutComponentMap.get("vertical")(group, index);
   };
 
   return (

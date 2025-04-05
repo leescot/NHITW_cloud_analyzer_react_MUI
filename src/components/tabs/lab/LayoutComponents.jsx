@@ -46,7 +46,7 @@ export const HorizontalLayout = ({
   generalDisplaySettings,
   labSettings
 }) => {
-  const { enableAbbrev, showUnit, showReference, highlightAbnormal } = labSettings;
+  const { enableLabAbbrev, showUnit, showReference, highlightAbnormal } = labSettings;
 
   // 使用 Map 來映射狀態和顏色 - 提高可讀性和效率
   const statusColorMap = new Map([
@@ -81,7 +81,7 @@ export const HorizontalLayout = ({
 
             return (
               <span key={labIndex} style={{ marginRight: '12px' }}>
-                {enableAbbrev
+                {enableLabAbbrev
                   ? lab.abbrName || lab.itemName
                   : lab.itemName}{" "}
                 <span style={{ fontWeight: 'medium', color: getStatusColor() }}>

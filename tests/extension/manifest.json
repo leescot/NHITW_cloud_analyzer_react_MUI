@@ -1,6 +1,6 @@
 {
   "manifest_version": 3,
-  "name": "健保雲端資料擷取器2.0",
+  "name": "更的的健保雲端 2.0 本地端版本",
   "version": "0.0.0",
   "description": "健保雲端資料擷取器 localhost 本地端 manifest.json 版本",
   "homepage_url": "https://github.com/leescot/NHITW_cloud_analyzer_react_MUI",

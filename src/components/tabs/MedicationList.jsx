@@ -4,11 +4,12 @@ import TypographySizeWrapper from "../utils/TypographySizeWrapper";
 import MedicationFilters from "./medication/MedicationFilters";
 import MedicationGroup from "./medication/MedicationGroup";
 import MedicationTermGroups from "./medication/MedicationTermGroups";
+import { medicationProcessor } from "../../utils/medicationProcessor.js";
 
 const MedicationList = ({
   groupedMedications,
   settings,
-  copyFormat,
+  medicationCopyFormat,
   generalDisplaySettings,
 }) => {
   // 添加 snackbar 狀態
@@ -162,7 +163,7 @@ const MedicationList = ({
 
   // 複製藥物的函數 - 從 FloatingIcon 移過來
   const handleCopyMedications = (medications, group) => {
-    if (settings.copyFormat === "none") {
+    if (settings.medicationCopyFormat === "none") {
       return;
     }
 
@@ -177,7 +178,7 @@ const MedicationList = ({
 
     const formattedText = medicationProcessor.formatMedicationList(
       medications,
-      settings.copyFormat,
+      settings.medicationCopyFormat,
       groupInfo
     );
     navigator.clipboard
@@ -188,6 +189,44 @@ const MedicationList = ({
       })
       .catch((err) => {
         console.error("Failed to copy medications: ", err);
+        setSnackbarMessage("複製失敗，請重試");
+        setSnackbarOpen(true);
+      });
+  };
+
+  // Handle copying all medications function
+  const handleCopyAllMedications = () => {
+    if (filteredMedications.length === 0 || settings.medicationCopyFormat === "none") {
+      setSnackbarMessage("沒有可複製的藥物資料");
+      setSnackbarOpen(true);
+      return;
+    }
+
+    const allFormattedText = filteredMedications.map(group => {
+      const groupInfo = {
+        date: group.date,
+        hosp: group.hosp,
+        visitType: group.visitType,
+        icd_code: group.icd_code,
+        icd_name: group.icd_name,
+        showDiagnosis: settings.showDiagnosis,
+      };
+
+      return medicationProcessor.formatMedicationList(
+        group.medications,
+        settings.medicationCopyFormat,
+        groupInfo
+      );
+    }).join("\n\n");
+
+    navigator.clipboard
+      .writeText(allFormattedText)
+      .then(() => {
+        setSnackbarMessage("所有藥物資料已複製到剪貼簿");
+        setSnackbarOpen(true);
+      })
+      .catch((err) => {
+        console.error("Failed to copy all medications: ", err);
         setSnackbarMessage("複製失敗，請重試");
         setSnackbarOpen(true);
       });
@@ -340,6 +379,8 @@ const MedicationList = ({
             handleVisitTypeChange={handleVisitTypeChange}
             availableVisitTypes={availableVisitTypes}
             generalDisplaySettings={generalDisplaySettings}
+            settings={settings}
+            onCopyAll={handleCopyAllMedications}
           />
 
           {filteredMedications.length === 0 ? (
@@ -358,7 +399,7 @@ const MedicationList = ({
                 longTermMeds={longTermMeds}
                 shortTermMeds={shortTermMeds}
                 settings={settings}
-                copyFormat={copyFormat}
+                copyFormat={medicationCopyFormat}
                 generalDisplaySettings={generalDisplaySettings}
                 setSnackbarMessage={setSnackbarMessage}
                 setSnackbarOpen={setSnackbarOpen}
@@ -370,7 +411,7 @@ const MedicationList = ({
                   key={index}
                   group={group}
                   settings={settings}
-                  copyFormat={copyFormat}
+                  copyFormat={medicationCopyFormat}
                   generalDisplaySettings={generalDisplaySettings}
                   isLast={index === filteredMedications.length - 1}
                   setSnackbarMessage={setSnackbarMessage}

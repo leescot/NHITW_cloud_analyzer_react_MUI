@@ -14,13 +14,16 @@ const LabItemDisplay = ({
   labSettings
 }) => {
   const {
-    enableCustomCopy,
-    displayFormat,
-    enableAbbrev,
+    enableLabChooseCopy,
+    displayLabFormat,
+    enableLabAbbrev,
     showUnit,
     showReference,
     highlightAbnormal
   } = labSettings;
+
+  // Add debug logging
+  // console.log(`LabItemDisplay format: ${displayLabFormat}, enableLabChooseCopy: ${enableLabChooseCopy}`);
 
   const labId = `${groupIndex}-${labIndex}`;
   const isSelected = selectedLabItems[groupIndex]?.[labId] || false;
@@ -29,9 +32,9 @@ const LabItemDisplay = ({
   const displayComponents = new Map([
     // 顯示帶有複選框的版本 - 當啟用自定義複製且顯示格式不是垂直或水平
     [
-      () => enableCustomCopy && 
-            (displayFormat !== 'vertical' && 
-             displayFormat !== 'horizontal'),
+      () => enableLabChooseCopy && 
+            (displayLabFormat !== 'vertical' && 
+             displayLabFormat !== 'horizontal'),
       () => (
         <FormControlLabel
           control={
@@ -62,7 +65,7 @@ const LabItemDisplay = ({
                 lineHeight: 1.2
               }}
             >
-              {enableAbbrev ? (lab.abbrName || lab.itemName) : lab.itemName}{" "}
+              {enableLabAbbrev ? (lab.abbrName || lab.itemName) : lab.itemName}{" "}
               <span style={{ fontWeight: 'medium' }}>
                 {lab.value}
               </span>
@@ -103,7 +106,7 @@ const LabItemDisplay = ({
             marginBottom: 0
           }}
         >
-          {enableAbbrev ? (lab.abbrName || lab.itemName) : lab.itemName}{" "}
+          {enableLabAbbrev ? (lab.abbrName || lab.itemName) : lab.itemName}{" "}
           <span style={{ fontWeight: 'medium' }}>
             {lab.value}
           </span>

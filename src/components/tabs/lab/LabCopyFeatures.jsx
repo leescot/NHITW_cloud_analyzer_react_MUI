@@ -13,15 +13,15 @@ export const useCopyLabData = () => {
 
   // 複製所有檢驗數據的函數
   const handleCopyAllLabData = (group, labSettings) => {
-    const { copyFormat, showUnit, showReference } = labSettings;
+    const { copyLabFormat, showUnit, showReference } = labSettings;
 
     // 格式化日期，從 YYYY-MM-DD 轉換為 YYYY/MM/DD
     const formattedDate = formatDate(group.date);
 
     let formattedText = `${formattedDate} - ${group.hosp}\n`;
 
-    // Format based on copyFormat setting
-    if (copyFormat === "vertical") {
+    // Format based on copyLabFormat setting
+    if (copyLabFormat === "vertical") {
       // Vertical format: each lab item on a new line
       group.labs.forEach((lab) => {
         formattedText += `${formatLabItemForCopy(lab, showUnit, showReference)}\n`;
@@ -47,7 +47,7 @@ export const useCopyLabData = () => {
 
   // 複製使用者選擇的檢驗數據的函數
   const handleCopyUserSelectedLabData = (group, groupIndex, selectedLabItems, labSettings) => {
-    const { copyFormat, showUnit, showReference } = labSettings;
+    const { copyLabFormat, showUnit, showReference } = labSettings;
 
     if (!selectedLabItems[groupIndex]) {
       setSnackbarMessage("未選擇任何項目進行複製");
@@ -74,7 +74,7 @@ export const useCopyLabData = () => {
     let formattedText = `${formattedDate} - ${group.hosp}\n`;
 
     // 根據複製格式處理
-    if (copyFormat === "vertical") {
+    if (copyLabFormat === "vertical") {
       // 直式格式
       filteredLabs.forEach((lab) => {
         formattedText += `${formatLabItemForCopy(lab, showUnit, showReference)}\n`;

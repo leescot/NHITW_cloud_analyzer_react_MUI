@@ -20,9 +20,10 @@ const TAB_COLORS = {
     imaging: { primary: "#4a148c", dark: "#4a148c" }, // 紫色
     medDays: { primary: "#880e4f", dark: "#880e4f" }, // 粉紅色
     help: { primary: "#2196f3", dark: "#0d47a1" }, // 藍色
+    settings: { primary: "#607d8b", dark: "#455a64" }, // 藍灰色
 
-    // PopupSettings 標籤
-    settings: { primary: "#0d47a1", dark: "#0d47a1" }, // 深藍色
+    // PopupSettings 標籤 - 各標籤類型使用唯一名稱
+    popupSettings: { primary: "#0d47a1", dark: "#0d47a1" }, // 深藍色
     dataStatus: { primary: "#e65100", dark: "#e65100" }, // 橙色
     about: { primary: "#673ab7", dark: "#4a148c" }, // 紫色
     loadData: { primary: "#2e7d32", dark: "#1b5e20" }, // 綠色

@@ -30,7 +30,7 @@ const TypeBasedLayout = ({
     }
 
     // 創建唯一標識 - 使用項目名稱和數值組合
-    const uniqueKey = `${labSettings.enableAbbrev ? (lab.abbrName || lab.itemName) : lab.itemName}_${lab.value}`;
+    const uniqueKey = `${labSettings.enableLabAbbrev ? (lab.abbrName || lab.itemName) : lab.itemName}_${lab.value}`;
 
     // 如果這個組合還沒出現過，添加到結果中
     if (!processedLabsByType[type].has(uniqueKey)) {

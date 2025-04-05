@@ -1,6 +1,7 @@
 import React from "react";
-import { Box, TextField, InputAdornment, FormControl, RadioGroup, FormControlLabel, Radio } from "@mui/material";
+import { Box, TextField, InputAdornment, FormControl, RadioGroup, FormControlLabel, Radio, Button } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import TypographySizeWrapper from "../../utils/TypographySizeWrapper";
 
 const MedicationFilters = ({
@@ -9,7 +10,9 @@ const MedicationFilters = ({
   selectedVisitType,
   handleVisitTypeChange,
   availableVisitTypes,
-  generalDisplaySettings
+  generalDisplaySettings,
+  settings,
+  onCopyAll
 }) => {
   // 使用 Map 來定義訪問類型選項及其渲染條件
   const visitTypeOptions = new Map([
@@ -94,6 +97,37 @@ const MedicationFilters = ({
           ),
         }}
       />
+
+      {/* 顯示複製全部按鈕，如果設置允許 */}
+      {settings?.enableMedicationCopyAll && (
+        <Button 
+          variant="outlined" 
+          size="small" 
+          onClick={onCopyAll}
+          sx={{ 
+            mb: 1, 
+            mr: 2, 
+            height: '24px',
+            position: 'relative',
+            fontSize: '0.75rem',
+            minWidth: '70px'
+          }}
+          startIcon={<ContentCopyIcon fontSize="small" />}
+        >
+          複製
+          <Box
+            sx={{
+              position: 'absolute',
+              bottom: 0,
+              right: 2,
+              fontSize: '0.6rem',
+              lineHeight: 1,
+            }}
+          >
+            All
+          </Box>
+        </Button>
+      )}
 
       {/* 如果有多種訪問類型，顯示過濾選項 */}
       {availableVisitTypes.length > 1 && (

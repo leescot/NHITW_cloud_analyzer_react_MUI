@@ -35,6 +35,8 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
 import ColorLensIcon from "@mui/icons-material/ColorLens";
+import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
+import FormatListBulletedIcon from "@mui/icons-material/FormatListBulleted";
 import { handleSettingChange } from "../../utils/settingsHelper";
 
 // 导入默认配置
@@ -46,17 +48,39 @@ const MedicationSettings = () => {
     showDiagnosis: true,
     showGenericName: false,
     showATC5Name: false,
-    copyFormat: "nameWithDosageVertical",
+    medicationCopyFormat: "nameWithDosageVertical",
     separateShortTermMeds: false,
     enableATC5Colors: true,
     atc5Groups: DEFAULT_ATC5_GROUPS,
     atc5ColorGroups: DEFAULT_ATC5_COLOR_GROUPS,
     showExternalDrugImage: false,
+    enableMedicationCustomCopyFormat: false,
+    customMedicationHeaderCopyFormat: [
+      { id: 'date', display: '日期' },
+      { id: 'separator', value: ' - ', display: ' - ' },
+      { id: 'hosp', display: '醫院' },
+      { id: 'newline', display: '換行' },
+    ],
+    customMedicationDrugCopyFormat: [
+      { id: 'name', display: '藥物名稱' },
+      { id: 'space', display: ' ' },
+      { id: 'perDosage', display: '單次劑量' },
+      { id: 'space', display: ' ' },
+      { id: 'frequency', display: '頻次' },
+      { id: 'space', display: ' ' },
+      { id: 'days', display: '天數' },
+      { id: 'text', value: '天', display: '天' }
+    ]
   });
+
+  // Monitor when enableMedicationCustomCopyFormat changes
+  useEffect(() => {
+    console.log("MedicationSettings: enableMedicationCustomCopyFormat changed to:", settings.enableMedicationCustomCopyFormat);
+  }, [settings.enableMedicationCustomCopyFormat]);
 
   // 统一的 ATC5 分组对话框
   const [atc5GroupsDialogOpen, setAtc5GroupsDialogOpen] = useState(false);
-
+  
   // ATC5 Group 编辑状态
   const [editingGroup, setEditingGroup] = useState(null);
   const [newGroupName, setNewGroupName] = useState("");
@@ -72,12 +96,29 @@ const MedicationSettings = () => {
         showDiagnosis: true,
         showGenericName: false,
         showATC5Name: false,
-        copyFormat: "nameWithDosageVertical",
+        medicationCopyFormat: "nameWithDosageVertical",
         separateShortTermMeds: false,
         enableATC5Colors: true,
         atc5Groups: DEFAULT_ATC5_GROUPS,
         atc5ColorGroups: DEFAULT_ATC5_COLOR_GROUPS,
         showExternalDrugImage: false,
+        enableMedicationCustomCopyFormat: false,
+        customMedicationHeaderCopyFormat: [
+          { id: 'date', display: '日期' },
+          { id: 'separator', value: ' - ', display: ' - ' },
+          { id: 'hosp', display: '醫院' },
+          { id: 'newline', display: '換行' },
+        ],
+        customMedicationDrugCopyFormat: [
+          { id: 'name', display: '藥物名稱' },
+          { id: 'space', display: ' ' },
+          { id: 'perDosage', display: '單次劑量' },
+          { id: 'space', display: ' ' },
+          { id: 'frequency', display: '頻次' },
+          { id: 'space', display: ' ' },
+          { id: 'days', display: '天數' },
+          { id: 'text', value: '天', display: '天' }
+        ]
       },
       (items) => {
         setSettings({
@@ -85,15 +126,36 @@ const MedicationSettings = () => {
           showDiagnosis: items.showDiagnosis,
           showGenericName: items.showGenericName,
           showATC5Name: items.showATC5Name,
-          copyFormat: items.copyFormat,
+          medicationCopyFormat: items.medicationCopyFormat,
           separateShortTermMeds: items.separateShortTermMeds,
           enableATC5Colors: items.enableATC5Colors,
           atc5Groups: items.atc5Groups,
           atc5ColorGroups: items.atc5ColorGroups,
           showExternalDrugImage: items.showExternalDrugImage,
+          enableMedicationCustomCopyFormat: items.enableMedicationCustomCopyFormat,
+          customMedicationHeaderCopyFormat: items.customMedicationHeaderCopyFormat,
+          customMedicationDrugCopyFormat: items.customMedicationDrugCopyFormat
         });
       }
     );
+
+    // Listen for real-time setting changes from other components
+    const handleSettingChangedEvent = (event) => {
+      const { key, value } = event.detail;
+      if (key === 'enableMedicationCustomCopyFormat') {
+        setSettings(prev => ({
+          ...prev,
+          [key]: value
+        }));
+      }
+    };
+
+    window.addEventListener('settingChanged', handleSettingChangedEvent);
+
+    // Cleanup the event listener
+    return () => {
+      window.removeEventListener('settingChanged', handleSettingChangedEvent);
+    };
   }, []);
 
   const handleLocalSettingChange = (key, value) => {
@@ -339,6 +401,32 @@ const MedicationSettings = () => {
     return styleMap.get(color) || { ...baseStyle, bgcolor: 'grey.100', color: 'text.secondary', border: '1px solid', borderColor: 'grey.300' };
   };
 
+  // 打开 FloatingIcon 的自訂設定标签
+  const openCustomFormatEditor = () => {
+    // Only proceed if enableMedicationCustomCopyFormat is true
+    if (!settings.enableMedicationCustomCopyFormat) return;
+    
+    // 发送消息给 background script 或直接调用 FloatingIcon 的方法
+    if (window.openFloatingIconDialog) {
+      window.openFloatingIconDialog();
+      // 等对话框打开后，切换到自訂設定标签（索引为9）
+      setTimeout(() => {
+        chrome.runtime.sendMessage({ 
+          action: 'switchToCustomFormatTab',
+          tabIndex: 9
+        });
+      }, 100);
+    } else {
+      // 如果全局方法不可用，则发送消息给背景脚本处理
+      chrome.runtime.sendMessage({ 
+        action: 'openCustomFormatEditor' 
+      });
+    }
+  };
+
+  console.log("Render - medicationCopyFormat:", settings.medicationCopyFormat);
+  console.log("Render - enableMedicationCustomCopyFormat:", settings.enableMedicationCustomCopyFormat);
+
   return (
     <Accordion>
       <AccordionSummary
@@ -447,6 +535,15 @@ const MedicationSettings = () => {
           </Box>
         )}
 
+        {/* Remove the duplicate switch for enableMedicationCustomCopyFormat since it's now in AdvancedSettings */}
+        {settings.enableMedicationCustomCopyFormat && (
+          <Box sx={{ mt: 1, mb: 2, ml: 4 }}>
+            <Typography variant="body2" color="text.secondary">
+              請在「進階設定」中設置自訂格式。
+            </Typography>
+          </Box>
+        )}
+
         <FormControl fullWidth sx={{ mt: 2 }}>
           <InputLabel id="medication-copy-format-label">
             藥物複製格式
@@ -454,11 +551,12 @@ const MedicationSettings = () => {
           <Select
             labelId="medication-copy-format-label"
             id="medication-copy-format"
-            value={settings.copyFormat}
+            value={settings.medicationCopyFormat}
             label="藥物複製格式"
-            onChange={(e) =>
-              handleLocalSettingChange("copyFormat", e.target.value)
-            }
+            onChange={(e) => {
+              console.log("Select onChange triggered. Value:", e.target.value);
+              handleLocalSettingChange("medicationCopyFormat", e.target.value);
+            }}
           >
             <MenuItem value="none">關閉複製功能</MenuItem>
             <MenuItem value="nameVertical">複製商品名(直式)</MenuItem>
@@ -468,6 +566,18 @@ const MedicationSettings = () => {
             <MenuItem value="nameHorizontal">複製商品名(橫式)</MenuItem>
             <MenuItem value="nameWithDosageHorizontal">
               複製商品名+使用量(橫式)
+            </MenuItem>
+            <MenuItem 
+              value="customVertical" 
+              disabled={!settings.enableMedicationCustomCopyFormat}
+            >
+              自訂西藥複製格式(直式)
+            </MenuItem>
+            <MenuItem 
+              value="customHorizontal" 
+              disabled={!settings.enableMedicationCustomCopyFormat}
+            >
+              自訂西藥複製格式(橫式)
             </MenuItem>
           </Select>
         </FormControl>

@@ -45,6 +45,11 @@ const getStatusKeyFromStorageKey = (storageKey) => {
 
 // 設定變更處理函數
 export const handleSettingChange = (settingName, value, setLocalState, localStateProp, settingType) => {
+  // Add special logging for displayLabFormat changes
+  if (settingName === 'displayLabFormat') {
+    console.log(`CHANGING LAB DISPLAY FORMAT TO: ${value}`);
+  }
+
   // Update local component state
   if (setLocalState && localStateProp) {
     setLocalState(prev => ({
@@ -57,6 +62,13 @@ export const handleSettingChange = (settingName, value, setLocalState, localStat
   chrome.storage.sync.set({ [settingName]: value }, () => {
     console.log(`Setting updated: ${settingName} = ${JSON.stringify(value)}`);
 
+    // Special logging for displayLabFormat
+    if (settingName === 'displayLabFormat') {
+      chrome.storage.sync.get('displayLabFormat', (items) => {
+        console.log(`Verified displayLabFormat in storage: ${items.displayLabFormat}`);
+      });
+    }
+
     // Notify content script of setting change
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
       if (tabs[0]?.id) {
@@ -64,7 +76,7 @@ export const handleSettingChange = (settingName, value, setLocalState, localStat
           action: 'settingChanged',
           setting: settingName,
           value: value,
-          settingType: settingType
+          settingType: settingType || 'general' // 使用傳入的 settingType 或預設為 'general'
         });
       }
     });

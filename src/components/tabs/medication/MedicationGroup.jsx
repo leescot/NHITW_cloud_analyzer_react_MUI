@@ -8,7 +8,7 @@ import { getVisitTypeColor, handleCopyMedications } from "./MedicationHelpers";
 const MedicationGroup = ({
   group,
   settings,
-  copyFormat,
+  medicationCopyFormat,
   generalDisplaySettings,
   isLast,
   setSnackbarMessage,
@@ -38,7 +38,7 @@ const MedicationGroup = ({
               {group.icd_code} {group.icd_name}
             </TypographySizeWrapper>
           )}
-          {copyFormat !== "none" && (
+          {medicationCopyFormat !== "none" && (
             <Tooltip title="複製藥物清單">
               <IconButton
                 size="small"

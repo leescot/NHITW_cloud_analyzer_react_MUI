@@ -33,6 +33,8 @@ import HealingIcon from "@mui/icons-material/Healing";
 import GrassIcon from "@mui/icons-material/Grass";
 // import ReportRoundedIcon from '@mui/icons-material/ReportRounded';
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
+import SettingsIcon from "@mui/icons-material/Settings";
+import FormatListBulletedIcon from "@mui/icons-material/FormatListBulleted";
 
 // Import cloud icon
 import { cloud_icon } from "../assets/pic_cloud_icon.js";
@@ -72,6 +74,7 @@ import ImagingData from "./tabs/ImagingData";
 import MedDaysData from "./tabs/MedDaysData";
 import LabTableView from "./tabs/LabTableView";
 import Instructions from "./tabs/Instructions";
+import AdvancedSettings from "./tabs/AdvancedSettings";
 
 import HomeIcon from "@mui/icons-material/Home";
 import MedicationIcon from "@mui/icons-material/Medication";
@@ -216,6 +219,29 @@ const FloatingIcon = () => {
       if (message.action === "settingChanged" && message.allSettings) {
         // 觸發設置重新加載
         initializeSettings();
+      }
+      
+      // 處理切換到自訂設定標籤的消息
+      if (message.action === "switchToCustomFormatTab") {
+        // 如果對話框未打開，先打開它
+        if (!open) {
+          setOpen(true);
+        }
+        // 只有當自訂設定已啟用時才切換到指定的標籤
+        if (typeof message.tabIndex === 'number' && appSettings.western.enableMedicationCustomCopyFormat) {
+          setTabValue(message.tabIndex);
+        }
+      }
+      
+      // 處理打開自訂格式編輯器的消息
+      if (message.action === "openCustomFormatEditor") {
+        if (!open) {
+          setOpen(true);
+        }
+        // 自訂設定標籤的索引是 9，只有當自訂設定已啟用時才切換
+        if (appSettings.western.enableMedicationCustomCopyFormat) {
+          setTabValue(9);
+        }
       }
     });
 
@@ -596,6 +622,20 @@ const FloatingIcon = () => {
                     },
                   }}
                 />
+                {appSettings.western.enableMedicationCustomCopyFormat && (
+                  <Tab
+                    label="進階"
+                    icon={<SettingsIcon sx={{ fontSize: "1rem" }} />}
+                    iconPosition="start"
+                    sx={{
+                      padding: "6px 10px",
+                      color: getTabColor(generalDisplaySettings, "settings"),
+                      "&.Mui-selected": {
+                        color: getTabSelectedColor(generalDisplaySettings, "settings"),
+                      },
+                    }}
+                  />
+                )}
               </Tabs>
             </Paper>
 
@@ -690,7 +730,7 @@ const FloatingIcon = () => {
                 atc5Groups: appSettings.atc5.groups,
                 atc5ColorGroups: appSettings.atc5.colorGroups,
               }}
-              copyFormat={appSettings.western.copyFormat}
+              copyFormat={appSettings.western.medicationCopyFormat}
               generalDisplaySettings={generalDisplaySettings}
             />
           </TabPanel>
@@ -757,6 +797,17 @@ const FloatingIcon = () => {
           <TabPanel value={tabValue} index={8}>
             <Instructions generalDisplaySettings={generalDisplaySettings} />
           </TabPanel>
+
+          {/* Advanced Settings Tab */}
+          {appSettings.western.enableMedicationCustomCopyFormat && (
+            <TabPanel value={tabValue} index={9}>
+              <AdvancedSettings
+                appSettings={appSettings}
+                setAppSettings={setAppSettings}
+                generalDisplaySettings={generalDisplaySettings}
+              />
+            </TabPanel>
+          )}
         </DialogContent>
       </Dialog>
       <Snackbar
