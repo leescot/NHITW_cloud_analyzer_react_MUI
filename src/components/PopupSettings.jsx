@@ -18,6 +18,7 @@ import InfoIcon from '@mui/icons-material/Info';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import HelpIcon from '@mui/icons-material/Help';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
+import VolunteerActivismIcon from '@mui/icons-material/VolunteerActivism';
 
 // 引入標籤顏色工具函數
 import { getTabColor, getTabSelectedColor } from '../utils/tabColorUtils';
@@ -104,6 +105,32 @@ const PopupSettings = () => {
     )],
     [3, (
       <Box>
+        <Typography variant="h6" align="center" gutterBottom>贊助我們</Typography>
+        <Typography paragraph  align="center">
+          感謝您使用「更好的健保雲端2.0」</Typography><Typography paragraph align="center">
+          如果您覺得這個工具對您醫療上有所幫助，您可以考慮贊助我們，幫助我們持續改進和維護這個專案。
+        </Typography>
+        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mt: 2 }}>
+          <Box sx={{ mb: 2, maxWidth: '200px', maxHeight: '200px' }}>
+            <img 
+              src="/images/buymeacoffee_qr.png" 
+              alt="Buy Me A Coffee QR Code"
+              style={{ width: '100%', height: 'auto', borderRadius: '8px' }}
+            />
+          </Box>
+          <Button 
+            variant="contained" 
+            color="primary"
+            startIcon={<VolunteerActivismIcon />}
+            onClick={() => chrome.tabs.create({ url: 'https://buymeacoffee.com/leescot' })}
+          >
+            前往贊助頁面
+          </Button>
+        </Box>
+      </Box>
+    )],
+    [4, (
+      <Box>
         <LoadDataTab
           localDataStatus={localDataStatus}
           setSnackbar={setSnackbar}
@@ -114,7 +141,7 @@ const PopupSettings = () => {
 
   const handleTabChange = (event, newValue) => {
     // 檢查是否點擊了"開啟雲端"標籤
-    const lastTabIndex = developerMode ? 4 : 3;
+    const lastTabIndex = developerMode ? 5 : 4;
     if (newValue === lastTabIndex) {
       // 開啟雲端連結而不切換標籤
       openNHIMedCloud();
@@ -140,7 +167,7 @@ const PopupSettings = () => {
         chrome.storage.local.set({ developerMode: newMode });
         
         // 如果關閉開發者模式，且當前在開發模式頁面，切換回設定頁面
-        if (!newMode && activeTab === 3) {
+        if (!newMode && activeTab === 4) {
           setActiveTab(0);
         }
         
@@ -296,6 +323,24 @@ const PopupSettings = () => {
           variant="fullWidth"
           indicatorColor="primary"
           textColor="primary"
+          sx={{
+            '& .MuiTab-root': {
+              minWidth: '20%', // 5 tabs - each gets 20%
+              padding: '6px 2px',
+              fontSize: '0.87rem', // Further increased font size
+              fontWeight: 'bold', // Added bold text
+            },
+            '& .MuiTabs-flexContainer': {
+              justifyContent: 'space-between',
+            },
+            '& .MuiTab-iconWrapper': {
+              marginBottom: '4px',
+              '& .MuiSvgIcon-root': {
+                fontSize: '1.3rem', // Increased icon size
+              }
+            },
+            minHeight: '58px', // Increased height for better touch targets
+          }}
         >
           <Tab
             icon={<SettingsIcon />}
@@ -305,16 +350,18 @@ const PopupSettings = () => {
               "&.Mui-selected": {
                 color: getTabSelectedColor(generalDisplaySettings, "settings"),
               },
+              minHeight: '58px',
             }}
           />
           <Tab
             icon={<InfoIcon />}
-            label="資料狀態"
+            label="資料"
             sx={{
               color: getTabColor(generalDisplaySettings, "dataStatus"),
               "&.Mui-selected": {
                 color: getTabSelectedColor(generalDisplaySettings, "dataStatus"),
               },
+              minHeight: '58px',
             }}
           />
           <Tab
@@ -325,28 +372,42 @@ const PopupSettings = () => {
               "&.Mui-selected": {
                 color: getTabSelectedColor(generalDisplaySettings, "about"),
               },
+              minHeight: '58px',
+            }}
+          />
+          <Tab
+            icon={<VolunteerActivismIcon />}
+            label="贊助"
+            sx={{
+              color: getTabColor(generalDisplaySettings, "sponsor"),
+              "&.Mui-selected": {
+                color: getTabSelectedColor(generalDisplaySettings, "sponsor"),
+              },
+              minHeight: '58px',
             }}
           />
           {developerMode && (
             <Tab
               icon={<CloudUploadIcon />}
-              label="開發模式"
+              label="開發"
               sx={{
                 color: getTabColor(generalDisplaySettings, "loadData"),
                 "&.Mui-selected": {
                   color: getTabSelectedColor(generalDisplaySettings, "loadData"),
                 },
+                minHeight: '58px',
               }}
             />
           )}
           <Tab
             icon={<OpenInNewIcon />}
-            label="開啟雲端"
+            label="雲端"
             sx={{
               color: getTabColor(generalDisplaySettings, "cloud"),
               "&.Mui-selected": {
                 color: getTabSelectedColor(generalDisplaySettings, "cloud"),
               },
+              minHeight: '58px',
             }}
           />
         </Tabs>
@@ -359,7 +420,8 @@ const PopupSettings = () => {
         {/* 使用 Map 渲染其他標籤內容 */}
         {activeTab === 1 && tabContentMap.get(1)}
         {activeTab === 2 && tabContentMap.get(2)}
-        {activeTab === 3 && developerMode && tabContentMap.get(3)}
+        {activeTab === 3 && tabContentMap.get(3)}
+        {activeTab === 4 && developerMode && tabContentMap.get(4)}
       </Box>
 
       <Box
@@ -381,7 +443,7 @@ const PopupSettings = () => {
             }
           }}
         >
-          健保雲端資料整理器
+          更好的健保雲端2.0
           {developerMode && (
             <span style={{ fontSize: '0.8em', marginLeft: '4px' }}>
               (開發模式)
