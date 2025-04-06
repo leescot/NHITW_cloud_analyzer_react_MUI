@@ -1,3 +1,5 @@
+import { medicationCopyFormatter } from './medicationCopyFormatter.js';
+
 export const medicationProcessor = {
   // Simplify medication names by removing redundant text
   simplifyMedicineName(name) {
@@ -5,64 +7,71 @@ export const medicationProcessor = {
 
     let simplifiedName = name;
 
-    // Handle special case where name starts with quotation mark
-    if (simplifiedName.trim().startsWith('"')) {
-      // Extract the first quoted text
-      const firstQuoteMatch = simplifiedName.match(/"([^"]*)"/);
-      if (firstQuoteMatch) {
-        // Keep the content of the first quotes
-        const firstQuoteContent = firstQuoteMatch[1];
-        
-        // Remove the first quoted part from the string
-        simplifiedName = simplifiedName.substring(firstQuoteMatch[0].length);
-        
-        // Now remove all other quoted text
-        simplifiedName = simplifiedName.replace(/"([^"]*)"/g, "");
-        
-        // Prepend the first quoted content back (without quotes)
-        simplifiedName = firstQuoteContent + " " + simplifiedName;
-      }
-    } else {
-      // Normal case: remove all quoted text
-      simplifiedName = simplifiedName.replace(/"([^"]*)"/g, "");
+    // 使用 Map 定義不同情況的文字處理方法
+    const textProcessors = new Map([
+      // 處理引號開頭的特殊情況
+      ['quoteStart', (text) => {
+        // 提取第一個引號中的內容
+        const firstQuoteMatch = text.match(/"([^"]*)"/);
+        if (firstQuoteMatch) {
+          // 保留第一個引號內容
+          const firstQuoteContent = firstQuoteMatch[1];
+          // 移除第一個引號部分
+          text = text.substring(firstQuoteMatch[0].length);
+          // 移除所有其他引號文字
+          text = text.replace(/"([^"]*)"/g, "");
+          // 將第一個引號內容加回（不含引號）
+          return firstQuoteContent + " " + text;
+        }
+        return text;
+      }],
+      // 處理一般情況
+      ['normal', (text) => {
+        // 移除所有引號文字
+        return text.replace(/"([^"]*)"/g, "");
+      }]
+    ]);
+
+    // 根據文字是否以引號開頭選擇處理方法
+    const processorKey = simplifiedName.trim().startsWith('"') ? 'quoteStart' : 'normal';
+    simplifiedName = textProcessors.get(processorKey)(simplifiedName);
+
+    // 定義正則表達式用於處理製劑相關變體
+    const regexReplacements = new Map([
+      // 處理片劑相關變體
+      [/\b(tablets?|f\.?c\.?\s*tablets?|film[\s-]?coated\s*tablets?|prolonged release tablets?)\b/gi, ""],
+      // 移除特定詞組
+      [/\b(ENTERIC-MICROENCAPSULATED|CAPSULES|ENTERIC[\s-]?SUGAR[\s-]?COATED|ENTERIC[\s-]?COATED|EFFERVESCENT|, solution for peritoneal dialysis|Plastic Syringe)\b/gi, ""],
+      // 標準化膠囊表示法
+      [/\b(capsules?|cap\.?)\b/gi, "CAP."],
+      // 格式化劑量（加括號）
+      [/(\d+(?:\.\d+)?(?:\s*\/\s*\d+(?:\.\d+)?){0,2})\s*mg\b(?!\s*\/)/gi, (match, p1) => `(${p1.replace(/\s+/g, "")})`],
+      // 清理 TAB./CAP. 周圍的空格
+      [/\s+(TAB\.|CAP\.)\s+/, " "],
+      // 移除包裝資訊（半寬和全寬括號）
+      [/\([^)]*箔[^)]*\)/g, ""],
+      [/（[^）]*箔[^）]*）/g, ""],
+      // 移除非劑量的括號內容（半寬和全寬括號）
+      [/\((?!\d+(?:[.,]\d+)?(?:\/\d+(?:[.,]\d+)?)?(?:\/\d+(?:[.,]\d+)?)?)([^)]*)\)/gi, ""],
+      [/（(?!\d+(?:[.,]\d+)?(?:\/\d+(?:[.,]\d+)?)?(?:\/\d+(?:[.,]\d+)?)?)([^）]*)）/gi, ""],
+      // 標準化空格
+      [/\s+/g, " "],
+      // 移除引號（如有遺留）
+      [/"/g, ""]
+    ]);
+
+    // 應用所有正則表達式替換
+    for (const [regex, replacement] of regexReplacements.entries()) {
+      simplifiedName = simplifiedName.replace(regex, replacement);
     }
     
-    // Process tablet related variations
-    const tabletRegex =
-      /\b(tablets?|f\.?c\.?\s*tablets?|film[\s-]?coated\s*tablets?|prolonged release tablets?)\b/gi;
-    simplifiedName = simplifiedName.replace(tabletRegex, "");
+    simplifiedName = simplifiedName.trim();
 
-    // Process other variations and formats
-    simplifiedName = simplifiedName
-      // Remove specific phrases
-      .replace(/\b(ENTERIC-MICROENCAPSULATED|CAPSULES|ENTERIC[\s-]?SUGAR[\s-]?COATED|ENTERIC[\s-]?COATED|EFFERVESCENT|, solution for peritoneal dialysis|Plastic Syringe)\b/gi, "")
-      // Standardize capsule notation
-      .replace(/\b(capsules?|cap\.?)\b/gi, "CAP.")
-      // Format dosage with parentheses
-      .replace(
-        /(\d+(?:\.\d+)?(?:\s*\/\s*\d+(?:\.\d+)?){0,2})\s*mg\b(?!\s*\/)/gi,
-        (match, p1) => `(${p1.replace(/\s+/g, "")})`
-      )
-      // Clean up spacing around TAB./CAP.
-      .replace(/\s+(TAB\.|CAP\.)\s+/, " ")
-      // Remove packaging information - updated to handle both half-width and full-width parentheses
-      .replace(/\([^)]*箔[^)]*\)/g, "")
-      .replace(/（[^）]*箔[^）]*）/g, "")
-      // Remove non-dosage parenthetical content - updated to handle both half-width and full-width parentheses
-      .replace(/\((?!\d+(?:[.,]\d+)?(?:\/\d+(?:[.,]\d+)?)?(?:\/\d+(?:[.,]\d+)?)?)([^)]*)\)/gi, "")
-      .replace(/（(?!\d+(?:[.,]\d+)?(?:\/\d+(?:[.,]\d+)?)?(?:\/\d+(?:[.,]\d+)?)?)([^）]*)）/gi, "")
-      // Normalize whitespace
-      .replace(/\s+/g, " ")
-      // Remove quotes (in case any remain)
-      .replace(/"/g, "")
-      .trim();
-
-    // Handle complex dosage
-    const complexDoseRegex =
-      /\((\d+(?:\.\d+)?(?:\/\d+(?:\.\d+)?){0,2})\)\s*(?:MG|MCG|G|ML|I\.U\.\/ML)(?!\s*\/)/i;
+    // 處理複雜劑量
+    const complexDoseRegex = /\((\d+(?:\.\d+)?(?:\/\d+(?:\.\d+)?){0,2})\)\s*(?:MG|MCG|G|ML|I\.U\.\/ML)(?!\s*\/)/i;
     const doseMatch = simplifiedName.match(complexDoseRegex);
-    
-    // Cut off everything after the dosage if found
+
+    // 如果找到劑量，截斷劑量後的內容
     if (doseMatch) {
       const dosePart = `(${doseMatch[1]})`;
       const beforeDose = simplifiedName.split(dosePart)[0].trim();
@@ -72,118 +81,125 @@ export const medicationProcessor = {
     return simplifiedName.trim();
   },
 
-  // Rest of the code remains the same...
+  // 使用 Map 重構頻次映射表
   calculatePerDosage(dosage, frequency, days) {
     if (!dosage || !frequency || !days) return "";
 
-    const frequencyMap = {
-      QD: 1,
-      QDP: 1,
-      QAM: 1,
-      AM: 1,
-      AMPC: 1,
-      QPM: 1,
-      QDPM: 1,
-      PM: 1,
-      BID: 2,
-      BIDP: 2,
-      TID: 3,
-      TIDP: 3,
-      QID: 4,
-      QIDP: 4,
-      Q2H: 12,
-      Q4H: 6,
-      Q6H: 4,
-      Q8H: 3,
-      Q12H: 2,
-      HS: 1,
-      HSP: 1,
-      DAILY: 1,
-      QN: 1,
-      STAT: 1,
-      ST: 1,
-      ASORDER: 1, // 新增 ASORDER
-      PRN: 1,     // 新增 PRN (as needed)
-      QOD: 0.5,   // 新增 QOD (every other day)
-      ONCE: 1,    // 新增 ONCE (equivalent to STAT)
-      PRNB: 2,    // 新增 PRNB (PRN BID)
-      QW: 0.14,   // 新增 QW (once a week) - approximately 1/7
-      BIW: 0.29,  // 新增 BIW (twice a week) - approximately 2/7
-      TIW: 0.43,  // 新增 TIW (three times a week) - approximately 3/7
-    };
+    // 使用 Map 儲存頻次和對應的每日劑量次數
+    const frequencyMap = new Map([
+      ['QD', 1],
+      ['QDP', 1],
+      ['QAM', 1],
+      ['AM', 1],
+      ['AMPC', 1],
+      ['QPM', 1],
+      ['QDPM', 1],
+      ['PM', 1],
+      ['BID', 2],
+      ['BIDP', 2],
+      ['TID', 3],
+      ['TIDP', 3],
+      ['QID', 4],
+      ['QIDP', 4],
+      ['Q2H', 12],
+      ['Q4H', 6],
+      ['Q6H', 4],
+      ['Q8H', 3],
+      ['Q12H', 2],
+      ['HS', 1],
+      ['HSP', 1],
+      ['DAILY', 1],
+      ['QN', 1],
+      ['STAT', 1],
+      ['ST', 1],
+      ['ASORDER', 1], // 新增 ASORDER
+      ['PRN', 1],     // 新增 PRN (as needed)
+      ['QOD', 0.5],   // 新增 QOD (every other day)
+      ['ONCE', 1],    // 新增 ONCE (equivalent to STAT)
+      ['PRNB', 2],    // 新增 PRNB (PRN BID)
+      ['QW', 0.14],   // 新增 QW (once a week) - approximately 1/7
+      ['BIW', 0.29],  // 新增 BIW (twice a week) - approximately 2/7
+      ['TIW', 0.43],  // 新增 TIW (three times a week) - approximately 3/7
+    ]);
 
-    // 修改正則表達式，確保包含所有在 frequencyMap 中的頻次
-    const freqRegexStr = Object.keys(frequencyMap).join("|");
+    // 特殊頻次處理映射
+    const specialFreqMap = new Map([
+      ['QOD', (d) => Math.ceil(parseInt(d) / 2)],
+      ['Q2D', (d) => Math.ceil(parseInt(d) / 2)],
+      ['TIW', (d) => Math.ceil(parseInt(d) / 7) * 3],
+      ['BIW', (d) => Math.ceil(parseInt(d) / 7) * 2],
+      ['QW', (d) => Math.ceil(parseInt(d) / 7)]
+    ]);
+
+    // 常見的有效單位劑量
+    const validUnits = [
+      0.25, 0.5, 0.75, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 6.0, 7.0,
+      8.0, 9.0, 10.0,
+    ];
+
+    // 建立正則表達式來匹配所有可能的頻次
+    const freqRegexStr = Array.from(frequencyMap.keys()).join("|");
     const freqRegex = new RegExp(freqRegexStr, "i");
     const freqMatch = frequency.toUpperCase().match(freqRegex);
 
+    // 無法辨識的頻次且不是「需要時」，回傳 SPECIAL
     if (!freqMatch && !frequency.includes("需要時")) {
       console.log("無法識別的頻次:", frequency);
       return "SPECIAL";
     }
 
-    let totalDoses;
     // 從匹配到的頻次字串中獲取完整頻次
     const freq = freqMatch ? freqMatch[0].toUpperCase() : "PRN";
 
-    // QOD 特殊處理 - 確保同時支援正則表達式匹配和特殊邏輯
-    if (frequency.includes("QOD") || frequency.includes("Q2D")) {
-      totalDoses = Math.ceil(parseInt(days) / 2);
-    } else if (freq === "TIW" || frequency.includes("TIW")) {
-      totalDoses = Math.ceil(parseInt(days) / 7) * 3;
-    } else if (freq === "BIW" || frequency.includes("BIW")) {
-      totalDoses = Math.ceil(parseInt(days) / 7) * 2;
-    } else if (freq === "QW" || frequency.includes("QW")) {
-      totalDoses = Math.ceil(parseInt(days) / 7);
-    } else if (frequency.includes("PRN") || frequency.includes("需要時") || freq === "PRN" || freq === "PRNB") {
-      return "SPECIAL";
-    } else {
-      totalDoses = parseInt(days) * (frequencyMap[freq] || 1);
+    // 檢查是否是特殊頻次（QOD, TIW, BIW, QW）
+    let totalDoses;
+    
+    // 先檢查特殊頻次
+    for (const [specialFreq, doseCalculator] of specialFreqMap.entries()) {
+      if (frequency.includes(specialFreq)) {
+        totalDoses = doseCalculator(days);
+        break;
+      }
+    }
+
+    // 如果不是特殊頻次
+    if (totalDoses === undefined) {
+      // PRN 相關頻次或需要時，回傳 SPECIAL
+      if (frequency.includes("PRN") || frequency.includes("需要時") || freq === "PRN" || freq === "PRNB") {
+        return "SPECIAL";
+      } else {
+        // 一般頻次，按照 Map 中的值計算
+        totalDoses = parseInt(days) * (frequencyMap.get(freq) || 1);
+      }
     }
 
     const totalDosage = parseFloat(dosage);
     const singleDose = totalDosage / totalDoses;
 
     const threshold = 0.24;
-    const validUnits = [
-      0.25, 0.5, 0.75, 1.0, 1.5, 2.0, 2.5, 3.0, 3.5, 4.0, 4.5, 5.0, 6.0, 7.0,
-      8.0, 9.0, 10.0,
-    ];
-
+    
+    // 如果單次劑量過小，回傳 SPECIAL
     if (singleDose < threshold) {
       return "SPECIAL";
     }
 
-    // For TIW, BIW, QW cases, do more precise calculation
-    if (freq === "TIW" || frequency.includes("TIW")) {
-      // For a 30-day month, there are about 4.29 weeks (30/7)
-      // For TIW, that's about 12.87 doses per month
-      // If total is 26 and doses are ~13, then should be 2 pills per dose
+    // 特殊頻次的精確計算
+    if (['TIW', 'BIW', 'QW'].includes(freq) || ['TIW', 'BIW', 'QW'].some(f => frequency.includes(f))) {
+      // 計算週數和估計劑量
       const numWeeks = Math.ceil(parseInt(days) / 7);
-      const estimatedDoses = numWeeks * 3; // For TIW
-      const perDose = Math.round(totalDosage / estimatedDoses);
+      let estimatedDoses;
       
-      // Only return if it's a clean number
-      if (validUnits.includes(perDose)) {
-        return perDose.toString();
+      if (freq === 'TIW' || frequency.includes('TIW')) {
+        estimatedDoses = numWeeks * 3;
+      } else if (freq === 'BIW' || frequency.includes('BIW')) {
+        estimatedDoses = numWeeks * 2;
+      } else { // QW
+        estimatedDoses = numWeeks;
       }
-    }
-    
-    if (freq === "BIW" || frequency.includes("BIW")) {
-      const numWeeks = Math.ceil(parseInt(days) / 7);
-      const estimatedDoses = numWeeks * 2; // For BIW
+      
       const perDose = Math.round(totalDosage / estimatedDoses);
       
-      if (validUnits.includes(perDose)) {
-        return perDose.toString();
-      }
-    }
-    
-    if (freq === "QW" || frequency.includes("QW")) {
-      const numWeeks = Math.ceil(parseInt(days) / 7);
-      const estimatedDoses = numWeeks; // For QW
-      const perDose = Math.round(totalDosage / estimatedDoses);
-      
+      // 只有在是標準單位劑量時才回傳
       if (validUnits.includes(perDose)) {
         return perDose.toString();
       }
@@ -198,151 +214,438 @@ export const medicationProcessor = {
     return roundedDose.toString();
   },
 
-  // Main function to process medication data with settings
+  // 處理藥物資料的主要函數
   processMedicationData(data) {
-    // Removed excessive logging
-    
     if (!data || !data.rObject || !Array.isArray(data.rObject)) {
-      console.error("Invalid medication data format");
+      console.error("無效的藥物資料格式");
       return Promise.resolve([]);
     }
 
-    // Get user settings for processing
+    // 預設使用者設定映射
+    const defaultSettings = {
+      simplifyMedicineName: true,
+      showGenericName: false,
+      showDiagnosis: false,
+      showATC5Name: false,
+      enableMedicationCustomCopyFormat: false,
+      medicationCopyFormat: "nameWithDosageVertical",
+      customMedicationHeaderCopyFormat: null,
+      customMedicationDrugCopyFormat: null,
+      drugSeparator: ",",
+    };
+
+    // 從 Chrome storage 獲取使用者設定
     return new Promise((resolve) => {
-      chrome.storage.sync.get(
-        {
-          simplifyMedicineName: true,
-          showGenericName: false,
-          showDiagnosis: false,
-          showATC5Name: false,
-        },
-        (settings) => {
-          // Process with settings here, without logging every time
-          try {
-            // Group medications by visit date and institution
-            const processedRecords = {};
-
-            data.rObject.forEach((record) => {
-              // Extract hospital name and visit type from the hosp field
-              const hospParts = (record.HOSP_NAME || record.hosp || "").split(";");
-              const hospitalName = hospParts[0] || "";
-              const visitType = hospParts.length > 1 ? hospParts[1] || "" : "";
+      chrome.storage.sync.get(defaultSettings, (settings) => {
+        // 檢查全局格式設定（來自本地資料處理器）
+        if (window.medicationFormatSettings) {
+          // console.log("使用全局藥物格式設定:", window.medicationFormatSettings);
+          
+          // 建立深度複製以確保數組被正確複製
+          const deepCopiedSettings = {};
+          
+          // 直接複製基本值
+          Object.keys(window.medicationFormatSettings).forEach(key => {
+            if (!Array.isArray(window.medicationFormatSettings[key])) {
+              deepCopiedSettings[key] = window.medicationFormatSettings[key];
+            } else {
+              // 使用 JSON 深度複製數組
+              deepCopiedSettings[key] = JSON.parse(JSON.stringify(window.medicationFormatSettings[key]));
+            }
+          });
+          
+          // 記錄深度複製的數組以驗證
+          // console.log("深度複製的數組:", {
+          //   標題格式長度: deepCopiedSettings.customMedicationHeaderCopyFormat?.length,
+          //   藥物格式長度: deepCopiedSettings.customMedicationDrugCopyFormat?.length
+          // });
+          
+          // 合併全局設定與獲取的設定
+          settings = {
+            ...settings,
+            ...deepCopiedSettings
+          };
+        } else {
+          console.log("使用 Chrome storage 中的設定:", {
+            medicationCopyFormat: settings.medicationCopyFormat,
+            enableMedicationCustomCopyFormat: settings.enableMedicationCustomCopyFormat,
+            hasHeaderFormat: !!settings.customMedicationHeaderCopyFormat,
+            hasDrugFormat: !!settings.customMedicationDrugCopyFormat,
+            drugSeparator: settings.drugSeparator
+          });
+          
+          // 改進: 如果啟用了自定義格式但 Chrome storage 中沒有全局變量，設置全局變量
+          if (settings.enableMedicationCustomCopyFormat && 
+              (settings.customMedicationHeaderCopyFormat || settings.customMedicationDrugCopyFormat)) {
               
-              // Create a unique key that includes date, hospital, visit type, and ICD code
-              const key = `${record.PER_DATE || record.drug_date}_${hospitalName}_${visitType}_${record.ICD_CODE || record.icd_code || ""}`;
-
-              if (!processedRecords[key]) {
-                processedRecords[key] = {
-                  date: record.PER_DATE || record.drug_date,
-                  hosp: hospitalName,
-                  visitType: visitType, // Add the new visitType field
-                  icd_code: record.ICD_CODE || record.icd_code,
-                  icd_name: record.ICD_NAME || record.icd_cname,
-                  medications: [],
-                };
-              }
-
-              // Process medication name based on settings
-              let medicationName =
-                record.MED_DESC || record.MED_ITEM || record.drug_ename;
-              let ingredientName = record.GENERIC_NAME || record.drug_ing_name;
-
-              if (settings.simplifyMedicineName) {
-                medicationName = this.simplifyMedicineName(medicationName);
-              }
-
-              // Get total quantity and calculate per-dose amount
-              const totalQty = record.DOSAGE || record.qty || "1";
-              const frequency = record.FREQ_DESC || record.drug_fre || "QD";
-              const days = record.MED_DAYS || record.day || "1";
-
-              // Calculate per-dose amount
-              const perDose = this.calculatePerDosage(
-                totalQty,
-                frequency,
-                days
-              );
-
-              processedRecords[key].medications.push({
-                name: medicationName,
-                ingredient: ingredientName,
-                dosage: totalQty, // Total quantity
-                perDosage: perDose, // Per-dose amount (calculated)
-                frequency: frequency,
-                days: days,
-                atc_code: record.ATC_CODE || record.drug_atc7_code,
-                atc_name: record.ATC_NAME || record.drug_atc5_name,
-                drug_left: parseInt(
-                  record.DRUG_LEFT || record.drug_left || "0",
-                  10
-                ),
-                drugcode: record.drug_code || "" // Add the new drugcode field
-              });
-            });
-
-            // Convert to array and sort by date (newest first)
-            const groupedData = Object.values(processedRecords);
-
-            groupedData.sort((a, b) => {
-              // Handle different date formats
-              const dateA = a.date.replace(/\//g, "-");
-              const dateB = b.date.replace(/\//g, "-");
-              return dateB.localeCompare(dateA);
-            });
-
-            resolve(groupedData);
-          } catch (error) {
-            console.error("Error processing medication data:", error);
-            console.error("Error details:", error.stack);
-            resolve([]);
+            // console.log("從 Chrome storage 設置全局格式變量");
+            
+            // 創建全局設定對象 (如果不存在)
+            if (!window.medicationFormatSettings) {
+              window.medicationFormatSettings = {};
+            }
+            
+            // 複製自定義格式設定到全局變量
+            if (settings.customMedicationHeaderCopyFormat) {
+              window.medicationFormatSettings.customMedicationHeaderCopyFormat = 
+                  JSON.parse(JSON.stringify(settings.customMedicationHeaderCopyFormat));
+              // 設置備份變量
+              window.customMedicationHeaderCopyFormat = 
+                  JSON.parse(JSON.stringify(settings.customMedicationHeaderCopyFormat));
+            }
+            
+            if (settings.customMedicationDrugCopyFormat) {
+              window.medicationFormatSettings.customMedicationDrugCopyFormat = 
+                  JSON.parse(JSON.stringify(settings.customMedicationDrugCopyFormat));
+              // 設置備份變量
+              window.customMedicationDrugCopyFormat = 
+                  JSON.parse(JSON.stringify(settings.customMedicationDrugCopyFormat));
+            }
+            
+            // 複製其他設定
+            window.medicationFormatSettings.enableMedicationCustomCopyFormat = 
+                settings.enableMedicationCustomCopyFormat;
+            window.medicationFormatSettings.medicationCopyFormat = 
+                settings.medicationCopyFormat;
+            window.medicationFormatSettings.drugSeparator = 
+                settings.drugSeparator;
+            
+            // console.log("全局變量設置完成:", {
+            //   hasGlobalSettings: !!window.medicationFormatSettings,
+            //   hasHeaderArray: !!window.customMedicationHeaderCopyFormat,
+            //   headerLength: window.customMedicationHeaderCopyFormat?.length,
+            //   hasDrugArray: !!window.customMedicationDrugCopyFormat,
+            //   drugLength: window.customMedicationDrugCopyFormat?.length
+            // });
           }
         }
-      );
+        
+        try {
+          // 按訪問日期和醫療機構分組藥物
+          const processedRecords = {};
+
+          // 欄位映射，用於處理不同的資料來源格式
+          const fieldMappings = new Map([
+            ["date", { primary: "PER_DATE", fallback: "drug_date" }],
+            ["hosp", { primary: "HOSP_NAME", fallback: "hosp" }],
+            ["icd_code", { primary: "ICD_CODE", fallback: "icd_code" }],
+            ["icd_name", { primary: "ICD_NAME", fallback: "icd_cname" }],
+            ["med_name", { primary: "MED_DESC", fallback1: "MED_ITEM", fallback2: "drug_ename" }],
+            ["ingredient", { primary: "GENERIC_NAME", fallback: "drug_ing_name" }],
+            ["dosage", { primary: "DOSAGE", fallback: "qty", default: "1" }],
+            ["frequency", { primary: "FREQ_DESC", fallback: "drug_fre", default: "QD" }],
+            ["days", { primary: "MED_DAYS", fallback: "day", default: "1" }],
+            ["atc_code", { primary: "ATC_CODE", fallback: "drug_atc7_code" }],
+            ["atc_name", { primary: "ATC_NAME", fallback: "drug_atc5_name" }],
+            ["drug_left", { primary: "DRUG_LEFT", fallback: "drug_left", default: "0" }],
+            ["drugcode", { primary: "drug_code", default: "" }]
+          ]);
+
+          // 從記錄中獲取特定欄位的值
+          const getFieldValue = (record, fieldMapping, isDefault = false) => {
+            const mapping = fieldMappings.get(fieldMapping);
+            if (!mapping) return "";
+            
+            if (mapping.primary && record[mapping.primary]) {
+              return record[mapping.primary];
+            } else if (mapping.fallback && record[mapping.fallback]) {
+              return record[mapping.fallback];
+            } else if (mapping.fallback1 && record[mapping.fallback1]) {
+              return record[mapping.fallback1];
+            } else if (mapping.fallback2 && record[mapping.fallback2]) {
+              return record[mapping.fallback2];
+            } else if (isDefault && mapping.default) {
+              return mapping.default;
+            }
+            
+            return "";
+          };
+
+          data.rObject.forEach((record) => {
+            // 從 hosp 欄位中提取醫院名稱和就診類型
+            const hospValue = getFieldValue(record, "hosp");
+            const hospParts = hospValue.split(";");
+            const hospitalName = hospParts[0] || "";
+            const visitType = hospParts.length > 1 ? hospParts[1] || "" : "";
+
+            // 創建包含日期、醫院、就診類型和 ICD 代碼的唯一鍵
+            const key = `${getFieldValue(record, "date")}_${hospitalName}_${visitType}_${getFieldValue(record, "icd_code")}`;
+
+            if (!processedRecords[key]) {
+              processedRecords[key] = {
+                date: getFieldValue(record, "date"),
+                hosp: hospitalName,
+                visitType: visitType, // 增加新的 visitType 欄位
+                icd_code: getFieldValue(record, "icd_code"),
+                icd_name: getFieldValue(record, "icd_name"),
+                medications: [],
+              };
+            }
+
+            // 根據設定處理藥物名稱
+            let medicationName = getFieldValue(record, "med_name");
+            let ingredientName = getFieldValue(record, "ingredient");
+
+            if (settings.simplifyMedicineName) {
+              medicationName = this.simplifyMedicineName(medicationName);
+            }
+
+            // 獲取總量並計算每劑量
+            const totalQty = getFieldValue(record, "dosage", true);
+            const frequency = getFieldValue(record, "frequency", true);
+            const days = getFieldValue(record, "days", true);
+
+            // 計算每劑量
+            const perDose = this.calculatePerDosage(
+              totalQty,
+              frequency,
+              days
+            );
+
+            // 將處理後的藥物資訊添加到相應組中
+            processedRecords[key].medications.push({
+              name: medicationName,
+              ingredient: ingredientName,
+              dosage: totalQty, // 總量
+              perDosage: perDose, // 每劑量（計算得出）
+              frequency: frequency,
+              days: days,
+              atc_code: getFieldValue(record, "atc_code"),
+              atc_name: getFieldValue(record, "atc_name"),
+              drug_left: parseInt(getFieldValue(record, "drug_left", true), 10),
+              drugcode: getFieldValue(record, "drugcode") // 增加新的 drugcode 欄位
+            });
+          });
+
+          // 轉換為數組並按日期排序（最新的優先）
+          const groupedData = Object.values(processedRecords);
+
+          groupedData.sort((a, b) => {
+            // 處理不同的日期格式
+            const dateA = a.date.replace(/\//g, "-");
+            const dateB = b.date.replace(/\//g, "-");
+            return dateB.localeCompare(dateA);
+          });
+
+          resolve(groupedData);
+        } catch (error) {
+          console.error("處理藥物數據時出錯:", error);
+          console.error("錯誤詳情:", error.stack);
+          resolve([]);
+        }
+      });
     });
   },
 
-  // Format medication list for copying with different formats
+  // 使用 Map 重構格式處理邏輯
   formatMedicationList(medications, format, groupInfo) {
     if (format === "none") {
       return "";
     }
+    
+    // 記錄 groupInfo 的完整內容以便調試
+    // console.log("formatMedicationList 中的完整 groupInfo:", JSON.stringify({
+    //   format: format,
+    //   hasHeaderArray: Array.isArray(groupInfo.customMedicationHeaderCopyFormat),
+    //   headerArrayLength: groupInfo.customMedicationHeaderCopyFormat?.length,
+    //   hasDrugArray: Array.isArray(groupInfo.customMedicationDrugCopyFormat),
+    //   drugArrayLength: groupInfo.customMedicationDrugCopyFormat?.length,
+    //   drugSeparator: groupInfo.drugSeparator
+    // }));
 
-    // Format the header with date, hospital, visit type and diagnosis
-    let header = `${groupInfo.date} - ${groupInfo.hosp}`;
-    if (groupInfo.visitType) {
-      header += ` (${groupInfo.visitType})`;
-    }
-    if (groupInfo.showDiagnosis && groupInfo.icd_code && groupInfo.icd_name) {
-      header += ` [${groupInfo.icd_code} ${groupInfo.icd_name}]`;
-    }
+    // 建立分隔符獲取策略
+    const getSeparator = () => {
+      const sources = [
+        groupInfo.drugSeparator,
+        window.medicationFormatSettings?.drugSeparator,
+        window.customDrugSeparator,
+        ', ' // 預設值
+      ];
+      
+      // 使用第一個非空值
+      return sources.find(source => source !== undefined && source !== null) || ', ';
+    };
+    
+    const drugSeparatorFromSettings = getSeparator();
+      
+    // console.log("藥物分隔符檢查:", {
+    //   fromGroupInfo: groupInfo.drugSeparator,
+    //   fromGlobalSettings: window.medicationFormatSettings?.drugSeparator,
+    //   fromCustomGlobal: window.customDrugSeparator,
+    //   finalValue: drugSeparatorFromSettings
+    // });
 
-    const getMedicationText = (med) => {
-      const dosageText =
-        med.perDosage === "SPECIAL" ? `總量${med.dosage}` : `${med.perDosage}#`;
-
-      switch (format) {
-        case "nameVertical":
-          return med.name;
-        case "nameWithDosageVertical":
-          return `${med.name} ${dosageText} ${med.frequency} ${med.days}天`;
-        case "nameHorizontal":
-          return med.name;
-        case "nameWithDosageHorizontal":
-          return `${med.name} ${dosageText} ${med.frequency} ${med.days}天`;
-        default:
-          return med.name;
-      }
+    // 確保 groupInfo 包含所有必要的設定
+    const enhancedGroupInfo = {
+      ...groupInfo,
+      // 確保自定義格式設定存在
+      customMedicationHeaderCopyFormat: groupInfo.customMedicationHeaderCopyFormat || [],
+      customMedicationDrugCopyFormat: groupInfo.customMedicationDrugCopyFormat || [],
+      // 確保分隔符設定存在，使用多重檢查確保我們有一個值
+      drugSeparator: drugSeparatorFromSettings
     };
 
-    const medicationTexts = medications.map((med) => getMedicationText(med));
+    // 記錄完整的增強 groupInfo 設定
+    // console.log("增強後的 groupInfo 設定:", {
+    //   format,
+    //   drugSeparator: enhancedGroupInfo.drugSeparator
+    // });
 
-    // Format the full output with header
-    if (format.includes("Horizontal")) {
-      return `${header}\n${medicationTexts.join(", ")}`;
-    } else {
-      return `${header}\n${medicationTexts.join("\n")}`;
+    // 定義驗證自定義格式配置的函數
+    const isValidArray = (array) => Array.isArray(array) && array.length > 0;
+
+    // 檢查自定義格式數組是否有效（非空）
+    let hasValidHeaderFormat = isValidArray(enhancedGroupInfo.customMedicationHeaderCopyFormat);
+    let hasValidDrugFormat = isValidArray(enhancedGroupInfo.customMedicationDrugCopyFormat);
+
+    // console.log("使用格式格式化藥物:", format, "以及設定:", {
+    //   drugSeparator: enhancedGroupInfo.drugSeparator,
+    //   hasCustomHeaderFormat: hasValidHeaderFormat,
+    //   hasCustomDrugFormat: hasValidDrugFormat,
+    //   headerFormatLength: enhancedGroupInfo.customMedicationHeaderCopyFormat?.length,
+    //   drugFormatLength: enhancedGroupInfo.customMedicationDrugCopyFormat?.length
+    // });
+
+    // 建立格式數組來源映射
+    const formatArraySources = new Map([
+      ['header', {
+        validate: (config) => isValidArray(config.customMedicationHeaderCopyFormat),
+        sources: [
+          (config) => config.customMedicationHeaderCopyFormat,
+          () => window.medicationFormatSettings?.customMedicationHeaderCopyFormat,
+          () => window.customMedicationHeaderCopyFormat
+        ],
+        target: 'customMedicationHeaderCopyFormat'
+      }],
+      ['drug', {
+        validate: (config) => isValidArray(config.customMedicationDrugCopyFormat),
+        sources: [
+          (config) => config.customMedicationDrugCopyFormat,
+          () => window.medicationFormatSettings?.customMedicationDrugCopyFormat,
+          () => window.customMedicationDrugCopyFormat
+        ],
+        target: 'customMedicationDrugCopyFormat'
+      }]
+    ]);
+
+    // 檢查是否需要並可以使用自定義格式
+    const isCustomFormat = ['custom', 'customVertical', 'customHorizontal'].includes(format);
+    const needsCustomFormatArrays = isCustomFormat && (!hasValidHeaderFormat || !hasValidDrugFormat);
+
+    // 如果需要自定義格式但缺少必要的數組
+    if (needsCustomFormatArrays) {
+      // console.log("檢查全局變量中的自定義格式數組");
+      
+      // 處理自定義格式數組配置
+      for (const [key, configMeta] of formatArraySources.entries()) {
+        // 如果當前配置有效，跳過
+        if (configMeta.validate(enhancedGroupInfo)) continue;
+        
+        // 嘗試從可能的來源獲取有效配置
+        for (const sourceFunc of configMeta.sources) {
+          const source = sourceFunc(enhancedGroupInfo);
+          
+          if (isValidArray(source)) {
+            // 複製數組到 enhancedGroupInfo
+            enhancedGroupInfo[configMeta.target] = JSON.parse(JSON.stringify(source));
+            
+            // 更新驗證標記
+            if (key === 'header') hasValidHeaderFormat = true;
+            if (key === 'drug') hasValidDrugFormat = true;
+            
+            // 找到有效來源後跳出
+            break;
+          }
+        }
+      }
+      
+      // 記錄設定更新後的狀態
+      // console.log("全局變量檢查後的自定義格式狀態:", {
+      //   hasValidHeaderFormat,
+      //   hasValidDrugFormat,
+      //   headerLength: enhancedGroupInfo.customMedicationHeaderCopyFormat?.length,
+      //   drugLength: enhancedGroupInfo.customMedicationDrugCopyFormat?.length
+      // });
     }
+
+    // 格式化僅包含日期和醫院的標頭（移除了 visitType）
+    let header = `${enhancedGroupInfo.date} - ${enhancedGroupInfo.hosp}`;
+    // 移除了 visitType 包含代碼
+    if (enhancedGroupInfo.showDiagnosis && enhancedGroupInfo.icd_code && enhancedGroupInfo.icd_name) {
+      header += ` [${enhancedGroupInfo.icd_code} ${enhancedGroupInfo.icd_name}]`;
+    }
+
+    // 使用 Map 儲存不同格式的處理邏輯
+    const formatHandlers = new Map([
+      ['nameVertical', (med) => med.name],
+      ['nameWithDosageVertical', (med) => {
+        const dosageText = med.perDosage === "SPECIAL" ? `總量${med.dosage}` : `${med.perDosage}#`;
+        return `${med.name} ${dosageText} ${med.frequency} ${med.days}d`;
+      }],
+      ['nameHorizontal', (med) => med.name],
+      ['nameWithDosageHorizontal', (med) => {
+        const dosageText = med.perDosage === "SPECIAL" ? `總量${med.dosage}` : `${med.perDosage}#`;
+        return `${med.name} ${dosageText} ${med.frequency} ${med.days}d`;
+      }]
+    ]);
+
+    // 處理自定義格式特殊情況
+    if (isCustomFormat) {
+      const isHorizontal = format === 'customHorizontal';
+      
+      // console.log("使用自定義格式設定:", {
+      //   format,
+      //   isHorizontal,
+      //   drugSeparator: enhancedGroupInfo.drugSeparator
+      // });
+      
+      // 增強 groupInfo 以支持自定義格式
+      enhancedGroupInfo.formatType = format;
+      enhancedGroupInfo.isHorizontal = isHorizontal;
+      
+      // 使用 medicationCopyFormatter 處理自定義格式
+      const customResult = medicationCopyFormatter.applyCustomFormat(medications, enhancedGroupInfo);
+      if (customResult !== null) {
+        return customResult;
+      }
+    }
+    
+    // 獲取適當的格式處理器
+    const formatHandler = formatHandlers.get(format) || ((med) => med.name);
+    
+    // 應用格式處理器到每個藥物
+    const medicationTexts = medications.map((med) => formatHandler(med));
+
+    // 格式呈現配置映射
+    const formatConfig = new Map([
+      ['horizontal', {
+        isHorizontal: true,
+        separator: enhancedGroupInfo.drugSeparator,
+        headerSeparator: ' '
+      }],
+      ['vertical', {
+        isHorizontal: false,
+        separator: '\n',
+        headerSeparator: '\n'
+      }]
+    ]);
+
+    // 根據格式決定分隔符號和換行
+    const isHorizontal = format.includes("Horizontal");
+    const formatType = isHorizontal ? 'horizontal' : 'vertical';
+    const config = formatConfig.get(formatType);
+    
+    // console.log("藥物分隔符設定:", {
+    //   format,
+    //   isHorizontal,
+    //   drugSeparator: enhancedGroupInfo.drugSeparator,
+    //   usingSeparator: config.separator
+    // });
+    
+    // 組合最終輸出
+    let result = header + config.headerSeparator + medicationTexts.join(config.separator);
+    
+    // console.log("格式化結果:", result);
+    return result;
   },
 };
-
-export default medicationProcessor;

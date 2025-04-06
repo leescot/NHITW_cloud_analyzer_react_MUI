@@ -8,7 +8,7 @@ import { getVisitTypeColor, handleCopyMedications } from "./MedicationHelpers";
 const MedicationGroup = ({
   group,
   settings,
-  copyFormat,
+  medicationCopyFormat,
   generalDisplaySettings,
   isLast,
   setSnackbarMessage,
@@ -17,8 +17,8 @@ const MedicationGroup = ({
   return (
     <Box sx={{ mb: 1.5 }}>
       <Box>
-        <TypographySizeWrapper 
-          variant="subtitle1" 
+        <TypographySizeWrapper
+          variant="subtitle1"
           textSizeType="content"
           generalDisplaySettings={generalDisplaySettings}
           color={getVisitTypeColor(group.visitType)}
@@ -38,7 +38,7 @@ const MedicationGroup = ({
               {group.icd_code} {group.icd_name}
             </TypographySizeWrapper>
           )}
-          {copyFormat !== "none" && (
+          {medicationCopyFormat !== "none" && (
             <Tooltip title="複製藥物清單">
               <IconButton
                 size="small"
@@ -64,10 +64,10 @@ const MedicationGroup = ({
           setSnackbarOpen={setSnackbarOpen}
         />
       ))}
-      
+
       {!isLast && <Divider sx={{ my: 1.0 }} />}
     </Box>
   );
 };
 
-export default MedicationGroup; 
+export default MedicationGroup;

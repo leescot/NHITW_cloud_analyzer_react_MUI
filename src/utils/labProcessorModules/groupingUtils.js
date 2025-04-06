@@ -9,7 +9,7 @@ const groupLabsByDate = (labs) => {
     }
 
     const key = lab.recipe_date;
-    
+
     if (!acc[key]) {
       acc[key] = {
         date: lab.recipe_date,
@@ -38,9 +38,9 @@ const getAllLabTypes = (groupedLabs) => {
   if (!groupedLabs || !Array.isArray(groupedLabs)) {
     return [];
   }
-  
+
   const typeSet = new Set();
-  
+
   // 遍歷所有檢驗資料收集類型
   groupedLabs.forEach(group => {
     group.labs.forEach(lab => {
@@ -49,7 +49,7 @@ const getAllLabTypes = (groupedLabs) => {
       }
     });
   });
-  
+
   // 轉換為陣列並排序
   return Array.from(typeSet).sort();
 };
@@ -58,4 +58,4 @@ export {
   groupLabsByDate,
   sortGroupedData,
   getAllLabTypes
-}; 
+};

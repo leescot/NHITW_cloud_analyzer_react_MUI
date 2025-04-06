@@ -4,44 +4,46 @@ import TypographySizeWrapper from "../../utils/TypographySizeWrapper";
 import { getStatusColor, formatReferenceRange } from "../../utils/lab/LabUtilities";
 
 // 生成測試項目顯示
-const LabItemDisplay = ({ 
-  lab, 
-  groupIndex, 
-  labIndex, 
-  selectedLabItems, 
-  handleToggleLabItem, 
+const LabItemDisplay = ({
+  lab,
+  groupIndex,
+  labIndex,
+  selectedLabItems,
+  handleToggleLabItem,
   generalDisplaySettings,
   labSettings
 }) => {
   const {
-    enableCustomCopy,
-    displayFormat,
-    enableAbbrev,
+    enableLabChooseCopy,
+    displayLabFormat,
+    enableLabAbbrev,
     showUnit,
     showReference,
     highlightAbnormal
   } = labSettings;
 
+  // Add debug logging
+  // console.log(`LabItemDisplay format: ${displayLabFormat}, enableLabChooseCopy: ${enableLabChooseCopy}`);
+
   const labId = `${groupIndex}-${labIndex}`;
   const isSelected = selectedLabItems[groupIndex]?.[labId] || false;
-  
-  return (
-    <Box sx={{ 
-      display: 'flex', 
-      alignItems: 'center', 
-      mb: 0.25 
-    }}>
-      {enableCustomCopy && 
-       (displayFormat !== 'vertical' && 
-        displayFormat !== 'horizontal') ? (
+
+  // 使用 Map 來決定渲染哪個組件
+  const displayComponents = new Map([
+    // 顯示帶有複選框的版本 - 當啟用自定義複製且顯示格式不是垂直或水平
+    [
+      () => enableLabChooseCopy && 
+            (displayLabFormat !== 'vertical' && 
+             displayLabFormat !== 'horizontal'),
+      () => (
         <FormControlLabel
           control={
-            <Checkbox 
+            <Checkbox
               checked={isSelected}
               onChange={() => handleToggleLabItem(groupIndex, labIndex)}
               size="small"
               disableRipple
-              sx={{ 
+              sx={{
                 color: 'rgba(0, 0, 0, 0.25)',
                 '&.Mui-checked': {
                   color: '#9c64a6', // 淡紫色 (比 secondary.main 更淡)
@@ -63,7 +65,7 @@ const LabItemDisplay = ({
                 lineHeight: 1.2
               }}
             >
-              {enableAbbrev ? (lab.abbrName || lab.itemName) : lab.itemName}{" "}
+              {enableLabAbbrev ? (lab.abbrName || lab.itemName) : lab.itemName}{" "}
               <span style={{ fontWeight: 'medium' }}>
                 {lab.value}
               </span>
@@ -73,8 +75,8 @@ const LabItemDisplay = ({
               {formatReferenceRange(lab, showReference)}
             </TypographySizeWrapper>
           }
-          sx={{ 
-            m: 0, 
+          sx={{
+            m: 0,
             p: 0,
             alignItems: 'center',
             '& .MuiCheckbox-root': {
@@ -88,7 +90,12 @@ const LabItemDisplay = ({
             paddingLeft: 0
           }}
         />
-      ) : (
+      )
+    ],
+    // 預設顯示 - 不帶複選框的簡化版
+    [
+      () => true,
+      () => (
         <TypographySizeWrapper
           variant="body2"
           textSizeType="content"
@@ -99,7 +106,7 @@ const LabItemDisplay = ({
             marginBottom: 0
           }}
         >
-          {enableAbbrev ? (lab.abbrName || lab.itemName) : lab.itemName}{" "}
+          {enableLabAbbrev ? (lab.abbrName || lab.itemName) : lab.itemName}{" "}
           <span style={{ fontWeight: 'medium' }}>
             {lab.value}
           </span>
@@ -108,9 +115,28 @@ const LabItemDisplay = ({
           )}
           {formatReferenceRange(lab, showReference)}
         </TypographySizeWrapper>
-      )}
+      )
+    ]
+  ]);
+
+  // 渲染合適的組件
+  let renderedComponent = null;
+  for (const [condition, renderer] of displayComponents) {
+    if (condition()) {
+      renderedComponent = renderer();
+      break;
+    }
+  }
+
+  return (
+    <Box sx={{
+      display: 'flex',
+      alignItems: 'center',
+      mb: 0.25
+    }}>
+      {renderedComponent}
     </Box>
   );
 };
 
-export default LabItemDisplay; 
+export default LabItemDisplay;

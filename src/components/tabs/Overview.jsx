@@ -1,6 +1,6 @@
 /**
  * Overview Component
- * 
+ *
  * This component displays an overview of patient information by integrating several smaller components:
  * - Important medications (filtered by ATC5 groups and colors)
  * - Patient summary data
@@ -9,7 +9,7 @@
  * - Surgery records
  * - Discharge records
  * - Imaging tests
- * 
+ *
  * This file serves as the integration point for all the separate components.
  */
 
@@ -30,11 +30,11 @@ import Overview_ImagingTests from "./Overview_ImagingTests";
 import { DEFAULT_LAB_TESTS } from '../../config/labTests';
 import { DEFAULT_IMAGE_TESTS } from '../../config/imageTests';
 
-const Overview = ({ 
-  dashboardData, 
-  allergyData, 
-  surgeryData, 
-  dischargeData, 
+const Overview = ({
+  dashboardData,
+  allergyData,
+  surgeryData,
+  dischargeData,
   patientSummaryData,
   groupedMedications = [],
   groupedChineseMeds = [],
@@ -42,9 +42,9 @@ const Overview = ({
   labData,
   imagingData = { withReport: [], withoutReport: [] },
   settings = {},
-  overviewSettings = { 
-    medicationTrackingDays: 180, 
-    labTrackingDays: 90, 
+  overviewSettings = {
+    medicationTrackingDays: 180,
+    labTrackingDays: 90,
     imageTrackingDays: 90,
     focusedLabTests: DEFAULT_LAB_TESTS,
     focusedImageTests: DEFAULT_IMAGE_TESTS
@@ -65,24 +65,24 @@ const Overview = ({
         {/* 左欄 (1/3) - 包含診斷與重點藥物 */}
         <Grid item xs={12} md={hasMedications ? 4.5 : 3}>
           {/* 近期就醫診斷 */}
-          <Overview_RecentDiagnosis 
+          <Overview_RecentDiagnosis
             groupedMedications={groupedMedications}
             groupedChineseMeds={groupedChineseMeds}
             generalDisplaySettings={generalDisplaySettings}
           />
-          
+
           {/* 重點藥物 */}
-          <Overview_ImportantMedications 
-            groupedMedications={groupedMedications} 
+          <Overview_ImportantMedications
+            groupedMedications={groupedMedications}
             settings={settings}
             overviewSettings={overviewSettings}
             generalDisplaySettings={generalDisplaySettings}
           />
         </Grid>
-        
+
         {/* 重點檢驗 - 中欄 (1/3) */}
         <Grid item xs={12} md={4.5}>
-          <Overview_LabTests 
+          <Overview_LabTests
             groupedLabs={groupedLabs}
             labData={labData}
             overviewSettings={overviewSettings}
@@ -90,7 +90,7 @@ const Overview = ({
             labSettings={labSettings}
           />
         </Grid>
-        
+
         {/* 右欄 (1/3) - 包含其他資訊的垂直堆疊 */}
         <Grid item xs={12} md={3}>
           <Grid container spacing={2} direction="column">
@@ -106,8 +106,8 @@ const Overview = ({
             {/* 2. 手術紀錄 - only display if has data */}
             {hasSurgeryData && (
               <Grid item>
-                <Overview_SurgeryRecords 
-                  surgeryData={surgeryData} 
+                <Overview_SurgeryRecords
+                  surgeryData={surgeryData}
                   generalDisplaySettings={generalDisplaySettings}
                 />
               </Grid>
@@ -116,8 +116,8 @@ const Overview = ({
             {/* 3. 出院紀錄 - only display if has data */}
             {hasDischargeData && (
               <Grid item>
-                <Overview_DischargeRecords 
-                  dischargeData={dischargeData} 
+                <Overview_DischargeRecords
+                  dischargeData={dischargeData}
                   generalDisplaySettings={generalDisplaySettings}
                 />
               </Grid>
@@ -126,8 +126,8 @@ const Overview = ({
             {/* 4. 過敏紀錄 - only display if has data */}
             {hasAllergyData && (
               <Grid item>
-                <Overview_AllergyRecords 
-                  allergyData={allergyData} 
+                <Overview_AllergyRecords
+                  allergyData={allergyData}
                   generalDisplaySettings={generalDisplaySettings}
                 />
               </Grid>
@@ -135,8 +135,8 @@ const Overview = ({
 
             {/* 5. 病患摘要 */}
             <Grid item>
-              <Overview_PatientSummary 
-                patientSummaryData={patientSummaryData} 
+              <Overview_PatientSummary
+                patientSummaryData={patientSummaryData}
                 generalDisplaySettings={generalDisplaySettings}
               />
             </Grid>

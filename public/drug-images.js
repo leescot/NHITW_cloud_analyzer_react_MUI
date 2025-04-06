@@ -28,16 +28,16 @@ async function fetchDrugData(code) {
     if (!response.ok) {
       throw new Error('無法獲取藥品數據');
     }
-    
+
     const data = await response.json();
-    
+
     // 隱藏載入提示
     loadingElement.style.display = 'none';
-    
+
     // 處理數據
     if (data && data.drug_table && data.drug_table.length > 0) {
       const drug = data.drug_table[0];
-      
+
       // 顯示藥品信息
       drugInfoElement.innerHTML = `
         <p class="drug-name">${drug.chi_name || ''}</p>
@@ -46,29 +46,29 @@ async function fetchDrugData(code) {
         <p>適應症: ${drug.indication || ''}</p>
         <p>許可證字號: ${drug.url_license ? `<a href="${drug.url_license}" target="_blank">${drug.license_code || ''}</a>` : drug.license_code || ''}</p>
       `;
-      
+
       // 顯示藥品圖片
       if (drug.fig && drug.fig.length > 0) {
         drug.fig.forEach((imgUrl, index) => {
           const sourceName = drug.src_name && drug.src_name[index] ? drug.src_name[index] : '';
           const sourceUrl = drug.url_drug && drug.url_drug[index] ? drug.url_drug[index] : '';
-          
+
           const galleryItem = document.createElement('div');
           galleryItem.className = 'gallery-item';
-          
+
           const img = document.createElement('img');
           img.src = imgUrl;
           img.alt = drug.chi_name || '藥品圖片';
           img.onclick = function() {
             openModal(imgUrl);
           };
-          
+
           galleryItem.appendChild(img);
-          
+
           if (sourceName) {
             const sourceElement = document.createElement('div');
             sourceElement.className = 'source-name';
-            
+
             if (sourceUrl) {
               const sourceLink = document.createElement('a');
               sourceLink.href = sourceUrl;
@@ -78,10 +78,10 @@ async function fetchDrugData(code) {
             } else {
               sourceElement.textContent = sourceName;
             }
-            
+
             galleryItem.appendChild(sourceElement);
           }
-          
+
           galleryElement.appendChild(galleryItem);
         });
       } else {

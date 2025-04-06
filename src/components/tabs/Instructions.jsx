@@ -370,6 +370,14 @@ IMAGE_PLACEHOLDER(medication_image_viewer, 藥物外觀圖片示例)
 
 - **顯示效能名稱**：啟用此選項後，系統將顯示中藥的效能名稱（如：清熱解毒、補氣養血等），方便您了解中藥的主要功效。預設為關閉。
 
+### 劑量顯示格式
+
+- **每日劑量**：顯示每日方劑的劑量
+
+- **每次劑量**：顯示每次方劑的劑量
+
+**注意**：有些院所的中藥頻次上傳不完整，會導致此功能無法正常顯示
+
 ### 中藥複製格式
 
 此設定控制當您複製中藥資訊時的格式，有以下選項：
@@ -533,97 +541,97 @@ const Instructions = ({ generalDisplaySettings }) => {
   // 自訂 markdown 元件的樣式
   const markdownComponents = {
     h1: props => (
-      <Typography 
-        variant="h4" 
-        component="h1" 
-        sx={{ 
-          mt: 2, 
-          mb: 3, 
+      <Typography
+        variant="h4"
+        component="h1"
+        sx={{
+          mt: 2,
+          mb: 3,
           fontWeight: 'bold',
-          fontSize: generalDisplaySettings && 
-                   generalDisplaySettings.titleTextSize || 
+          fontSize: generalDisplaySettings &&
+                   generalDisplaySettings.titleTextSize ||
                    '1.5rem'
-        }} 
-        {...props} 
+        }}
+        {...props}
       />
     ),
     h2: props => (
-      <Typography 
-        variant="h5" 
-        component="h2" 
-        sx={{ 
-          mt: 3, 
-          mb: 2, 
+      <Typography
+        variant="h5"
+        component="h2"
+        sx={{
+          mt: 3,
+          mb: 2,
           fontWeight: 'bold',
           color: '#1976d2',
-          fontSize: generalDisplaySettings && 
-                   generalDisplaySettings.titleTextSize && 
-                   (parseFloat(generalDisplaySettings.titleTextSize) - 0.2) + 'rem' || 
+          fontSize: generalDisplaySettings &&
+                   generalDisplaySettings.titleTextSize &&
+                   (parseFloat(generalDisplaySettings.titleTextSize) - 0.2) + 'rem' ||
                    '1.3rem'
-        }} 
-        {...props} 
+        }}
+        {...props}
       />
     ),
     h3: props => (
-      <Typography 
-        variant="h6" 
-        component="h3" 
-        sx={{ 
-          mt: 2, 
-          mb: 1, 
+      <Typography
+        variant="h6"
+        component="h3"
+        sx={{
+          mt: 2,
+          mb: 1,
           fontWeight: 'bold',
           color: '#2196f3',
-          fontSize: generalDisplaySettings && 
-                   generalDisplaySettings.contentTextSize || 
+          fontSize: generalDisplaySettings &&
+                   generalDisplaySettings.contentTextSize ||
                    '1.1rem'
-        }} 
-        {...props} 
+        }}
+        {...props}
       />
     ),
     p: props => (
-      <Typography 
-        variant="body1" 
-        component="p" 
-        sx={{ 
+      <Typography
+        variant="body1"
+        component="p"
+        sx={{
           my: 1,
-          fontSize: generalDisplaySettings && 
-                   generalDisplaySettings.contentTextSize || 
+          fontSize: generalDisplaySettings &&
+                   generalDisplaySettings.contentTextSize ||
                    '1rem'
-        }} 
-        {...props} 
+        }}
+        {...props}
       />
     ),
     li: props => (
-      <Typography 
-        component="li" 
-        sx={{ 
-          fontSize: generalDisplaySettings && 
-                   generalDisplaySettings.contentTextSize || 
+      <Typography
+        component="li"
+        sx={{
+          fontSize: generalDisplaySettings &&
+                   generalDisplaySettings.contentTextSize ||
                    '1rem'
-        }} 
-        {...props} 
+        }}
+        {...props}
       />
     ),
     img: props => (
       <Box sx={{ my: 2, textAlign: 'center' }}>
-        <img 
-          {...props} 
-          alt={props.alt || '圖片'} 
-          style={{ 
-            maxWidth: '100%', 
-            height: 'auto', 
+        <img
+          {...props}
+          alt={props.alt || '圖片'}
+          style={{
+            maxWidth: '100%',
+            height: 'auto',
             borderRadius: '8px',
             boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-          }} 
+          }}
         />
-        <Typography 
-          variant="caption" 
+        <Typography
+          variant="caption"
           component="figcaption"
-          sx={{ 
-            mt: 1, 
+          sx={{
+            mt: 1,
             color: 'text.secondary',
-            fontSize: generalDisplaySettings && 
-                     generalDisplaySettings.noteTextSize || 
+            fontSize: generalDisplaySettings &&
+                     generalDisplaySettings.noteTextSize ||
                      '0.8rem'
           }}
         >
@@ -637,7 +645,7 @@ const Instructions = ({ generalDisplaySettings }) => {
   const renderContent = () => {
     // 使用更精確的正則表達式，允許圖片說明包含在括號內
     const parts = processedContent.split(/IMAGE_PLACEHOLDER\(([^)]+)\)/);
-    
+
     return parts.map((part, index) => {
       // 偶數索引為文本內容
       if (index % 2 === 0) {
@@ -646,7 +654,7 @@ const Instructions = ({ generalDisplaySettings }) => {
             {part}
           </ReactMarkdown>
         );
-      } 
+      }
       // 奇數索引為圖片引用
       else {
         // 分割圖片變數名和說明文字（如果有）
@@ -654,10 +662,10 @@ const Instructions = ({ generalDisplaySettings }) => {
         const imgVarName = paramsArray[0];
         // 如果提供了說明，則使用提供的說明，否則使用默認文字
         const captionText = paramsArray.length > 1 ? paramsArray[1] : '說明圖片';
-        
+
         // 從映射對象獲取圖片
         const imgSrc = images[imgVarName];
-        
+
         // 檢查是否為需要調整大小的特定圖片
         const reducedSizeImages = [
           'updated_settings_page',
@@ -666,26 +674,26 @@ const Instructions = ({ generalDisplaySettings }) => {
           'lab_report_settings',
           'auto_copy_lab_results'
         ];
-        
+
         const isReducedSizeImage = reducedSizeImages.includes(imgVarName);
-        
+
         return imgSrc ? (
           <Box key={`img-${index}`} sx={{ my: 2, textAlign: 'center' }}>
-            <img 
-              src={imgSrc} 
-              alt={captionText} 
-              style={{ 
-                maxWidth: isReducedSizeImage ? '40%' : '100%', 
-                height: 'auto', 
+            <img
+              src={imgSrc}
+              alt={captionText}
+              style={{
+                maxWidth: isReducedSizeImage ? '40%' : '100%',
+                height: 'auto',
                 borderRadius: '8px',
                 boxShadow: '0 2px 8px rgba(0,0,0,0.1)'
-              }} 
+              }}
             />
-            <Typography 
-              variant="caption" 
+            <Typography
+              variant="caption"
               component="figcaption"
-              sx={{ 
-                mt: 1, 
+              sx={{
+                mt: 1,
                 color: 'text.secondary',
                 fontSize: generalDisplaySettings?.noteTextSize || '0.8rem'
               }}
@@ -699,10 +707,10 @@ const Instructions = ({ generalDisplaySettings }) => {
   };
 
   return (
-    <Paper 
-      elevation={0} 
-      sx={{ 
-        p: 3, 
+    <Paper
+      elevation={0}
+      sx={{
+        p: 3,
         backgroundColor: '#f9f9f9',
         borderRadius: '8px',
         height: '100%'
@@ -710,15 +718,15 @@ const Instructions = ({ generalDisplaySettings }) => {
     >
       <Grid container spacing={3} sx={{ height: '100%' }}>
         {/* 左側導航列表 */}
-        <Grid item xs={12} md={3} sx={{ 
-          borderRight: { md: '1px solid #e0e0e0' }, 
+        <Grid item xs={12} md={3} sx={{
+          borderRight: { md: '1px solid #e0e0e0' },
           pr: { md: 2 },
           height: '100%'
         }}>
-          <Typography 
-            variant="h6" 
-            component="h2" 
-            sx={{ 
+          <Typography
+            variant="h6"
+            component="h2"
+            sx={{
               mb: 2,
               fontWeight: 'bold',
               color: '#1976d2',
@@ -729,12 +737,12 @@ const Instructions = ({ generalDisplaySettings }) => {
           </Typography>
           <List component="nav" aria-label="instruction documents">
             {documents.map((doc) => (
-              <ListItem 
-                button 
-                key={doc.id} 
+              <ListItem
+                button
+                key={doc.id}
                 selected={selectedDocId === doc.id}
                 onClick={() => handleDocumentSelect(doc.id)}
-                sx={{ 
+                sx={{
                   borderRadius: '4px',
                   mb: 0.5,
                   bgcolor: selectedDocId === doc.id ? 'rgba(25, 118, 210, 0.08)' : 'transparent',
@@ -743,10 +751,10 @@ const Instructions = ({ generalDisplaySettings }) => {
                   }
                 }}
               >
-                <ListItemText 
-                  primary={doc.title} 
+                <ListItemText
+                  primary={doc.title}
                   primaryTypographyProps={{
-                    sx: { 
+                    sx: {
                       fontWeight: selectedDocId === doc.id ? 'bold' : 'normal',
                       fontSize: generalDisplaySettings?.contentTextSize || '1rem'
                     }
@@ -756,7 +764,7 @@ const Instructions = ({ generalDisplaySettings }) => {
             ))}
           </List>
         </Grid>
-        
+
         {/* 右側內容區域 */}
         <Grid item xs={12} md={9} sx={{ height: '100%', overflowY: 'auto' }}>
           <Box sx={{ height: '100%' }}>
@@ -768,4 +776,4 @@ const Instructions = ({ generalDisplaySettings }) => {
   );
 };
 
-export default Instructions; 
+export default Instructions;

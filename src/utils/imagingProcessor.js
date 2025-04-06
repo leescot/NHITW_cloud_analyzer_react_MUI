@@ -17,7 +17,8 @@ export const imagingProcessor = {
         date: this.formatDate(item.real_inspect_date || item.case_time || item.recipe_date),
         hosp: (item.hosp || '').split(';')[0],
         orderName: (item.order_name || '').replace(/;/g, '\n'),
-        inspectResult: item.inspect_result || '',
+        // 合併 inspect_result, path_diag_2, path_diag_3 欄位
+        inspectResult: this.combineReportFields(item),
         // 關鍵：加入 order_code 欄位，用於後續整合影像和報告
         order_code: item.order_code || '',
         // 關鍵：保存所有與影像查看相關的欄位
@@ -42,16 +43,36 @@ export const imagingProcessor = {
     });
 
     // console.log('Processed imaging data:', { withReport, withoutReport }); // 添加調試信息
-    
+
     return {
       withReport: withReport,
       withoutReport: withoutReport
     };
   },
 
+  // 新增方法：合併報告欄位
+  combineReportFields(item) {
+    let report = '';
+    
+    // 依序加入 inspect_result, path_diag_2, path_diag_3
+    if (item.inspect_result) {
+      report += item.inspect_result;
+    }
+    
+    if (item.path_diag_2) {
+      report += item.path_diag_2;
+    }
+    
+    if (item.path_diag_3) {
+      report += item.path_diag_3;
+    }
+    
+    return report;
+  },
+
   formatDate(dateStr) {
     if (!dateStr) return '';
-    
+
     // 處理日期格式
     const parts = dateStr.split('/');
     if (parts.length === 3) {
@@ -59,7 +80,7 @@ export const imagingProcessor = {
       const year = parts[0].length === 4 ? parts[0] : String(parseInt(parts[0]) + 1911);
       return `${year}/${parts[1]}/${parts[2]}`;
     }
-    
+
     return dateStr;
   }
 };

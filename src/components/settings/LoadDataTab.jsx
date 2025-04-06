@@ -20,22 +20,22 @@ import DeleteIcon from '@mui/icons-material/Delete';
 import DownloadIcon from '@mui/icons-material/Download';
 
 // 資料類型對照表
-const dataTypeMap = {
-  'medication': '西藥處方',
-  'labData': '檢驗報告',
-  'chineseMed': '中藥處方',
-  'imaging': '醫療影像',
-  'allergy': '過敏資料',
-  'surgery': '手術記錄',
-  'discharge': '出院病摘',
-  'medDays': '餘藥資料',
-  'patientSummary': '病患摘要'
-};
+const dataTypeMap = new Map([
+  ['medication', '西藥處方'],
+  ['labData', '檢驗報告'],
+  ['chineseMed', '中藥處方'],
+  ['imaging', '醫療影像'],
+  ['allergy', '過敏資料'],
+  ['surgery', '手術記錄'],
+  ['discharge', '出院病摘'],
+  ['medDays', '餘藥資料'],
+  ['patientSummary', '病患摘要']
+]);
 
 // 新增下載功能
 const handleDownloadJSON = (setDownloading, setSnackbar) => {
   setDownloading(true);
-  
+
   // 從 content script 獲取所有資料
   chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
     if (!tabs || !tabs[0] || !tabs[0].id) {
@@ -47,11 +47,11 @@ const handleDownloadJSON = (setDownloading, setSnackbar) => {
       });
       return;
     }
-    
+
     try {
       chrome.tabs.sendMessage(tabs[0].id, { action: "getPatientData" }, function(response) {
         setDownloading(false);
-        
+
         // 處理 chrome 錯誤
         if (chrome.runtime.lastError) {
           setSnackbar({
@@ -61,7 +61,7 @@ const handleDownloadJSON = (setDownloading, setSnackbar) => {
           });
           return;
         }
-        
+
         // 檢查回應是否存在
         if (!response) {
           setSnackbar({
@@ -71,7 +71,7 @@ const handleDownloadJSON = (setDownloading, setSnackbar) => {
           });
           return;
         }
-        
+
         // 檢查是否有錯誤訊息
         if (response.error) {
           setSnackbar({
@@ -81,7 +81,7 @@ const handleDownloadJSON = (setDownloading, setSnackbar) => {
           });
           return;
         }
-        
+
         // 檢查是否已直接由內容腳本處理下載
         if (response.directDownload || response.status === "success") {
           setSnackbar({
@@ -181,7 +181,7 @@ const LoadDataTab = ({ localDataStatus, setSnackbar }) => {
           if (response && response.success) {
             setSnackbar({
               open: true,
-              message: `成功載入資料：${response.loadedTypes.map(type => dataTypeMap[type] || type).join(', ')}`,
+              message: `成功載入資料：${response.loadedTypes.map(type => dataTypeMap.get(type) || type).join(', ')}`,
               severity: 'success'
             });
           } else {
@@ -242,18 +242,18 @@ const LoadDataTab = ({ localDataStatus, setSnackbar }) => {
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-      <Typography variant="h6" gutterBottom>
+      {/* <Typography variant="h6" gutterBottom>
         本地資料載入
-      </Typography>
+      </Typography> */}
 
       {/* 新增下載 JSON 資料檔的按鈕 */}
       <Paper variant="outlined" sx={{ p: 2 }}>
         <Typography variant="subtitle1" gutterBottom>
           下載雲端資料
         </Typography>
-        <Button 
-          variant="contained" 
-          color="primary" 
+        <Button
+          variant="contained"
+          color="primary"
           startIcon={downloading ? <CircularProgress size={16} color="inherit" /> : <DownloadIcon />}
           onClick={() => handleDownloadJSON(setDownloading, setSnackbar)}
           disabled={downloading}
@@ -266,51 +266,12 @@ const LoadDataTab = ({ localDataStatus, setSnackbar }) => {
         </Typography> */}
       </Paper>
 
-      {/* 資料狀態顯示 */}
-      {localDataStatus.loaded ? (
-        <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-            <CheckCircleIcon color="success" sx={{ mr: 1 }} />
-            <Typography variant="subtitle1">
-              已載入本地資料
-            </Typography>
-          </Box>
-          <Typography variant="body2" color="text.secondary" gutterBottom>
-            來源: {localDataStatus.source}
-          </Typography>
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 1 }}>
-            {localDataStatus.types.map((type) => (
-              <Chip 
-                key={type} 
-                label={dataTypeMap[type] || type} 
-                size="small" 
-                color="primary" 
-                variant="outlined" 
-              />
-            ))}
-          </Box>
-          {/* <Button
-            variant="outlined"
-            color="error"
-            startIcon={<DeleteIcon />}
-            onClick={handleClearLocalData}
-            sx={{ mt: 2 }}
-          >
-            清除本地資料
-          </Button> */}
-        </Paper>
-      ) : (
-        <Alert severity="info" sx={{ mb: 2 }}>
-          請選擇 JSON 檔案並點擊「載入檔案」
-        </Alert>
-      )}
-
       {/* 檔案上傳區 */}
       <Paper variant="outlined" sx={{ p: 2 }}>
         <Typography variant="subtitle1" gutterBottom>
           選擇 JSON 檔案
         </Typography>
-        
+
         <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
           <Button
             variant="contained"
@@ -330,7 +291,7 @@ const LoadDataTab = ({ localDataStatus, setSnackbar }) => {
             {selectedFile ? selectedFile.name : '未選擇檔案'}
           </Typography>
         </Box>
-        
+
         <Button
           variant="contained"
           color="primary"
@@ -342,8 +303,49 @@ const LoadDataTab = ({ localDataStatus, setSnackbar }) => {
           {loading ? '載入中...' : '載入檔案'}
         </Button>
       </Paper>
+
+      {/* 資料狀態顯示 */}
+      {localDataStatus.loaded ? (
+        <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+            <CheckCircleIcon color="success" sx={{ mr: 1 }} />
+            <Typography variant="subtitle1">
+              已載入本地資料
+            </Typography>
+          </Box>
+          <Typography variant="body2" color="text.secondary" gutterBottom>
+            來源: {localDataStatus.source}
+          </Typography>
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 1 }}>
+            {localDataStatus.types.map((type) => (
+              <Chip
+                key={type}
+                label={dataTypeMap.get(type) || type}
+                size="small"
+                color="primary"
+                variant="outlined"
+              />
+            ))}
+          </Box>
+          {/* <Button
+            variant="outlined"
+            color="error"
+            startIcon={<DeleteIcon />}
+            onClick={handleClearLocalData}
+            sx={{ mt: 2 }}
+          >
+            清除本地資料
+          </Button> */}
+        </Paper>
+      ) : (
+        <Alert severity="info" sx={{ mb: 2 }}>
+          請選擇 JSON 檔案並點擊「載入檔案」
+        </Alert>
+      )}
+
+      
     </Box>
   );
 };
 
-export default LoadDataTab; 
+export default LoadDataTab;

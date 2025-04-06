@@ -1,9 +1,17 @@
 name: Create Release
 
 on:
-  push:
-    branches:
-      - release
+  workflow_dispatch:
+    inputs:
+      is_pre:
+        description: '發布為測試版'
+        type: boolean
+        default: false
+        required: false
+      message:
+        description: '更新說明'
+        default: ''
+        required: false
 
 jobs:
   build-and-release:
@@ -20,7 +28,7 @@ jobs:
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
-          node-version: '20'
+          node-version: '22'
           # Remove the cache option that's causing issues
       
       - name: Install dependencies
@@ -53,12 +61,14 @@ jobs:
       
       - name: Create GitHub Release
         id: create_release
-        uses: softprops/action-gh-release@v1
+        uses: softprops/action-gh-release@v2
         with:
           tag_name: ${{ steps.create_tag.outputs.TAG_NAME }}
           name: Release ${{ steps.create_tag.outputs.TAG_NAME }}
+          body: ${{ github.event.inputs.message }}
           draft: false
-          prerelease: false
+          prerelease: ${{ github.event.inputs.is_pre }}
+          make_latest: 'legacy'
           files: NHITW_cloud_analyzer_${{ steps.create_tag.outputs.TAG_NAME }}.zip
         env:
           GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

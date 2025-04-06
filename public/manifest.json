@@ -1,11 +1,12 @@
 {
   "manifest_version": 3,
-  "name": "健保雲端資料擷取器2.0",
-  "version": "1.1.4",
-  "description": "健保雲端資料擷取器，幫忙醫療人員快速瀏覽健保雲端資料",
+  "name": "更好的健保雲端 2.0",
+  "version": "25.0405.1",
+  "description": "幫忙醫療人員快速瀏覽「健保雲端系統2.0」資料",
+  "homepage_url": "https://github.com/leescot/NHITW_cloud_analyzer_react_MUI",
   "permissions": ["webRequest", "storage", "scripting", "clipboardWrite"],
   "host_permissions": [
-    "https://medcloud2.nhi.gov.tw/imu/IMUE1000/*",
+    "https://medcloud2.nhi.gov.tw/*",
     "https://drugtw.com/*"
   ],
   "background": {
@@ -29,10 +30,10 @@
   "content_scripts": [
     {
       "matches": [
-        "https://medcloud2.nhi.gov.tw/imu/IMUE1000/*"
+        "https://medcloud2.nhi.gov.tw/*"
       ],
       "js": ["content.js"],
-      "run_at": "document_end"
+      "run_at": "document_idle"
     }
   ],
   "web_accessible_resources": [

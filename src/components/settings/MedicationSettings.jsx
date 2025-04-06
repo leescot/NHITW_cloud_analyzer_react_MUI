@@ -35,6 +35,8 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
 import ColorLensIcon from "@mui/icons-material/ColorLens";
+import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
+import FormatListBulletedIcon from "@mui/icons-material/FormatListBulleted";
 import { handleSettingChange } from "../../utils/settingsHelper";
 
 // 导入默认配置
@@ -46,17 +48,39 @@ const MedicationSettings = () => {
     showDiagnosis: true,
     showGenericName: false,
     showATC5Name: false,
-    copyFormat: "nameWithDosageVertical",
+    medicationCopyFormat: "nameWithDosageVertical",
     separateShortTermMeds: false,
     enableATC5Colors: true,
     atc5Groups: DEFAULT_ATC5_GROUPS,
     atc5ColorGroups: DEFAULT_ATC5_COLOR_GROUPS,
     showExternalDrugImage: false,
+    enableMedicationCustomCopyFormat: false,
+    customMedicationHeaderCopyFormat: [
+      { id: 'date', display: '日期' },
+      { id: 'separator', value: ' - ', display: ' - ' },
+      { id: 'hosp', display: '醫院' },
+      { id: 'newline', display: '換行' },
+    ],
+    customMedicationDrugCopyFormat: [
+      { id: 'name', display: '藥物名稱' },
+      { id: 'space', display: ' ' },
+      { id: 'perDosage', display: '單次劑量' },
+      { id: 'space', display: ' ' },
+      { id: 'frequency', display: '頻次' },
+      { id: 'space', display: ' ' },
+      { id: 'days', display: '天數' },
+      { id: 'text', value: '天', display: '天' }
+    ]
   });
+
+  // Monitor when enableMedicationCustomCopyFormat changes
+  useEffect(() => {
+    console.log("MedicationSettings: enableMedicationCustomCopyFormat changed to:", settings.enableMedicationCustomCopyFormat);
+  }, [settings.enableMedicationCustomCopyFormat]);
 
   // 统一的 ATC5 分组对话框
   const [atc5GroupsDialogOpen, setAtc5GroupsDialogOpen] = useState(false);
-
+  
   // ATC5 Group 编辑状态
   const [editingGroup, setEditingGroup] = useState(null);
   const [newGroupName, setNewGroupName] = useState("");
@@ -72,12 +96,29 @@ const MedicationSettings = () => {
         showDiagnosis: true,
         showGenericName: false,
         showATC5Name: false,
-        copyFormat: "nameWithDosageVertical",
+        medicationCopyFormat: "nameWithDosageVertical",
         separateShortTermMeds: false,
         enableATC5Colors: true,
         atc5Groups: DEFAULT_ATC5_GROUPS,
         atc5ColorGroups: DEFAULT_ATC5_COLOR_GROUPS,
         showExternalDrugImage: false,
+        enableMedicationCustomCopyFormat: false,
+        customMedicationHeaderCopyFormat: [
+          { id: 'date', display: '日期' },
+          { id: 'separator', value: ' - ', display: ' - ' },
+          { id: 'hosp', display: '醫院' },
+          { id: 'newline', display: '換行' },
+        ],
+        customMedicationDrugCopyFormat: [
+          { id: 'name', display: '藥物名稱' },
+          { id: 'space', display: ' ' },
+          { id: 'perDosage', display: '單次劑量' },
+          { id: 'space', display: ' ' },
+          { id: 'frequency', display: '頻次' },
+          { id: 'space', display: ' ' },
+          { id: 'days', display: '天數' },
+          { id: 'text', value: '天', display: '天' }
+        ]
       },
       (items) => {
         setSettings({
@@ -85,15 +126,36 @@ const MedicationSettings = () => {
           showDiagnosis: items.showDiagnosis,
           showGenericName: items.showGenericName,
           showATC5Name: items.showATC5Name,
-          copyFormat: items.copyFormat,
+          medicationCopyFormat: items.medicationCopyFormat,
           separateShortTermMeds: items.separateShortTermMeds,
           enableATC5Colors: items.enableATC5Colors,
           atc5Groups: items.atc5Groups,
           atc5ColorGroups: items.atc5ColorGroups,
           showExternalDrugImage: items.showExternalDrugImage,
+          enableMedicationCustomCopyFormat: items.enableMedicationCustomCopyFormat,
+          customMedicationHeaderCopyFormat: items.customMedicationHeaderCopyFormat,
+          customMedicationDrugCopyFormat: items.customMedicationDrugCopyFormat
         });
       }
     );
+
+    // Listen for real-time setting changes from other components
+    const handleSettingChangedEvent = (event) => {
+      const { key, value } = event.detail;
+      if (key === 'enableMedicationCustomCopyFormat') {
+        setSettings(prev => ({
+          ...prev,
+          [key]: value
+        }));
+      }
+    };
+
+    window.addEventListener('settingChanged', handleSettingChangedEvent);
+
+    // Cleanup the event listener
+    return () => {
+      window.removeEventListener('settingChanged', handleSettingChangedEvent);
+    };
   }, []);
 
   const handleLocalSettingChange = (key, value) => {
@@ -123,10 +185,15 @@ const MedicationSettings = () => {
 
   // 查找组的颜色
   const getGroupColor = (groupName) => {
-    if (settings.atc5ColorGroups.red.includes(groupName)) return "red";
-    if (settings.atc5ColorGroups.orange.includes(groupName)) return "orange";
-    if (settings.atc5ColorGroups.green.includes(groupName)) return "green";
-    return "none";
+    // # zh-TW: 使用 Map 代替多個 if-else 檢查，提高可讀性和效率
+    const colorMap = new Map([
+      [settings.atc5ColorGroups.red.includes(groupName), "red"],
+      [settings.atc5ColorGroups.orange.includes(groupName), "orange"],
+      [settings.atc5ColorGroups.green.includes(groupName), "green"]
+    ]);
+    
+    // 找出第一個符合條件的顏色，或返回 "none"
+    return colorMap.get(true) || "none";
   };
 
   // ATC5 分组管理函数
@@ -141,13 +208,13 @@ const MedicationSettings = () => {
   const handleDeleteGroup = (groupName) => {
     const updatedGroups = { ...settings.atc5Groups };
     delete updatedGroups[groupName];
-    
+
     // 首先更新 ATC5 分组
     handleLocalSettingChange('atc5Groups', updatedGroups);
-    
+
     // 然后从任何颜色分配中删除已删除的组
     const updatedColorGroups = { ...settings.atc5ColorGroups };
-    
+
     // 检查所有颜色类别并删除组（如果存在）
     ['red', 'orange', 'green'].forEach(color => {
       if (updatedColorGroups[color].includes(groupName)) {
@@ -156,7 +223,7 @@ const MedicationSettings = () => {
         );
       }
     });
-    
+
     // 更新颜色组分配
     handleLocalSettingChange('atc5ColorGroups', updatedColorGroups);
   };
@@ -176,26 +243,26 @@ const MedicationSettings = () => {
     }
 
     const codes = newGroupCodes.trim().split(/\s+/);
-    
+
     if (codes.length === 0 || (codes.length === 1 && codes[0] === "")) {
       alert("請輸入至少一個 ATC 代碼");
       return;
     }
-    
+
     const updatedGroups = { ...settings.atc5Groups };
     const oldGroupName = editingGroup;
-    
+
     // 更新分组
     if (oldGroupName && oldGroupName !== newGroupName) {
       delete updatedGroups[oldGroupName];
     }
-    
+
     updatedGroups[newGroupName] = codes;
     handleLocalSettingChange('atc5Groups', updatedGroups);
-    
+
     // 更新颜色分配
     const updatedColorGroups = { ...settings.atc5ColorGroups };
-    
+
     // 从所有颜色组中删除旧的组名（如果存在）
     ['red', 'orange', 'green'].forEach(color => {
       // 如果是编辑现有组，删除旧的分配
@@ -204,7 +271,7 @@ const MedicationSettings = () => {
           group => group !== oldGroupName
         );
       }
-      
+
       // 如果是编辑现有组且组名已更改，还需删除新名称的任何现有分配
       if (oldGroupName !== newGroupName) {
         updatedColorGroups[color] = updatedColorGroups[color].filter(
@@ -212,17 +279,17 @@ const MedicationSettings = () => {
         );
       }
     });
-    
+
     // 添加新的颜色分配（如果不是"none"）
     if (newGroupColor !== "none") {
       updatedColorGroups[newGroupColor] = [
-        ...updatedColorGroups[newGroupColor], 
+        ...updatedColorGroups[newGroupColor],
         newGroupName
       ];
     }
-    
+
     handleLocalSettingChange('atc5ColorGroups', updatedColorGroups);
-    
+
     setEditMode(false);
     setEditingGroup(null);
   };
@@ -236,11 +303,11 @@ const MedicationSettings = () => {
     // 创建默认组的深拷贝
     const groupsCopy = JSON.parse(JSON.stringify(DEFAULT_ATC5_GROUPS));
     const colorGroupsCopy = JSON.parse(JSON.stringify(DEFAULT_ATC5_COLOR_GROUPS));
-    
+
     // 将两个设置都更新为默认值
     handleLocalSettingChange('atc5Groups', groupsCopy);
     handleLocalSettingChange('atc5ColorGroups', colorGroupsCopy);
-    
+
     // 如果打开，关闭编辑模式
     setEditMode(false);
     setEditingGroup(null);
@@ -249,19 +316,17 @@ const MedicationSettings = () => {
   // 为更好显示格式化 ATC 代码 - 两列
   const formatCodesForDisplay = (codes) => {
     if (codes.length === 0) return null;
-    
-    // 为两列布局创建代码对
+
+    // # zh-TW: 為兩列佈局創建代碼對
     const rows = [];
     for (let i = 0; i < codes.length; i += 2) {
-      if (i + 1 < codes.length) {
-        // 如果我们有一对
-        rows.push([codes[i], codes[i + 1]]);
-      } else {
-        // 如果最后有奇数
-        rows.push([codes[i]]);
-      }
+      // # zh-TW: 使用條件運算符替代 if-else 邏輯，更簡潔
+      const pair = i + 1 < codes.length 
+        ? [codes[i], codes[i + 1]]  // 如果有一對
+        : [codes[i]];               // 如果最後有奇數
+      rows.push(pair);
     }
-    
+
     return (
       <Box sx={{ width: '100%' }}>
         {rows.map((row, rowIndex) => (
@@ -288,21 +353,23 @@ const MedicationSettings = () => {
 
   // 根据组的颜色获取显示芯片
   const getColorChip = (groupName) => {
-    const colorMap = {
-      red: { color: "error", label: "紅" },
-      orange: { color: "warning", label: "橘" },
-      green: { color: "success", label: "綠" },
-      none: { color: "default", label: "無" }
-    };
-    
+    // # zh-TW: 使用 Map 代替物件映射，保持一致性並提高查詢效率
+    const colorMap = new Map([
+      ["red", { color: "error", label: "紅" }],
+      ["orange", { color: "warning", label: "橘" }],
+      ["green", { color: "success", label: "綠" }],
+      ["none", { color: "default", label: "無" }]
+    ]);
+
     const groupColor = getGroupColor(groupName);
-    const { color, label } = colorMap[groupColor];
-    
+    // 如果顏色是 none 則不顯示芯片
     if (groupColor === "none") return null;
     
+    const { color, label } = colorMap.get(groupColor);
+
     return (
-      <Chip 
-        size="small" 
+      <Chip
+        size="small"
         label={label}
         color={color}
         variant="outlined"
@@ -314,26 +381,51 @@ const MedicationSettings = () => {
 
   // 颜色选择标签的样式
   const getColorLabelStyle = (color) => {
-    const baseStyle = { 
-      borderRadius: 1, 
-      px: 1, 
-      py: 0.5, 
-      display: 'flex', 
+    const baseStyle = {
+      borderRadius: 1,
+      px: 1,
+      py: 0.5,
+      display: 'flex',
       alignItems: 'center',
       gap: 0.5
     };
+
+    // # zh-TW: 使用 Map 代替 switch-case，提高可讀性和維護性
+    const styleMap = new Map([
+      ["red", { ...baseStyle, bgcolor: '#ffebee', color: 'error.main', border: '1px solid', borderColor: 'error.light' }],
+      ["orange", { ...baseStyle, bgcolor: '#fff3e0', color: 'warning.main', border: '1px solid', borderColor: 'warning.light' }],
+      ["green", { ...baseStyle, bgcolor: '#e8f5e9', color: 'success.main', border: '1px solid', borderColor: 'success.light' }]
+    ]);
     
-    switch (color) {
-      case "red":
-        return { ...baseStyle, bgcolor: '#ffebee', color: 'error.main', border: '1px solid', borderColor: 'error.light' };
-      case "orange":
-        return { ...baseStyle, bgcolor: '#fff3e0', color: 'warning.main', border: '1px solid', borderColor: 'warning.light' };
-      case "green":
-        return { ...baseStyle, bgcolor: '#e8f5e9', color: 'success.main', border: '1px solid', borderColor: 'success.light' };
-      default:
-        return { ...baseStyle, bgcolor: 'grey.100', color: 'text.secondary', border: '1px solid', borderColor: 'grey.300' };
+    // 返回對應顏色的樣式，如果找不到則返回預設樣式
+    return styleMap.get(color) || { ...baseStyle, bgcolor: 'grey.100', color: 'text.secondary', border: '1px solid', borderColor: 'grey.300' };
+  };
+
+  // 打开 FloatingIcon 的自訂設定标签
+  const openCustomFormatEditor = () => {
+    // Only proceed if enableMedicationCustomCopyFormat is true
+    if (!settings.enableMedicationCustomCopyFormat) return;
+    
+    // 发送消息给 background script 或直接调用 FloatingIcon 的方法
+    if (window.openFloatingIconDialog) {
+      window.openFloatingIconDialog();
+      // 等对话框打开后，切换到自訂設定标签（索引为9）
+      setTimeout(() => {
+        chrome.runtime.sendMessage({ 
+          action: 'switchToCustomFormatTab',
+          tabIndex: 9
+        });
+      }, 100);
+    } else {
+      // 如果全局方法不可用，则发送消息给背景脚本处理
+      chrome.runtime.sendMessage({ 
+        action: 'openCustomFormatEditor' 
+      });
     }
   };
+
+  console.log("Render - medicationCopyFormat:", settings.medicationCopyFormat);
+  console.log("Render - enableMedicationCustomCopyFormat:", settings.enableMedicationCustomCopyFormat);
 
   return (
     <Accordion>
@@ -434,12 +526,21 @@ const MedicationSettings = () => {
         />
         {settings.enableATC5Colors && (
           <Box sx={{ mt: 1, mb: 2, ml: 4 }}>
-            <Button 
-              variant="outlined" 
+            <Button
+              variant="outlined"
               onClick={handleOpenAtc5GroupsDialog}
             >
               設定ATC5群組與顏色
             </Button>
+          </Box>
+        )}
+
+        {/* Remove the duplicate switch for enableMedicationCustomCopyFormat since it's now in AdvancedSettings */}
+        {settings.enableMedicationCustomCopyFormat && (
+          <Box sx={{ mt: 1, mb: 2, ml: 4 }}>
+            <Typography variant="body2" color="text.secondary">
+              請在「進階設定」中設置自訂格式。
+            </Typography>
           </Box>
         )}
 
@@ -450,11 +551,12 @@ const MedicationSettings = () => {
           <Select
             labelId="medication-copy-format-label"
             id="medication-copy-format"
-            value={settings.copyFormat}
+            value={settings.medicationCopyFormat}
             label="藥物複製格式"
-            onChange={(e) =>
-              handleLocalSettingChange("copyFormat", e.target.value)
-            }
+            onChange={(e) => {
+              console.log("Select onChange triggered. Value:", e.target.value);
+              handleLocalSettingChange("medicationCopyFormat", e.target.value);
+            }}
           >
             <MenuItem value="none">關閉複製功能</MenuItem>
             <MenuItem value="nameVertical">複製商品名(直式)</MenuItem>
@@ -465,12 +567,24 @@ const MedicationSettings = () => {
             <MenuItem value="nameWithDosageHorizontal">
               複製商品名+使用量(橫式)
             </MenuItem>
+            <MenuItem 
+              value="customVertical" 
+              disabled={!settings.enableMedicationCustomCopyFormat}
+            >
+              自訂西藥複製格式(直式)
+            </MenuItem>
+            <MenuItem 
+              value="customHorizontal" 
+              disabled={!settings.enableMedicationCustomCopyFormat}
+            >
+              自訂西藥複製格式(橫式)
+            </MenuItem>
           </Select>
         </FormControl>
 
         {/* 整合后的 ATC5 分组和颜色对话框 */}
-        <Dialog 
-          open={atc5GroupsDialogOpen} 
+        <Dialog
+          open={atc5GroupsDialogOpen}
           onClose={handleCloseAtc5GroupsDialog}
           fullWidth
           maxWidth="md"
@@ -483,26 +597,26 @@ const MedicationSettings = () => {
             <Typography variant="body2" gutterBottom sx={{ color: 'text.secondary' }}>
               每個群組可以選擇一種顏色或不指定顏色(暫不分組)
             </Typography>
-            
+
             {!editMode ? (
               <Box sx={{ mt: 2 }}>
                 <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
-                  <Button 
-                    variant="contained" 
+                  <Button
+                    variant="contained"
                     startIcon={<AddIcon />}
                     onClick={handleAddNewGroup}
                   >
                     新增群組
                   </Button>
                 </Box>
-                
+
                 <List sx={{ width: '100%' }}>
                   {Object.entries(settings.atc5Groups).map(([groupName, codes], index) => (
                     <React.Fragment key={groupName}>
                       {index > 0 && <Divider />}
                       <ListItem
-                        sx={{ 
-                          py: 1.5, 
+                        sx={{
+                          py: 1.5,
                           position: 'relative',
                           display: 'block'
                         }}
@@ -560,8 +674,8 @@ const MedicationSettings = () => {
                       value={newGroupColor}
                       onChange={(e) => setNewGroupColor(e.target.value)}
                     >
-                      
-                      <FormControlLabel 
+
+                      <FormControlLabel
                         value="red"
                         control={<Radio color="error" />}
                         label={
@@ -571,7 +685,7 @@ const MedicationSettings = () => {
                           </Box>
                         }
                       />
-                      <FormControlLabel 
+                      <FormControlLabel
                         value="orange"
                         control={<Radio color="warning" />}
                         label={
@@ -581,7 +695,7 @@ const MedicationSettings = () => {
                           </Box>
                         }
                       />
-                      <FormControlLabel 
+                      <FormControlLabel
                         value="green"
                         control={<Radio color="success" />}
                         label={
@@ -591,7 +705,7 @@ const MedicationSettings = () => {
                           </Box>
                         }
                       />
-                      <FormControlLabel 
+                      <FormControlLabel
                         value="none"
                         control={<Radio />}
                         label={
@@ -612,7 +726,7 @@ const MedicationSettings = () => {
             )}
           </DialogContent>
           <DialogActions sx={{ justifyContent: 'center' }}>
-            <Button 
+            <Button
               onClick={handleResetSettings}
               color="secondary"
             >

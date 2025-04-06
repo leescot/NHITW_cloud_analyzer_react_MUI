@@ -22,18 +22,18 @@ import TypographySizeWrapper from "../utils/TypographySizeWrapper";
 
 const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings }) => {
   // 添加過濾選項的狀態
-  const [dayFilter, setDayFilter] = useState("gte14"); // 默認顯示>=7天藥物
+  const [dayFilter, setDayFilter] = useState("gte14"); // 默認顯示>=14天藥物
   // 追蹤是否有 ATC5 顏色藥物
   const [hasATC5ColoredMeds, setHasATC5ColoredMeds] = useState(false);
 
   // Use useState for the medication lookup to maintain state between renders
   const [medNameLookup, setMedNameLookup] = useState({});
-  
+
   // Build medNameLookup when medications change
   useEffect(() => {
     // Create a new lookup object
     const newLookup = {};
-    
+
     // Populate lookup with medications
     groupedMedications.forEach(group => {
       group.medications.forEach(med => {
@@ -43,11 +43,11 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
         newLookup[med.name].push(med);
       });
     });
-    
+
     // Update the state with the new lookup
     setMedNameLookup(newLookup);
   }, [groupedMedications]);
-  
+
   // 判斷藥物所屬顏色的函數 (與 MedicationList 中相同)
   const getMedicationColor = (name) => {
     if (!settings?.enableATC5Colors) return null;
@@ -55,20 +55,20 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
     if (!medNameLookup[name]) {
       return null;
     }
-    
+
     const allMedInstances = medNameLookup[name];
     // 使用第一個找到的實例進行顏色判斷
     const medication = allMedInstances[0];
-    
+
     // 只使用 atc_code
     let atc5Code = medication.atc_code;
-    
+
     // Handle cases where the ATC5 code might be in the ATC name
     if (!atc5Code && medication.atc_name) {
       const matches = medication.atc_name.match(/\(([A-Z0-9]+)\)/);
       if (matches && matches[1]) atc5Code = matches[1];
     }
-    
+
     if (!atc5Code) {
       return null;
     }
@@ -89,16 +89,16 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
       });
       return match;
     });
-    
+
     if (!group) {
       return null;
     }
-    
+
     const groupName = group[0];
 
     // 檢查群組是否被分配到顏色
     const colorGroups = settings.atc5ColorGroups || { red: [], orange: [], green: [] };
-    
+
     if (colorGroups.red && colorGroups.red.includes(groupName)) {
       return { name: 'red', color: '#f44336' };
     } else if (colorGroups.orange && colorGroups.orange.includes(groupName)) {
@@ -106,25 +106,25 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
     } else if (colorGroups.green && colorGroups.green.includes(groupName)) {
       return { name: 'green', color: '#2e7d32' };
     }
-    
+
     return null;
   };
-  
+
   // 檢查是否存在 ATC5 顏色藥物
   useEffect(() => {
-    if (!settings?.enableATC5Colors || !medNameLookup || 
+    if (!settings?.enableATC5Colors || !medNameLookup ||
         !settings.atc5Groups || Object.keys(settings.atc5Groups).length === 0) {
       setHasATC5ColoredMeds(false);
       return;
     }
-    
+
     // 檢查是否有任何藥物有 ATC5 顏色
     const hasColoredMeds = Object.keys(medNameLookup).some(name => {
       return getMedicationColor(name) !== null;
     });
-    
+
     setHasATC5ColoredMeds(hasColoredMeds);
-    
+
     // 如果沒有 ATC5 顏色藥物且當前選擇的是 "colored_only"，則重置為默認過濾器
     if (!hasColoredMeds && dayFilter === "colored_only") {
       setDayFilter("gte7");
@@ -138,15 +138,15 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
     if (!medNameLookup[name]) {
       return false;
     }
-    
+
     const allMedInstances = medNameLookup[name];
-    
+
     // 使用第一個找到的實例進行判斷
     const medication = allMedInstances[0];
-    
+
     // 只使用 atc_code
     let atc5Code = medication.atc_code;
-    
+
     if (!atc5Code) return false;
 
     // 檢查是否有 atc5Groups 設定
@@ -164,17 +164,17 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
         }
       });
     });
-    
+
     if (!group) return false;
-    
+
     const groupName = group[0];
 
     // 檢查群組是否被分配到顏色
     const colorGroups = settings.atc5ColorGroups || { red: [], orange: [], green: [] };
-    
+
     // 如果藥物屬於任何有顏色的群組（紅色、橘色或綠色），返回 true
     return (
-      colorGroups.red.includes(groupName) || 
+      colorGroups.red.includes(groupName) ||
       colorGroups.orange.includes(groupName) ||
       colorGroups.green.includes(groupName)
     );
@@ -186,26 +186,71 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
     const allDates = new Set();
     const dateToHospMap = {};
 
-    medications.forEach((group) => {
-      group.medications.forEach((med) => {
-        if (!medicineMap.has(med.name)) {
-          medicineMap.set(med.name, new Map());
-        }
-        allDates.add(group.date);
-        if (!dateToHospMap[group.date]) {
-          dateToHospMap[group.date] = group.hosp;
-        }
-        medicineMap.get(med.name).set(group.date, {
+    // 提取處理單個藥物數據的函數
+    const processMedicationData = (med, date, medicineMap) => {
+      const medName = med.name;
+      const medDate = date;
+      
+      // 若藥名不存在於 Map 中，先建立
+      if (!medicineMap.has(medName)) {
+        medicineMap.set(medName, new Map());
+      }
+      
+      // 獲取藥物的日期 Map
+      const dateMap = medicineMap.get(medName);
+      
+      // 建立當前藥物的劑量和頻次資訊
+      const currentDosageFreq = {
+        perDosage: med.perDosage,
+        frequency: med.frequency,
+      };
+      
+      // 檢查該日期是否已有此藥物的記錄
+      if (!dateMap.has(medDate)) {
+        // 創建新的藥物記錄
+        dateMap.set(medDate, {
           dosage: med.dosage,
           perDosage: med.perDosage,
           frequency: med.frequency,
           days: med.days,
           drug_left: med.drug_left || 0,
+          dosageFreqs: [currentDosageFreq],
         });
+      } else {
+        // 更新現有記錄
+        const existingMed = dateMap.get(medDate);
+        
+        // 檢查是否有重複的劑量和頻次
+        const hasDuplicate = existingMed.dosageFreqs.some(
+          df => df.perDosage === med.perDosage && df.frequency === med.frequency
+        );
+        
+        // 如果不是重複的，添加到 dosageFreqs 數組
+        if (!hasDuplicate) {
+          existingMed.dosageFreqs.push(currentDosageFreq);
+        }
+        
+        // 更新藥物天數和剩餘藥物 (取較大值)
+        existingMed.days = Math.max(parseInt(existingMed.days), parseInt(med.days)).toString();
+        existingMed.drug_left = Math.max(existingMed.drug_left, med.drug_left || 0);
+      }
+    };
+
+    // 處理所有藥物資料
+    medications.forEach((group) => {
+      // 記錄日期和醫院映射
+      allDates.add(group.date);
+      if (!dateToHospMap[group.date]) {
+        dateToHospMap[group.date] = group.hosp;
+      }
+      
+      // 處理每個藥物
+      group.medications.forEach((med) => {
+        processMedicationData(med, group.date, medicineMap);
       });
     });
 
-    // Convert dates to sorted array (newest first)
+    // 將日期轉換為排序的數組 (最新日期優先)
     const sortedDates = Array.from(allDates).sort((a, b) => b.localeCompare(a));
 
     return {
@@ -215,33 +260,40 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
     };
   };
 
+  // 藥物過濾條件定義 - 集中管理所有過濾條件
+  const filterConditions = {
+    // 基本過濾條件定義
+    definitions: new Map([
+      ["all", () => true],
+      ["lte7", (days) => days <= 7],
+      ["gte7", (days) => days >= 7],
+      ["gte14", (days) => days >= 14],
+      ["lt7", (days) => days < 7],
+      ["lt14", (days) => days < 14],
+      ["14_to_28", (days) => days >= 14 && days <= 28],
+      ["gt28", (days) => days > 28],
+      ["colored_only", (_, medName) => getMedicationColor(medName) !== null]
+    ]),
+    
+    // 獲取過濾函數
+    getFilterFunction(filterName) {
+      return this.definitions.get(filterName) || (() => true);
+    },
+    
+    // 檢查藥物是否符合過濾條件
+    meetsCriteria(filterName, days, medName) {
+      const filterFn = this.getFilterFunction(filterName);
+      return filterFn(days, medName);
+    }
+  };
+  
   // 對藥物按天數進行過濾的函數
   const filterMedicinesByDays = (medicines) => {
     return Array.from(medicines).filter(([medName, dateMap]) => {
       // 檢查藥物是否有任何符合過濾條件的日期記錄
       return Array.from(dateMap.values()).some((medData) => {
         const days = parseInt(medData.days) || 0;
-        switch (dayFilter) {
-          case "all":
-            return true;
-          case "gte7":
-            return days >= 7;
-          case "14_to_28":
-            return days >= 14 && days <= 28;
-          case "gt28":
-            return days > 28;
-          case "lt7":
-            return days < 7;
-          case "lt14":
-            return days < 14;
-          case "gte14":
-            return days >= 14;
-          case "colored_only":
-            // 只顯示有ATC5顏色的藥物
-            return getMedicationColor(medName) !== null;
-          default:
-            return true;
-        }
+        return filterConditions.meetsCriteria(dayFilter, days, medName);
       });
     });
   };
@@ -257,26 +309,7 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
     filteredMedicines.forEach(([medName, dateMap]) => {
       dateMap.forEach((medData, date) => {
         const days = parseInt(medData.days) || 0;
-        let shouldInclude = false;
-
-        switch (dayFilter) {
-          case "lte7":
-            shouldInclude = days <= 7;
-            break;
-          case "gte7":
-            shouldInclude = days >= 7;
-            break;
-          case "gte14":
-            shouldInclude = days >= 14;
-            break;
-          case "colored_only":
-            shouldInclude = getMedicationColor(medName) !== null;
-            break;
-          default:
-            shouldInclude = true;
-        }
-
-        if (shouldInclude) {
+        if (filterConditions.meetsCriteria(dayFilter, days, medName)) {
           datesWithData.add(date);
         }
       });
@@ -285,33 +318,21 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
     return processedData.dates.filter((date) => datesWithData.has(date));
   };
 
-  // 過濾選項變更處理函數
-  const handleFilterChange = (event) => {
-    setDayFilter(event.target.value);
-  };
-
+  // 獲取最近的日期
   const getMostRecentDate = (dateMap, medName) => {
     const filteredDates = Array.from(dateMap.entries())
-      .filter(([date, medData]) => {
+      .filter(([_, medData]) => {
         const days = parseInt(medData.days) || 0;
-        switch (dayFilter) {
-          case "all":
-            return true;
-          case "lte7":
-            return days <= 7;
-          case "gte7":
-            return days >= 7;
-          case "gte14":
-            return days >= 14;
-          case "colored_only":
-            return true;
-          default:
-            return true;
-        }
+        return filterConditions.meetsCriteria(dayFilter, days, medName);
       })
       .sort((a, b) => b[0].localeCompare(a[0]));
 
     return filteredDates.length > 0 ? filteredDates[0][0] : null;
+  };
+
+  // 過濾選項變更處理函數
+  const handleFilterChange = (event) => {
+    setDayFilter(event.target.value);
   };
 
   // 獲取處理後的資料
@@ -348,18 +369,123 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
       setSnackbarOpen(true);
       return;
     }
-    
+
     // 打開藥品圖片頁面
     window.open(`chrome-extension://${chrome.runtime.id}/drug-images.html?code=${drugcode}`, '_blank', 'noopener,noreferrer');
-    
+
     setSnackbarMessage("已開啟藥品圖片查看器");
     setSnackbarOpen(true);
+  };
+
+  // 在 TableCell 的渲染部分修改為顯示多種頻次
+  const renderMultipleDosages = (dosageFreqs) => {
+    // 格式化單個劑量頻次的函數
+    const formatDosageFrequency = (df) => 
+      df.perDosage !== "SPECIAL"
+        ? `${df.perDosage}# ${df.frequency}`
+        : `總量${df.dosage} ${df.frequency}`;
+    
+    // 對頻次進行排序，QD 最優先，其次是 Q 開頭的頻次，最後是其他頻次
+    const sortedDosageFreqs = [...dosageFreqs].sort((a, b) => {
+      // QD 頻次最優先
+      if (a.frequency === 'QD' && b.frequency !== 'QD') return -1;
+      if (a.frequency !== 'QD' && b.frequency === 'QD') return 1;
+      
+      // 其次是 Q 開頭的頻次
+      const aStartsWithQ = a.frequency.startsWith('Q');
+      const bStartsWithQ = b.frequency.startsWith('Q');
+      
+      if (aStartsWithQ && !bStartsWithQ) return -1;
+      if (!aStartsWithQ && bStartsWithQ) return 1;
+      
+      return 0;
+    });
+    
+    // 將所有劑量頻次格式化為字符串，並用 " + " 連接
+    return sortedDosageFreqs.map(formatDosageFrequency).join(" + ");
+  };
+
+  // 藥物劑量顯示 Cell 組件 - 封裝單個劑量顯示邏輯
+  const MedicationDosageCell = ({ medData, shouldDisplay, generalDisplaySettings }) => {
+    if (!shouldDisplay) {
+      return null;
+    }
+    
+    // 藥物劑量的顯示邏輯
+    const renderDosage = () => {
+      if (!medData.dosageFreqs) {
+        // 處理舊數據格式
+        return medData.perDosage !== "SPECIAL"
+          ? `${medData.perDosage}# ${medData.frequency}`
+          : `總量${medData.dosage} ${medData.frequency}`;
+      }
+      
+      // 處理新的多劑量格式
+      return medData.dosageFreqs.length > 1
+        ? renderMultipleDosages(medData.dosageFreqs)
+        : (medData.dosageFreqs[0].perDosage !== "SPECIAL"
+            ? `${medData.dosageFreqs[0].perDosage}# ${medData.dosageFreqs[0].frequency}`
+            : `總量${medData.dosage} ${medData.dosageFreqs[0].frequency}`);
+    };
+    
+    // 用藥天數的顯示邏輯
+    const renderDayInfo = () => {
+      const hasRemainingDrug = medData.drug_left > 0;
+      
+      return (
+        <TypographySizeWrapper
+          variant="caption"
+          textSizeType="content"
+          generalDisplaySettings={generalDisplaySettings}
+          sx={{
+            display: "block",
+            color: "text.secondary",
+          }}
+        >
+          {medData.days}天
+          {hasRemainingDrug && (
+            <TypographySizeWrapper
+              component="span"
+              textSizeType="note"
+              generalDisplaySettings={generalDisplaySettings}
+              sx={{ color: "#1976d2" }}
+            >
+              {` (餘${medData.drug_left})`}
+            </TypographySizeWrapper>
+          )}
+        </TypographySizeWrapper>
+      );
+    };
+    
+    return (
+      <>
+        <TypographySizeWrapper
+          variant="body2"
+          textSizeType="content"
+          generalDisplaySettings={generalDisplaySettings}
+          sx={{ whiteSpace: "nowrap" }}
+        >
+          {renderDosage()}
+        </TypographySizeWrapper>
+        {renderDayInfo()}
+      </>
+    );
+  };
+
+  // 檢查藥物在特定日期是否應該顯示的函數
+  const shouldDisplayMedication = (medData, dayFilter, name) => {
+    if (!medData) return false;
+    
+    if (dayFilter === "all") return true;
+    
+    const days = parseInt(medData.days) || 0;
+    return filterConditions.meetsCriteria(dayFilter, days, name);
   };
 
   return (
     <>
       {groupedMedications.length === 0 ? (
-        <TypographySizeWrapper 
+        <TypographySizeWrapper
           textSizeType="content"
           generalDisplaySettings={generalDisplaySettings}
           color="text.secondary"
@@ -502,8 +628,8 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
                         padding: "8px 4px",
                       }}
                     >
-                      <TypographySizeWrapper 
-                        variant="body2" 
+                      <TypographySizeWrapper
+                        variant="body2"
                         textSizeType="content"
                         generalDisplaySettings={generalDisplaySettings}
                         sx={{ fontWeight: "medium" }}
@@ -533,7 +659,7 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
                   const medicationColor = getMedicationColor(name);
                   // 檢查藥物是否應該以粗體顯示
                   const isBold = shouldBeBold(name);
-                  
+
                   return (
                     <TableRow key={name}>
                       <TableCell
@@ -549,7 +675,7 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
                       >
                         <Box sx={{ display: 'flex', alignItems: 'center' }}>
                           <TypographySizeWrapper
-                            textSizeType="content" 
+                            textSizeType="content"
                             generalDisplaySettings={generalDisplaySettings}
                             sx={{
                               color: medicationColor?.color || 'inherit',
@@ -571,12 +697,12 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
                                   }
                                 }}
                               >
-                                <ImageIcon sx={{ 
-                                  fontSize: generalDisplaySettings.contentTextSize === 'small' 
-                                    ? "14px" 
-                                    : generalDisplaySettings.contentTextSize === 'medium' 
-                                      ? "16px" 
-                                      : "18px" 
+                                <ImageIcon sx={{
+                                  fontSize: generalDisplaySettings.contentTextSize === 'small'
+                                    ? "14px"
+                                    : generalDisplaySettings.contentTextSize === 'medium'
+                                      ? "16px"
+                                      : "18px"
                                 }} />
                               </IconButton>
                             </Tooltip>
@@ -585,28 +711,8 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
                       </TableCell>
                       {visibleDates.map((date) => {
                         const medData = dateMap.get(date);
-
-                        // 檢查該藥物在該日期是否符合過濾條件
-                        const days = medData ? parseInt(medData.days) || 0 : 0;
-                        let shouldDisplay = !!medData;
-
-                        if (shouldDisplay && dayFilter !== "all") {
-                          switch (dayFilter) {
-                            case "lte7":
-                              shouldDisplay = days <= 7;
-                              break;
-                            case "gte7":
-                              shouldDisplay = days >= 7;
-                              break;
-                            case "gte14":
-                              shouldDisplay = days >= 14;
-                              break;
-                            case "colored_only":
-                              shouldDisplay = getMedicationColor(name) !== null;
-                              break;
-                          }
-                        }
-
+                        const shouldDisplay = shouldDisplayMedication(medData, dayFilter, name);
+                        
                         return (
                           <TableCell
                             key={date}
@@ -617,43 +723,11 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
                               padding: "6px 4px",
                             }}
                           >
-                            {shouldDisplay ? (
-                              <>
-                                <TypographySizeWrapper
-                                  variant="body2"
-                                  textSizeType="content"
-                                  generalDisplaySettings={generalDisplaySettings}
-                                  sx={{ whiteSpace: "nowrap" }}
-                                >
-                                  {medData.perDosage !== "SPECIAL"
-                                    ? `${medData.perDosage}# ${medData.frequency}`
-                                    : `總量${medData.dosage} ${medData.frequency}`}
-                                </TypographySizeWrapper>
-                                <TypographySizeWrapper
-                                  variant="caption"
-                                  textSizeType="content"
-                                  generalDisplaySettings={generalDisplaySettings}
-                                  sx={{
-                                    display: "block",
-                                    color: "text.secondary",
-                                  }}
-                                >
-                                  {medData.days}天
-                                  {medData.drug_left > 0 && (
-                                    <TypographySizeWrapper
-                                      component="span"
-                                      textSizeType="note"
-                                      generalDisplaySettings={generalDisplaySettings}
-                                      sx={{ color: "#1976d2" }}
-                                    >
-                                      {` (餘${medData.drug_left})`}
-                                    </TypographySizeWrapper>
-                                  )}
-                                </TypographySizeWrapper>
-                              </>
-                            ) : (
-                              ""
-                            )}
+                            <MedicationDosageCell 
+                              medData={medData} 
+                              shouldDisplay={shouldDisplay} 
+                              generalDisplaySettings={generalDisplaySettings} 
+                            />
                           </TableCell>
                         );
                       })}

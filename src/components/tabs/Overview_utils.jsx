@@ -1,6 +1,6 @@
 /**
  * Overview Utility Functions
- * 
+ *
  * This file contains utility functions used by the Overview components
  */
 
@@ -9,18 +9,18 @@ export const isWithinLast90Days = (dateString) => {
   if (!dateString) {
     return false;
   }
-  
+
   const today = new Date();
   const medicationDate = new Date(dateString);
-  
+
   // Check if the date is valid
   if (isNaN(medicationDate.getTime())) {
     return false;
   }
-  
+
   const diffTime = today - medicationDate;
   const diffDays = Math.ceil(diffTime / (1000 * 60 * 60 * 24));
-  
+
   return diffDays <= 90;
 };
 
@@ -30,29 +30,29 @@ export const getMedicationColorGroup = (medication, settings) => {
   if (!settings || !settings.enableATC5Colors || !settings.atc5Groups || !settings.atc5ColorGroups) {
     return null;
   }
-  
+
   // Extract the ATC5 code from the medication
   const atc5Code = medication.atc_code;
-  
+
   // FALLBACK MECHANISM FOR MISSING ATC5 CODES
   if (!atc5Code) {
     // Try to match by medication name to common medication categories
     const medNameLower = medication.name ? medication.name.toLowerCase() : '';
-    
+
     let matchedGroup = null;
-    
+
     if (matchedGroup) {
       // Find which color this group belongs to
       let colorName = null;
       let colorCode = null;
-      
+
       Object.entries(settings.atc5ColorGroups).forEach(([color, groups]) => {
         if (groups && Array.isArray(groups) && groups.includes(matchedGroup)) {
           colorName = color;
           colorCode = mapColorNameToColorCode(color);
         }
       });
-      
+
       if (colorName) {
         return {
           groupName: matchedGroup,
@@ -62,7 +62,7 @@ export const getMedicationColorGroup = (medication, settings) => {
         };
       }
     }
-    
+
     // If no match found by name, use a fallback group
     // Check if there's a default group assigned to medications without ATC5
     const defaultGroups = settings.atc5ColorGroups.orange || [];
@@ -74,10 +74,10 @@ export const getMedicationColorGroup = (medication, settings) => {
         drugcode: medication.drugcode || medication.drug_code || '' // Preserve drugcode
       };
     }
-    
+
     return null;
   }
-  
+
   // Normal processing with ATC5 code
   // Find which category group this belongs to
   let groupName = null;
@@ -97,26 +97,26 @@ export const getMedicationColorGroup = (medication, settings) => {
       }
     }
   });
-  
+
   if (!groupName) {
     return null;
   }
-  
+
   // Find which color this group belongs to
   let colorName = null;
   let colorCode = null;
-  
+
   Object.entries(settings.atc5ColorGroups).forEach(([color, groups]) => {
     if (groups && Array.isArray(groups) && groups.includes(groupName)) {
       colorName = color;
       colorCode = mapColorNameToColorCode(color);
     }
   });
-  
+
   if (!colorName) {
     return null;
   }
-  
+
   return {
     groupName,
     colorName,
@@ -127,43 +127,45 @@ export const getMedicationColorGroup = (medication, settings) => {
 
 // Helper function to map color names to MUI color codes
 const mapColorNameToColorCode = (colorName) => {
-  switch (colorName) {
-    case 'red':
-      return 'error';
-    case 'orange':
-      return 'warning';
-    case 'green':
-      return 'success';
-    default:
-      return 'primary';
-  }
+  // 使用 Map 替代 switch 語句，提高可讀性和效率
+  const colorMap = new Map([
+    ['red', 'error'],
+    ['orange', 'warning'],
+    ['green', 'success'],
+    // 預設值
+    ['default', 'primary']
+  ]);
+  
+  // 如果顏色名稱存在於 Map 中，則返回對應的顏色代碼
+  // 否則返回預設值 'primary'
+  return colorMap.get(colorName) || colorMap.get('default');
 };
 
 // 将日期格式化为 YYYY/MM/DD
 export const formatDate = (dateString) => {
   if (!dateString) return '';
-  
+
   // 尝试处理各种日期格式
   const date = new Date(dateString);
   if (isNaN(date.getTime())) {
     // 如果无法解析，直接返回原始字符串
     return dateString;
   }
-  
+
   return date.toISOString().split('T')[0].replace(/-/g, '/');
 };
 
 // Format date to show just MM/DD
 export const formatDateShort = (dateString) => {
   if (!dateString) return '';
-  
+
   const date = new Date(dateString.replace(/\//g, '-'));
   if (isNaN(date.getTime())) return dateString;
-  
+
   // Format as MM/DD
   const month = (date.getMonth() + 1).toString().padStart(2, '0');
   const day = date.getDate().toString().padStart(2, '0');
-  
+
   return `${month}/${day}`;
 };
 
@@ -174,7 +176,7 @@ export const getImportantLabTests = (groupedLabs, orderCodes = ['09002C']) => {
   }
 
   // Filter labs from the last 90 days
-  const recentLabs = groupedLabs.filter(labGroup => 
+  const recentLabs = groupedLabs.filter(labGroup =>
     isWithinLast90Days(labGroup.date)
   );
 
@@ -191,14 +193,14 @@ export const getImportantLabTests = (groupedLabs, orderCodes = ['09002C']) => {
       if (!lab.orderCode) {
         return false;
       }
-      
+
       // Check for exact match or partial match
       const exactMatch = orderCodes.includes(lab.orderCode);
       const partialMatch = orderCodes.some(code => lab.orderCode.includes(code));
-      
+
       return exactMatch || partialMatch;
     });
-    
+
     // Add date and hospital info to each lab
     return filteredLabs.map(lab => ({
       ...lab,
@@ -219,6 +221,6 @@ export const getImportantLabTests = (groupedLabs, orderCodes = ['09002C']) => {
     acc[orderCode].tests.push(lab);
     return acc;
   }, {});
-  
+
   return Object.values(groupedByTest);
 };

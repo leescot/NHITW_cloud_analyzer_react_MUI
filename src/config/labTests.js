@@ -1,18 +1,18 @@
 /**
  * 檢驗項目預設設定
- * 
+ *
  * 此檔案定義了應用中使用的預設檢驗項目列表
- * 
+ *
  * 每個項目的格式:
  * - orderCode: 檢驗的代碼 (例如: 09015C)
  * - displayName: 在界面上顯示的名稱
  * - enabled: 是否預設啟用此項目
- * 
- * 注意: 
+ *
+ * 注意:
  * 1. 僅修改此處不會影響現有使用者的設定，因為他們的配置已存儲在 Chrome storage 中
  * 2. 若要更新所有使用者的設定，需要實現版本升級機制
  * 3. 新增或修改項目時，確保 orderCode 的唯一性
- * 
+ *
  * 顯示格式選項:
  * - vertical: 垂直單欄顯示
  * - twoColumn: 雙欄顯示
@@ -46,21 +46,21 @@ export const DEFAULT_LAB_TESTS = [
   { orderCode: '09029C', displayName: 'Bil(T)', enabled: false },
   { orderCode: '09030C', displayName: 'Bil(D)', enabled: false },
   { orderCode: '09031C', displayName: 'r-GT', enabled: false }
-]; 
+];
 
 /**
  * 檢驗項目複製預設設定
- * 
+ *
  * 此常數定義了當使用者啟用"自訂複製項目功能"時，預設要複製的檢驗項目列表
- * 
+ *
  * 格式與 DEFAULT_LAB_TESTS 相同:
  * - orderCode: 檢驗的代碼
  * - displayName: 在界面上顯示的名稱
  * - enabled: 是否預設啟用此項目進行複製
- * 
- * 注意: 
+ *
+ * 注意:
  * 1. 使用者可以透過設定界面自訂要複製的項目
- * 2. 設定會存儲在 Chrome storage 中的 customCopyItems 欄位
+ * 2. 設定會存儲在 Chrome storage 中的 labChooseCopyItems 欄位
  */
 export const DEFAULT_LAB_COPY_ITEMS = [
   { orderCode: '08011C-WBC', displayName: 'WBC', enabled: false },
@@ -88,4 +88,4 @@ export const DEFAULT_LAB_COPY_ITEMS = [
   { orderCode: '09029C', displayName: 'Bil(T)', enabled: false },
   { orderCode: '09030C', displayName: 'Bil(D)', enabled: false },
   { orderCode: '09031C', displayName: 'r-GT', enabled: false }
-]; 
+];

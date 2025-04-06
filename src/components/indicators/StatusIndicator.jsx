@@ -6,7 +6,7 @@ import { NOTE_TEXT_SIZES } from "../../utils/textSizeUtils";
 const StatusIndicator = ({ label, hasData, icon, fontSize, tooltipTitle }) => {
   // 使用 NOTE_TEXT_SIZES 並設定默認值
   const fontSizeValue = NOTE_TEXT_SIZES[fontSize] || NOTE_TEXT_SIZES['small'];
-  
+
   return (
     <Tooltip title={tooltipTitle || (hasData ? `有${label}資料` : `無${label}資料`)}>
       <Chip
@@ -15,7 +15,7 @@ const StatusIndicator = ({ label, hasData, icon, fontSize, tooltipTitle }) => {
         size="small"
         color={hasData ? "success" : "default"}
         variant={hasData ? "filled" : "outlined"}
-        sx={{ 
+        sx={{
           mx: 0.5,
           '& .MuiChip-label': {
             fontSize: fontSizeValue
@@ -26,4 +26,4 @@ const StatusIndicator = ({ label, hasData, icon, fontSize, tooltipTitle }) => {
   );
 };
 
-export default StatusIndicator; 
+export default StatusIndicator;

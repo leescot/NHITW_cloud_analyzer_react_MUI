@@ -1,12 +1,14 @@
 import React, { useEffect } from 'react';
 
+import { updateDataStatus } from './utils/settingsHelper.js';
+
 function App() {
   useEffect(() => {
     console.log('PopupSettings 組件已掛載');
-    
+
     // 立即更新資料狀態
     updateDataStatus();
-    
+
     // 添加儲存變更的監聽器
     const handleStorageChange = (changes, area) => {
       console.log('儲存變更事件觸發:', changes);
@@ -15,15 +17,15 @@ function App() {
         updateDataStatus();
       }
     };
-    
+
     chrome.storage.onChanged.addListener(handleStorageChange);
-    
+
     // 設定定期檢查
     const intervalId = setInterval(() => {
       console.log('定期檢查資料狀態');
       updateDataStatus();
     }, 3000);
-    
+
     // 清理監聽器和間隔
     return () => {
       console.log('清理 PopupSettings 組件');
@@ -41,4 +43,4 @@ function App() {
   );
 }
 
-export default App; 
+export default App;

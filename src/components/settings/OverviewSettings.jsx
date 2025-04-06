@@ -38,7 +38,7 @@ import { DEFAULT_IMAGE_TESTS } from '../../config/imageTests';
 
 /**
  * FALLBACK_LAB_TESTS - 極簡版的檢驗項目配置
- * 
+ *
  * 當用戶沒有儲存的設定且 DEFAULT_LAB_TESTS 也不可用時的最小備用配置。
  * 這個配置應與 DEFAULT_LAB_TESTS 中最重要的幾個項目保持一致。
  */
@@ -52,7 +52,7 @@ export const FALLBACK_LAB_TESTS = [
 
 /**
  * SPECIAL_LAB_CODES - 需要特殊處理的檢驗代碼
- * 
+ *
  * 這些檢驗項目在處理時需要特殊邏輯。
  * 集中在此處定義可確保一致性和易於維護。
  */
@@ -65,14 +65,14 @@ export const SPECIAL_LAB_CODES = [
 
 /**
  * 重置用戶的檢驗項目設定為預設值
- * 
+ *
  * 可在需要重置設定的地方調用此函數，例如：
  * - 設定頁面中的"重置為預設"按鈕
  * - 應用版本更新時
  */
 export const resetLabTestsToDefault = (callback = () => {}) => {
   chrome.storage.sync.set(
-    { focusedLabTests: DEFAULT_LAB_TESTS }, 
+    { focusedLabTests: DEFAULT_LAB_TESTS },
     () => {
       // 通知其他組件設定已更改
       chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
@@ -93,7 +93,7 @@ export const resetLabTestsToDefault = (callback = () => {}) => {
 
 /**
  * FALLBACK_IMAGE_TESTS - 極簡版的影像檢查配置
- * 
+ *
  * 當用戶沒有儲存的設定且 DEFAULT_IMAGE_TESTS 也不可用時的最小備用配置。
  * 這個配置應與 DEFAULT_IMAGE_TESTS 中最重要的幾個項目保持一致。
  */
@@ -107,7 +107,7 @@ export const FALLBACK_IMAGE_TESTS = [
  */
 export const resetImageTestsToDefault = (callback = () => {}) => {
   chrome.storage.sync.set(
-    { focusedImageTests: DEFAULT_IMAGE_TESTS }, 
+    { focusedImageTests: DEFAULT_IMAGE_TESTS },
     () => {
       // 通知其他組件設定已更改
       chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
@@ -132,17 +132,17 @@ const OverviewSettings = () => {
   const [labTrackingDays, setLabTrackingDays] = useState(90);
   // 新增關注影像追蹤天數
   const [imageTrackingDays, setImageTrackingDays] = useState(90);
-  
+
   // 關注檢驗清單狀態
   const [focusedLabTests, setFocusedLabTests] = useState(DEFAULT_LAB_TESTS);
   const [dialogOpen, setDialogOpen] = useState(false);
   const [tempLabTests, setTempLabTests] = useState([]);
-  
+
   // 關注影像清單狀態
   const [focusedImageTests, setFocusedImageTests] = useState(DEFAULT_IMAGE_TESTS);
   const [imageDialogOpen, setImageDialogOpen] = useState(false);
   const [tempImageTests, setTempImageTests] = useState([]);
-  
+
   // 加載設定
   useEffect(() => {
     chrome.storage.sync.get({
@@ -159,14 +159,14 @@ const OverviewSettings = () => {
       setFocusedImageTests(items.focusedImageTests);
     });
   }, []);
-  
+
   // 更新藥物追蹤天數
   const handleMedicationDaysChange = (event) => {
     const newValue = parseInt(event.target.value, 10);
     if (newValue > 0) {
       setMedicationTrackingDays(newValue);
       chrome.storage.sync.set({ medicationTrackingDays: newValue });
-      
+
       // 發送消息給 FloatingIcon 組件更新
       chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
         if (tabs[0]) {
@@ -185,14 +185,14 @@ const OverviewSettings = () => {
       });
     }
   };
-  
+
   // 更新檢驗追蹤天數
   const handleLabDaysChange = (event) => {
     const newValue = parseInt(event.target.value, 10);
     if (newValue > 0) {
       setLabTrackingDays(newValue);
       chrome.storage.sync.set({ labTrackingDays: newValue });
-      
+
       // 發送消息給 FloatingIcon 組件更新
       chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
         if (tabs[0]) {
@@ -211,14 +211,14 @@ const OverviewSettings = () => {
       });
     }
   };
-  
+
   // 新增更新影像追蹤天數
   const handleImageDaysChange = (event) => {
     const newValue = parseInt(event.target.value, 10);
     if (newValue > 0) {
       setImageTrackingDays(newValue);
       chrome.storage.sync.set({ imageTrackingDays: newValue });
-      
+
       // 發送消息給 FloatingIcon 組件更新
       chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
         if (tabs[0]) {
@@ -237,23 +237,23 @@ const OverviewSettings = () => {
       });
     }
   };
-  
+
   // 打開關注檢驗清單對話框
   const handleOpenLabDialog = () => {
     setTempLabTests([...focusedLabTests]);
     setDialogOpen(true);
   };
-  
+
   // 關閉關注檢驗清單對話框
   const handleCloseLabDialog = () => {
     setDialogOpen(false);
   };
-  
+
   // 保存關注檢驗清單設置
   const handleSaveLabTests = () => {
     setFocusedLabTests(tempLabTests);
     chrome.storage.sync.set({ focusedLabTests: tempLabTests });
-    
+
     // 發送消息給 FloatingIcon 組件更新
     chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
       if (tabs[0]) {
@@ -265,22 +265,22 @@ const OverviewSettings = () => {
         });
       }
     });
-    
+
     setDialogOpen(false);
   };
-  
+
   // 重置检验清单到默认设置
   const handleResetLabTests = () => {
     setTempLabTests([...DEFAULT_LAB_TESTS]);
   };
-  
+
   // 切換檢驗項目啟用狀態
   const handleToggleLabTest = (index) => {
     const updatedTests = [...tempLabTests];
     updatedTests[index].enabled = !updatedTests[index].enabled;
     setTempLabTests(updatedTests);
   };
-  
+
   // 上移檢驗項目
   const handleMoveUp = (index) => {
     if (index > 0) {
@@ -291,7 +291,7 @@ const OverviewSettings = () => {
       setTempLabTests(updatedTests);
     }
   };
-  
+
   // 下移檢驗項目
   const handleMoveDown = (index) => {
     if (index < tempLabTests.length - 1) {
@@ -302,23 +302,23 @@ const OverviewSettings = () => {
       setTempLabTests(updatedTests);
     }
   };
-  
+
   // 打開關注影像清單對話框
   const handleOpenImageDialog = () => {
     setTempImageTests([...focusedImageTests]);
     setImageDialogOpen(true);
   };
-  
+
   // 關閉關注影像清單對話框
   const handleCloseImageDialog = () => {
     setImageDialogOpen(false);
   };
-  
+
   // 保存關注影像清單設置
   const handleSaveImageTests = () => {
     setFocusedImageTests(tempImageTests);
     chrome.storage.sync.set({ focusedImageTests: tempImageTests });
-    
+
     // 發送消息給 FloatingIcon 組件更新
     chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
       if (tabs[0]) {
@@ -330,18 +330,18 @@ const OverviewSettings = () => {
         });
       }
     });
-    
+
     setImageDialogOpen(false);
   };
-  
+
   // 重置影像清單到默认设置
   const handleResetImageTests = () => {
     setTempImageTests([...DEFAULT_IMAGE_TESTS]);
   };
-  
+
   const medicationHelperText = (
     <span>
-      <span style={{ color: 'red' }}>關注藥物清單至西藥ACT5變色設定</span>
+      <span style={{ color: 'red' }}>關注藥物清單請至西藥ACT分類設定</span>
       /範圍: 1~180天
     </span>
   );
@@ -352,7 +352,7 @@ const OverviewSettings = () => {
     updatedTests[index].enabled = !updatedTests[index].enabled;
     setTempImageTests(updatedTests);
   };
-  
+
   return (
     <Accordion>
       <AccordionSummary
@@ -370,7 +370,7 @@ const OverviewSettings = () => {
           {/* <Typography variant="body2" color="text.secondary" paragraph>
             設定總覽頁面中的資料顯示範圍
           </Typography> */}
-          
+
           <FormControl fullWidth sx={{ mb: 2 }}>
           <TextField
             id="medication-tracking-days"
@@ -382,7 +382,7 @@ const OverviewSettings = () => {
             helperText={medicationHelperText}
           />
           </FormControl>
-          
+
           <FormControl fullWidth sx={{ mb: 2 }}>
             <TextField
               id="lab-tracking-days"
@@ -394,7 +394,7 @@ const OverviewSettings = () => {
               helperText="總覽頁面最多顯示七組資料/範圍: 1~365天"
             />
           </FormControl>
-          
+
           <FormControl fullWidth sx={{ mb: 2 }}>
             <TextField
               id="image-tracking-days"
@@ -406,7 +406,7 @@ const OverviewSettings = () => {
               helperText="範圍: 1~365天"
             />
           </FormControl>
-          
+
           <Button
             variant="outlined"
             color="primary"
@@ -420,7 +420,7 @@ const OverviewSettings = () => {
           <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 2 }}>
             設定要在總覽頁面顯示的檢驗項目及其排序
           </Typography>
-          
+
           <Button
             variant="outlined"
             color="primary"
@@ -435,10 +435,10 @@ const OverviewSettings = () => {
             設定要在總覽頁面顯示的影像檢查項目及其排序
           </Typography>
         </Box>
-        
+
         {/* 關注檢驗清單對話框 */}
-        <Dialog 
-          open={dialogOpen} 
+        <Dialog
+          open={dialogOpen}
           onClose={handleCloseLabDialog}
           fullWidth
           maxWidth="sm"
@@ -458,21 +458,21 @@ const OverviewSettings = () => {
                       onChange={() => handleToggleLabTest(index)}
                     />
                   </ListItemIcon>
-                  <ListItemText 
-                    primary={`${test.displayName}`} 
+                  <ListItemText
+                    primary={`${test.displayName}`}
                   />
                   <ListItemSecondaryAction>
-                    <IconButton 
-                      edge="end" 
+                    <IconButton
+                      edge="end"
                       onClick={() => handleMoveUp(index)}
                       disabled={index === 0}
                       size="small"
-                      sx={{ 
+                      sx={{
                         color: 'primary.main',
                         bgcolor: 'primary.lighter',
                         borderRadius: 1,
                         mr: 0.5,
-                        '&:hover': { 
+                        '&:hover': {
                           bgcolor: 'primary.light',
                           boxShadow: 1
                         },
@@ -483,16 +483,16 @@ const OverviewSettings = () => {
                     >
                       <ArrowCircleUpIcon fontSize="small" />
                     </IconButton>
-                    <IconButton 
-                      edge="end" 
+                    <IconButton
+                      edge="end"
                       onClick={() => handleMoveDown(index)}
                       disabled={index === tempLabTests.length - 1}
                       size="small"
-                      sx={{ 
+                      sx={{
                         color: 'primary.main',
                         bgcolor: 'primary.lighter',
                         borderRadius: 1,
-                        '&:hover': { 
+                        '&:hover': {
                           bgcolor: 'primary.light',
                           boxShadow: 1
                         },
@@ -512,8 +512,8 @@ const OverviewSettings = () => {
             <Button onClick={handleCloseLabDialog} color="primary">
               取消
             </Button>
-            <Button 
-              onClick={handleResetLabTests} 
+            <Button
+              onClick={handleResetLabTests}
               color="secondary"
               sx={{ mr: 'auto' }}
             >
@@ -524,10 +524,10 @@ const OverviewSettings = () => {
             </Button>
           </DialogActions>
         </Dialog>
-        
+
         {/* 關注影像清單對話框 */}
-        <Dialog 
-          open={imageDialogOpen} 
+        <Dialog
+          open={imageDialogOpen}
           onClose={handleCloseImageDialog}
           fullWidth
           maxWidth="sm"
@@ -547,8 +547,8 @@ const OverviewSettings = () => {
                       onChange={() => handleToggleImageTest(index)}
                     />
                   </ListItemIcon>
-                  <ListItemText 
-                    primary={`${test.displayName}`} 
+                  <ListItemText
+                    primary={`${test.displayName}`}
                   />
                 </ListItem>
               ))}
@@ -558,8 +558,8 @@ const OverviewSettings = () => {
             <Button onClick={handleCloseImageDialog} color="primary">
               取消
             </Button>
-            <Button 
-              onClick={handleResetImageTests} 
+            <Button
+              onClick={handleResetImageTests}
               color="secondary"
               sx={{ mr: 'auto' }}
             >
@@ -575,4 +575,4 @@ const OverviewSettings = () => {
   );
 };
 
-export default OverviewSettings; 
+export default OverviewSettings;

@@ -15,4 +15,4 @@ export const NOTE_TEXT_SIZES = {
   small: '0.75rem',  // caption equivalent (12px)
   medium: '0.875rem', // body2 equivalent (14px)
   large: '1rem'      // body1 equivalent (16px)
-}; 
+};

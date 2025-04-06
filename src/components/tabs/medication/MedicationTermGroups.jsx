@@ -7,7 +7,7 @@ const MedicationTermGroups = ({
   longTermMeds,
   shortTermMeds,
   settings,
-  copyFormat,
+  medicationCopyFormat,
   generalDisplaySettings,
   setSnackbarMessage,
   setSnackbarOpen
@@ -17,8 +17,8 @@ const MedicationTermGroups = ({
       {/* 左欄：長期用藥（含有>=14天的藥物） */}
       <Grid item xs={12} md={6}>
         <Paper elevation={0} variant="outlined" sx={{ p: 2, mb: 2 }}>
-          <TypographySizeWrapper 
-            variant="h6" 
+          <TypographySizeWrapper
+            variant="h6"
             textSizeType="content"
             generalDisplaySettings={generalDisplaySettings}
             color="primary.main"
@@ -26,10 +26,10 @@ const MedicationTermGroups = ({
           >
             長期用藥（{'\u2265'}14天）
           </TypographySizeWrapper>
-          
+
           {longTermMeds.length === 0 ? (
-            <TypographySizeWrapper 
-              variant="body2" 
+            <TypographySizeWrapper
+              variant="body2"
               textSizeType="content"
               generalDisplaySettings={generalDisplaySettings}
               color="text.secondary"
@@ -42,7 +42,7 @@ const MedicationTermGroups = ({
                 key={index}
                 group={group}
                 settings={settings}
-                copyFormat={copyFormat}
+                copyFormat={medicationCopyFormat}
                 generalDisplaySettings={generalDisplaySettings}
                 isLast={index === longTermMeds.length - 1}
                 setSnackbarMessage={setSnackbarMessage}
@@ -52,12 +52,12 @@ const MedicationTermGroups = ({
           )}
         </Paper>
       </Grid>
-      
+
       {/* 右欄：短期用藥（全部<14天的藥物） */}
       <Grid item xs={12} md={6}>
         <Paper elevation={0} variant="outlined" sx={{ p: 2, mb: 2 }}>
-          <TypographySizeWrapper 
-            variant="h6" 
+          <TypographySizeWrapper
+            variant="h6"
             textSizeType="content"
             generalDisplaySettings={generalDisplaySettings}
             color="primary.main"
@@ -65,10 +65,10 @@ const MedicationTermGroups = ({
           >
             短期用藥（{"<"}14天）
           </TypographySizeWrapper>
-          
+
           {shortTermMeds.length === 0 ? (
-            <TypographySizeWrapper 
-              variant="body2" 
+            <TypographySizeWrapper
+              variant="body2"
               textSizeType="content"
               generalDisplaySettings={generalDisplaySettings}
               color="text.secondary"
@@ -81,7 +81,7 @@ const MedicationTermGroups = ({
                 key={index}
                 group={group}
                 settings={settings}
-                copyFormat={copyFormat}
+                copyFormat={medicationCopyFormat}
                 generalDisplaySettings={generalDisplaySettings}
                 isLast={index === shortTermMeds.length - 1}
                 setSnackbarMessage={setSnackbarMessage}
@@ -95,4 +95,4 @@ const MedicationTermGroups = ({
   );
 };
 
-export default MedicationTermGroups; 
+export default MedicationTermGroups;

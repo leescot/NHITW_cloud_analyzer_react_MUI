@@ -1,7 +1,7 @@
 export const patientSummaryProcessor = {
   processPatientSummaryData(data) {
     // console.log('patientsummary - Processing data:', data);
-    
+
     if (!data || !data.rObject || !Array.isArray(data.rObject)) {
       console.log('patientsummary - Invalid format:', data);
       return [];
@@ -33,4 +33,4 @@ export const patientSummaryProcessor = {
     temp.innerHTML = html;
     return temp.textContent || temp.innerText || '';
   }
-}; 
+};

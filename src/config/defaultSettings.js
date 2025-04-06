@@ -19,9 +19,34 @@ export const DEFAULT_SETTINGS = {
     showGenericName: false,
     showDiagnosis: true,
     showATC5Name: false,
-    copyFormat: "nameWithDosageVertical",
-    separateShortTermMeds: false,
+    medicationCopyFormat: 'nameWithDosageVertical',
+    separateShortTermMeds: true,
     showExternalDrugImage: false,
+    enableMedicationCustomCopyFormat: false,
+    enableMedicationCopyAll: false,
+    drugSeparator: ',',
+    customMedicationHeaderCopyFormat: [
+      { id: 'date_default', display: '日期', group: 'header', section: 'header' },
+      { id: 'header_text_default', value: ' - ', display: ' - ', group: 'format', section: 'header' },
+      { id: 'hosp_default', display: '醫院', group: 'header', section: 'header' },
+      { id: 'header_space_default', display: '(空格)', value: ' ', group: 'format', section: 'header' },
+      { id: 'header_text_default2', value: '[', display: '[', group: 'format', section: 'header' },
+      { id: 'icdcode_default', display: 'ICD代碼', group: 'header', section: 'header' },
+      { id: 'header_space_default2', display: '(空格)', value: ' ', group: 'format', section: 'header' },
+      { id: 'icdname_default', display: 'ICD名稱', group: 'header', section: 'header' },
+      { id: 'header_text_default3', value: ']', display: ']', group: 'format', section: 'header' }
+    ],
+    customMedicationDrugCopyFormat: [
+      { id: 'simplifiedname_default', display: '簡化藥名', group: 'medication', section: 'drug' },
+      { id: 'drug_space_default', display: '(空格)', value: ' ', group: 'format', section: 'drug' },
+      { id: 'perDosage_default', display: '單次劑量', group: 'dosage', section: 'drug' },
+      { id: 'drug_text_default', value: '#', display: '#', group: 'format', section: 'drug' },
+      { id: 'drug_space_default2', display: '(空格)', value: ' ', group: 'format', section: 'drug' },
+      { id: 'frequency_default', display: '頻次', group: 'dosage', section: 'drug' },
+      { id: 'drug_space_default3', display: '(空格)', value: ' ', group: 'format', section: 'drug' },
+      { id: 'days_default', display: '天數', group: 'dosage', section: 'drug' },
+      { id: 'drug_text_default2', value: '天', display: '天', group: 'format', section: 'drug' }
+    ]
   },
 
   // ATC5 藥物分類設定
@@ -35,19 +60,20 @@ export const DEFAULT_SETTINGS = {
   chinese: {
     showDiagnosis: false,
     showEffectName: false,
+    doseFormat: "perDay",
     copyFormat: "nameWithDosageVertical",
   },
 
   // 檢驗資料設定
   lab: {
-    displayFormat: "byType",
+    displayLabFormat: "byType",
     showUnit: false,
     showReference: false,
-    enableAbbrev: true,
+    enableLabAbbrev: true,
     highlightAbnormal: true,
-    copyFormat: "horizontal",
-    enableCustomCopy: false,
-    customCopyItems: DEFAULT_LAB_COPY_ITEMS,
+    copyLabFormat: "horizontal",
+    enableLabChooseCopy: false,
+    labChooseCopyItems: DEFAULT_LAB_COPY_ITEMS,
   },
 
   // 總覽頁面設定
