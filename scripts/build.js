@@ -158,6 +158,26 @@ function createZip(filename) {
   }
 }
 
+async function createTest() {
+  await bundleContentScript({sourcemap: true});
+  await copyExtensionFiles();
+
+  // modify manifest.json
+  const hosts = ["http://localhost/*"];
+  const { default: manifest } = await import('../public/manifest.json', {with: {type: 'json'}});
+  manifest.name += " - 本地端版本";
+  manifest.host_permissions.push(...hosts);
+  manifest.content_scripts[0].matches.push(...hosts);
+  manifest.web_accessible_resources[0].resources.push("content.js.map");
+  manifest.web_accessible_resources[0].matches.push(...hosts);
+  fs.writeFileSync(
+    path.resolve(ROOT, 'dist', 'manifest.json'),
+    JSON.stringify(manifest, null, 2),
+    'utf-8',
+  );
+  console.log(`Successfully updated manifest.json`);
+}
+
 async function main() {
   const args = parseArgs({
     options: {
@@ -193,17 +213,7 @@ Options:
   }
 
   if (args.values.test) {
-    await bundleContentScript({sourcemap: true});
-    await copyExtensionFiles();
-
-    for (const file of fs.readdirSync(path.resolve(ROOT, 'tests', 'extension'))) {
-      copyFileSync(
-        path.resolve(ROOT, 'tests', 'extension', file),
-        path.resolve(ROOT, 'dist', file),
-      );
-    }
-
-    console.log(`Successfully copied local test files`);
+    await createTest();
     return;
   }
 
