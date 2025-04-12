@@ -14,9 +14,9 @@ window.lastInterceptedDischargeData = null;
 window.lastInterceptedMedDaysData = null;
 window.lastInterceptedPatientSummaryData = null;
 window.lastInterceptedMasterMenuData = null; // 新增主選單數據
-window.lastInterceptedRehabilitationData = null; // 新增復健資料
-window.lastInterceptedAcupunctureData = null; // 新增針灸資料
-window.lastInterceptedSpecialChineseMedCareData = null; // 新增特殊中醫處置資料
+// window.lastInterceptedRehabilitationData = null; // 新增復健資料
+// window.lastInterceptedAcupunctureData = null; // 新增針灸資料
+// window.lastInterceptedSpecialChineseMedCareData = null; // 新增特殊中醫處置資料
 
 // 新增: 使用者資訊快取
 let cachedUserInfo = null;
@@ -58,6 +58,8 @@ if (document.readyState === "loading") {
 } else {
   initialize();
 }
+
+// 移除定时器，改为在数据保存或加载时直接更新 localStorage
 
 // 初始化函數
 function initialize() {
@@ -347,9 +349,9 @@ function performClearPreviousData() {
       lastInterceptedMedDaysData = null;
       lastInterceptedPatientSummaryData = null;
       lastInterceptedMasterMenuData = null;
-      lastInterceptedRehabilitationData = null;
-      lastInterceptedAcupunctureData = null;
-      lastInterceptedSpecialChineseMedCareData = null;
+      // lastInterceptedRehabilitationData = null;
+      // lastInterceptedAcupunctureData = null;
+      // lastInterceptedSpecialChineseMedCareData = null;
     }
   );
 
@@ -491,9 +493,9 @@ const API_URL_PATTERNS = new Map([
   ["medDays", "/imu/api/imue0120/imue0120s01/pres-med-day"],
   ["patientsummary", "/imu/api/imue2000/imue2000s01/get-summary"],
   ["masterMenu", "/imu/api/imue1000/imue1000s02/master-menu"],
-  ["rehabilitation", "/imu/api/imue0080/imue0080s02/get-data"],
-  ["acupuncture", "/imu/api/imue0160/imue0160s02/get-data"],
-  ["specialChineseMedCare", "/imu/api/imue0170/imue0170s02/get-data"]
+  // ["rehabilitation", "/imu/api/imue0080/imue0080s02/get-data"],
+  // ["acupuncture", "/imu/api/imue0160/imue0160s02/get-data"],
+  // ["specialChineseMedCare", "/imu/api/imue0170/imue0170s02/get-data"]
 ]);
 
 // 從 URL 獲取數據類型的函數
@@ -600,9 +602,9 @@ function setupMonitoring() {
                       ["medDays", "lastInterceptedMedDaysData"],
                       ["patientsummary", "lastInterceptedPatientSummaryData"],
                       ["masterMenu", "lastInterceptedMasterMenuData"],
-                      ["rehabilitation", "lastInterceptedRehabilitationData"],
-                      ["acupuncture", "lastInterceptedAcupunctureData"],
-                      ["specialChineseMedCare", "lastInterceptedSpecialChineseMedCareData"]
+                      // ["rehabilitation", "lastInterceptedRehabilitationData"],
+                      // ["acupuncture", "lastInterceptedAcupunctureData"],
+                      // ["specialChineseMedCare", "lastInterceptedSpecialChineseMedCareData"]
                     ]);
                     
                     // 設置對應的全局變數
@@ -739,9 +741,9 @@ function setupMonitoring() {
                       ["medDays", "lastInterceptedMedDaysData"],
                       ["patientsummary", "lastInterceptedPatientSummaryData"],
                       ["masterMenu", "lastInterceptedMasterMenuData"],
-                      ["rehabilitation", "lastInterceptedRehabilitationData"],
-                      ["acupuncture", "lastInterceptedAcupunctureData"],
-                      ["specialChineseMedCare", "lastInterceptedSpecialChineseMedCareData"]
+                      // ["rehabilitation", "lastInterceptedRehabilitationData"],
+                      // ["acupuncture", "lastInterceptedAcupunctureData"],
+                      // ["specialChineseMedCare", "lastInterceptedSpecialChineseMedCareData"]
                     ]);
                     
                     // 設置對應的全局變數
@@ -802,9 +804,9 @@ const dataVarMap = new Map([
   ["medDays", "lastInterceptedMedDaysData"],
   ["patientsummary", "lastInterceptedPatientSummaryData"],
   ["masterMenu", "lastInterceptedMasterMenuData"],
-  ["rehabilitation", "lastInterceptedRehabilitationData"],
-  ["acupuncture", "lastInterceptedAcupunctureData"],
-  ["specialChineseMedCare", "lastInterceptedSpecialChineseMedCareData"]
+  // ["rehabilitation", "lastInterceptedRehabilitationData"],
+  // ["acupuncture", "lastInterceptedAcupunctureData"],
+  // ["specialChineseMedCare", "lastInterceptedSpecialChineseMedCareData"]
 ]);
 
 // 使用 Map 定義數據類型與對應的 action
@@ -819,9 +821,9 @@ const actionMap = new Map([
   ["medDays", "saveMedDaysData"],
   ["patientsummary", "savePatientSummaryData"],
   ["masterMenu", "saveMasterMenuData"],
-  ["rehabilitation", "saveRehabilitationData"],
-  ["acupuncture", "saveAcupunctureData"],
-  ["specialChineseMedCare", "saveSpecialChineseMedCareData"]
+  // ["rehabilitation", "saveRehabilitationData"],
+  // ["acupuncture", "saveAcupunctureData"],
+  // ["specialChineseMedCare", "saveSpecialChineseMedCareData"]
 ]);
 
 // 使用 Map 定義數據類型與對應的中文顯示文字
@@ -836,10 +838,95 @@ const typeTextMap = new Map([
   ["medDays", "藥品餘藥"],
   ["patientsummary", "病患摘要"],
   ["masterMenu", "主選單"],
-  ["rehabilitation", "復健治療"],
-  ["acupuncture", "針灸治療"],
-  ["specialChineseMedCare", "特殊中醫處置"]
+  // ["rehabilitation", "復健治療"],
+  // ["acupuncture", "針灸治療"],
+  // ["specialChineseMedCare", "特殊中醫處置"]
 ]);
+
+// 新增: 使用 localStorage 保存数据的功能
+function saveDataToLocalStorage() {
+  try {
+    // 创建一个包含所有数据的对象
+    const dataToShare = {
+      medication: window.lastInterceptedMedicationData,
+      lab: window.lastInterceptedLabData,
+      chinesemed: window.lastInterceptedChineseMedData,
+      imaging: window.lastInterceptedImagingData,
+      allergy: window.lastInterceptedAllergyData,
+      surgery: window.lastInterceptedSurgeryData,
+      discharge: window.lastInterceptedDischargeData,
+      medDays: window.lastInterceptedMedDaysData,
+      patientSummary: window.lastInterceptedPatientSummaryData,
+      masterMenu: window.lastInterceptedMasterMenuData,
+      // rehabilitation: window.lastInterceptedRehabilitationData,
+      // acupuncture: window.lastInterceptedAcupunctureData,
+      // specialChineseMedCare: window.lastInterceptedSpecialChineseMedCareData,
+      timestamp: Date.now() // 添加时间戳以识别数据新鲜度
+    };
+    
+    // 检查是否有数据
+    const hasData = Object.values(dataToShare).some(value => 
+      value !== null && value !== undefined && value !== false && value !== ''
+    );
+    
+    if (hasData) {
+      // 将数据保存到 localStorage
+      localStorage.setItem('NHITW_DATA', JSON.stringify(dataToShare));
+      // console.log('数据已保存到 localStorage:', {
+      //   medication: dataToShare.medication ? true : false,
+      //   lab: dataToShare.lab ? true : false,
+      //   chinesemed: dataToShare.chinesemed ? true : false,
+      //   imaging: dataToShare.imaging ? true : false,
+      //   allergy: dataToShare.allergy ? true : false,
+      //   surgery: dataToShare.surgery ? true : false,
+      //   discharge: dataToShare.discharge ? true : false,
+      //   medDays: dataToShare.medDays ? true : false,
+      //   patientSummary: dataToShare.patientSummary ? true : false,
+      //   masterMenu: dataToShare.masterMenu ? true : false,
+      //   rehabilitation: dataToShare.rehabilitation ? true : false,
+      //   acupuncture: dataToShare.acupuncture ? true : false,
+      //   specialChineseMedCare: dataToShare.specialChineseMedCare ? true : false
+      // });
+      
+      // 触发存储事件，便于其他扩展监听
+      window.dispatchEvent(new Event('storage'));
+    }
+  } catch (error) {
+    // console.error('保存数据到 localStorage 时出错:', error);
+  }
+}
+
+// // 新增: 广播数据给其他扩展的函数
+// function broadcastDataToOtherExtensions() {
+//   // 调用 localStorage 保存函数
+//   saveDataToLocalStorage();
+  
+//   // 为了兼容性，保留原来的事件广播方式
+//   const dataToShare = {
+//     medication: window.lastInterceptedMedicationData,
+//     lab: window.lastInterceptedLabData,
+//     chinesemed: window.lastInterceptedChineseMedData,
+//     imaging: window.lastInterceptedImagingData,
+//     allergy: window.lastInterceptedAllergyData,
+//     surgery: window.lastInterceptedSurgeryData,
+//     discharge: window.lastInterceptedDischargeData,
+//     medDays: window.lastInterceptedMedDaysData,
+//     patientSummary: window.lastInterceptedPatientSummaryData,
+//     masterMenu: window.lastInterceptedMasterMenuData,
+//     rehabilitation: window.lastInterceptedRehabilitationData,
+//     acupuncture: window.lastInterceptedAcupunctureData,
+//     specialChineseMedCare: window.lastInterceptedSpecialChineseMedCareData
+//   };
+  
+//   const event = new CustomEvent('NHITW_DATA_UPDATED', { detail: dataToShare });
+//   document.dispatchEvent(event);
+// }
+
+// // 新增: 手動觸發廣播資料的函數
+// function manuallyBroadcastData() {
+//   console.log('手動觸發廣播資料...');
+//   broadcastDataToOtherExtensions();
+// }
 
 function saveData(data, dataType, source = "unknown") {
   // 先直接更新全局變數
@@ -876,6 +963,13 @@ function saveData(data, dataType, source = "unknown") {
       }
     }
   );
+  
+  // 直接保存到 localStorage，而不是使用定时器
+  saveDataToLocalStorage();
+  
+  // 廣播資料給其他擴充功能 (保留原有功能以保持兼容性)
+  // 由于 broadcastDataToOtherExtensions 已經調用 saveDataToLocalStorage，所以這裡不需要再調用
+  // broadcastDataToOtherExtensions();
 }
 
 // 保存令牌
@@ -924,13 +1018,13 @@ function captureXhrRequestHeaders() {
       const xhr = this;
       this.addEventListener("loadend", function () {
         if (xhr.status === 200 && xhr._requestHeaders) {
-          console.log("Captured successful request headers for API:", xhr._url);
+          // console.log("Captured successful request headers for API:", xhr._url);
           // 儲存成功請求的headers
           lastSuccessfulRequestHeaders = Object.assign({}, xhr._requestHeaders);
-          console.log(
-            "Headers captured:",
-            Object.keys(lastSuccessfulRequestHeaders).join(", ")
-          );
+          // console.log(
+          //   "Headers captured:",
+          //   Object.keys(lastSuccessfulRequestHeaders).join(", ")
+          // );
 
           // 嘗試從headers中提取令牌
           if (lastSuccessfulRequestHeaders["Authorization"]) {
@@ -944,7 +1038,7 @@ function captureXhrRequestHeaders() {
     return originalOpen.apply(this, arguments);
   };
 
-  console.log("XHR request header capturing set up");
+  // console.log("XHR request header capturing set up");
 }
 
 // 從頁面中提取授權令牌
@@ -1074,10 +1168,10 @@ function validateToken(token) {
 
 // 在 content.js 中添加一個新函數，用於獲取所有類型的資料
 function fetchAllDataTypes() {
-  console.log("開始獲取所有資料類型");
+  // console.log("開始獲取所有資料類型");
 
   if (isBatchFetchInProgress) {
-    console.log("已有批次抓取進行中，跳過本次請求");
+    // console.log("已有批次抓取進行中，跳過本次請求");
     return;
   }
 
@@ -1093,7 +1187,7 @@ function fetchAllDataTypes() {
     (pending) => pending
   );
   if (hasPendingRequests) {
-    console.log("已有獨立請求進行中，跳過本次批次抓取");
+    // console.log("已有獨立請求進行中，跳過本次批次抓取");
     return;
   }
 
@@ -1104,7 +1198,7 @@ function fetchAllDataTypes() {
   // 先獲取主選單資料(masterMenu)，以判斷有哪些資料可獲取
   enhancedFetchData("masterMenu")
     .then((menuResult) => {
-      console.log("獲取主選單資料成功，開始處理其他資料");
+      // console.log("獲取主選單資料成功，開始處理其他資料");
 
       // 定義所有要獲取的資料類型
       const dataTypes = [
@@ -1117,9 +1211,9 @@ function fetchAllDataTypes() {
         "discharge",
         "medDays",
         "patientsummary",
-        "rehabilitation",
-        "acupuncture",
-        "specialChineseMedCare",
+        // "rehabilitation",
+        // "acupuncture",
+        // "specialChineseMedCare",
       ];
 
       // 根據授權過濾並獲取資料類型
@@ -1285,9 +1379,9 @@ const apiPathMap = new Map([
   ["medDays", "imue0120/imue0120s01/pres-med-day"],
   ["patientsummary", "imue2000/imue2000s01/get-summary"],
   ["masterMenu", "imue1000/imue1000s02/master-menu"],
-  ["rehabilitation", "imue0080/imue0080s02/get-data"],
-  ["acupuncture", "imue0160/imue0160s02/get-data"],
-  ["specialChineseMedCare", "imue0170/imue0170s02/get-data"]
+  // ["rehabilitation", "imue0080/imue0080s02/get-data"],
+  // ["acupuncture", "imue0160/imue0160s02/get-data"],
+  // ["specialChineseMedCare", "imue0170/imue0170s02/get-data"]
 ]);
 
 function enhancedFetchData(dataType, options = {}) {
@@ -1309,9 +1403,9 @@ function enhancedFetchData(dataType, options = {}) {
     "medDays",
     "patientsummary",
     "masterMenu",
-    "rehabilitation",
-    "acupuncture",
-    "specialChineseMedCare",
+    // "rehabilitation",
+    // "acupuncture",
+    // "specialChineseMedCare",
   ];
 
   if (!validDataTypes.includes(dataType)) {
@@ -1482,14 +1576,14 @@ const nodeToDataTypeMap = new Map([
   ["2.1", "medication"],
   ["2.4", "medDays"],
   ["3.1", "chinesemed"],
-  ["3.2", "acupuncture"],
-  ["3.3", "specialChineseMedCare"],
+  // ["3.2", "acupuncture"],
+  // ["3.3", "specialChineseMedCare"],
   ["5.1", "allergy"],
   ["6.1", "labdata"],
   ["6.2", "imaging"],
   ["7.1", "surgery"],
   ["8.1", "discharge"],
-  ["9.1", "rehabilitation"]
+  // ["9.1", "rehabilitation"]
 ]);
 
 // 新增: 檢查資料類型是否有授權
@@ -1732,9 +1826,9 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
         medDays: window.lastInterceptedMedDaysData,
         patientSummary: window.lastInterceptedPatientSummaryData,
         masterMenu: window.lastInterceptedMasterMenuData,
-        rehabilitation: window.lastInterceptedRehabilitationData,
-        acupuncture: window.lastInterceptedAcupunctureData,
-        specialChineseMedCare: window.lastInterceptedSpecialChineseMedCareData,
+        // rehabilitation: window.lastInterceptedRehabilitationData,
+        // acupuncture: window.lastInterceptedAcupunctureData,
+        // specialChineseMedCare: window.lastInterceptedSpecialChineseMedCareData,
       };
 
       // 檢查是否有任何資料

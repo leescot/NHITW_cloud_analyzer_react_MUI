@@ -64,7 +64,7 @@ function notifyExtensionDataLoaded(source, dataTypes) {
  * @param {Object} settings - 格式設定
  */
 function setGlobalMedicationFormatSettings(settings) {
-  console.log("設置全局藥物格式設定:", settings);
+  // console.log("設置全局藥物格式設定:", settings);
   
   // 創建一個深度複製的全局格式設定
   window.medicationFormatSettings = {};
@@ -82,12 +82,12 @@ function setGlobalMedicationFormatSettings(settings) {
   // 驗證複製後的數組是否完整
   if (Array.isArray(settings.customMedicationHeaderCopyFormat) && 
       Array.isArray(settings.customMedicationDrugCopyFormat)) {
-    console.log("驗證自定義格式數組設置後:", {
-      原始標題長度: settings.customMedicationHeaderCopyFormat.length,
-      複製後標題長度: window.medicationFormatSettings.customMedicationHeaderCopyFormat.length,
-      原始藥物長度: settings.customMedicationDrugCopyFormat.length,
-      複製後藥物長度: window.medicationFormatSettings.customMedicationDrugCopyFormat.length
-    });
+    // console.log("驗證自定義格式數組設置後:", {
+    //   原始標題長度: settings.customMedicationHeaderCopyFormat.length,
+    //   複製後標題長度: window.medicationFormatSettings.customMedicationHeaderCopyFormat.length,
+    //   原始藥物長度: settings.customMedicationDrugCopyFormat.length,
+    //   複製後藥物長度: window.medicationFormatSettings.customMedicationDrugCopyFormat.length
+    // });
     
     // 直接存儲到全局變量，以防其他方式丟失
     window.customMedicationHeaderCopyFormat = JSON.parse(JSON.stringify(settings.customMedicationHeaderCopyFormat));
@@ -186,6 +186,50 @@ export async function processLocalData(jsonData, filename) {
 
       // 通知擴充功能資料已載入
       notifyExtensionDataLoaded(filename, loadedTypes);
+      
+      // 直接保存到 localStorage 並廣播資料
+      try {
+        // console.log('將資料保存到 localStorage ...');
+        
+        // 先將數據保存到 localStorage
+        const dataToShare = {
+          medication: window.lastInterceptedMedicationData,
+          lab: window.lastInterceptedLabData,
+          chinesemed: window.lastInterceptedChineseMedData,
+          imaging: window.lastInterceptedImagingData,
+          allergy: window.lastInterceptedAllergyData,
+          surgery: window.lastInterceptedSurgeryData,
+          discharge: window.lastInterceptedDischargeData,
+          medDays: window.lastInterceptedMedDaysData,
+          patientSummary: window.lastInterceptedPatientSummaryData,
+          masterMenu: window.lastInterceptedMasterMenuData,
+          rehabilitation: window.lastInterceptedRehabilitationData,
+          acupuncture: window.lastInterceptedAcupunctureData,
+          specialChineseMedCare: window.lastInterceptedSpecialChineseMedCareData,
+          timestamp: Date.now()
+        };
+        
+        // 保存到 localStorage
+        localStorage.setItem('NHITW_DATA', JSON.stringify(dataToShare));
+        // console.log('數據已保存到 localStorage');
+        
+        // 觸發 storage 事件，便於其他擴充功能監聽
+        window.dispatchEvent(new Event('storage'));
+        
+        // 如果有廣播函數，也調用它以保持兼容性
+        // if (typeof broadcastDataToOtherExtensions === 'function') {
+        //   broadcastDataToOtherExtensions();
+        // } else if (typeof window.broadcastDataToOtherExtensions === 'function') {
+        //   window.broadcastDataToOtherExtensions();
+        // } else {
+        //   // 直接發送自定義事件
+        //   const event = new CustomEvent('NHITW_DATA_UPDATED', { detail: dataToShare });
+        //   document.dispatchEvent(event);
+        //   console.log('直接發送自定義事件完成');
+        // }
+      } catch (error) {
+        // console.error('保存資料到 localStorage 或廣播時發生錯誤:', error);
+      }
 
       return {
         success: true,
@@ -313,7 +357,7 @@ export const localDataHandler = {
   async processJsonData(data, localDataStatus, filename) {
     try {
       const dataType = this.detectDataType(data, filename);
-      console.log("檢測到資料類型:", dataType);
+      // console.log("檢測到資料類型:", dataType);
 
       if (dataType === "unknown") {
         localDataStatus.message = "無法識別的資料格式";
