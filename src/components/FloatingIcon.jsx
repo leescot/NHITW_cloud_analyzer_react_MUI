@@ -233,6 +233,18 @@ const FloatingIcon = () => {
         }
       }
       
+      // 處理切換到檢驗自訂格式編輯器的消息
+      if (message.action === "switchToLabCustomFormatTab") {
+        // 如果對話框未打開，先打開它
+        if (!open) {
+          setOpen(true);
+        }
+        // 只有當自訂設定已啟用時才切換到指定的標籤
+        if (typeof message.tabIndex === 'number' && appSettings.lab.enableLabCustomCopyFormat) {
+          setTabValue(message.tabIndex);
+        }
+      }
+      
       // 處理打開自訂格式編輯器的消息
       if (message.action === "openCustomFormatEditor") {
         if (!open) {
@@ -240,6 +252,17 @@ const FloatingIcon = () => {
         }
         // 自訂設定標籤的索引是 9，只有當自訂設定已啟用時才切換
         if (appSettings.western.enableMedicationCustomCopyFormat) {
+          setTabValue(9);
+        }
+      }
+
+      // 處理打開檢驗自訂格式編輯器的消息
+      if (message.action === "openLabCustomFormatEditor") {
+        if (!open) {
+          setOpen(true);
+        }
+        // 只有當檢驗自訂設定已啟用時才切換
+        if (appSettings.lab.enableLabCustomCopyFormat) {
           setTabValue(9);
         }
       }
@@ -622,7 +645,7 @@ const FloatingIcon = () => {
                     },
                   }}
                 />
-                {appSettings.western.enableMedicationCustomCopyFormat && (
+                {(appSettings.western.enableMedicationCustomCopyFormat || appSettings.lab.enableLabCustomCopyFormat) && (
                   <Tab
                     label="進階"
                     icon={<SettingsIcon sx={{ fontSize: "1rem" }} />}
@@ -799,7 +822,7 @@ const FloatingIcon = () => {
           </TabPanel>
 
           {/* Advanced Settings Tab */}
-          {appSettings.western.enableMedicationCustomCopyFormat && (
+          {(appSettings.western.enableMedicationCustomCopyFormat || appSettings.lab.enableLabCustomCopyFormat) && (
             <TabPanel value={tabValue} index={9}>
               <AdvancedSettings
                 appSettings={appSettings}

@@ -74,6 +74,22 @@ export const DEFAULT_SETTINGS = {
     copyLabFormat: "horizontal",
     enableLabChooseCopy: false,
     labChooseCopyItems: DEFAULT_LAB_COPY_ITEMS,
+    enableLabCustomCopyFormat: false,
+    itemSeparator: ',',
+    customLabHeaderCopyFormat: [
+      { id: 'date_default', display: '日期', group: 'header', section: 'labheader' },
+      { id: 'header_text_default', value: ' - ', display: ' - ', group: 'format', section: 'labheader' },
+      { id: 'hosp_default', display: '醫院', group: 'header', section: 'labheader' },
+      { id: 'header_space_default', display: '(空格)', value: ' ', group: 'format', section: 'labheader' },
+    ],
+    customLabItemCopyFormat: [
+      { id: 'itemName_default', display: '檢驗名稱', group: 'lab', section: 'labcontent' },
+      { id: 'lab_space_default', display: '(空格)', value: ' ', group: 'format', section: 'labcontent' },
+      { id: 'value_default', display: '數值', group: 'lab', section: 'labcontent' },
+      { id: 'lab_space_default2', display: '(空格)', value: ' ', group: 'format', section: 'labcontent' },
+      { id: 'unit_default', display: '單位', group: 'lab', section: 'labcontent' },
+      { id: 'consultValue_default', display: '參考值', group: 'lab', section: 'labcontent' }
+    ]
   },
 
   // 總覽頁面設定

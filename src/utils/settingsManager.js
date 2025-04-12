@@ -46,6 +46,10 @@ export const loadAllSettings = async () => {
       copyLabFormat: DEFAULT_SETTINGS.lab.copyLabFormat,
       enableLabChooseCopy: DEFAULT_SETTINGS.lab.enableLabChooseCopy,
       labChooseCopyItems: DEFAULT_SETTINGS.lab.labChooseCopyItems,
+      enableLabCustomCopyFormat: DEFAULT_SETTINGS.lab.enableLabCustomCopyFormat || false,
+      itemSeparator: DEFAULT_SETTINGS.lab.itemSeparator || ',',
+      customLabHeaderCopyFormat: DEFAULT_SETTINGS.lab.customLabHeaderCopyFormat,
+      customLabItemCopyFormat: DEFAULT_SETTINGS.lab.customLabItemCopyFormat,
 
       // Overview settings
       medicationTrackingDays: DEFAULT_SETTINGS.overview.medicationTrackingDays,
@@ -99,6 +103,10 @@ export const loadAllSettings = async () => {
           copyLabFormat: items.copyLabFormat,
           enableLabChooseCopy: items.enableLabChooseCopy,
           labChooseCopyItems: items.labChooseCopyItems,
+          enableLabCustomCopyFormat: items.enableLabCustomCopyFormat,
+          itemSeparator: items.itemSeparator || ',',
+          customLabHeaderCopyFormat: items.customLabHeaderCopyFormat,
+          customLabItemCopyFormat: items.customLabItemCopyFormat,
         },
         overview: {
           medicationTrackingDays: items.medicationTrackingDays,
@@ -237,6 +245,10 @@ const handleLabSettingsChange = (event, currentSettings, updateCallback, callbac
       copyLabFormat: event.detail.allSettings.copyLabFormat,
       enableLabChooseCopy: event.detail.allSettings.enableLabChooseCopy,
       labChooseCopyItems: event.detail.allSettings.labChooseCopyItems,
+      enableLabCustomCopyFormat: event.detail.allSettings.enableLabCustomCopyFormat,
+      itemSeparator: event.detail.allSettings.itemSeparator || ',',
+      customLabHeaderCopyFormat: event.detail.allSettings.customLabHeaderCopyFormat,
+      customLabItemCopyFormat: event.detail.allSettings.customLabItemCopyFormat,
     };
 
     console.log("Updating all lab settings:", newLabSettings);
@@ -269,6 +281,46 @@ const handleLabSettingsChange = (event, currentSettings, updateCallback, callbac
       };
       
       console.log("Updated lab settings with new display format:", updatedSettings);
+      
+      // 更新設置
+      updateCallback({
+        ...currentSettings,
+        lab: updatedSettings
+      });
+      
+      // 重新處理檢驗數據
+      if (window.lastInterceptedLabData && callbacks.reprocessLab) {
+        callbacks.reprocessLab(window.lastInterceptedLabData, updatedSettings);
+      }
+      
+      return; // 提前返回，不執行後面的代碼
+    }
+    
+    // 特別處理 itemSeparator
+    if (settingKey === 'itemSeparator') {
+      console.log(`Special handling for item separator: "${updatedValue}" (${typeof updatedValue})`);
+      
+      // 確保分隔符是字符串
+      if (typeof updatedValue !== 'string') {
+        console.warn(`Invalid itemSeparator value: ${updatedValue}, converting to string`);
+        updatedValue = String(updatedValue || ',');
+      }
+      
+      // 確保有可讀的日誌輸出
+      const loggableSeparator = updatedValue
+        .replace(/\n/g, '\\n')
+        .replace(/\r/g, '\\r')
+        .replace(/\t/g, '\\t');
+        
+      console.log(`Sanitized itemSeparator: "${loggableSeparator}" (${typeof updatedValue})`);
+      
+      // 創建新的設置對象，確保 itemSeparator 被正確設置
+      const updatedSettings = {
+        ...currentSettings.lab,
+        itemSeparator: updatedValue
+      };
+      
+      console.log("Updated lab settings with new item separator:", updatedSettings);
       
       // 更新設置
       updateCallback({

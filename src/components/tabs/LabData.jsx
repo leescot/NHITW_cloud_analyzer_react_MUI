@@ -74,7 +74,7 @@ const LabData = ({ groupedLabs, settings, labSettings, generalDisplaySettings })
     snackbarOpen,
     snackbarMessage,
     handleSnackbarClose,
-    handleCopyAllLabData: copyAllLabData,
+    handleSectionLabData: copySectionLabData,
     handleCopyUserSelectedLabData: copyUserSelectedLabData
   } = useCopyLabData();
 
@@ -192,8 +192,8 @@ const LabData = ({ groupedLabs, settings, labSettings, generalDisplaySettings })
   };
 
   // 將複製處理函數封裝，加入必要的參數
-  const handleCopyAllLabData = (group) => {
-    copyAllLabData(group, completeLabSettings);
+  const handleSectionLabData = (group) => {
+    copySectionLabData(group, completeLabSettings);
   };
 
   const handleCopyUserSelectedLabData = (group, groupIndex) => {
@@ -302,7 +302,7 @@ const LabData = ({ groupedLabs, settings, labSettings, generalDisplaySettings })
               settings={settings}
               labSettings={completeLabSettings}
               generalDisplaySettings={generalDisplaySettings}
-              handleCopyAllLabData={handleCopyAllLabData}
+              handleSectionLabData={handleSectionLabData}
               handleCopyUserSelectedLabData={handleCopyUserSelectedLabData}
               hasSelectedItems={hasSelectedItems}
             />

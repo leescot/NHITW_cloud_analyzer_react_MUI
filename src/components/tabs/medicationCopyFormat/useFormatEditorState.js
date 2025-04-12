@@ -183,12 +183,33 @@ const useFormatEditorState = (appSettings, setAppSettings) => {
 
   // Reset to default format
   const resetToDefault = () => {
+    // Get default formats for medication
     const defaultHeaderFormat = getDefaultHeaderFormat();
     const defaultDrugFormat = getDefaultDrugFormat();
     
+    // Update local state
     setHeaderFormat(defaultHeaderFormat);
     setDrugFormat(defaultDrugFormat);
     setDrugSeparator(','); // Reset the drug separator to default value
+    
+    // Update app settings - ONLY update western section
+    setAppSettings(prev => {
+      const newSettings = {
+        ...prev,
+        western: {
+          ...prev.western,
+          customMedicationHeaderCopyFormat: defaultHeaderFormat,
+          customMedicationDrugCopyFormat: defaultDrugFormat,
+          drugSeparator: ','
+        }
+      };
+      
+      console.log('MedicationCustomFormatEditor: Reset to default formats');
+      
+      return newSettings;
+    });
+    
+    // Show success message
     setSnackbarMessage('已重置為新的預設格式');
     setSnackbarSeverity('success');
     setSnackbarOpen(true);
@@ -214,15 +235,6 @@ const useFormatEditorState = (appSettings, setAppSettings) => {
       item.section = ELEMENT_SECTIONS.DRUG;
     });
     
-    // console.log('Saved format settings:', {
-    //   header: finalHeaderFormat,
-    //   drug: finalDrugFormat,
-    //   formatType: formatType,
-    //   options: {
-    //     drugSeparator
-    //   }
-    // });
-    
     // Update settings - now saving header and drug formats separately
     handleSettingChange('enableMedicationCustomCopyFormat', true, null, null, 'western');
     handleSettingChange('customMedicationHeaderCopyFormat', finalHeaderFormat, null, null, 'western');
@@ -234,18 +246,28 @@ const useFormatEditorState = (appSettings, setAppSettings) => {
     setSnackbarSeverity('success');
     setSnackbarOpen(true);
     
-    // Update app settings
-    setAppSettings(prev => ({
-      ...prev,
-      western: {
-        ...prev.western,
-        customMedicationHeaderCopyFormat: finalHeaderFormat,
-        customMedicationDrugCopyFormat: finalDrugFormat,
-        enableMedicationCustomCopyFormat: true,
-        medicationCopyFormat: formatType, // Now using the passed format type
-        drugSeparator: drugSeparator
-      }
-    }));
+    // Update app settings - ONLY update western section, preserve everything else
+    setAppSettings(prev => {
+      const newSettings = {
+        ...prev,
+        western: {
+          ...prev.western,
+          customMedicationHeaderCopyFormat: finalHeaderFormat,
+          customMedicationDrugCopyFormat: finalDrugFormat,
+          enableMedicationCustomCopyFormat: true,
+          medicationCopyFormat: formatType,
+          drugSeparator: drugSeparator
+        }
+      };
+      
+      // Log the updated section for debugging
+      console.log('Medication format settings updated:', {
+        section: 'western',
+        changes: newSettings.western
+      });
+      
+      return newSettings;
+    });
   };
   
   // Add preset group to header format - removed functionality since it's now empty
