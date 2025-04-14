@@ -64,8 +64,8 @@ masterMenu API 回傳的節點ID對應到健保雲端系統的各個頁面和資
 | 5.1 | 過敏紀錄 | 過敏紀錄 | allergy | /imu/api/imue0040/imue0040s02/get-data |
 | 6.1 | 檢查與檢驗 | 檢查檢驗結果 | labdata | /imu/api/imue0060/imue0060s02/get-data |
 | 6.2 | 檢查與檢驗 | 影像及病理 | imaging | /imu/api/imue0130/imue0130s02/get-data |
-| 6.3 | 檢查與檢驗 | 成人預防保健 | - | - |
-| 6.4 | 檢查與檢驗 | 四癌篩檢結果 | - | - |
+| 6.3 | 檢查與檢驗 | 成人預防保健 | adultHealthCheck | /imu/api/imue0140/imue0140s01/hpa-data |
+| 6.4 | 檢查與檢驗 | 四癌篩檢結果 | cancerScreening | /imu/api/imue0150/imue0150s01/hpa-data |
 | 6.5 | 檢查與檢驗 | 檢查檢驗紀錄 | - | - |
 | 7.1 | 手術紀錄 | 手術紀錄項目 | surgery | /imu/api/imue0020/imue0020s02/get-data |
 | 8.1 | 出院病摘 | 出院病歷摘要 | discharge | /imu/api/imue0070/imue0070s02/get-data |

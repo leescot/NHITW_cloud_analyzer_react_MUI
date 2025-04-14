@@ -75,6 +75,7 @@ export const DEFAULT_SETTINGS = {
     enableLabChooseCopy: false,
     labChooseCopyItems: DEFAULT_LAB_COPY_ITEMS,
     enableLabCustomCopyFormat: false,
+    enableLabCopyAll: false,
     itemSeparator: ',',
     customLabHeaderCopyFormat: [
       { id: 'date_default', display: '日期', group: 'header', section: 'labheader' },
@@ -110,5 +111,11 @@ export const DEFAULT_SETTINGS = {
     floatingIconPosition: "middle-right",
     alwaysOpenOverviewTab: true,
     useColorfulTabs: true,
+  },
+  
+  // 雲端資料設定
+  cloud: {
+    fetchAdultHealthCheck: false,
+    fetchCancerScreening: false,
   },
 };

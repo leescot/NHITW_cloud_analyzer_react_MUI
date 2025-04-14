@@ -10,7 +10,8 @@ export const updateDataStatus = (setDataStatus) => {
       // 使用 Map 存儲預期的鍵和默認值
       const expectedKeys = [
         'medication', 'labData', 'chineseMed', 'imaging',
-        'allergy', 'surgery', 'discharge', 'medDays', 'patientSummary'
+        'allergy', 'surgery', 'discharge', 'medDays', 'patientSummary',
+        'adultHealthCheck', 'cancerScreening'
       ];
 
       expectedKeys.forEach(key => {
@@ -35,7 +36,9 @@ const storageToStatusKeyMap = new Map([
   ['surgeryData', 'surgery'],
   ['dischargeData', 'discharge'],
   ['medDaysData', 'medDays'],
-  ['patientSummaryData', 'patientSummary']
+  ['patientSummaryData', 'patientSummary'],
+  ['adultHealthCheckData', 'adultHealthCheck'],
+  ['cancerScreeningData', 'cancerScreening']
 ]);
 
 // 從存儲鍵獲取狀態鍵的輔助函數
@@ -144,7 +147,9 @@ export const handleClearData = (setDataStatus) => {
     'allergyData',
     'surgeryData',
     'dischargeData',
-    'medDaysData'
+    'medDaysData',
+    'adultHealthCheckData',
+    'cancerScreeningData'
   ];
 
   chrome.storage.local.remove(dataKeysToRemove, () => {

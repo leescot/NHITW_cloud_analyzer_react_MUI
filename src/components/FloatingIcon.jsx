@@ -168,6 +168,7 @@ const FloatingIcon = () => {
         lab: allSettings.lab,
         overview: allSettings.overview,
         display: allSettings.display,
+        cloud: allSettings.cloud,
       });
       setGeneralDisplaySettings(allSettings.general);
     };
@@ -184,6 +185,7 @@ const FloatingIcon = () => {
         lab: newSettings.lab,
         overview: newSettings.overview,
         display: newSettings.display,
+        cloud: newSettings.cloud,
       });
       setGeneralDisplaySettings(newSettings.general);
 
@@ -740,6 +742,7 @@ const FloatingIcon = () => {
               overviewSettings={appSettings.overview}
               generalDisplaySettings={generalDisplaySettings}
               labSettings={appSettings.lab}
+              cloudSettings={appSettings.cloud}
             />
           </TabPanel>
 

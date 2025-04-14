@@ -183,21 +183,23 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
   // 處理數據格式化為表格可用的格式
   const processMedicationTableData = (medications) => {
     const medicineMap = new Map();
-    const allDates = new Set();
-    const dateToHospMap = {};
+    const allDateHospPairs = new Set();
+    const dateHospToKeyMap = {};
+    const keyToDateHospMap = {};
 
     // 提取處理單個藥物數據的函數
-    const processMedicationData = (med, date, medicineMap) => {
+    const processMedicationData = (med, date, hosp, medicineMap) => {
       const medName = med.name;
-      const medDate = date;
+      // 創建一個唯一的鍵來表示日期和醫院的組合
+      const dateHospKey = `${date}__${hosp}`;
       
       // 若藥名不存在於 Map 中，先建立
       if (!medicineMap.has(medName)) {
         medicineMap.set(medName, new Map());
       }
       
-      // 獲取藥物的日期 Map
-      const dateMap = medicineMap.get(medName);
+      // 獲取藥物的日期醫院組合 Map
+      const dateHospMap = medicineMap.get(medName);
       
       // 建立當前藥物的劑量和頻次資訊
       const currentDosageFreq = {
@@ -205,10 +207,10 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
         frequency: med.frequency,
       };
       
-      // 檢查該日期是否已有此藥物的記錄
-      if (!dateMap.has(medDate)) {
+      // 檢查該日期醫院組合是否已有此藥物的記錄
+      if (!dateHospMap.has(dateHospKey)) {
         // 創建新的藥物記錄
-        dateMap.set(medDate, {
+        dateHospMap.set(dateHospKey, {
           dosage: med.dosage,
           perDosage: med.perDosage,
           frequency: med.frequency,
@@ -218,7 +220,7 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
         });
       } else {
         // 更新現有記錄
-        const existingMed = dateMap.get(medDate);
+        const existingMed = dateHospMap.get(dateHospKey);
         
         // 檢查是否有重複的劑量和頻次
         const hasDuplicate = existingMed.dosageFreqs.some(
@@ -234,29 +236,42 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
         existingMed.days = Math.max(parseInt(existingMed.days), parseInt(med.days)).toString();
         existingMed.drug_left = Math.max(existingMed.drug_left, med.drug_left || 0);
       }
+      
+      // 保存日期醫院組合映射
+      dateHospToKeyMap[dateHospKey] = { date, hosp };
+      keyToDateHospMap[dateHospKey] = { date, hosp };
+      
+      // 記錄所有日期醫院組合
+      allDateHospPairs.add(dateHospKey);
     };
 
     // 處理所有藥物資料
     medications.forEach((group) => {
-      // 記錄日期和醫院映射
-      allDates.add(group.date);
-      if (!dateToHospMap[group.date]) {
-        dateToHospMap[group.date] = group.hosp;
-      }
-      
       // 處理每個藥物
       group.medications.forEach((med) => {
-        processMedicationData(med, group.date, medicineMap);
+        processMedicationData(med, group.date, group.hosp, medicineMap);
       });
     });
 
-    // 將日期轉換為排序的數組 (最新日期優先)
-    const sortedDates = Array.from(allDates).sort((a, b) => b.localeCompare(a));
+    // 將日期醫院組合轉換為排序的數組 (最新日期優先)
+    const sortedDateHospKeys = Array.from(allDateHospPairs).sort((a, b) => {
+      // 提取日期部分進行比較
+      const dateA = a.split('__')[0];
+      const dateB = b.split('__')[0];
+      // 優先按日期排序
+      const dateCompare = dateB.localeCompare(dateA);
+      if (dateCompare !== 0) return dateCompare;
+      
+      // 如果日期相同，則按醫院名稱排序
+      const hospA = a.split('__')[1];
+      const hospB = b.split('__')[1];
+      return hospA.localeCompare(hospB);
+    });
 
     return {
       medicines: medicineMap,
-      dates: sortedDates,
-      dateToHospMap,
+      dateHospKeys: sortedDateHospKeys,
+      keyToDateHospMap: keyToDateHospMap,
     };
   };
 
@@ -289,45 +304,50 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
   
   // 對藥物按天數進行過濾的函數
   const filterMedicinesByDays = (medicines) => {
-    return Array.from(medicines).filter(([medName, dateMap]) => {
+    return Array.from(medicines).filter(([medName, dateHospMap]) => {
       // 檢查藥物是否有任何符合過濾條件的日期記錄
-      return Array.from(dateMap.values()).some((medData) => {
+      return Array.from(dateHospMap.values()).some((medData) => {
         const days = parseInt(medData.days) || 0;
         return filterConditions.meetsCriteria(dayFilter, days, medName);
       });
     });
   };
 
-  // 獲取應該顯示的日期列
-  const getVisibleDates = (processedData, filteredMedicines) => {
+  // 獲取應該顯示的日期醫院組合列
+  const getVisibleDateHospKeys = (processedData, filteredMedicines) => {
     if (dayFilter === "all") {
-      return processedData.dates;
+      return processedData.dateHospKeys;
     }
 
-    const datesWithData = new Set();
+    const keysWithData = new Set();
 
-    filteredMedicines.forEach(([medName, dateMap]) => {
-      dateMap.forEach((medData, date) => {
+    filteredMedicines.forEach(([medName, dateHospMap]) => {
+      dateHospMap.forEach((medData, key) => {
         const days = parseInt(medData.days) || 0;
         if (filterConditions.meetsCriteria(dayFilter, days, medName)) {
-          datesWithData.add(date);
+          keysWithData.add(key);
         }
       });
     });
 
-    return processedData.dates.filter((date) => datesWithData.has(date));
+    return processedData.dateHospKeys.filter((key) => keysWithData.has(key));
   };
 
-  // 獲取最近的日期
-  const getMostRecentDate = (dateMap, medName) => {
-    const filteredDates = Array.from(dateMap.entries())
+  // 獲取最近的日期醫院組合
+  const getMostRecentDateHospKey = (dateHospMap, medName) => {
+    const filteredKeys = Array.from(dateHospMap.entries())
       .filter(([_, medData]) => {
         const days = parseInt(medData.days) || 0;
         return filterConditions.meetsCriteria(dayFilter, days, medName);
       })
-      .sort((a, b) => b[0].localeCompare(a[0]));
+      .sort((a, b) => {
+        // 日期在鍵值的前面部分
+        const dateA = a[0].split('__')[0];
+        const dateB = b[0].split('__')[0];
+        return dateB.localeCompare(dateA);
+      });
 
-    return filteredDates.length > 0 ? filteredDates[0][0] : null;
+    return filteredKeys.length > 0 ? filteredKeys[0][0] : null;
   };
 
   // 過濾選項變更處理函數
@@ -341,17 +361,21 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
 
   // 按最近處方日期排序藥物（最新日期在最上方）
   const sortedFilteredMedicines = Array.from(filteredMedicines).sort((a, b) => {
-    const dateA = getMostRecentDate(a[1], a[0]);
-    const dateB = getMostRecentDate(b[1], b[0]);
+    const keyA = getMostRecentDateHospKey(a[1], a[0]);
+    const keyB = getMostRecentDateHospKey(b[1], b[0]);
 
-    if (!dateA && !dateB) return 0;
-    if (!dateA) return 1;
-    if (!dateB) return -1;
+    if (!keyA && !keyB) return 0;
+    if (!keyA) return 1;
+    if (!keyB) return -1;
+
+    // 從鍵中提取日期進行比較
+    const dateA = keyA.split('__')[0];
+    const dateB = keyB.split('__')[0];
 
     return dateB.localeCompare(dateA);
   });
 
-  const visibleDates = getVisibleDates(processedData, sortedFilteredMedicines);
+  const visibleDateHospKeys = getVisibleDateHospKeys(processedData, sortedFilteredMedicines);
 
   // Add snackbar state
   const [snackbarOpen, setSnackbarOpen] = useState(false);
@@ -472,7 +496,7 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
     );
   };
 
-  // 檢查藥物在特定日期是否應該顯示的函數
+  // 檢查藥物在特定日期醫院組合是否應該顯示的函數
   const shouldDisplayMedication = (medData, dayFilter, name) => {
     if (!medData) return false;
     
@@ -617,44 +641,50 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
                       藥品名稱
                     </TypographySizeWrapper>
                   </TableCell>
-                  {visibleDates.map((date) => (
-                    <TableCell
-                      key={date}
-                      align="center"
-                      sx={{
-                        minWidth: "100px",
-                        maxWidth: "120px",
-                        whiteSpace: "nowrap",
-                        padding: "8px 4px",
-                      }}
-                    >
-                      <TypographySizeWrapper
-                        variant="body2"
-                        textSizeType="content"
-                        generalDisplaySettings={generalDisplaySettings}
-                        sx={{ fontWeight: "medium" }}
+                  {visibleDateHospKeys.map((key) => {
+                    const { date, hosp } = processedData.keyToDateHospMap[key];
+                    // 清理醫院名稱，只取分號前的部分
+                    const hospName = hosp.split(';')[0];
+                    
+                    return (
+                      <TableCell
+                        key={key}
+                        align="center"
+                        sx={{
+                          minWidth: "100px",
+                          maxWidth: "120px",
+                          whiteSpace: "nowrap",
+                          padding: "8px 4px",
+                        }}
                       >
-                        {date}
-                      </TypographySizeWrapper>
-                      {processedData.dateToHospMap[date] && (
                         <TypographySizeWrapper
-                          variant="caption"
-                          textSizeType="note"
+                          variant="body2"
+                          textSizeType="content"
                           generalDisplaySettings={generalDisplaySettings}
-                          sx={{
-                            display: "block",
-                            color: "text.secondary",
-                          }}
+                          sx={{ fontWeight: "medium" }}
                         >
-                          {processedData.dateToHospMap[date]}
+                          {date}
                         </TypographySizeWrapper>
-                      )}
-                    </TableCell>
-                  ))}
+                        {hospName && (
+                          <TypographySizeWrapper
+                            variant="caption"
+                            textSizeType="note"
+                            generalDisplaySettings={generalDisplaySettings}
+                            sx={{
+                              display: "block",
+                              color: "text.secondary",
+                            }}
+                          >
+                            {hospName}
+                          </TypographySizeWrapper>
+                        )}
+                      </TableCell>
+                    );
+                  })}
                 </TableRow>
               </TableHead>
               <TableBody>
-                {sortedFilteredMedicines.map(([name, dateMap]) => {
+                {sortedFilteredMedicines.map(([name, dateHospMap]) => {
                   // 獲取藥物的顏色
                   const medicationColor = getMedicationColor(name);
                   // 檢查藥物是否應該以粗體顯示
@@ -709,13 +739,13 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
                           )}
                         </Box>
                       </TableCell>
-                      {visibleDates.map((date) => {
-                        const medData = dateMap.get(date);
+                      {visibleDateHospKeys.map((key) => {
+                        const medData = dateHospMap.get(key);
                         const shouldDisplay = shouldDisplayMedication(medData, dayFilter, name);
                         
                         return (
                           <TableCell
-                            key={date}
+                            key={key}
                             align="center"
                             sx={{
                               minWidth: "100px",

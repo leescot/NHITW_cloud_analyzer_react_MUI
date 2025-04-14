@@ -58,6 +58,7 @@ const DataStatusTab = ({ dataStatus }) => {
     <Box sx={{ flexGrow: 1, mt: 1 }}>
       <Grid container spacing={2}>
         {Object.entries(dataStatus).map(([key, value]) => (
+          !['adultHealthCheck', 'cancerScreening'].includes(key) && (
           <Grid item xs={4} key={key}>
             <Paper
               elevation={1}
@@ -91,6 +92,7 @@ const DataStatusTab = ({ dataStatus }) => {
               </Box>
             </Paper>
           </Grid>
+          )
         ))}
       </Grid>
     </Box>

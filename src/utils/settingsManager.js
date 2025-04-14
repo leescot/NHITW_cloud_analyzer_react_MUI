@@ -47,6 +47,7 @@ export const loadAllSettings = async () => {
       enableLabChooseCopy: DEFAULT_SETTINGS.lab.enableLabChooseCopy,
       labChooseCopyItems: DEFAULT_SETTINGS.lab.labChooseCopyItems,
       enableLabCustomCopyFormat: DEFAULT_SETTINGS.lab.enableLabCustomCopyFormat || false,
+      enableLabCopyAll: DEFAULT_SETTINGS.lab.enableLabCopyAll || false,
       itemSeparator: DEFAULT_SETTINGS.lab.itemSeparator || ',',
       customLabHeaderCopyFormat: DEFAULT_SETTINGS.lab.customLabHeaderCopyFormat,
       customLabItemCopyFormat: DEFAULT_SETTINGS.lab.customLabItemCopyFormat,
@@ -66,6 +67,10 @@ export const loadAllSettings = async () => {
       floatingIconPosition: DEFAULT_SETTINGS.general.floatingIconPosition,
       alwaysOpenOverviewTab: DEFAULT_SETTINGS.general.alwaysOpenOverviewTab,
       useColorfulTabs: DEFAULT_SETTINGS.general.useColorfulTabs,
+      
+      // Cloud data settings
+      fetchAdultHealthCheck: DEFAULT_SETTINGS.cloud.fetchAdultHealthCheck,
+      fetchCancerScreening: DEFAULT_SETTINGS.cloud.fetchCancerScreening,
     }, (items) => {
       // 組織所有設置到一個結構化對象
       const allSettings = {
@@ -104,6 +109,7 @@ export const loadAllSettings = async () => {
           enableLabChooseCopy: items.enableLabChooseCopy,
           labChooseCopyItems: items.labChooseCopyItems,
           enableLabCustomCopyFormat: items.enableLabCustomCopyFormat,
+          enableLabCopyAll: items.enableLabCopyAll,
           itemSeparator: items.itemSeparator || ',',
           customLabHeaderCopyFormat: items.customLabHeaderCopyFormat,
           customLabItemCopyFormat: items.customLabItemCopyFormat,
@@ -123,6 +129,10 @@ export const loadAllSettings = async () => {
           floatingIconPosition: items.floatingIconPosition,
           alwaysOpenOverviewTab: items.alwaysOpenOverviewTab,
           useColorfulTabs: items.useColorfulTabs,
+        },
+        cloud: {
+          fetchAdultHealthCheck: items.fetchAdultHealthCheck,
+          fetchCancerScreening: items.fetchCancerScreening,
         }
       };
 
@@ -246,6 +256,7 @@ const handleLabSettingsChange = (event, currentSettings, updateCallback, callbac
       enableLabChooseCopy: event.detail.allSettings.enableLabChooseCopy,
       labChooseCopyItems: event.detail.allSettings.labChooseCopyItems,
       enableLabCustomCopyFormat: event.detail.allSettings.enableLabCustomCopyFormat,
+      enableLabCopyAll: event.detail.allSettings.enableLabCopyAll,
       itemSeparator: event.detail.allSettings.itemSeparator || ',',
       customLabHeaderCopyFormat: event.detail.allSettings.customLabHeaderCopyFormat,
       customLabItemCopyFormat: event.detail.allSettings.customLabItemCopyFormat,
@@ -404,6 +415,37 @@ const handleOverviewSettingsChange = (event, currentSettings, updateCallback, ca
 };
 
 /**
+ * 處理雲端資料設置變更
+ */
+const handleCloudDataSettingsChange = (event, currentSettings, updateCallback) => {
+  if (event.detail.allSettings) {
+    // 更新所有雲端資料設置
+    const newCloudSettings = {
+      fetchAdultHealthCheck: event.detail.allSettings.fetchAdultHealthCheck,
+      fetchCancerScreening: event.detail.allSettings.fetchCancerScreening,
+    };
+
+    // 更新設置
+    updateCallback({
+      ...currentSettings,
+      cloud: newCloudSettings
+    });
+  } else {
+    // 單一設置變更
+    const updatedSettings = {
+      ...currentSettings.cloud,
+      [event.detail.setting]: event.detail.value
+    };
+
+    // 更新設置
+    updateCallback({
+      ...currentSettings,
+      cloud: updatedSettings
+    });
+  }
+};
+
+/**
  * 處理一般顯示設置變更
  */
 const handleGeneralDisplaySettingsChange = (event, updateGeneralDisplaySettings) => {
@@ -445,7 +487,8 @@ export const handleDataFetchCompletedSettingsChange = (event, currentSettings, u
       ['chinesemed', () => handleChineseMedSettingsChange(event, currentSettings, updateCallback, callbacks)],
       ['labsettings', () => handleLabSettingsChange(event, currentSettings, updateCallback, callbacks)],
       ['overview', () => handleOverviewSettingsChange(event, currentSettings, updateCallback, callbacks)],
-      ['generalDisplay', () => handleGeneralDisplaySettingsChange(event, updateCallback)]
+      ['generalDisplay', () => handleGeneralDisplaySettingsChange(event, updateCallback)],
+      ['cloud', () => handleCloudDataSettingsChange(event, currentSettings, updateCallback)]
     ]);
 
     // 從 Map 中獲取並執行對應的處理函數

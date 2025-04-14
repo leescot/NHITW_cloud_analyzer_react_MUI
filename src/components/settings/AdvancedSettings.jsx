@@ -18,6 +18,7 @@ const AdvancedSettings = () => {
     enableMedicationCustomCopyFormat: false,
     enableMedicationCopyAll: false,
     enableLabCustomCopyFormat: false,
+    enableLabCopyAll: false,
   });
 
   useEffect(() => {
@@ -27,12 +28,14 @@ const AdvancedSettings = () => {
         enableMedicationCustomCopyFormat: false,
         enableMedicationCopyAll: false,
         enableLabCustomCopyFormat: false,
+        enableLabCopyAll: false,
       },
       (items) => {
         setSettings({
           enableMedicationCustomCopyFormat: items.enableMedicationCustomCopyFormat,
           enableMedicationCopyAll: items.enableMedicationCopyAll,
           enableLabCustomCopyFormat: items.enableLabCustomCopyFormat,
+          enableLabCopyAll: items.enableLabCopyAll,
         });
       }
     );
@@ -153,6 +156,21 @@ const AdvancedSettings = () => {
         <FormControlLabel
           control={
             <Switch
+              checked={settings.enableMedicationCopyAll}
+              onChange={(e) => {
+                handleLocalSettingChange(
+                  "enableMedicationCopyAll",
+                  e.target.checked
+                );
+              }}
+            />
+          }
+          label="開啟西藥全部資料複製功能"
+        />
+
+        <FormControlLabel
+          control={
+            <Switch
               checked={settings.enableLabCustomCopyFormat}
               onChange={(e) => {
                 handleLocalSettingChange(
@@ -176,16 +194,16 @@ const AdvancedSettings = () => {
         <FormControlLabel
           control={
             <Switch
-              checked={settings.enableMedicationCopyAll}
+              checked={settings.enableLabCopyAll}
               onChange={(e) => {
                 handleLocalSettingChange(
-                  "enableMedicationCopyAll",
+                  "enableLabCopyAll",
                   e.target.checked
                 );
               }}
             />
           }
-          label="開啟西藥全部資料複製功能"
+          label="開啟檢驗報告全部資料複製功能"
         />
       </AccordionDetails>
     </Accordion>

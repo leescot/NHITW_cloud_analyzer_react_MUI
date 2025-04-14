@@ -14,6 +14,8 @@ window.lastInterceptedDischargeData = null;
 window.lastInterceptedMedDaysData = null;
 window.lastInterceptedPatientSummaryData = null;
 window.lastInterceptedMasterMenuData = null; // 新增主選單數據
+window.lastInterceptedAdultHealthCheckData = null; // 新增成人預防保健資料
+window.lastInterceptedCancerScreeningData = null; // 新增四癌篩檢結果資料
 // window.lastInterceptedRehabilitationData = null; // 新增復健資料
 // window.lastInterceptedAcupunctureData = null; // 新增針灸資料
 // window.lastInterceptedSpecialChineseMedCareData = null; // 新增特殊中醫處置資料
@@ -50,6 +52,8 @@ let pendingRequests = {
   medDays: false,
   patientsummary: false, // 新增病患摘要
   masterMenu: false, // 新增主選單
+  adultHealthCheck: false, // 新增成人預防保健
+  cancerScreening: false, // 新增四癌篩檢結果
 };
 
 // 在頁面加載後自動初始化
@@ -193,6 +197,10 @@ function clearTestData() {
   lastInterceptedSurgeryData = null;
   lastInterceptedDischargeData = null;
   lastInterceptedMedDaysData = null;
+  lastInterceptedPatientSummaryData = null;
+  lastInterceptedMasterMenuData = null;
+  lastInterceptedAdultHealthCheckData = null;
+  lastInterceptedCancerScreeningData = null;
   // console.log('Test data cleared');
 }
 
@@ -272,16 +280,9 @@ async function checkAndInitUserSession() {
         const isNewSession = storedSession !== userInfo;
 
         if (isNewSession) {
-          // console.log(
-          //   "User session changed from:",
-          //   storedSession,
-          //   "to:",
-          //   userInfo
-          // );
           performClearPreviousData();
           currentPatientId = userInfo; // 更新當前病人標識
           chrome.storage.local.set({ currentUserSession: userInfo }, () => {
-            // console.log("New user session saved:", userInfo);
             chrome.runtime.sendMessage({
               action: "userSessionChanged",
               userSession: userInfo,
@@ -291,7 +292,6 @@ async function checkAndInitUserSession() {
         } else {
           currentUserSession = userInfo;
           currentPatientId = userInfo; // 更新但不清除資料
-          // console.log('Same user session:', userInfo);
           resolve(false); // 表示同一病人
         }
       });
@@ -349,6 +349,8 @@ function performClearPreviousData() {
       lastInterceptedMedDaysData = null;
       lastInterceptedPatientSummaryData = null;
       lastInterceptedMasterMenuData = null;
+      lastInterceptedAdultHealthCheckData = null;
+      lastInterceptedCancerScreeningData = null;
       // lastInterceptedRehabilitationData = null;
       // lastInterceptedAcupunctureData = null;
       // lastInterceptedSpecialChineseMedCareData = null;
@@ -374,7 +376,6 @@ async function extractUserInfo() {
     cachedUserInfo &&
     currentTime - lastUserInfoExtractTime < USER_INFO_CACHE_DURATION
   ) {
-    // console.log('Using cached user info:', cachedUserInfo);
     return cachedUserInfo;
   }
 
@@ -468,9 +469,6 @@ function observeUrlChanges() {
         isDataFetchingStarted = false; // 重置狀態
         checkAndInitUserSession().then((isNewSession) => {
           if (isNewSession || !window.lastInterceptedMedicationData?.rObject) {
-            // console.log(
-            //   "New patient or no data due to URL change, fetching..."
-            // );
             fetchAllDataTypes();
           } else {
             console.log("Same patient after URL change, reusing data");
@@ -493,19 +491,266 @@ const API_URL_PATTERNS = new Map([
   ["medDays", "/imu/api/imue0120/imue0120s01/pres-med-day"],
   ["patientsummary", "/imu/api/imue2000/imue2000s01/get-summary"],
   ["masterMenu", "/imu/api/imue1000/imue1000s02/master-menu"],
+  ["adultHealthCheck", "/imu/api/imue0140/imue0140s01/hpa-data"],
+  ["cancerScreening", "/imu/api/imue0150/imue0150s01/hpa-data"],
   // ["rehabilitation", "/imu/api/imue0080/imue0080s02/get-data"],
-  // ["acupuncture", "/imu/api/imue0160/imue0160s02/get-data"],
+  // ["acupuncture", "/imu/api/imue0100/imue0100s02/get-data"],
   // ["specialChineseMedCare", "/imu/api/imue0170/imue0170s02/get-data"]
 ]);
 
-// 從 URL 獲取數據類型的函數
-function getDataTypeFromUrl(url) {
-  for (const [dataType, pattern] of API_URL_PATTERNS.entries()) {
-    if (url.includes(pattern)) {
-      return dataType;
+// 數據處理模塊 - 封裝數據提取與處理相關功能
+const DataProcessor = {
+  // Map 定義集中管理，提高封裝性
+  // API URL 模式映射表
+  API_URL_PATTERNS: new Map([
+    ["medication", "/imu/api/imue0008/imue0008s02/get-data"],
+    ["labdata", "/imu/api/imue0060/imue0060s02/get-data"],
+    ["chinesemed", "/imu/api/imue0090/imue0090s02/get-data"],
+    ["imaging", "/imu/api/imue0130/imue0130s02/get-data"],
+    ["allergy", "/imu/api/imue0040/imue0040s02/get-data"],
+    ["surgery", "/imu/api/imue0020/imue0020s02/get-data"],
+    ["discharge", "/imu/api/imue0070/imue0070s02/get-data"],
+    ["medDays", "/imu/api/imue0120/imue0120s01/pres-med-day"],
+    ["patientsummary", "/imu/api/imue2000/imue2000s01/get-summary"],
+    ["masterMenu", "/imu/api/imue1000/imue1000s02/master-menu"],
+    ["adultHealthCheck", "/imu/api/imue0140/imue0140s01/hpa-data"],
+    ["cancerScreening", "/imu/api/imue0150/imue0150s01/hpa-data"],
+    // ["rehabilitation", "/imu/api/imue0080/imue0080s02/get-data"],
+    // ["acupuncture", "/imu/api/imue0100/imue0100s02/get-data"],
+    // ["specialChineseMedCare", "/imu/api/imue0170/imue0170s02/get-data"]
+  ]),
+  
+  // 數據類型與對應的全局變數
+  dataVarMap: new Map([
+    ["medication", "lastInterceptedMedicationData"],
+    ["labdata", "lastInterceptedLabData"],
+    ["chinesemed", "lastInterceptedChineseMedData"],
+    ["imaging", "lastInterceptedImagingData"],
+    ["allergy", "lastInterceptedAllergyData"],
+    ["surgery", "lastInterceptedSurgeryData"],
+    ["discharge", "lastInterceptedDischargeData"],
+    ["medDays", "lastInterceptedMedDaysData"],
+    ["patientsummary", "lastInterceptedPatientSummaryData"],
+    ["masterMenu", "lastInterceptedMasterMenuData"],
+    ["adultHealthCheck", "lastInterceptedAdultHealthCheckData"],
+    ["cancerScreening", "lastInterceptedCancerScreeningData"],
+    // ["rehabilitation", "lastInterceptedRehabilitationData"],
+    // ["acupuncture", "lastInterceptedAcupunctureData"],
+    // ["specialChineseMedCare", "lastInterceptedSpecialChineseMedCareData"]
+  ]),
+  
+  // 數據類型與對應的 action
+  actionMap: new Map([
+    ["medication", "saveMedicationData"],
+    ["labdata", "saveLabData"],
+    ["chinesemed", "saveChineseMedData"],
+    ["imaging", "saveImagingData"],
+    ["allergy", "saveAllergyData"],
+    ["surgery", "saveSurgeryData"],
+    ["discharge", "saveDischargeData"],
+    ["medDays", "saveMedDaysData"],
+    ["patientsummary", "savePatientSummaryData"],
+    ["masterMenu", "saveMasterMenuData"],
+    ["adultHealthCheck", "saveAdultHealthCheckData"],
+    ["cancerScreening", "saveCancerScreeningData"],
+    // ["rehabilitation", "saveRehabilitationData"],
+    // ["acupuncture", "saveAcupunctureData"],
+    // ["specialChineseMedCare", "saveSpecialChineseMedCareData"]
+  ]),
+  
+  // 數據類型與對應的中文顯示文字
+  typeTextMap: new Map([
+    ["medication", "西醫藥歷"],
+    ["labdata", "檢驗資料"],
+    ["chinesemed", "中醫用藥"],
+    ["imaging", "醫療影像"],
+    ["allergy", "過敏資料"],
+    ["surgery", "手術記錄"],
+    ["discharge", "出院病摘"],
+    ["medDays", "藥品餘藥"],
+    ["patientsummary", "病患摘要"],
+    ["masterMenu", "主選單"],
+    ["adultHealthCheck", "成人預防保健"],
+    ["cancerScreening", "四癌篩檢結果"],
+    // ["rehabilitation", "復健治療"],
+    // ["acupuncture", "針灸治療"],
+    // ["specialChineseMedCare", "特殊中醫處置"]
+  ]),
+  
+  // 處理原始數據，統一數據格式
+  normalizeData(data, dataType) {
+    // 檢查 robject（小寫）或 rObject（大寫），兩者都接受
+    const recordsArray = data.rObject || data.robject;
+    
+    // 對 masterMenu 類型特殊處理
+    const isMasterMenu = dataType === "masterMenu";
+    
+    if (!data || (!recordsArray && !isMasterMenu)) {
+      console.error(`Invalid data for type ${dataType}`);
+      return null;
     }
-  }
-  return null;
+    
+    // 統一格式
+    return {
+      rObject: isMasterMenu ? [data] : recordsArray,
+      originalData: data,
+    };
+  },
+  
+  // 檢查數據是否為有效
+  isValidData(data, dataType) {
+    if (!data) return false;
+    
+    // 對 masterMenu 類型特殊處理
+    if (dataType === "masterMenu") return true;
+    
+    const recordsArray = data.rObject || data.robject;
+    return recordsArray && Array.isArray(recordsArray);
+  },
+  
+  // 獲取數據類型對應的變數名
+  getVarName(dataType) {
+    return this.dataVarMap.get(dataType);
+  },
+  
+  // 獲取數據類型對應的 action
+  getAction(dataType) {
+    return this.actionMap.get(dataType);
+  },
+  
+  // 獲取數據類型對應的顯示文字
+  getTypeText(dataType) {
+    return this.typeTextMap.get(dataType);
+  },
+  
+  // 根據 URL 獲取對應的數據類型
+  getDataTypeFromUrl(url) {
+    const foundEntry = Array.from(this.API_URL_PATTERNS.entries())
+      .find(([_, pattern]) => url.includes(pattern));
+    
+    return foundEntry ? foundEntry[0] : null;
+  },
+  
+  // 處理 API 響應數據
+  processApiResponse(data, url, source = "API") {
+    const dataType = this.getDataTypeFromUrl(url);
+    if (!dataType) {
+      console.log("無法從 URL 確定數據類型:", url);
+      return null;
+    }
+    
+    // 標準化數據
+    const normalizedData = this.normalizeData(data, dataType);
+    if (!normalizedData) return null;
+    
+    // 更新全局變數
+    const varName = this.getVarName(dataType);
+    if (varName) {
+      window[varName] = normalizedData;
+    }
+    
+    // 保存數據
+    this.saveData(normalizedData, dataType, source);
+    
+    return {
+      dataType,
+      data: normalizedData
+    };
+  },
+  
+  // 保存數據到 localStorage
+  saveDataToLocalStorage() {
+    try {
+      // 使用 dataVarMap 遍历获取所有数据，減少重複代碼和硬編碼
+      const dataToShare = {
+        timestamp: Date.now() // 添加时间戳以识别数据新鲜度
+      };
+      
+      // 從 dataVarMap 中獲取所有數據類型和對應的變數名
+      // 這樣避免硬編碼重複數據類型，使維護更容易
+      for (const [dataType, varName] of this.dataVarMap.entries()) {
+        // 特殊處理 labdata 類型，對應的存儲鍵為 lab
+        const storageKey = dataType === 'labdata' ? 'lab' : dataType;
+        dataToShare[storageKey] = window[varName];
+      }
+      
+      // 檢查是否有數據
+      const hasData = Object.values(dataToShare).some(value => 
+        value !== null && value !== undefined && value !== false && value !== ''
+      );
+      
+      if (hasData) {
+        localStorage.setItem('NHITW_DATA', JSON.stringify(dataToShare));
+        
+        // 觸發存儲事件，便於其他擴展監聽
+        window.dispatchEvent(new Event('storage'));
+      }
+    } catch (error) {
+      console.error('保存数据到 localStorage 时出错:', error);
+    }
+  },
+  
+  // 驗證數據有效性並更新全局變數
+  validateAndUpdateData(data, dataType) {
+    // 使用內部方法進行數據驗證和處理
+    if (!this.isValidData(data, dataType)) {
+      console.error(`無效的數據類型: ${dataType}`);
+      return false;
+    }
+    
+    // 更新全局變數
+    const varName = this.getVarName(dataType);
+    if (varName) {
+      window[varName] = data;
+    }
+
+    const action = this.getAction(dataType);
+    
+    if (!action) {
+      console.error(`不支援的資料類型: ${dataType}`);
+      return false;
+    }
+    
+    return true;
+  },
+  
+  // 發送數據到後台腳本
+  sendDataToBackground(data, dataType) {
+    const action = this.getAction(dataType);
+    
+    chrome.runtime.sendMessage(
+      {
+        action: action,
+        data: data,
+        userSession: currentUserSession,
+      },
+      (response) => {
+        if (response && response.status === "saved") {
+          const recordCount = data.rObject.length;
+          // 可以在此處添加保存成功後的處理邏輯
+        }
+      }
+    );
+  },
+  
+  // 保存數據函數
+  saveData(data, dataType, source = "unknown") {
+    // 數據檢驗和更新邏輯
+    if (!this.validateAndUpdateData(data, dataType)) {
+      return;
+    }
+
+    // 發送消息到後台腳本
+    this.sendDataToBackground(data, dataType);
+    
+    // 保存到 localStorage
+    this.saveDataToLocalStorage();
+  },
+};
+
+// 使用此模塊替換原有的 getDataTypeFromUrl 函數
+function getDataTypeFromUrl(url) {
+  return DataProcessor.getDataTypeFromUrl(url);
 }
 
 // 監聽設置
@@ -543,7 +788,7 @@ function setupMonitoring() {
       if (event === "load" || event === "readystatechange") {
         const newHandler = function () {
           // 檢查 URL 是否匹配任一 API 模式
-          const isTargetUrl = Array.from(API_URL_PATTERNS.values()).some(pattern => 
+          const isTargetUrl = Array.from(DataProcessor.API_URL_PATTERNS.values()).some(pattern => 
             originalUrl && originalUrl.includes(pattern)
           );
           
@@ -560,76 +805,22 @@ function setupMonitoring() {
 
                 const data = JSON.parse(this.responseText);
 
-                // For master-menu, log the response data
-                if (originalUrl.includes(API_URL_PATTERNS.get("masterMenu"))) {
+                // 使用 DataProcessor 處理 API 響應數據
+                const result = DataProcessor.processApiResponse(data, originalUrl, "XHR");
+                if (result) {
                   console.log(
-                    "Master Menu API Response:",
-                    JSON.stringify(data, null, 2)
+                    `Successfully intercepted ${result.data.rObject.length} ${result.dataType} records via XHR`
                   );
-                }
 
-                // 檢查 robject（小寫）或 rObject（大寫），兩者都接受
-                const recordsArray = data.rObject || data.robject;
-
-                // 強化資料格式檢查
-                const isMasterMenu = originalUrl.includes(API_URL_PATTERNS.get("masterMenu"));
-                if (
-                  data &&
-                  ((recordsArray && Array.isArray(recordsArray)) ||
-                    isMasterMenu)
-                ) {
-                  // 統一格式
-                  const normalizedData = {
-                    rObject: isMasterMenu
-                      ? [data]
-                      : recordsArray,
-                    originalData: data,
-                  };
-
-                  // 判斷數據類型
-                  const dataType = getDataTypeFromUrl(originalUrl);
-
-                  if (dataType) {
-                    // 使用 Map 保存數據類型和對應的變數名
-                    const dataVarMap = new Map([
-                      ["medication", "lastInterceptedMedicationData"],
-                      ["labdata", "lastInterceptedLabData"],
-                      ["chinesemed", "lastInterceptedChineseMedData"],
-                      ["imaging", "lastInterceptedImagingData"],
-                      ["allergy", "lastInterceptedAllergyData"],
-                      ["surgery", "lastInterceptedSurgeryData"],
-                      ["discharge", "lastInterceptedDischargeData"],
-                      ["medDays", "lastInterceptedMedDaysData"],
-                      ["patientsummary", "lastInterceptedPatientSummaryData"],
-                      ["masterMenu", "lastInterceptedMasterMenuData"],
-                      // ["rehabilitation", "lastInterceptedRehabilitationData"],
-                      // ["acupuncture", "lastInterceptedAcupunctureData"],
-                      // ["specialChineseMedCare", "lastInterceptedSpecialChineseMedCareData"]
-                    ]);
-                    
-                    // 設置對應的全局變數
-                    const varName = dataVarMap.get(dataType);
-                    if (varName) {
-                      window[varName] = normalizedData;
-                    }
-
-                    console.log(
-                      `Successfully intercepted ${recordsArray.length} ${dataType} records via XHR`
-                    );
-
-                    // 將數據保存到儲存空間
-                    saveData(normalizedData, dataType, "XHR");
-
-                    // 嘗試提取並保存令牌
-                    setTimeout(() => {
-                      extractAndSaveToken();
-                    }, 500);
-                  } else {
-                    console.log(
-                      "Response does not contain expected data structure:",
-                      data
-                    );
-                  }
+                  // 嘗試提取並保存令牌
+                  setTimeout(() => {
+                    extractAndSaveToken();
+                  }, 500);
+                } else {
+                  console.log(
+                    "Response does not contain expected data structure:",
+                    data
+                  );
                 }
               } catch (error) {
                 console.error("Error processing XHR response:", error);
@@ -648,7 +839,7 @@ function setupMonitoring() {
     };
 
     // 檢查 URL 是否匹配任一 API 模式
-    const isTargetUrl = Array.from(API_URL_PATTERNS.values()).some(pattern => 
+    const isTargetUrl = Array.from(DataProcessor.API_URL_PATTERNS.values()).some(pattern => 
       originalUrl && originalUrl.includes(pattern)
     );
     
@@ -672,7 +863,7 @@ function setupMonitoring() {
         : null;
 
     // 檢查 URL 是否匹配任一 API 模式
-    const isTargetUrl = Array.from(API_URL_PATTERNS.values()).some(pattern => 
+    const isTargetUrl = Array.from(DataProcessor.API_URL_PATTERNS.values()).some(pattern => 
       url && url.includes(pattern)
     );
     
@@ -699,76 +890,22 @@ function setupMonitoring() {
               try {
                 const data = JSON.parse(text);
 
-                // For master-menu, log the response data
-                if (url.includes(API_URL_PATTERNS.get("masterMenu"))) {
+                // 使用 DataProcessor 處理 API 響應數據
+                const result = DataProcessor.processApiResponse(data, url);
+                if (result) {
                   console.log(
-                    "Master Menu API Response:",
-                    JSON.stringify(data, null, 2)
+                    `Successfully intercepted ${result.data.rObject.length} ${result.dataType} records via fetch`
                   );
-                }
 
-                // 檢查 robject（小寫）或 rObject（大寫），兩者都接受
-                const recordsArray = data.rObject || data.robject;
-
-                // 強化資料格式檢查
-                const isMasterMenu = url.includes(API_URL_PATTERNS.get("masterMenu"));
-                if (
-                  data &&
-                  ((recordsArray && Array.isArray(recordsArray)) ||
-                    isMasterMenu)
-                ) {
-                  // 統一格式
-                  const normalizedData = {
-                    rObject: isMasterMenu
-                      ? [data]
-                      : recordsArray,
-                    originalData: data,
-                  };
-
-                  // 判斷數據類型
-                  const dataType = getDataTypeFromUrl(url);
-
-                  if (dataType) {
-                    // 使用 Map 保存數據類型和對應的變數名
-                    const dataVarMap = new Map([
-                      ["medication", "lastInterceptedMedicationData"],
-                      ["labdata", "lastInterceptedLabData"],
-                      ["chinesemed", "lastInterceptedChineseMedData"],
-                      ["imaging", "lastInterceptedImagingData"],
-                      ["allergy", "lastInterceptedAllergyData"],
-                      ["surgery", "lastInterceptedSurgeryData"],
-                      ["discharge", "lastInterceptedDischargeData"],
-                      ["medDays", "lastInterceptedMedDaysData"],
-                      ["patientsummary", "lastInterceptedPatientSummaryData"],
-                      ["masterMenu", "lastInterceptedMasterMenuData"],
-                      // ["rehabilitation", "lastInterceptedRehabilitationData"],
-                      // ["acupuncture", "lastInterceptedAcupunctureData"],
-                      // ["specialChineseMedCare", "lastInterceptedSpecialChineseMedCareData"]
-                    ]);
-                    
-                    // 設置對應的全局變數
-                    const varName = dataVarMap.get(dataType);
-                    if (varName) {
-                      window[varName] = normalizedData;
-                    }
-
-                    console.log(
-                      `Successfully intercepted ${recordsArray.length} ${dataType} records via fetch`
-                    );
-
-                    // 將數據保存到儲存空間
-                    saveData(normalizedData, dataType, "fetch");
-
-                    // 嘗試提取並保存令牌
-                    setTimeout(() => {
-                      extractAndSaveToken();
-                    }, 500);
-                  } else {
-                    console.warn(
-                      "Fetch response does not contain expected data structure:",
-                      data
-                    );
-                  }
+                  // 嘗試提取並保存令牌
+                  setTimeout(() => {
+                    extractAndSaveToken();
+                  }, 500);
+                } else {
+                  console.warn(
+                    "Fetch response does not contain expected data structure:",
+                    data
+                  );
                 }
               } catch (error) {
                 console.error("Error parsing fetch response:", error);
@@ -792,163 +929,40 @@ function setupMonitoring() {
   console.log("Fetch monitoring set up");
 }
 
-// 使用 Map 定義數據類型與對應的全局變數
-const dataVarMap = new Map([
-  ["medication", "lastInterceptedMedicationData"],
-  ["labdata", "lastInterceptedLabData"],
-  ["chinesemed", "lastInterceptedChineseMedData"],
-  ["imaging", "lastInterceptedImagingData"],
-  ["allergy", "lastInterceptedAllergyData"],
-  ["surgery", "lastInterceptedSurgeryData"],
-  ["discharge", "lastInterceptedDischargeData"],
-  ["medDays", "lastInterceptedMedDaysData"],
-  ["patientsummary", "lastInterceptedPatientSummaryData"],
-  ["masterMenu", "lastInterceptedMasterMenuData"],
-  // ["rehabilitation", "lastInterceptedRehabilitationData"],
-  // ["acupuncture", "lastInterceptedAcupunctureData"],
-  // ["specialChineseMedCare", "lastInterceptedSpecialChineseMedCareData"]
-]);
-
-// 使用 Map 定義數據類型與對應的 action
-const actionMap = new Map([
-  ["medication", "saveMedicationData"],
-  ["labdata", "saveLabData"],
-  ["chinesemed", "saveChineseMedData"],
-  ["imaging", "saveImagingData"],
-  ["allergy", "saveAllergyData"],
-  ["surgery", "saveSurgeryData"],
-  ["discharge", "saveDischargeData"],
-  ["medDays", "saveMedDaysData"],
-  ["patientsummary", "savePatientSummaryData"],
-  ["masterMenu", "saveMasterMenuData"],
-  // ["rehabilitation", "saveRehabilitationData"],
-  // ["acupuncture", "saveAcupunctureData"],
-  // ["specialChineseMedCare", "saveSpecialChineseMedCareData"]
-]);
-
-// 使用 Map 定義數據類型與對應的中文顯示文字
-const typeTextMap = new Map([
-  ["medication", "西醫藥歷"],
-  ["labdata", "檢驗資料"],
-  ["chinesemed", "中醫用藥"],
-  ["imaging", "醫療影像"],
-  ["allergy", "過敏資料"],
-  ["surgery", "手術記錄"],
-  ["discharge", "出院病摘"],
-  ["medDays", "藥品餘藥"],
-  ["patientsummary", "病患摘要"],
-  ["masterMenu", "主選單"],
-  // ["rehabilitation", "復健治療"],
-  // ["acupuncture", "針灸治療"],
-  // ["specialChineseMedCare", "特殊中醫處置"]
-]);
-
-// 新增: 使用 localStorage 保存数据的功能
-function saveDataToLocalStorage() {
-  try {
-    // 创建一个包含所有数据的对象
-    const dataToShare = {
-      medication: window.lastInterceptedMedicationData,
-      lab: window.lastInterceptedLabData,
-      chinesemed: window.lastInterceptedChineseMedData,
-      imaging: window.lastInterceptedImagingData,
-      allergy: window.lastInterceptedAllergyData,
-      surgery: window.lastInterceptedSurgeryData,
-      discharge: window.lastInterceptedDischargeData,
-      medDays: window.lastInterceptedMedDaysData,
-      patientSummary: window.lastInterceptedPatientSummaryData,
-      masterMenu: window.lastInterceptedMasterMenuData,
-      // rehabilitation: window.lastInterceptedRehabilitationData,
-      // acupuncture: window.lastInterceptedAcupunctureData,
-      // specialChineseMedCare: window.lastInterceptedSpecialChineseMedCareData,
-      timestamp: Date.now() // 添加时间戳以识别数据新鲜度
-    };
-    
-    // 检查是否有数据
-    const hasData = Object.values(dataToShare).some(value => 
-      value !== null && value !== undefined && value !== false && value !== ''
-    );
-    
-    if (hasData) {
-      // 将数据保存到 localStorage
-      localStorage.setItem('NHITW_DATA', JSON.stringify(dataToShare));
-      // console.log('数据已保存到 localStorage:', {
-      //   medication: dataToShare.medication ? true : false,
-      //   lab: dataToShare.lab ? true : false,
-      //   chinesemed: dataToShare.chinesemed ? true : false,
-      //   imaging: dataToShare.imaging ? true : false,
-      //   allergy: dataToShare.allergy ? true : false,
-      //   surgery: dataToShare.surgery ? true : false,
-      //   discharge: dataToShare.discharge ? true : false,
-      //   medDays: dataToShare.medDays ? true : false,
-      //   patientSummary: dataToShare.patientSummary ? true : false,
-      //   masterMenu: dataToShare.masterMenu ? true : false,
-      //   rehabilitation: dataToShare.rehabilitation ? true : false,
-      //   acupuncture: dataToShare.acupuncture ? true : false,
-      //   specialChineseMedCare: dataToShare.specialChineseMedCare ? true : false
-      // });
-      
-      // 触发存储事件，便于其他扩展监听
-      window.dispatchEvent(new Event('storage'));
-    }
-  } catch (error) {
-    // console.error('保存数据到 localStorage 时出错:', error);
-  }
+// 保存數據的函數 - 對外接口
+function saveData(data, dataType, source = "unknown") {
+  // 直接調用 DataProcessor 模塊的方法
+  DataProcessor.saveData(data, dataType, source);
 }
 
-// // 新增: 广播数据给其他扩展的函数
-// function broadcastDataToOtherExtensions() {
-//   // 调用 localStorage 保存函数
-//   saveDataToLocalStorage();
+// 驗證數據有效性並更新全局變數
+function validateAndUpdateData(data, dataType) {
+  // 使用內部方法進行數據驗證和處理
+  if (!DataProcessor.isValidData(data, dataType)) {
+    console.error(`無效的數據類型: ${dataType}`);
+    return false;
+  }
   
-//   // 为了兼容性，保留原来的事件广播方式
-//   const dataToShare = {
-//     medication: window.lastInterceptedMedicationData,
-//     lab: window.lastInterceptedLabData,
-//     chinesemed: window.lastInterceptedChineseMedData,
-//     imaging: window.lastInterceptedImagingData,
-//     allergy: window.lastInterceptedAllergyData,
-//     surgery: window.lastInterceptedSurgeryData,
-//     discharge: window.lastInterceptedDischargeData,
-//     medDays: window.lastInterceptedMedDaysData,
-//     patientSummary: window.lastInterceptedPatientSummaryData,
-//     masterMenu: window.lastInterceptedMasterMenuData,
-//     rehabilitation: window.lastInterceptedRehabilitationData,
-//     acupuncture: window.lastInterceptedAcupunctureData,
-//     specialChineseMedCare: window.lastInterceptedSpecialChineseMedCareData
-//   };
-  
-//   const event = new CustomEvent('NHITW_DATA_UPDATED', { detail: dataToShare });
-//   document.dispatchEvent(event);
-// }
-
-// // 新增: 手動觸發廣播資料的函數
-// function manuallyBroadcastData() {
-//   console.log('手動觸發廣播資料...');
-//   broadcastDataToOtherExtensions();
-// }
-
-function saveData(data, dataType, source = "unknown") {
-  // 先直接更新全局變數
-  const varName = dataVarMap.get(dataType);
+  // 更新全局變數
+  const varName = DataProcessor.getVarName(dataType);
   if (varName) {
     window[varName] = data;
   }
 
-  // 確保 data 有效 (對 masterMenu 類型特殊處理)
-  if (!data || (!data.rObject && dataType !== "masterMenu")) {
-    console.error(`Invalid data for type ${dataType}`);
-    return;
-  }
-
-  const action = actionMap.get(dataType);
-  const typeText = typeTextMap.get(dataType);
-
+  const action = DataProcessor.getAction(dataType);
+  
   if (!action) {
     console.error(`不支援的資料類型: ${dataType}`);
-    return;
+    return false;
   }
+  
+  return true;
+}
 
+// 发送数据到后台脚本
+function sendDataToBackground(data, dataType) {
+  const action = DataProcessor.getAction(dataType);
+  
   chrome.runtime.sendMessage(
     {
       action: action,
@@ -956,20 +970,12 @@ function saveData(data, dataType, source = "unknown") {
       userSession: currentUserSession,
     },
     (response) => {
-      // console.log(`${dataType} data saved to storage via ${source}:`, response);
-
       if (response && response.status === "saved") {
         const recordCount = data.rObject.length;
+        // 可以在此处添加保存成功后的处理逻辑
       }
     }
   );
-  
-  // 直接保存到 localStorage，而不是使用定时器
-  saveDataToLocalStorage();
-  
-  // 廣播資料給其他擴充功能 (保留原有功能以保持兼容性)
-  // 由于 broadcastDataToOtherExtensions 已經調用 saveDataToLocalStorage，所以這裡不需要再調用
-  // broadcastDataToOtherExtensions();
 }
 
 // 保存令牌
@@ -1010,7 +1016,7 @@ function captureXhrRequestHeaders() {
     this._url = url;
 
     // 檢查 URL 是否匹配任一 API 模式
-    const isTargetUrl = Array.from(API_URL_PATTERNS.values()).some(pattern => 
+    const isTargetUrl = Array.from(DataProcessor.API_URL_PATTERNS.values()).some(pattern => 
       url && url.includes(pattern)
     );
     
@@ -1166,6 +1172,29 @@ function validateToken(token) {
   }
 }
 
+// 新增: 檢查是否有抓取特定資料的設定
+function shouldFetchData(dataType) {
+  // 只對需要受控制的資料類型進行檢查，其他的預設為 true
+  if (dataType === "adultHealthCheck") {
+    // 檢查是否應該抓取成人預防保健資料
+    return new Promise((resolve) => {
+      chrome.storage.sync.get({ fetchAdultHealthCheck: true }, (items) => {
+        resolve(items.fetchAdultHealthCheck);
+      });
+    });
+  } else if (dataType === "cancerScreening") {
+    // 檢查是否應該抓取四癌篩檢結果資料
+    return new Promise((resolve) => {
+      chrome.storage.sync.get({ fetchCancerScreening: true }, (items) => {
+        resolve(items.fetchCancerScreening);
+      });
+    });
+  }
+  
+  // 其他資料類型預設為 true
+  return Promise.resolve(true);
+}
+
 // 在 content.js 中添加一個新函數，用於獲取所有類型的資料
 function fetchAllDataTypes() {
   // console.log("開始獲取所有資料類型");
@@ -1219,7 +1248,7 @@ function fetchAllDataTypes() {
       // 根據授權過濾並獲取資料類型
       const fetchPromises = dataTypes.map((dataType) => {
         if (isDataTypeAuthorized(dataType)) {
-          // console.log(`${dataType} 已授權，開始獲取資料`);
+          // console.log(`${dataType} 已授權，開始取資料`);
           return enhancedFetchData(dataType).catch((err) => {
             console.error(`獲取 ${dataType} 資料時發生錯誤:`, err);
             return { status: "error", recordCount: 0, error: err, dataType };
@@ -1231,8 +1260,25 @@ function fetchAllDataTypes() {
         }
       });
 
+      // 獲取設定並根據設定決定是否抓取特殊資料類型
+      const specialDataTypes = ["adultHealthCheck", "cancerScreening"];
+      const specialFetchPromises = specialDataTypes.map((dataType) => {
+        return shouldFetchData(dataType).then((shouldFetch) => {
+          if (shouldFetch && isDataTypeAuthorized(dataType)) {
+            // console.log(`${dataType} 已授權且設定要抓取，開始獲取資料`);
+            return enhancedFetchData(dataType).catch((err) => {
+              console.error(`獲取 ${dataType} 資料時發生錯誤:`, err);
+              return { status: "error", recordCount: 0, error: err, dataType };
+            });
+          } else {
+            // console.log(`${dataType} 設定不抓取或無授權，返回空集合`);
+            return Promise.resolve(createEmptyDataResult(dataType));
+          }獲
+        });
+      });
+
       // 執行所有請求
-      return Promise.all(fetchPromises);
+      return Promise.all([...fetchPromises, ...specialFetchPromises]);
     })
     .catch((err) => {
       console.error("獲取主選單資料失敗:", err);
@@ -1302,7 +1348,9 @@ function fetchAllDataTypes() {
         ["discharge", 0],
         ["medDays", 0],
         ["patientSummary", 0],
-        ["masterMenu", 1] // 主選單資料已獲取
+        ["masterMenu", 1], // 主選單資料已獲取
+        ["adultHealthCheck", 1], // 成人預防保健資料已獲取
+        ["cancerScreening", 1], // 四癌篩檢結果資料已獲取
       ]);
       
       // 填充實際計數
@@ -1316,6 +1364,8 @@ function fetchAllDataTypes() {
         else if (result.dataType === "discharge") countsMap.set("discharge", result.recordCount || 0);
         else if (result.dataType === "medDays") countsMap.set("medDays", result.recordCount || 0);
         else if (result.dataType === "patientsummary") countsMap.set("patientSummary", result.recordCount || 0);
+        else if (result.dataType === "adultHealthCheck") countsMap.set("adultHealthCheck", result.recordCount || 0);
+        else if (result.dataType === "cancerScreening") countsMap.set("cancerScreening", result.recordCount || 0);
       });
 
       // Build notification text
@@ -1329,6 +1379,8 @@ function fetchAllDataTypes() {
       if (countsMap.get("discharge") > 0) dataCounts.push(`${countsMap.get("discharge")} 筆病摘`);
       if (countsMap.get("medDays") > 0) dataCounts.push(`${countsMap.get("medDays")} 筆餘藥`);
       if (countsMap.get("patientSummary") > 0) dataCounts.push(`${countsMap.get("patientSummary")} 筆摘要`);
+      if (countsMap.get("adultHealthCheck") > 0) dataCounts.push(`${countsMap.get("adultHealthCheck")} 筆成人預防保健`);
+      if (countsMap.get("cancerScreening") > 0) dataCounts.push(`${countsMap.get("cancerScreening")} 筆四癌篩檢結果`);
 
       let notificationText;
       if (dataCounts.length === 0) {
@@ -1379,6 +1431,8 @@ const apiPathMap = new Map([
   ["medDays", "imue0120/imue0120s01/pres-med-day"],
   ["patientsummary", "imue2000/imue2000s01/get-summary"],
   ["masterMenu", "imue1000/imue1000s02/master-menu"],
+  ["adultHealthCheck", "imue0140/imue0140s01/hpa-data"],
+  ["cancerScreening", "imue0150/imue0150s01/hpa-data"],
   // ["rehabilitation", "imue0080/imue0080s02/get-data"],
   // ["acupuncture", "imue0160/imue0160s02/get-data"],
   // ["specialChineseMedCare", "imue0170/imue0170s02/get-data"]
@@ -1403,6 +1457,8 @@ function enhancedFetchData(dataType, options = {}) {
     "medDays",
     "patientsummary",
     "masterMenu",
+    "adultHealthCheck",
+    "cancerScreening",
     // "rehabilitation",
     // "acupuncture",
     // "specialChineseMedCare",
@@ -1518,7 +1574,7 @@ function enhancedFetchData(dataType, options = {}) {
             };
             
             // 使用 Map 更新全局變數
-            const varName = dataVarMap.get(dataType);
+            const varName = DataProcessor.getVarName(dataType);
             if (varName) {
               window[varName] = normalizedData;
             }
@@ -1567,7 +1623,7 @@ function extractAndSaveToken() {
 
 // 新增輔助函數來獲取資料類型的中文名稱
 function getTypeText(type) {
-  return typeTextMap.get(type) || type;
+  return DataProcessor.getTypeText(type) || type;
 }
 
 // 新增: 節點ID與資料類型對應表
@@ -1581,6 +1637,8 @@ const nodeToDataTypeMap = new Map([
   ["5.1", "allergy"],
   ["6.1", "labdata"],
   ["6.2", "imaging"],
+  ["6.3", "adultHealthCheck"],
+  ["6.4", "cancerScreening"],
   ["7.1", "surgery"],
   ["8.1", "discharge"],
   // ["9.1", "rehabilitation"]
@@ -1623,7 +1681,7 @@ function createEmptyDataResult(dataType) {
   };
 
   // 使用 Map 更新對應的全局變數
-  const varName = dataVarMap.get(dataType);
+  const varName = DataProcessor.getVarName(dataType);
   if (varName) {
     window[varName] = emptyData;
   }
@@ -1710,7 +1768,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action === "dataCleared") {
     console.log("Data cleared from popup");
     // Reset local data variables
-    for (const varName of dataVarMap.values()) {
+    for (const varName of DataProcessor.dataVarMap.values()) {
       window[varName] = null;
     }
 
@@ -1826,6 +1884,8 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
         medDays: window.lastInterceptedMedDaysData,
         patientSummary: window.lastInterceptedPatientSummaryData,
         masterMenu: window.lastInterceptedMasterMenuData,
+        adultHealthCheck: window.lastInterceptedAdultHealthCheckData,
+        cancerScreening: window.lastInterceptedCancerScreeningData,
         // rehabilitation: window.lastInterceptedRehabilitationData,
         // acupuncture: window.lastInterceptedAcupunctureData,
         // specialChineseMedCare: window.lastInterceptedSpecialChineseMedCareData,
@@ -1906,3 +1966,9 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
     return true; // 保持連接開啟以進行非同步回應
   }
 });
+
+// 新增: 使用 localStorage 保存数据的功能
+function saveDataToLocalStorage() {
+  // 直接调用 DataProcessor 模块中的方法
+  DataProcessor.saveDataToLocalStorage();
+}
