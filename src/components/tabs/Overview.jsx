@@ -9,6 +9,8 @@
  * - Surgery records
  * - Discharge records
  * - Imaging tests
+ * - Adult health check data
+ * - Cancer screening data
  *
  * This file serves as the integration point for all the separate components.
  */
@@ -25,6 +27,8 @@ import Overview_AllergyRecords from "./Overview_AllergyRecords";
 import Overview_SurgeryRecords from "./Overview_SurgeryRecords";
 import Overview_DischargeRecords from "./Overview_DischargeRecords";
 import Overview_ImagingTests from "./Overview_ImagingTests";
+import Overview_AdultHealthCheck from "./Overview_AdultHealthCheck";
+import Overview_CancerScreening from "./Overview_CancerScreening";
 
 // 導入從配置文件中移出的常數
 import { DEFAULT_LAB_TESTS } from '../../config/labTests';
@@ -41,6 +45,8 @@ const Overview = ({
   groupedLabs = [],
   labData,
   imagingData = { withReport: [], withoutReport: [] },
+  adultHealthCheckData = null,
+  cancerScreeningData = null,
   settings = {},
   overviewSettings = {
     medicationTrackingDays: 180,
@@ -50,13 +56,26 @@ const Overview = ({
     focusedImageTests: DEFAULT_IMAGE_TESTS
   },
   generalDisplaySettings = { titleTextSize: 'medium', contentTextSize: 'medium', noteTextSize: 'small' },
-  labSettings = {}
+  labSettings = {},
+  cloudSettings = { fetchAdultHealthCheck: true, fetchCancerScreening: true }
 }) => {
   // Check if components have data
   const hasMedications = useMemo(() => groupedMedications && groupedMedications.length > 0, [groupedMedications]);
   const hasAllergyData = useMemo(() => allergyData && allergyData.length > 0, [allergyData]);
   const hasSurgeryData = useMemo(() => surgeryData && surgeryData.length > 0, [surgeryData]);
   const hasDischargeData = useMemo(() => dischargeData && dischargeData.length > 0, [dischargeData]);
+
+  // Check if adult health check should be displayed
+  const shouldShowAdultHealthCheck = useMemo(() => 
+    cloudSettings?.fetchAdultHealthCheck === true, 
+    [cloudSettings]
+  );
+
+  // Check if cancer screening should be displayed
+  const shouldShowCancerScreening = useMemo(() => 
+    cloudSettings?.fetchCancerScreening === true, 
+    [cloudSettings]
+  );
 
   return (
     <Box sx={{ p: 0 }}>
@@ -82,6 +101,23 @@ const Overview = ({
 
         {/* 重點檢驗 - 中欄 (1/3) */}
         <Grid item xs={12} md={4.5}>
+          {/* 成人預防保健 - only display if setting is enabled */}
+          {shouldShowAdultHealthCheck && (
+            <Overview_AdultHealthCheck
+              adultHealthCheckData={adultHealthCheckData}
+              generalDisplaySettings={generalDisplaySettings}
+            />
+          )}
+
+          {/* 四癌篩檢 - only display if setting is enabled */}
+          {shouldShowCancerScreening && (
+            <Overview_CancerScreening
+              cancerScreeningData={cancerScreeningData}
+              generalDisplaySettings={generalDisplaySettings}
+            />
+          )}
+
+          {/* 重點檢驗 */}
           <Overview_LabTests
             groupedLabs={groupedLabs}
             labData={labData}

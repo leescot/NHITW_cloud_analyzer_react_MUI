@@ -10,7 +10,8 @@ export const updateDataStatus = (setDataStatus) => {
       // 使用 Map 存儲預期的鍵和默認值
       const expectedKeys = [
         'medication', 'labData', 'chineseMed', 'imaging',
-        'allergy', 'surgery', 'discharge', 'medDays', 'patientSummary'
+        'allergy', 'surgery', 'discharge', 'medDays', 'patientSummary',
+        'adultHealthCheck', 'cancerScreening'
       ];
 
       expectedKeys.forEach(key => {
@@ -35,7 +36,9 @@ const storageToStatusKeyMap = new Map([
   ['surgeryData', 'surgery'],
   ['dischargeData', 'discharge'],
   ['medDaysData', 'medDays'],
-  ['patientSummaryData', 'patientSummary']
+  ['patientSummaryData', 'patientSummary'],
+  ['adultHealthCheckData', 'adultHealthCheck'],
+  ['cancerScreeningData', 'cancerScreening']
 ]);
 
 // 從存儲鍵獲取狀態鍵的輔助函數
@@ -69,38 +72,68 @@ export const handleSettingChange = (settingName, value, setLocalState, localStat
       });
     }
 
-    // Notify content script of setting change
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      if (tabs[0]?.id) {
-        chrome.tabs.sendMessage(tabs[0].id, {
-          action: 'settingChanged',
-          setting: settingName,
-          value: value,
-          settingType: settingType || 'general' // 使用傳入的 settingType 或預設為 'general'
+    // Create a static property on the function to track if we've logged the warning
+    if (!handleSettingChange.hasLoggedTabsWarning) {
+      // Notify content script of setting change
+      if (chrome?.tabs?.query) {
+        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+          if (tabs[0]?.id) {
+            chrome.tabs.sendMessage(tabs[0].id, {
+              action: 'settingChanged',
+              setting: settingName,
+              value: value,
+              settingType: settingType || 'general' // 使用傳入的 settingType 或預設為 'general'
+            });
+          }
+        });
+      } else {
+        console.log('chrome.tabs API not available, notification system disabled');
+        // Mark that we've logged the warning
+        handleSettingChange.hasLoggedTabsWarning = true;
+      }
+    } else {
+      // If we've already logged the warning, just silently skip the notification
+      if (chrome?.tabs?.query) {
+        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+          if (tabs[0]?.id) {
+            chrome.tabs.sendMessage(tabs[0].id, {
+              action: 'settingChanged',
+              setting: settingName,
+              value: value,
+              settingType: settingType || 'general'
+            });
+          }
         });
       }
-    });
+    }
   });
 };
 
+// Initialize the static property
+handleSettingChange.hasLoggedTabsWarning = false;
+
 // 手動擷取資料處理函數
 export const handleFetchData = (setDataStatus) => {
-  chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-    if (tabs[0]?.id) {
-      chrome.tabs.sendMessage(tabs[0].id, { action: 'manualDataFetch' },
-        (response) => {
-          if (response && response.status === 'started') {
-            console.log('Manual data fetch initiated');
+  if (chrome?.tabs?.query) {
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      if (tabs[0]?.id) {
+        chrome.tabs.sendMessage(tabs[0].id, { action: 'manualDataFetch' },
+          (response) => {
+            if (response && response.status === 'started') {
+              console.log('Manual data fetch initiated');
 
-            // Update status after a delay to allow fetch to complete
-            setTimeout(() => {
-              updateDataStatus(setDataStatus);
-            }, 2000);
+              // Update status after a delay to allow fetch to complete
+              setTimeout(() => {
+                updateDataStatus(setDataStatus);
+              }, 2000);
+            }
           }
-        }
-      );
-    }
-  });
+        );
+      }
+    });
+  } else {
+    console.log('chrome.tabs API not available, skipping manual data fetch');
+  }
 };
 
 // 清除資料處理函數
@@ -114,7 +147,9 @@ export const handleClearData = (setDataStatus) => {
     'allergyData',
     'surgeryData',
     'dischargeData',
-    'medDaysData'
+    'medDaysData',
+    'adultHealthCheckData',
+    'cancerScreeningData'
   ];
 
   chrome.storage.local.remove(dataKeysToRemove, () => {
@@ -122,10 +157,14 @@ export const handleClearData = (setDataStatus) => {
     updateDataStatus(setDataStatus);
 
     // Notify content script to clear data
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
-      if (tabs[0]?.id) {
-        chrome.tabs.sendMessage(tabs[0].id, { action: 'clearData' });
-      }
-    });
+    if (chrome?.tabs?.query) {
+      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        if (tabs[0]?.id) {
+          chrome.tabs.sendMessage(tabs[0].id, { action: 'clearData' });
+        }
+      });
+    } else {
+      console.log('chrome.tabs API not available, skipping clear data notification');
+    }
   });
 };

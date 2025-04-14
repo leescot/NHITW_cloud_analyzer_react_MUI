@@ -46,6 +46,11 @@ export const loadAllSettings = async () => {
       copyLabFormat: DEFAULT_SETTINGS.lab.copyLabFormat,
       enableLabChooseCopy: DEFAULT_SETTINGS.lab.enableLabChooseCopy,
       labChooseCopyItems: DEFAULT_SETTINGS.lab.labChooseCopyItems,
+      enableLabCustomCopyFormat: DEFAULT_SETTINGS.lab.enableLabCustomCopyFormat || false,
+      enableLabCopyAll: DEFAULT_SETTINGS.lab.enableLabCopyAll || false,
+      itemSeparator: DEFAULT_SETTINGS.lab.itemSeparator || ',',
+      customLabHeaderCopyFormat: DEFAULT_SETTINGS.lab.customLabHeaderCopyFormat,
+      customLabItemCopyFormat: DEFAULT_SETTINGS.lab.customLabItemCopyFormat,
 
       // Overview settings
       medicationTrackingDays: DEFAULT_SETTINGS.overview.medicationTrackingDays,
@@ -62,6 +67,10 @@ export const loadAllSettings = async () => {
       floatingIconPosition: DEFAULT_SETTINGS.general.floatingIconPosition,
       alwaysOpenOverviewTab: DEFAULT_SETTINGS.general.alwaysOpenOverviewTab,
       useColorfulTabs: DEFAULT_SETTINGS.general.useColorfulTabs,
+      
+      // Cloud data settings
+      fetchAdultHealthCheck: DEFAULT_SETTINGS.cloud.fetchAdultHealthCheck,
+      fetchCancerScreening: DEFAULT_SETTINGS.cloud.fetchCancerScreening,
     }, (items) => {
       // 組織所有設置到一個結構化對象
       const allSettings = {
@@ -99,6 +108,11 @@ export const loadAllSettings = async () => {
           copyLabFormat: items.copyLabFormat,
           enableLabChooseCopy: items.enableLabChooseCopy,
           labChooseCopyItems: items.labChooseCopyItems,
+          enableLabCustomCopyFormat: items.enableLabCustomCopyFormat,
+          enableLabCopyAll: items.enableLabCopyAll,
+          itemSeparator: items.itemSeparator || ',',
+          customLabHeaderCopyFormat: items.customLabHeaderCopyFormat,
+          customLabItemCopyFormat: items.customLabItemCopyFormat,
         },
         overview: {
           medicationTrackingDays: items.medicationTrackingDays,
@@ -115,6 +129,10 @@ export const loadAllSettings = async () => {
           floatingIconPosition: items.floatingIconPosition,
           alwaysOpenOverviewTab: items.alwaysOpenOverviewTab,
           useColorfulTabs: items.useColorfulTabs,
+        },
+        cloud: {
+          fetchAdultHealthCheck: items.fetchAdultHealthCheck,
+          fetchCancerScreening: items.fetchCancerScreening,
         }
       };
 
@@ -237,6 +255,11 @@ const handleLabSettingsChange = (event, currentSettings, updateCallback, callbac
       copyLabFormat: event.detail.allSettings.copyLabFormat,
       enableLabChooseCopy: event.detail.allSettings.enableLabChooseCopy,
       labChooseCopyItems: event.detail.allSettings.labChooseCopyItems,
+      enableLabCustomCopyFormat: event.detail.allSettings.enableLabCustomCopyFormat,
+      enableLabCopyAll: event.detail.allSettings.enableLabCopyAll,
+      itemSeparator: event.detail.allSettings.itemSeparator || ',',
+      customLabHeaderCopyFormat: event.detail.allSettings.customLabHeaderCopyFormat,
+      customLabItemCopyFormat: event.detail.allSettings.customLabItemCopyFormat,
     };
 
     console.log("Updating all lab settings:", newLabSettings);
@@ -269,6 +292,46 @@ const handleLabSettingsChange = (event, currentSettings, updateCallback, callbac
       };
       
       console.log("Updated lab settings with new display format:", updatedSettings);
+      
+      // 更新設置
+      updateCallback({
+        ...currentSettings,
+        lab: updatedSettings
+      });
+      
+      // 重新處理檢驗數據
+      if (window.lastInterceptedLabData && callbacks.reprocessLab) {
+        callbacks.reprocessLab(window.lastInterceptedLabData, updatedSettings);
+      }
+      
+      return; // 提前返回，不執行後面的代碼
+    }
+    
+    // 特別處理 itemSeparator
+    if (settingKey === 'itemSeparator') {
+      console.log(`Special handling for item separator: "${updatedValue}" (${typeof updatedValue})`);
+      
+      // 確保分隔符是字符串
+      if (typeof updatedValue !== 'string') {
+        console.warn(`Invalid itemSeparator value: ${updatedValue}, converting to string`);
+        updatedValue = String(updatedValue || ',');
+      }
+      
+      // 確保有可讀的日誌輸出
+      const loggableSeparator = updatedValue
+        .replace(/\n/g, '\\n')
+        .replace(/\r/g, '\\r')
+        .replace(/\t/g, '\\t');
+        
+      console.log(`Sanitized itemSeparator: "${loggableSeparator}" (${typeof updatedValue})`);
+      
+      // 創建新的設置對象，確保 itemSeparator 被正確設置
+      const updatedSettings = {
+        ...currentSettings.lab,
+        itemSeparator: updatedValue
+      };
+      
+      console.log("Updated lab settings with new item separator:", updatedSettings);
       
       // 更新設置
       updateCallback({
@@ -352,6 +415,37 @@ const handleOverviewSettingsChange = (event, currentSettings, updateCallback, ca
 };
 
 /**
+ * 處理雲端資料設置變更
+ */
+const handleCloudDataSettingsChange = (event, currentSettings, updateCallback) => {
+  if (event.detail.allSettings) {
+    // 更新所有雲端資料設置
+    const newCloudSettings = {
+      fetchAdultHealthCheck: event.detail.allSettings.fetchAdultHealthCheck,
+      fetchCancerScreening: event.detail.allSettings.fetchCancerScreening,
+    };
+
+    // 更新設置
+    updateCallback({
+      ...currentSettings,
+      cloud: newCloudSettings
+    });
+  } else {
+    // 單一設置變更
+    const updatedSettings = {
+      ...currentSettings.cloud,
+      [event.detail.setting]: event.detail.value
+    };
+
+    // 更新設置
+    updateCallback({
+      ...currentSettings,
+      cloud: updatedSettings
+    });
+  }
+};
+
+/**
  * 處理一般顯示設置變更
  */
 const handleGeneralDisplaySettingsChange = (event, updateGeneralDisplaySettings) => {
@@ -393,7 +487,8 @@ export const handleDataFetchCompletedSettingsChange = (event, currentSettings, u
       ['chinesemed', () => handleChineseMedSettingsChange(event, currentSettings, updateCallback, callbacks)],
       ['labsettings', () => handleLabSettingsChange(event, currentSettings, updateCallback, callbacks)],
       ['overview', () => handleOverviewSettingsChange(event, currentSettings, updateCallback, callbacks)],
-      ['generalDisplay', () => handleGeneralDisplaySettingsChange(event, updateCallback)]
+      ['generalDisplay', () => handleGeneralDisplaySettingsChange(event, updateCallback)],
+      ['cloud', () => handleCloudDataSettingsChange(event, currentSettings, updateCallback)]
     ]);
 
     // 從 Map 中獲取並執行對應的處理函數

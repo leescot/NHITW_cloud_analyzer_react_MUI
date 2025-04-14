@@ -1,5 +1,6 @@
 import { useState } from 'react';
 import { formatLabItemForCopy, formatDate } from '../../utils/lab/LabUtilities';
+import { labCopyFormatter } from '../../../utils/labCopyFormatter';
 
 // Custom hook for handling copy functionality
 export const useCopyLabData = () => {
@@ -12,24 +13,40 @@ export const useCopyLabData = () => {
   };
 
   // 複製所有檢驗數據的函數
-  const handleCopyAllLabData = (group, labSettings) => {
+  const handleSectionLabData = (group, labSettings) => {
     const { copyLabFormat, showUnit, showReference } = labSettings;
+    let formattedText = '';
 
-    // 格式化日期，從 YYYY-MM-DD 轉換為 YYYY/MM/DD
-    const formattedDate = formatDate(group.date);
+    // 確保自定義格式的設定是完整的
+    const customSettingsInfo = {
+      format: copyLabFormat,
+      hasHeaderFormat: Array.isArray(labSettings.customLabHeaderCopyFormat) && labSettings.customLabHeaderCopyFormat.length > 0,
+      hasItemFormat: Array.isArray(labSettings.customLabItemCopyFormat) && labSettings.customLabItemCopyFormat.length > 0,
+    };
+    console.log("LabCopyFeatures: 處理格式設定:", customSettingsInfo);
 
-    let formattedText = `${formattedDate} - ${group.hosp}\n`;
-
-    // Format based on copyLabFormat setting
-    if (copyLabFormat === "vertical") {
-      // Vertical format: each lab item on a new line
-      group.labs.forEach((lab) => {
-        formattedText += `${formatLabItemForCopy(lab, showUnit, showReference)}\n`;
-      });
+    // 檢查是否為自定義格式
+    if (copyLabFormat === "customVertical" || copyLabFormat === "customHorizontal") {
+      // 使用自定義格式處理器來生成格式化文本
+      try {
+        // 確保 itemSeparator 值被使用
+        console.log("使用的項目分隔符:", labSettings.itemSeparator || ', ');
+        formattedText = labCopyFormatter.applyCustomFormat(group.labs, group, labSettings);
+      } catch (error) {
+        console.error("應用自定義格式時出錯:", error);
+        // 出錯時回退到標準格式
+        if (copyLabFormat === "customVertical") {
+          formattedText = applyStandardVerticalFormat(group, showUnit, showReference);
+        } else {
+          formattedText = applyStandardHorizontalFormat(group, showUnit, showReference);
+        }
+      }
+    } else if (copyLabFormat === "vertical") {
+      // 標準垂直格式
+      formattedText = applyStandardVerticalFormat(group, showUnit, showReference);
     } else {
-      // Horizontal format: lab items on the same line, separated by spaces
-      let labItems = group.labs.map((lab) => formatLabItemForCopy(lab, showUnit, showReference));
-      formattedText += labItems.join(" ");
+      // 標準水平格式 (默認)
+      formattedText = applyStandardHorizontalFormat(group, showUnit, showReference);
     }
 
     navigator.clipboard
@@ -43,6 +60,35 @@ export const useCopyLabData = () => {
         setSnackbarMessage("複製失敗，請重試");
         setSnackbarOpen(true);
       });
+  };
+
+  // 標準垂直格式處理函數
+  const applyStandardVerticalFormat = (group, showUnit, showReference) => {
+    // 格式化日期，從 YYYY-MM-DD 轉換為 YYYY/MM/DD
+    const formattedDate = formatDate(group.date);
+    
+    let formattedText = `${formattedDate} - ${group.hosp}\n`;
+    
+    // 垂直格式：每個項目一行
+    group.labs.forEach((lab) => {
+      formattedText += `${formatLabItemForCopy(lab, showUnit, showReference)}\n`;
+    });
+    
+    return formattedText;
+  };
+
+  // 標準水平格式處理函數
+  const applyStandardHorizontalFormat = (group, showUnit, showReference) => {
+    // 格式化日期，從 YYYY-MM-DD 轉換為 YYYY/MM/DD
+    const formattedDate = formatDate(group.date);
+    
+    let formattedText = `${formattedDate} - ${group.hosp}\n`;
+    
+    // 水平格式：項目在同一行，用空格分隔
+    let labItems = group.labs.map((lab) => formatLabItemForCopy(lab, showUnit, showReference));
+    formattedText += labItems.join(" ");
+    
+    return formattedText;
   };
 
   // 複製使用者選擇的檢驗數據的函數
@@ -67,22 +113,44 @@ export const useCopyLabData = () => {
       return;
     }
 
-    // 生成複製文本
-    // 格式化日期，從 YYYY-MM-DD 轉換為 YYYY/MM/DD
-    const formattedDate = formatDate(group.date);
+    // 創建一個包含已篩選實驗室項目的新組對象
+    const filteredGroup = {
+      ...group,
+      labs: filteredLabs
+    };
 
-    let formattedText = `${formattedDate} - ${group.hosp}\n`;
+    let formattedText = '';
 
-    // 根據複製格式處理
-    if (copyLabFormat === "vertical") {
-      // 直式格式
-      filteredLabs.forEach((lab) => {
-        formattedText += `${formatLabItemForCopy(lab, showUnit, showReference)}\n`;
-      });
+    // 確保自定義格式的設定是完整的
+    const customSettingsInfo = {
+      format: copyLabFormat,
+      hasHeaderFormat: Array.isArray(labSettings.customLabHeaderCopyFormat) && labSettings.customLabHeaderCopyFormat.length > 0,
+      hasItemFormat: Array.isArray(labSettings.customLabItemCopyFormat) && labSettings.customLabItemCopyFormat.length > 0,
+    };
+    console.log("LabCopyFeatures (selected): 處理格式設定:", customSettingsInfo);
+
+    // 檢查是否為自定義格式
+    if (copyLabFormat === "customVertical" || copyLabFormat === "customHorizontal") {
+      // 使用自定義格式處理器來生成格式化文本
+      try {
+        // 確保 itemSeparator 值被使用
+        console.log("使用的項目分隔符 (選擇複製):", labSettings.itemSeparator || ', ');
+        formattedText = labCopyFormatter.applyCustomFormat(filteredLabs, group, labSettings);
+      } catch (error) {
+        console.error("應用自定義格式時出錯:", error);
+        // 出錯時回退到標準格式
+        if (copyLabFormat === "customVertical") {
+          formattedText = applyStandardVerticalFormat(filteredGroup, showUnit, showReference);
+        } else {
+          formattedText = applyStandardHorizontalFormat(filteredGroup, showUnit, showReference);
+        }
+      }
+    } else if (copyLabFormat === "vertical") {
+      // 標準垂直格式
+      formattedText = applyStandardVerticalFormat(filteredGroup, showUnit, showReference);
     } else {
-      // 橫式格式
-      let labItems = filteredLabs.map((lab) => formatLabItemForCopy(lab, showUnit, showReference));
-      formattedText += labItems.join(" ");
+      // 標準水平格式 (默認)
+      formattedText = applyStandardHorizontalFormat(filteredGroup, showUnit, showReference);
     }
 
     navigator.clipboard
@@ -102,7 +170,7 @@ export const useCopyLabData = () => {
     snackbarOpen,
     snackbarMessage,
     handleSnackbarClose,
-    handleCopyAllLabData,
+    handleSectionLabData,
     handleCopyUserSelectedLabData
   };
 };

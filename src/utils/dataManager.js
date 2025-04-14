@@ -10,6 +10,26 @@ import { surgeryProcessor } from "./surgeryProcessor";
 import { dischargeProcessor } from "./dischargeProcessor";
 import { medDaysProcessor } from "./medDaysProcessor";
 import { patientSummaryProcessor } from "./patientSummaryProcessor";
+import { cancerScreeningProcessor } from "./cancerScreeningProcessor";
+import { adultHealthCheckProcessor } from "./adultHealthCheckProcessor";
+
+/**
+ * 安全調用setter，如果setter不存在則寫入window全局變量
+ * @param {Object} setters - 所有setter函數的對象
+ * @param {string} setterName - 要調用的setter名稱
+ * @param {any} data - 要設置的數據
+ * @param {string} dataName - 數據的名稱（用於設置window全局變量）
+ */
+const safeSetter = (setters, setterName, data, dataName) => {
+  const setterFn = setters[setterName];
+  
+  if (typeof setterFn === 'function') {
+    setterFn(data);
+  } else {
+    // 將數據存儲在window全局變量中
+    window[`${dataName}Data`] = data;
+  }
+};
 
 /**
  * 處理所有資料來源並回傳處理結果
@@ -131,11 +151,37 @@ export const handleAllData = async (dataSources, settings, setters) => {
             results.patientSummary = processedPatientSummary;
           }
         }
+      }],
+      ['cancerScreening', {
+        process: () => {
+          if (dataSources.cancerScreening) {
+            const processedCancerScreening = cancerScreeningProcessor.processCancerScreeningData(
+              dataSources.cancerScreening
+            );
+            
+            // Use safeSetter to handle the case where the setter might not exist
+            safeSetter(setters, 'setCancerScreeningData', processedCancerScreening, 'cancerScreening');
+            results.cancerScreening = processedCancerScreening;
+          }
+        }
+      }],
+      ['adultHealthCheck', {
+        process: () => {
+          if (dataSources.adultHealthCheck) {
+            const processedAdultHealthCheck = adultHealthCheckProcessor.processAdultHealthCheckData(
+              dataSources.adultHealthCheck
+            );
+            
+            // Use safeSetter to handle the case where the setter might not exist
+            safeSetter(setters, 'setAdultHealthCheckData', processedAdultHealthCheck, 'adultHealthCheck');
+            results.adultHealthCheck = processedAdultHealthCheck;
+          }
+        }
       }]
     ]);
 
     // 處理每個資料類型
-    for (const [, { process }] of dataProcessors) {
+    for (const [dataType, { process }] of dataProcessors) {
       await process();
     }
 
@@ -160,7 +206,9 @@ export const collectDataSources = () => {
     surgery: window.lastInterceptedSurgeryData,
     discharge: window.lastInterceptedDischargeData,
     medDays: window.lastInterceptedMedDaysData,
-    patientSummary: window.lastInterceptedPatientSummaryData
+    patientSummary: window.lastInterceptedPatientSummaryData,
+    cancerScreening: window.lastInterceptedCancerScreeningData,
+    adultHealthCheck: window.lastInterceptedAdultHealthCheckData
   };
 
   return sources;
@@ -194,8 +242,6 @@ export const reprocessData = async (dataType, data, settings, setter) => {
     if (processor) {
       const processed = await processor(data, settings);
       setter(processed);
-    } else {
-      console.log(`No processing method for data type: ${dataType}`);
     }
   } catch (error) {
     console.error(`Error reprocessing ${dataType} data:`, error);

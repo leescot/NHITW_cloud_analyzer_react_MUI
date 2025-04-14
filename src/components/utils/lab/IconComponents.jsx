@@ -25,9 +25,9 @@ export const TextOverlay = styled(Typography)(({ theme }) => ({
 }));
 
 // 複製全部按鈕
-export const CopyAllButton = ({ onClick, style, showLabel = true }) => {
+export const CopySectionButton = ({ onClick, style, showLabel = true }) => {
   return (
-    <Tooltip title="複製全部檢驗資料">
+    <Tooltip title="複製此區段檢驗資料">
       <IconButton onClick={onClick} size="small" sx={style}>
         <IconWithTextOverlay>
           <ContentCopyIcon fontSize="small" color="primary" />
