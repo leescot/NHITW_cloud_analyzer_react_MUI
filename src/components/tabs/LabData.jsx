@@ -7,11 +7,51 @@ import { useCopyLabData } from "./lab/LabCopyFeatures";
 import LabHeader from "./lab/LabHeader";
 import TypeBasedLayout from "./lab/TypeBasedLayout";
 import { VerticalLayout, HorizontalLayout, MultiColumnLayout } from "./lab/LayoutComponents";
+import LabSearch from "./lab/LabSearch";
+import { formatLabItemForCopy, formatDate } from "../utils/lab/LabUtilities";
+import { labCopyFormatter } from "../../utils/labCopyFormatter";
 
 const LabData = ({ groupedLabs, settings, labSettings, generalDisplaySettings }) => {
   // Add detailed logging to see what's coming in from props
   console.log("LabData props:", { settings, labSettings, displayLabFormat: labSettings?.displayLabFormat });
   
+  // 添加搜尋功能狀態
+  const [searchText, setSearchText] = useState("");
+  const [filteredGroupedLabs, setFilteredGroupedLabs] = useState(groupedLabs);
+  
+  // 處理搜尋文字變化
+  const handleSearchChange = (event) => {
+    setSearchText(event.target.value);
+  };
+  
+  // 當搜尋文字變化時過濾檢驗項目
+  useEffect(() => {
+    if (searchText.trim() === "") {
+      setFilteredGroupedLabs(groupedLabs);
+      return;
+    }
+    
+    const searchLower = searchText.toLowerCase();
+    
+    // 針對每個檢驗組，只保留符合搜尋條件的檢驗項目
+    const searchFiltered = groupedLabs.map(group => {
+      // 深複製組資料，但不包含labs
+      const newGroup = { ...group };
+      
+      // 過濾檢驗項目，只保留符合搜尋條件的
+      newGroup.labs = group.labs.filter(lab =>
+        (lab.orderName && lab.orderName.toLowerCase().includes(searchLower)) ||
+        (lab.orderCode && lab.orderCode.toLowerCase().includes(searchLower)) ||
+        (lab.abbrName && lab.abbrName.toLowerCase().includes(searchLower)) ||
+        (lab.itemName && lab.itemName.toLowerCase().includes(searchLower))
+      );
+      
+      return newGroup;
+    }).filter(group => group.labs.length > 0); // 只保留有符合檢驗項目的組
+    
+    setFilteredGroupedLabs(searchFiltered);
+  }, [searchText, groupedLabs]);
+
   // Function to map format names (handles legacy formats and ensures valid values)
   const mapFormatName = (format) => {
     // Log format value for debugging
@@ -53,6 +93,7 @@ const LabData = ({ groupedLabs, settings, labSettings, generalDisplaySettings })
     copyLabFormat: 'horizontal',
     enableLabChooseCopy: false,
     labChooseCopyItems: [],
+    enableLabCopyAll: false,
     ...labSettings,
     // Ensure display format is properly mapped
     displayLabFormat: mapFormatName(labSettings?.displayLabFormat)
@@ -74,7 +115,7 @@ const LabData = ({ groupedLabs, settings, labSettings, generalDisplaySettings })
     snackbarOpen,
     snackbarMessage,
     handleSnackbarClose,
-    handleCopyAllLabData: copyAllLabData,
+    handleSectionLabData: copySectionLabData,
     handleCopyUserSelectedLabData: copyUserSelectedLabData
   } = useCopyLabData();
 
@@ -192,12 +233,100 @@ const LabData = ({ groupedLabs, settings, labSettings, generalDisplaySettings })
   };
 
   // 將複製處理函數封裝，加入必要的參數
-  const handleCopyAllLabData = (group) => {
-    copyAllLabData(group, completeLabSettings);
+  const handleSectionLabData = (group) => {
+    copySectionLabData(group, completeLabSettings);
   };
 
   const handleCopyUserSelectedLabData = (group, groupIndex) => {
     copyUserSelectedLabData(group, groupIndex, selectedLabItems, completeLabSettings);
+  };
+
+  // 處理複製所有檢驗數據的函數
+  const handleCopyAllLabData = () => {
+    if (filteredGroupedLabs.length === 0) {
+      setSnackbarMessage("沒有可複製的檢驗資料");
+      setSnackbarOpen(true);
+      return;
+    }
+
+    // 根據 copyLabFormat 決定如何格式化
+    const { copyLabFormat, showUnit, showReference } = completeLabSettings;
+    let allFormattedText = '';
+
+    // 創建格式化函數映射
+    const formatFunctions = {
+      vertical: () => {
+        // 垂直格式: 每個組一個區塊，每個項目一行
+        return filteredGroupedLabs.map(group => {
+          // 標準垂直格式生成
+          const formattedDate = formatDate(group.date);
+          let groupText = `${formattedDate} - ${group.hosp}\n`;
+          
+          // 垂直格式：每個項目一行
+          group.labs.forEach((lab) => {
+            groupText += `${formatLabItemForCopy(lab, showUnit, showReference)}\n`;
+          });
+          
+          return groupText;
+        }).join("\n");
+      },
+      horizontal: () => {
+        // 水平格式: 每個組一個區塊，項目在同一行
+        return filteredGroupedLabs.map(group => {
+          // 標準水平格式生成
+          const formattedDate = formatDate(group.date);
+          let groupText = `${formattedDate} - ${group.hosp}\n`;
+          
+          // 水平格式：項目在同一行，用空格分隔
+          let labItems = group.labs.map((lab) => formatLabItemForCopy(lab, showUnit, showReference));
+          groupText += labItems.join(" ");
+          
+          return groupText;
+        }).join("\n\n");
+      },
+      customVertical: () => {
+        // 嘗試使用自定義格式，如果失敗則回退到標準垂直格式
+        try {
+          return filteredGroupedLabs.map(group => {
+            return labCopyFormatter.applyCustomFormat(group.labs, group, completeLabSettings);
+          }).join("\n\n");
+        } catch (error) {
+          console.error("應用自定義格式時出錯:", error);
+          return formatFunctions.vertical();
+        }
+      },
+      customHorizontal: () => {
+        // 嘗試使用自定義格式，如果失敗則回退到標準水平格式
+        try {
+          return filteredGroupedLabs.map(group => {
+            return labCopyFormatter.applyCustomFormat(group.labs, group, completeLabSettings);
+          }).join("\n\n");
+        } catch (error) {
+          console.error("應用自定義格式時出錯:", error);
+          return formatFunctions.horizontal();
+        }
+      },
+      default: () => formatFunctions.horizontal() // 默認使用水平格式
+    };
+
+    // 選擇格式化函數
+    const formatFunction = formatFunctions[copyLabFormat] || formatFunctions.default;
+    
+    // 執行格式化
+    allFormattedText = formatFunction();
+
+    // 複製到剪貼簿
+    navigator.clipboard
+      .writeText(allFormattedText)
+      .then(() => {
+        setSnackbarMessage("所有檢驗資料已複製到剪貼簿");
+        setSnackbarOpen(true);
+      })
+      .catch((err) => {
+        console.error("Failed to copy all lab data: ", err);
+        setSnackbarMessage("複製失敗，請重試");
+        setSnackbarOpen(true);
+      });
   };
 
   // 使用 Map 來取代 switch-case 結構
@@ -283,17 +412,26 @@ const LabData = ({ groupedLabs, settings, labSettings, generalDisplaySettings })
 
   return (
     <>
-      {groupedLabs.length === 0 ? (
+      {/* 添加搜尋欄 */}
+      <LabSearch 
+        searchText={searchText}
+        handleSearchChange={handleSearchChange}
+        generalDisplaySettings={generalDisplaySettings}
+        labSettings={completeLabSettings}
+        onCopyAll={handleCopyAllLabData}
+      />
+      
+      {filteredGroupedLabs.length === 0 ? (
         <TypographySizeWrapper
           color="text.secondary"
           variant="body2"
           textSizeType="content"
           generalDisplaySettings={generalDisplaySettings}
         >
-          沒有找到檢驗資料
+          {searchText.trim() !== "" ? "沒有找到符合搜尋條件的檢驗資料" : "沒有找到檢驗資料"}
         </TypographySizeWrapper>
       ) : (
-        groupedLabs.map((group, index) => (
+        filteredGroupedLabs.map((group, index) => (
           <Box key={index} sx={{ mb: 2 }}>
             {/* 檢驗數據標題區域 - 使用提取出的 LabHeader 組件 */}
             <LabHeader
@@ -302,7 +440,7 @@ const LabData = ({ groupedLabs, settings, labSettings, generalDisplaySettings })
               settings={settings}
               labSettings={completeLabSettings}
               generalDisplaySettings={generalDisplaySettings}
-              handleCopyAllLabData={handleCopyAllLabData}
+              handleSectionLabData={handleSectionLabData}
               handleCopyUserSelectedLabData={handleCopyUserSelectedLabData}
               hasSelectedItems={hasSelectedItems}
             />
@@ -312,7 +450,7 @@ const LabData = ({ groupedLabs, settings, labSettings, generalDisplaySettings })
               {getLayoutComponent(group, index)}
             </Box>
 
-            {index < groupedLabs.length - 1 && <Divider sx={{ my: 1.5 }} />}
+            {index < filteredGroupedLabs.length - 1 && <Divider sx={{ my: 1.5 }} />}
           </Box>
         ))
       )}

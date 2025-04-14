@@ -17,13 +17,13 @@ import SaveIcon from '@mui/icons-material/Save';
 import RestoreIcon from '@mui/icons-material/Restore';
 
 // Import local components
-import FormatElementsPanel from './medicationCopyFormat/FormatElementsPanel';
-import FormatPreview from './medicationCopyFormat/FormatPreview';
-import useFormatEditorState from './medicationCopyFormat/useFormatEditorState';
-import { createHeaderDragHandlers, createDrugDragHandlers } from './medicationCopyFormat/dragDropHandlers';
+import FormatElementsPanel from './labCopyFormat/FormatElementsPanel';
+import FormatPreview from './labCopyFormat/FormatPreview';
+import useFormatEditorState from './labCopyFormat/useFormatEditorState';
+import { createHeaderLabHandlers, createItemLabHandlers } from './labCopyFormat/dragDropHandlers';
 
-// 西藥自訂格式編輯器組件
-const MedicationCustomFormatEditor = ({ appSettings, setAppSettings, generalDisplaySettings }) => {
+// 檢驗報告自訂格式編輯器組件
+const LabCustomFormatEditor = ({ appSettings, setAppSettings, generalDisplaySettings }) => {
   // 響應式布局
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
@@ -35,60 +35,70 @@ const MedicationCustomFormatEditor = ({ appSettings, setAppSettings, generalDisp
   // Format type selection (horizontal or vertical)
   const [formatType, setFormatType] = useState("customVertical");
   
-  // Use the custom hook for state management - now with separate header and drug formats
+  // Use the custom hook for state management - now with separate header and item formats
   const {
     headerFormat,
     setHeaderFormat,
-    drugFormat,
-    setDrugFormat,
+    itemFormat,
+    setItemFormat,
     customTextValue,
     setCustomTextValue,
     snackbarOpen,
     setSnackbarOpen,
     snackbarMessage,
     snackbarSeverity,
-    drugSeparator,
-    setDrugSeparator,
+    itemSeparator,
+    setItemSeparator,
     availableElements,
     addHeaderItem,
-    addDrugItem,
+    addLabItem,
     addHeaderCustomText,
-    addDrugCustomText,
+    addLabItemCustomText,
     removeHeaderItem,
-    removeDrugItem,
+    removeLabItem,
     saveChanges,
     resetToDefault,
     addHeaderPresetGroup
   } = useFormatEditorState(appSettings, setAppSettings);
 
   // Create drag handlers
-  const headerDragHandlers = createHeaderDragHandlers(headerFormat, setHeaderFormat);
-  const drugDragHandlers = createDrugDragHandlers(drugFormat, setDrugFormat);
+  const headerLabHandlers = createHeaderLabHandlers(headerFormat, setHeaderFormat);
+  const itemLabHandlers = createItemLabHandlers(itemFormat, setItemFormat);
 
   // Add extra debugging to track settings changes
   useEffect(() => {
-    if (appSettings?.western?.customMedicationHeaderCopyFormat && appSettings?.western?.customMedicationDrugCopyFormat) {
+    if (appSettings?.lab?.customLabHeaderCopyFormat && appSettings?.lab?.customLabItemCopyFormat) {
       // Monitoring both formats instead of a single customCopyFormat
     }
-  }, [appSettings?.western?.customMedicationHeaderCopyFormat, appSettings?.western?.customMedicationDrugCopyFormat]);
+  }, [appSettings?.lab?.customLabHeaderCopyFormat, appSettings?.lab?.customLabItemCopyFormat]);
 
   // Initialize format type from settings
   useEffect(() => {
-    if (appSettings.western) {
+    if (appSettings.lab) {
       // Initialize format type
-      if (appSettings.western.medicationCopyFormat === "customHorizontal") {
+      if (appSettings.lab.copyLabFormat === "customHorizontal") {
         setFormatType("customHorizontal");
       } else {
         setFormatType("customVertical");
       }
+      
+      // Log the current itemSeparator from settings
+      console.log(`LabCustomFormatEditor: Initial itemSeparator from settings: "${appSettings.lab.itemSeparator || ','}"`);
     }
-  }, [appSettings.western]);
+  }, [appSettings.lab]);
+
+  // Effect to track itemSeparator changes
+  useEffect(() => {
+    console.log(`LabCustomFormatEditor: itemSeparator changed to: "${itemSeparator}"`);
+  }, [itemSeparator]);
 
   // Handle format type change
   const handleFormatTypeChange = (event) => {
     const newFormatType = event.target ? event.target.value : event;
-    console.log("Format type changed to:", newFormatType);
+    console.log("LabCustomFormatEditor: Format type changed to:", newFormatType);
     setFormatType(newFormatType);
+    
+    // We no longer immediately update settings here - will be saved with saveChanges
   };
 
   // Custom save changes function to include format type
@@ -113,25 +123,36 @@ const MedicationCustomFormatEditor = ({ appSettings, setAppSettings, generalDisp
       return isHeaderTextOrText && item.value === ']';
     });
     
-    if (!hasClosingBracket) {
-      console.warn('MedicationCustomFormatEditor: Closing bracket missing from header format!');
-    }
+    // if (!hasClosingBracket) {
+    //   console.warn('LabCustomFormatEditor: Closing bracket missing from header format!');
+    // }
+    
+    // Log the current itemSeparator before saving
+    // console.log(`LabCustomFormatEditor: Current itemSeparator before saving: "${itemSeparator}" (${typeof itemSeparator})`);
     
     // Save with format type
     saveChanges({
-      formatType // Pass the current format type for medication only
+      formatType // Pass the current format type for lab only
     });
     
     // Log final settings after saving
-    console.log('MedicationCustomFormatEditor: Saved format settings:', {
-      header: headerFormat,
-      drug: drugFormat,
-      formatType: formatType,
-      options: {
-        drugSeparator
-      }
-    });
+    // console.log('LabCustomFormatEditor: Saved format settings:', {
+    //   header: headerFormat,
+    //   item: itemFormat,
+    //   formatType: formatType,
+    //   options: {
+    //     itemSeparator
+    //   }
+    // });
   };
+  
+  // For directly testing separator
+  // const testCurrentSeparator = () => {
+  //   console.log(`====== LAB SEPARATOR TEST ======`);
+  //   console.log(`Current itemSeparator value: "${itemSeparator}" (${typeof itemSeparator})`);
+  //   console.log(`appSettings.lab.itemSeparator: "${appSettings.lab?.itemSeparator}" (${typeof appSettings.lab?.itemSeparator})`);
+  //   console.log(`================================`);
+  // };
 
   return (
     <Box sx={{ pt: 0, px: 1, pb: 1 }}>
@@ -143,13 +164,23 @@ const MedicationCustomFormatEditor = ({ appSettings, setAppSettings, generalDisp
             color="secondary"
             startIcon={<RestoreIcon />}
             onClick={() => {
-              console.log('MedicationCustomFormatEditor: Reset button clicked');
+              console.log('LabCustomFormatEditor: Reset button clicked');
               resetToDefault();
             }}
             size="small"
           >
             重置為預設
           </Button>
+          {/* {process.env.NODE_ENV === 'development' && (
+            <Button
+              variant="outlined"
+              color="info"
+              onClick={testCurrentSeparator}
+              size="small"
+            >
+              測試分隔符
+            </Button>
+          )} */}
           <Button
             variant="contained"
             color="primary"
@@ -172,8 +203,8 @@ const MedicationCustomFormatEditor = ({ appSettings, setAppSettings, generalDisp
         
         <FormatPreview 
           headerFormat={headerFormat} 
-          drugFormat={drugFormat} 
-          drugSeparator={drugSeparator}
+          itemFormat={itemFormat} 
+          itemSeparator={itemSeparator}
           formatType={formatType}
           onFormatTypeChange={handleFormatTypeChange}
         />
@@ -194,37 +225,37 @@ const MedicationCustomFormatEditor = ({ appSettings, setAppSettings, generalDisp
         formatType="header"
         currentFormatType={formatType}
         dragHandlers={{
-          handleDragStart: headerDragHandlers.handleHeaderDragStart,
-          handleDragEnter: headerDragHandlers.handleHeaderDragEnter,
-          handleDragOver: headerDragHandlers.handleHeaderDragOver,
-          handleDragLeave: headerDragHandlers.handleHeaderDragLeave,
-          handleDrop: headerDragHandlers.handleHeaderDrop,
-          handleDragEnd: headerDragHandlers.handleHeaderDragEnd
+          handleDragStart: headerLabHandlers.handleHeaderDragStart,
+          handleDragEnter: headerLabHandlers.handleHeaderDragEnter,
+          handleDragOver: headerLabHandlers.handleHeaderDragOver,
+          handleDragLeave: headerLabHandlers.handleHeaderDragLeave,
+          handleDrop: headerLabHandlers.handleHeaderDrop,
+          handleDragEnd: headerLabHandlers.handleHeaderDragEnd
         }}
       />
       
-      {/* Drug format panel */}
+      {/* Lab item format panel */}
       <FormatElementsPanel
-        title="藥品格式 (每個藥品顯示一次)"
-        elements={drugFormat}
-        formatClass="drug-format-item"
-        availableElements={availableElements('drug')}
+        title="檢驗項目格式 (每個檢驗項目顯示一次)"
+        elements={itemFormat}
+        formatClass="lab-item-format-item"
+        availableElements={availableElements('lab')}
         customTextValue=""
         setCustomTextValue={() => {}}
-        onAddItem={addDrugItem}
-        onRemoveItem={removeDrugItem}
-        onAddCustomText={(text) => addDrugCustomText(text)}
-        formatType="drug"
-        drugSeparator={drugSeparator}
-        setDrugSeparator={setDrugSeparator}
+        onAddItem={addLabItem}
+        onRemoveItem={removeLabItem}
+        onAddCustomText={(text) => addLabItemCustomText(text)}
+        formatType="lab"
+        itemSeparator={itemSeparator}
+        setItemSeparator={setItemSeparator}
         currentFormatType={formatType}
         dragHandlers={{
-          handleDragStart: drugDragHandlers.handleDrugDragStart,
-          handleDragEnter: drugDragHandlers.handleDrugDragEnter,
-          handleDragOver: drugDragHandlers.handleDrugDragOver,
-          handleDragLeave: drugDragHandlers.handleDrugDragLeave,
-          handleDrop: drugDragHandlers.handleDrugDrop,
-          handleDragEnd: drugDragHandlers.handleDragEnd
+          handleDragStart: itemLabHandlers.handleItemDragStart,
+          handleDragEnter: itemLabHandlers.handleItemDragEnter,
+          handleDragOver: itemLabHandlers.handleItemDragOver,
+          handleDragLeave: itemLabHandlers.handleItemDragLeave,
+          handleDrop: itemLabHandlers.handleItemDrop,
+          handleDragEnd: itemLabHandlers.handleItemDragEnd
         }}
       />
       
@@ -246,4 +277,4 @@ const MedicationCustomFormatEditor = ({ appSettings, setAppSettings, generalDisp
   );
 };
 
-export default MedicationCustomFormatEditor; 
+export default LabCustomFormatEditor; 

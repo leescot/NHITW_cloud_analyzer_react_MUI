@@ -1,7 +1,7 @@
 import React from "react";
 import { Box } from "@mui/material";
 import TypographySizeWrapper from "../../utils/TypographySizeWrapper";
-import { CopyAllButton, CopySelectedButton } from "../../utils/lab/IconComponents";
+import { CopySectionButton, CopySelectedButton } from "../../utils/lab/IconComponents";
 import { formatDate } from "../../utils/lab/LabUtilities";
 
 const LabHeader = ({
@@ -10,7 +10,7 @@ const LabHeader = ({
   settings,
   labSettings,
   generalDisplaySettings,
-  handleCopyAllLabData,
+  handleSectionLabData,
   handleCopyUserSelectedLabData,
   hasSelectedItems
 }) => {
@@ -44,14 +44,14 @@ const LabHeader = ({
         {/* 複製按鈕 - 根據設定決定顯示一個還是兩個 */}
         {labSettings.enableLabChooseCopy ? (
           <>
-            <CopyAllButton onClick={() => handleCopyAllLabData(group)} style={copyButtonStyle} showLabel={true} />
+            <CopySectionButton onClick={() => handleSectionLabData(group)} style={copyButtonStyle} showLabel={true} />
             {/* 當選擇了項目時顯示 Sel 按鈕 */}
             {hasSelectedItems(index) && (
               <CopySelectedButton onClick={() => handleCopyUserSelectedLabData(group, index)} style={copyButtonStyle} />
             )}
           </>
         ) : (
-          <CopyAllButton onClick={() => handleCopyAllLabData(group)} style={copyButtonStyle} showLabel={false} />
+          <CopySectionButton onClick={() => handleSectionLabData(group)} style={copyButtonStyle} showLabel={false} />
         )}
       </TypographySizeWrapper>
     </Box>

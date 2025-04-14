@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import {
   Box,
   Typography,
@@ -10,9 +10,11 @@ import {
 
 // Import settings pages
 import MedicationCustomFormatEditor from './MedicationCustomFormatEditor';
+import LabCustomFormatEditor from './LabCustomFormatEditor';
 
 // Import icons
 import MedicationIcon from '@mui/icons-material/Medication';
+import ScienceIcon from '@mui/icons-material/Science';
 // Other icons can be imported for future settings pages
 
 /**
@@ -21,6 +23,35 @@ import MedicationIcon from '@mui/icons-material/Medication';
 const AdvancedSettings = ({ appSettings, setAppSettings, generalDisplaySettings }) => {
   // 當前選擇的設定頁面索引
   const [settingsTabIndex, setSettingsTabIndex] = useState(0);
+  // 是否啟用實驗室自訂複製格式
+  const [enableLabCustomFormat, setEnableLabCustomFormat] = useState(false);
+
+  // 獲取設定狀態
+  useEffect(() => {
+    chrome.storage.sync.get(
+      {
+        enableLabCustomCopyFormat: false
+      },
+      (items) => {
+        setEnableLabCustomFormat(items.enableLabCustomCopyFormat);
+      }
+    );
+
+    // 監聽設定變更事件
+    const handleSettingChangedEvent = (event) => {
+      const { key, value } = event.detail;
+      if (key === 'enableLabCustomCopyFormat') {
+        setEnableLabCustomFormat(value);
+      }
+    };
+
+    window.addEventListener('settingChanged', handleSettingChangedEvent);
+
+    // 清理事件監聽
+    return () => {
+      window.removeEventListener('settingChanged', handleSettingChangedEvent);
+    };
+  }, []);
 
   // 處理設定頁籤變更
   const handleSettingsTabChange = (event, newValue) => {
@@ -70,14 +101,14 @@ const AdvancedSettings = ({ appSettings, setAppSettings, generalDisplaySettings 
             icon={<MedicationIcon sx={{ fontSize: '1rem' }} />}
             iconPosition="start"
           />
+          {enableLabCustomFormat && (
+            <Tab 
+              label="檢驗複製格式" 
+              icon={<ScienceIcon sx={{ fontSize: '1rem' }} />}
+              iconPosition="start"
+            />
+          )}
           {/* 在這裡可以加入更多的設定頁籤 */}
-          {/* 例如：
-          <Tab 
-            label="檢驗複製格式" 
-            icon={<ScienceIcon sx={{ fontSize: '1rem' }} />}
-            iconPosition="start"
-          />
-          */}
         </Tabs>
       </Paper>
       
@@ -94,18 +125,18 @@ const AdvancedSettings = ({ appSettings, setAppSettings, generalDisplaySettings 
         )}
       </Box>
       
-      {/* 可以加入更多的設定頁面 */}
-      {/* 
-      <Box role="tabpanel" hidden={settingsTabIndex !== 1}>
-        {settingsTabIndex === 1 && (
-          <LabCustomFormatEditor 
-            appSettings={appSettings} 
-            setAppSettings={setAppSettings} 
-            generalDisplaySettings={generalDisplaySettings} 
-          />
-        )}
-      </Box>
-      */}
+      {/* 檢驗複製格式設定頁面 */}
+      {enableLabCustomFormat && (
+        <Box role="tabpanel" hidden={settingsTabIndex !== 1}>
+          {settingsTabIndex === 1 && (
+            <LabCustomFormatEditor 
+              appSettings={appSettings} 
+              setAppSettings={setAppSettings} 
+              generalDisplaySettings={generalDisplaySettings} 
+            />
+          )}
+        </Box>
+      )}
     </Box>
   );
 };

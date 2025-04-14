@@ -63,7 +63,21 @@ const LabSettings = () => {
     highlightAbnormalLab: true,
     copyLabFormat: 'horizontal',
     enableLabChooseCopy: false,
-    labChooseCopyItems: DEFAULT_LAB_COPY_ITEMS
+    labChooseCopyItems: DEFAULT_LAB_COPY_ITEMS,
+    enableLabCustomCopyFormat: false,
+    customLabHeaderCopyFormat: [
+      { id: 'date', display: '日期' },
+      { id: 'separator', value: ' - ', display: ' - ' },
+      { id: 'hosp', display: '醫院' },
+      { id: 'newline', display: '換行' },
+    ],
+    customLabItemCopyFormat: [
+      { id: 'itemName', display: '項目名稱' },
+      { id: 'space', display: ' ' },
+      { id: 'value', display: '數值' },
+      { id: 'space', display: ' ' },
+      { id: 'unit', display: '單位' },
+    ]
   });
 
   const [customCopyDialogOpen, setCustomCopyDialogOpen] = useState(false);
@@ -79,7 +93,21 @@ const LabSettings = () => {
       highlightAbnormalLab: true,
       copyLabFormat: 'horizontal',
       enableLabChooseCopy: false,
-      labChooseCopyItems: DEFAULT_LAB_COPY_ITEMS
+      labChooseCopyItems: DEFAULT_LAB_COPY_ITEMS,
+      enableLabCustomCopyFormat: false,
+      customLabHeaderCopyFormat: [
+        { id: 'date', display: '日期' },
+        { id: 'separator', value: ' - ', display: ' - ' },
+        { id: 'hosp', display: '醫院' },
+        { id: 'newline', display: '換行' },
+      ],
+      customLabItemCopyFormat: [
+        { id: 'itemName', display: '項目名稱' },
+        { id: 'space', display: ' ' },
+        { id: 'value', display: '數值' },
+        { id: 'space', display: ' ' },
+        { id: 'unit', display: '單位' },
+      ]
     }, (items) => {
       setSettings({
         displayLabFormat: items.displayLabFormat,
@@ -89,9 +117,30 @@ const LabSettings = () => {
         highlightAbnormalLab: items.highlightAbnormalLab,
         copyLabFormat: items.copyLabFormat,
         enableLabChooseCopy: items.enableLabChooseCopy,
-        labChooseCopyItems: items.labChooseCopyItems
+        labChooseCopyItems: items.labChooseCopyItems,
+        enableLabCustomCopyFormat: items.enableLabCustomCopyFormat,
+        customLabHeaderCopyFormat: items.customLabHeaderCopyFormat,
+        customLabItemCopyFormat: items.customLabItemCopyFormat
       });
     });
+
+    // Listen for real-time setting changes from other components
+    const handleSettingChangedEvent = (event) => {
+      const { key, value } = event.detail;
+      if (key === 'enableLabCustomCopyFormat') {
+        setSettings(prev => ({
+          ...prev,
+          [key]: value
+        }));
+      }
+    };
+
+    window.addEventListener('settingChanged', handleSettingChangedEvent);
+
+    // Cleanup the event listener
+    return () => {
+      window.removeEventListener('settingChanged', handleSettingChangedEvent);
+    };
   }, []);
 
   // 打開自訂複製項目對話框
@@ -149,6 +198,29 @@ const LabSettings = () => {
     const updatedItems = [...tempCustomCopyItems];
     updatedItems[index].enabled = !updatedItems[index].enabled;
     setTempCustomCopyItems(updatedItems);
+  };
+
+  // 打開 FloatingIcon 的檢驗自訂格式標籤
+  const openLabCustomFormatEditor = () => {
+    // Only proceed if enableLabCustomCopyFormat is true
+    if (!settings.enableLabCustomCopyFormat) return;
+    
+    // 發送消息給 background script 或直接調用 FloatingIcon 的方法
+    if (window.openFloatingIconDialog) {
+      window.openFloatingIconDialog();
+      // 等對話框打開後，切換到檢驗自訂格式標籤（索引為10）
+      setTimeout(() => {
+        chrome.runtime.sendMessage({ 
+          action: 'switchToLabCustomFormatTab',
+          tabIndex: 10
+        });
+      }, 100);
+    } else {
+      // 如果全局方法不可用，則發送消息給背景脚本處理
+      chrome.runtime.sendMessage({ 
+        action: 'openLabCustomFormatEditor' 
+      });
+    }
   };
 
   return (
@@ -212,7 +284,7 @@ const LabSettings = () => {
               onChange={(e) => handleSettingChange('enableLabChooseCopy', e.target.checked, setSettings, 'enableLabChooseCopy', 'labsettings')}
             />
           }
-          label="開啟自訂複製項目功能"
+          label="開啟自選複製項目功能"
         />
 
         {settings.enableLabChooseCopy && (
@@ -226,6 +298,14 @@ const LabSettings = () => {
           >
             選擇要複製的檢驗項目
           </Button>
+        )}
+
+        {settings.enableLabCustomCopyFormat && (
+          <Box sx={{ mt: 1, mb: 2, ml: 4 }}>
+            <Typography variant="body2" color="text.secondary">
+              請在「進階設定」中設置自訂格式。
+            </Typography>
+          </Box>
         )}
 
         <Divider sx={{ my: 1.5 }} />
@@ -271,6 +351,18 @@ const LabSettings = () => {
           >
             <MenuItem value="vertical">直式格式 (每項檢驗獨立一行)</MenuItem>
             <MenuItem value="horizontal">橫式格式 (檢驗項目並排顯示)</MenuItem>
+            <MenuItem 
+              value="customVertical" 
+              disabled={!settings.enableLabCustomCopyFormat}
+            >
+              自訂檢驗複製格式(直式)
+            </MenuItem>
+            <MenuItem 
+              value="customHorizontal" 
+              disabled={!settings.enableLabCustomCopyFormat}
+            >
+              自訂檢驗複製格式(橫式)
+            </MenuItem>
           </Select>
         </FormControl>
 

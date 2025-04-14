@@ -32,6 +32,7 @@ import LabSettings from './settings/LabSettings';
 import OverviewSettings from './settings/OverviewSettings';
 import AboutTab from './settings/AboutTab';
 import AdvancedSettings from './settings/AdvancedSettings';
+import CloudDataSettings from './settings/CloudDataSettings';
 import { updateDataStatus } from '../utils/settingsHelper';
 import LoadDataTab from './settings/LoadDataTab';
 
@@ -45,7 +46,9 @@ const PopupSettings = () => {
     surgery: { status: 'none', count: 0 },
     discharge: { status: 'none', count: 0 },
     medDays: { status: 'none', count: 0 },
-    patientSummary: { status: 'none', count: 0 }
+    patientSummary: { status: 'none', count: 0 },
+    adultHealthCheck: { status: 'none', count: 0 },
+    cancerScreening: { status: 'none', count: 0 }
   });
 
   // 添加一般顯示設定狀態
@@ -86,6 +89,7 @@ const PopupSettings = () => {
     [0, (
       <Box sx={{ display: 'flex', flexDirection: 'column' }}>
         <GeneralDisplaySettings />
+        <CloudDataSettings />
         <OverviewSettings />
         <MedicationSettings />
         <ChineseMedicationSettings />

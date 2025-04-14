@@ -17,6 +17,8 @@ const AdvancedSettings = () => {
   const [settings, setSettings] = useState({
     enableMedicationCustomCopyFormat: false,
     enableMedicationCopyAll: false,
+    enableLabCustomCopyFormat: false,
+    enableLabCopyAll: false,
   });
 
   useEffect(() => {
@@ -25,11 +27,15 @@ const AdvancedSettings = () => {
       {
         enableMedicationCustomCopyFormat: false,
         enableMedicationCopyAll: false,
+        enableLabCustomCopyFormat: false,
+        enableLabCopyAll: false,
       },
       (items) => {
         setSettings({
           enableMedicationCustomCopyFormat: items.enableMedicationCustomCopyFormat,
           enableMedicationCopyAll: items.enableMedicationCopyAll,
+          enableLabCustomCopyFormat: items.enableLabCustomCopyFormat,
+          enableLabCopyAll: items.enableLabCopyAll,
         });
       }
     );
@@ -90,6 +96,29 @@ const AdvancedSettings = () => {
     }
   };
 
+  // Function to open the Lab custom format editor
+  const openLabCustomFormatEditor = () => {
+    // Only proceed if enableLabCustomCopyFormat is true
+    if (!settings.enableLabCustomCopyFormat) return;
+    
+    // Send a message to open the FloatingIcon dialog and switch to the lab custom format tab
+    if (window.openFloatingIconDialog) {
+      window.openFloatingIconDialog();
+      // After the dialog is open, switch to the lab custom format tab (index 10)
+      setTimeout(() => {
+        chrome.runtime.sendMessage({ 
+          action: 'switchToLabCustomFormatTab',
+          tabIndex: 10
+        });
+      }, 100);
+    } else {
+      // If the global method is not available, send a message to the background script
+      chrome.runtime.sendMessage({ 
+        action: 'openLabCustomFormatEditor' 
+      });
+    }
+  };
+
   return (
     <Accordion>
       <AccordionSummary
@@ -137,6 +166,44 @@ const AdvancedSettings = () => {
             />
           }
           label="開啟西藥全部資料複製功能"
+        />
+
+        <FormControlLabel
+          control={
+            <Switch
+              checked={settings.enableLabCustomCopyFormat}
+              onChange={(e) => {
+                handleLocalSettingChange(
+                  "enableLabCustomCopyFormat",
+                  e.target.checked
+                );
+              }}
+            />
+          }
+          label="開啟檢驗報告自訂複製格式"
+        />
+        
+        {settings.enableLabCustomCopyFormat && (
+          <Box sx={{ mt: 1, mb: 2, ml: 4 }}>
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+              需於程式主頁面「進階設定」來設定格式
+            </Typography>
+          </Box>
+        )}
+
+        <FormControlLabel
+          control={
+            <Switch
+              checked={settings.enableLabCopyAll}
+              onChange={(e) => {
+                handleLocalSettingChange(
+                  "enableLabCopyAll",
+                  e.target.checked
+                );
+              }}
+            />
+          }
+          label="開啟檢驗報告全部資料複製功能"
         />
       </AccordionDetails>
     </Accordion>
