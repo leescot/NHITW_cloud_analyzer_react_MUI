@@ -6,69 +6,68 @@ on:
       is_pre:
         description: '發布為測試版'
         type: boolean
-        default: false
-        required: false
-      message:
-        description: '更新說明'
-        default: ''
-        required: false
+      is_draft:
+        description: '建立草稿'
+        type: boolean
 
 jobs:
   build-and-release:
     runs-on: ubuntu-latest
-    
+    environment: publish
+    env:
+      IS_PRE: ${{ github.event.inputs.is_pre }}
+      IS_DRAFT: ${{ github.event.inputs.is_draft }}
+      TIMEZONE: ${{ vars.TIMEZONE || 'UTC' }}
+
     # Add explicit permissions for releases
     permissions:
       contents: write
-    
+
     steps:
       - name: Checkout code
         uses: actions/checkout@v4
-      
+
+      - name: Configure and verify
+        run: |
+          VERSION=$(jq -r '.version' './package.json')
+          TAG_NAME="v${VERSION}-$(TZ="$TIMEZONE" date +'%Y%m%d')"
+
+          echo "VERSION=${VERSION}" >> $GITHUB_ENV
+          echo "TAG_NAME=${TAG_NAME}" >> $GITHUB_ENV
+          echo "RELEASE_NAME=Release ${TAG_NAME}" >> $GITHUB_ENV
+          echo "EXT_PATH=NHITW_cloud_analyzer_${TAG_NAME}.zip" >> $GITHUB_ENV
+
       - name: Set up Node.js
         uses: actions/setup-node@v4
         with:
           node-version: '22'
           # Remove the cache option that's causing issues
-      
+
       - name: Install dependencies
         run: npm install
-      
-      - name: Build project
+
+      - name: Build extension
         run: npm run build
-      
-      - name: Get version from package.json
-        id: get_version
-        run: echo "VERSION=$(node -p "require('./package.json').version")" >> $GITHUB_OUTPUT
-      
-      - name: Create version tag
-        id: create_tag
-        run: |
-          VERSION=${{ steps.get_version.outputs.VERSION }}
-          TIMESTAMP=$(date +'%Y%m%d')
-          echo "TAG_NAME=v${VERSION}-${TIMESTAMP}" >> $GITHUB_OUTPUT
-      
+
       - name: Create Git Tag
         run: |
-          git tag ${{ steps.create_tag.outputs.TAG_NAME }}
-          git push origin ${{ steps.create_tag.outputs.TAG_NAME }}
-      
+          git tag --force ${{ env.TAG_NAME }}
+          git push origin ${{ env.TAG_NAME }}
+
       - name: Create Zip Archive
         run: |
           cd dist
-          zip -r ../NHITW_cloud_analyzer_${{ steps.create_tag.outputs.TAG_NAME }}.zip .
+          zip -r "../${EXT_PATH}" .
           cd ..
-      
+
       - name: Create GitHub Release
         id: create_release
         uses: softprops/action-gh-release@v2
         with:
-          tag_name: ${{ steps.create_tag.outputs.TAG_NAME }}
-          name: Release ${{ steps.create_tag.outputs.TAG_NAME }}
-          body: ${{ github.event.inputs.message }}
-          draft: false
-          prerelease: ${{ github.event.inputs.is_pre }}
-          make_latest: 'legacy'
-          files: NHITW_cloud_analyzer_${{ steps.create_tag.outputs.TAG_NAME }}.zip
-        env:
-          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+          tag_name: ${{ env.TAG_NAME }}
+          name: ${{ env.RELEASE_NAME }}
+          draft: ${{ env.IS_DRAFT }}
+          prerelease: ${{ env.IS_PRE }}
+          make_latest: 'legacy'  # 版號較大且非 prelease 時自動標記為 latest
+          generate_release_notes: true
+          files: ${{ env.EXT_PATH }}
