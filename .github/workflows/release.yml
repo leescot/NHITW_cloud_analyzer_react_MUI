@@ -4,10 +4,10 @@ on:
   workflow_dispatch:
     inputs:
       is_pre:
-        description: '發布為測試版'
+        description: '發布為測試版（不上傳至商店）'
         type: boolean
       is_draft:
-        description: '建立草稿'
+        description: '建立草稿（上傳至商店不發布）'
         type: boolean
 
 jobs:
@@ -71,3 +71,16 @@ jobs:
           make_latest: 'legacy'  # 版號較大且非 prelease 時自動標記為 latest
           generate_release_notes: true
           files: ${{ env.EXT_PATH }}
+
+      - name: Upload to Chrome Web Store
+        if: ${{ env.IS_PRE == 'false' }}
+        uses: mnao305/chrome-extension-upload@v5.0.0
+        with:
+          publish: ${{ env.IS_DRAFT == 'false' }}
+          file-path: ${{ env.EXT_PATH }}
+          extension-id: ${{ vars.CHROME_EXTENSION_ID }}
+
+          # https://github.com/fregante/chrome-webstore-upload-keys
+          client-id: ${{ secrets.CHROME_CLIENT_ID }}
+          client-secret: ${{ secrets.CHROME_CLIENT_SECRET }}
+          refresh-token: ${{ secrets.CHROME_REFRESH_TOKEN }}
