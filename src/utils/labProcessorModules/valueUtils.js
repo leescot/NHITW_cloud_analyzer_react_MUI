@@ -1,4 +1,4 @@
-// 數值標準化和檢查相關函數
+// 數值標準化和檢查相關函式
 
 // 標準化數值 - 去除尾部的零
 const normalizeValue = (value) => {
@@ -38,7 +38,7 @@ const getValueStatus = (value, min, max) => {
     [() => true, () => "normal"]
   ]);
 
-  // 尋找符合條件的檢查函數並執行
+  // 尋找符合條件的檢查函式並執行
   for (const [condition, statusFn] of statusChecks) {
     if (condition()) {
       return statusFn();
@@ -48,7 +48,7 @@ const getValueStatus = (value, min, max) => {
   return "normal";
 };
 
-// 保留舊的函數名稱作為兼容，但使用新邏輯
+// 保留舊的函式名稱作為兼容，但使用新邏輯
 const checkIfAbnormal = (value, consultValue) => {
   if (!consultValue || !value) return false;
 

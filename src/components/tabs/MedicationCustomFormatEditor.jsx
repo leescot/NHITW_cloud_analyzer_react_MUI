@@ -22,7 +22,7 @@ import FormatPreview from './medicationCopyFormat/FormatPreview';
 import useFormatEditorState from './medicationCopyFormat/useFormatEditorState';
 import { createHeaderDragHandlers, createDrugDragHandlers } from './medicationCopyFormat/dragDropHandlers';
 
-// 西藥自訂格式編輯器組件
+// 西藥自訂格式編輯器元件
 const MedicationCustomFormatEditor = ({ appSettings, setAppSettings, generalDisplaySettings }) => {
   // 響應式布局
   const theme = useTheme();
@@ -166,7 +166,7 @@ const MedicationCustomFormatEditor = ({ appSettings, setAppSettings, generalDisp
       <Box sx={{ display: 'flex', flexDirection: 'column', bgcolor: '#f8f8f8', pt: 1, px: 2, pb: 1, borderRadius: 1, mb: 1 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
           <Typography variant="subtitle1" fontWeight="medium" sx={{ width: '100%', textAlign: 'center' }}>
-            格式類型選擇與預覽
+            格式型別選擇與預覽
           </Typography>
         </Box>
         

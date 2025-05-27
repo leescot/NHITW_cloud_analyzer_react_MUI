@@ -3,7 +3,7 @@ import { Box, Grid, Paper } from "@mui/material";
 import TypographySizeWrapper from "../../utils/TypographySizeWrapper";
 import LabItemDisplay from "./LabItemDisplay";
 
-// 垂直布局組件 - 單欄顯示
+// 垂直布局元件 - 單欄顯示
 export const VerticalLayout = ({
   labs,
   groupIndex,
@@ -39,7 +39,7 @@ export const VerticalLayout = ({
   );
 };
 
-// 橫式布局組件 - 所有檢驗連續顯示在同一行
+// 橫式布局元件 - 所有檢驗連續顯示在同一行
 export const HorizontalLayout = ({
   labs,
   groupIndex,
@@ -73,7 +73,7 @@ export const HorizontalLayout = ({
       >
         <div style={{ display: 'flex', flexWrap: 'wrap' }}>
           {labs.map((lab, labIndex) => {
-            // 使用 Map 取代 if-else 結構的 getStatusColor 函數
+            // 使用 Map 取代 if-else 結構的 getStatusColor 函式
             const getStatusColor = () => {
               if (!lab || !highlightAbnormal) return "inherit";
               return statusColorMap.get(lab.valueStatus) || statusColorMap.get("default");
@@ -112,7 +112,7 @@ export const HorizontalLayout = ({
   );
 };
 
-// 多欄布局組件
+// 多欄布局元件
 export const MultiColumnLayout = ({
   labs,
   columnCount,

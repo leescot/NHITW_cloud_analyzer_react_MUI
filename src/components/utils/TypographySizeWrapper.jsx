@@ -20,7 +20,7 @@ const NOTE_TEXT_SIZES = {
   large: '1rem'      // body1 等效 (16px)
 };
 
-// 變體到文字大小類型的映射
+// 變體到文字大小型別的映射
 const VARIANT_TO_SIZE_TYPE = new Map([
   ['h6', 'title'],
   ['h5', 'title'],
@@ -29,7 +29,7 @@ const VARIANT_TO_SIZE_TYPE = new Map([
   // 其他變體預設為 'content'
 ]);
 
-// 文字大小類型到對應尺寸集合的映射
+// 文字大小型別到對應尺寸集合的映射
 const SIZE_TYPE_TO_SIZES = new Map([
   ['title', TITLE_TEXT_SIZES],
   ['note', NOTE_TEXT_SIZES],
@@ -37,15 +37,15 @@ const SIZE_TYPE_TO_SIZES = new Map([
 ]);
 
 /**
- * 一個 Typography 的包裝組件，根據變體和一般顯示設置應用正確的字體大小
+ * 一個 Typography 的包裝元件，根據變體和一般顯示設置應用正確的字體大小
  *
- * @param {Object} props - 組件屬性
+ * @param {Object} props - 元件屬性
  * @param {Object} props.generalDisplaySettings - 一般顯示設置
  * @param {string} props.variant - Typography 變體
  * @param {Object} props.sx - 額外的 sx 樣式
  * @param {ReactNode} props.children - 子元素
  * @param {string} props.textSizeType - 手動指定使用哪種文字大小（'title'、'content' 或 'note'）
- * @returns {JSX.Element} - 具有正確字體大小的 Typography 組件
+ * @returns {JSX.Element} - 具有正確字體大小的 Typography 元件
  */
 const TypographySizeWrapper = ({
   generalDisplaySettings = { titleTextSize: 'medium', contentTextSize: 'medium', noteTextSize: 'small' },
@@ -58,7 +58,7 @@ const TypographySizeWrapper = ({
   // 確保 generalDisplaySettings 已定義
   const settings = generalDisplaySettings || { titleTextSize: 'medium', contentTextSize: 'medium', noteTextSize: 'small' };
 
-  // 根據變體或明確的 textSizeType 確定要使用的文字大小類型
+  // 根據變體或明確的 textSizeType 確定要使用的文字大小型別
   const sizeType = textSizeType || VARIANT_TO_SIZE_TYPE.get(variant) || 'content';
 
   // 從設置中擷取正確的字體大小

@@ -16,7 +16,7 @@ let currentSessionData = {
   currentUserSession: null
 };
 
-// 定義 API 端點和對應的數據類型
+// 定義 API 端點和對應的數據型別
 const API_ENDPOINTS = {
   allergy: "medcloud2.nhi.gov.tw/imu/api/imue0040/imue0040s02/get-data",
   surgery: "medcloud2.nhi.gov.tw/imu/api/imue0020/imue0020s02/get-data",
@@ -64,7 +64,7 @@ Object.entries(API_ENDPOINTS).forEach(([type, endpoint]) => {
   );
 });
 
-// 數據類型與對應的 storage 鍵值映射
+// 數據型別與對應的 storage 鍵值映射
 const DATA_TYPE_TO_STORAGE_KEY = {
   'medication': 'medicationData',
   'labdata': 'labData',
@@ -77,7 +77,7 @@ const DATA_TYPE_TO_STORAGE_KEY = {
   'patientSummary': 'patientSummaryData'
 };
 
-// 動作與處理函數的映射
+// 動作與處理函式的映射
 const ACTION_HANDLERS = new Map([
   ['openPopup', (message, sender, sendResponse) => {
     chrome.action.openPopup();
@@ -124,7 +124,7 @@ const ACTION_HANDLERS = new Map([
       // console.log("STORAGE DATA DEBUG:", result);
       const dataStatus = {};
 
-      // 處理所有數據類型
+      // 處理所有數據型別
       const processDataType = (typeKey, storageKey) => {
         const dataObj = result[storageKey];
         // 處理大小寫不一致的情況
@@ -140,7 +140,7 @@ const ACTION_HANDLERS = new Map([
         }
       };
 
-      // 映射數據類型到 UI 顯示名稱
+      // 映射數據型別到 UI 顯示名稱
       const displayNameMap = {
         'medication': 'medication',
         'labdata': 'labData',
@@ -153,7 +153,7 @@ const ACTION_HANDLERS = new Map([
         'patientSummary': 'patientSummary'
       };
 
-      // 處理每個數據類型
+      // 處理每個數據型別
       Object.entries(DATA_TYPE_TO_STORAGE_KEY).forEach(([type, storageKey]) => {
         const displayName = displayNameMap[type] || type;
         processDataType(displayName, storageKey);
@@ -164,7 +164,7 @@ const ACTION_HANDLERS = new Map([
     return true; // 保持消息通道開放以進行異步響應
   }],
   
-  // 使用通用處理函數處理所有數據保存操作
+  // 使用通用處理函式處理所有數據保存操作
   ['saveMedicationData', saveDataHandler('medication')],
   ['saveLabData', saveDataHandler('labdata')],
   ['saveChineseMedData', saveDataHandler('chinesemed')],
@@ -183,7 +183,7 @@ const ACTION_HANDLERS = new Map([
   }]
 ]);
 
-// 通用數據保存處理函數
+// 通用數據保存處理函式
 function saveDataHandler(type) {
   return function(message, sender, sendResponse) {
     const storageKey = DATA_TYPE_TO_STORAGE_KEY[type];
@@ -240,7 +240,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     currentSessionData.currentUserSession = message.userSession;
   }
 
-  // 查找並執行對應的處理函數
+  // 查找並執行對應的處理函式
   const handler = ACTION_HANDLERS.get(message.action);
   if (handler) {
     handler(message, sender, sendResponse);
@@ -271,7 +271,7 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   }
 });
 
-// 通用數據保存函數
+// 通用數據保存函式
 function saveDataToStorage(type, data, userSession) {
   const storageKey = DATA_TYPE_TO_STORAGE_KEY[type.toLowerCase()] || type + 'Data';
 

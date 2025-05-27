@@ -1,4 +1,4 @@
-// 參考範圍處理相關函數
+// 參考範圍處理相關函式
 import { getCustomReferenceRange } from './customReferenceRanges.js';
 
 // Helper function to check if a reference range is of the form [0.000][0.000]
@@ -25,7 +25,7 @@ const shouldUseCustomRange = (orderCode, hosp) => {
   // 檢查特定醫院 - 門諾
   const isMennoniteHospital = hosp.includes("門諾");
 
-  // 使用 Set 代替數組以提高查詢效率
+  // 使用 Set 代替陣列以提高查詢效率
   const targetCodes = new Set(["09001C", "09004C", "09044C", "09043C", "12015C"]);
 
   return isMennoniteHospital && targetCodes.has(orderCode);

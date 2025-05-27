@@ -24,13 +24,13 @@ export const labCopyFormatter = {
       itemSeparator: labSettings.itemSeparator
     }, null, 2));
     
-    // 定義驗證陣列是否有效的函數
+    // 定義驗證陣列是否有效的函式
     const isValidArray = (array) => Array.isArray(array) && array.length > 0;
     
     const { customLabHeaderCopyFormat, customLabItemCopyFormat } = labSettings;
     
     // 詳細檢查自訂格式設定
-    console.log("檢驗報告自訂格式數組檢查:", {
+    console.log("檢驗報告自訂格式陣列檢查:", {
       headerFormat: customLabHeaderCopyFormat,
       headerFormatType: typeof customLabHeaderCopyFormat,
       headerFormatIsArray: Array.isArray(customLabHeaderCopyFormat),
@@ -122,13 +122,13 @@ export const labCopyFormatter = {
    * 生成自訂文字輸出
    * @param {Array} labs - 檢驗項目清單
    * @param {Object} group - 檢驗組別資訊
-   * @param {Array} headerFormat - 標題格式數組
-   * @param {Array} itemFormat - 檢驗項目格式數組
+   * @param {Array} headerFormat - 標題格式陣列
+   * @param {Array} itemFormat - 檢驗項目格式陣列
    * @param {Object} labSettings - 格式設定資訊
    * @returns {String} - 格式化後的文字
    */
   generateCustomTextOutput(labs, group, headerFormat, itemFormat, labSettings) {
-    console.log("generateCustomTextOutput 被調用，參數:", {
+    console.log("generateCustomTextOutput 被呼叫，參數:", {
       labs: labs.length,
       headerFormatLength: Array.isArray(headerFormat) ? headerFormat.length : 0,
       itemFormatLength: Array.isArray(itemFormat) ? itemFormat.length : 0,
@@ -141,7 +141,7 @@ export const labCopyFormatter = {
     // 堅實的安全檢查
     if (!Array.isArray(headerFormat) || headerFormat.length === 0 || 
         !Array.isArray(itemFormat) || itemFormat.length === 0) {
-      console.error("提供給 generateCustomTextOutput 的格式數組無效");
+      console.error("提供給 generateCustomTextOutput 的格式陣列無效");
       if (labSettings.copyLabFormat === "customVertical") {
         return this.applyVerticalFormat(labs, group, labSettings);
       } else {
@@ -155,7 +155,7 @@ export const labCopyFormatter = {
       ['hosp', group.hosp || '']
     ]);
     
-    // 構建頭部信息
+    // 建置頭部信息
     let header = '';
     for (const item of headerFormat) {
       // 提取基本 ID（移除前綴和計數器）
@@ -174,7 +174,7 @@ export const labCopyFormatter = {
       }
     }
     
-    // 檢驗項目屬性映射函數
+    // 檢驗項目屬性映射函式
     const getLabItemProperty = (lab, formatItem) => {
       // 提取基本 ID（移除前綴和計數器）
       let baseId = formatItem.id.split('_')[0];
@@ -207,14 +207,14 @@ export const labCopyFormatter = {
       }
     };
     
-    // 根據格式類型決定輸出方式
+    // 根據格式型別決定輸出方式
     const isHorizontal = labSettings.copyLabFormat === "customHorizontal";
     
-    // 構建檢驗項目列表
+    // 建置檢驗項目列表
     let labItemsText = '';
     
     if (isHorizontal) {
-      // 確保分隔字元是字符串類型
+      // 確保分隔字元是字符串型別
       const itemSeparator = String(labSettings.itemSeparator || ', ');
       
       // 記錄使用的分隔字元
@@ -277,7 +277,7 @@ export const labCopyFormatter = {
         }
         
         if (showReference && lab.consultValue) {
-          // 使用格式化函數處理參考值
+          // 使用格式化函式處理參考值
           labText += ` (${this.formatConsultValue(lab.consultValue)})`;
         }
       }
@@ -317,7 +317,7 @@ export const labCopyFormatter = {
         }
         
         if (showReference && lab.consultValue) {
-          // 使用格式化函數處理參考值
+          // 使用格式化函式處理參考值
           labText += ` (${this.formatConsultValue(lab.consultValue)})`;
         }
       }

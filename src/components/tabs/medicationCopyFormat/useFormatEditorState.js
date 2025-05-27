@@ -115,7 +115,7 @@ const useFormatEditorState = (appSettings, setAppSettings) => {
     // 對空格和文字元素確保有 drug 前綴 #zh-TW
     const baseId = itemToAdd.id.split('_')[0];
     
-    // 使用 Map 代替 if-else 來處理需要添加前綴的元素類型 #zh-TW
+    // 使用 Map 代替 if-else 來處理需要添加前綴的元素型別 #zh-TW
     const prefixMap = new Map([
       ['space', true],
       ['text', true]
@@ -325,7 +325,7 @@ const useFormatEditorState = (appSettings, setAppSettings) => {
     //   drugElements: drugFormat.length
     // });
     
-    // 保存當前格式類型
+    // 保存當前格式型別
     setSavedFormatType(medicationCopyFormat);
     
     // 保存到 Chrome 存儲

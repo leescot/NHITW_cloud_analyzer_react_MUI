@@ -138,7 +138,7 @@ const Overview_LabTests = ({ groupedLabs = [], labData, overviewSettings = {}, g
             ['08011C-Platelet', true]  // 我們特定的血小板代碼
           ]);
 
-          // 幫助函數來檢查代碼是否與 CBC 相關
+          // 幫助函式來檢查代碼是否與 CBC 相關
           const isCBCCode = (code) => {
             if (!code) return false;
             return cbcVariants.has(code) || code.startsWith('08011');
@@ -196,7 +196,7 @@ const Overview_LabTests = ({ groupedLabs = [], labData, overviewSettings = {}, g
 
           // Function to process CBC labs with specialized handling
           function processSpecialCBCItem(lab, date, targetOrderCodes, matchingTests) {
-            // 創建一個提取值的輔助函數
+            // 創建一個提取值的輔助函式
             const extractLabValue = (lab) => {
               // 如果有數值和單位，則使用它們
               if (lab.value && lab.unit) {
@@ -211,7 +211,7 @@ const Overview_LabTests = ({ groupedLabs = [], labData, overviewSettings = {}, g
               return '';
             };
 
-            // 檢查是否包含特定文本的幫助函數，不區分大小寫
+            // 檢查是否包含特定文本的幫助函式，不區分大小寫
             const containsText = (source, targets) => {
               if (!source) return false;
 
@@ -231,7 +231,7 @@ const Overview_LabTests = ({ groupedLabs = [], labData, overviewSettings = {}, g
               });
             };
 
-            // 使用 Map 建立 CBC 項目類型映射
+            // 使用 Map 建立 CBC 項目型別映射
             const cbcItemTypes = new Map([
               ['WBC', {
                 keywords: ['WBC', '白血球'],
@@ -302,7 +302,7 @@ const Overview_LabTests = ({ groupedLabs = [], labData, overviewSettings = {}, g
             if (labGroup.labs && Array.isArray(labGroup.labs)) {
               labGroup.labs.forEach(lab => {
                 if (targetOrderCodes.includes(lab.orderCode)) {
-                  // 使用 Map 為特殊處理的測試類型定義處理邏輯
+                  // 使用 Map 為特殊處理的測試型別定義處理邏輯
                   const specialTestHandlers = new Map([
                     ['09015C', () => {
                       // 使用 abbrName 來判斷是否為 GFR

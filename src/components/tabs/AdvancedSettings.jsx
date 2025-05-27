@@ -18,7 +18,7 @@ import ScienceIcon from '@mui/icons-material/Science';
 // Other icons can be imported for future settings pages
 
 /**
- * 進階設定主組件 - 管理多個設定頁面
+ * 進階設定主元件 - 管理多個設定頁面
  */
 const AdvancedSettings = ({ appSettings, setAppSettings, generalDisplaySettings }) => {
   // 當前選擇的設定頁面索引

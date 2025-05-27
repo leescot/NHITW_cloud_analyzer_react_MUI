@@ -1,7 +1,7 @@
-// 表格數據準備相關函數
+// 表格數據準備相關函式
 import { isMultiItemOrderCode } from './abbreviationUtils.js';
 
-// 修改表格數據準備函數，添加類型過濾
+// 修改表格數據準備函式，添加型別過濾
 const prepareLabTableData = (groupedLabs, selectedType = null) => {
   if (!groupedLabs || !Array.isArray(groupedLabs) || groupedLabs.length === 0) {
     return { dates: [], items: [] };
@@ -116,7 +116,7 @@ const prepareLabTableData = (groupedLabs, selectedType = null) => {
     }]
   ]);
 
-  // 創建值對象的輔助函數
+  // 創建值對象的輔助函式
   const createValueObject = (lab) => {
     return {
       value: lab.value,
@@ -158,7 +158,7 @@ const prepareLabTableData = (groupedLabs, selectedType = null) => {
 
       const orderCode = lab.orderCode || '';
 
-      // 如果指定了類型過濾器，檢查項目是否匹配
+      // 如果指定了型別過濾器，檢查項目是否匹配
       if (selectedType && lab.type !== selectedType) {
         return; // 跳過不匹配的項目
       }
@@ -226,7 +226,7 @@ const prepareLabTableData = (groupedLabs, selectedType = null) => {
     });
   });
 
-  // 將 Map 轉換為數組並排序
+  // 將 Map 轉換為陣列並排序
   const items = Array.from(itemMap.values()).sort((a, b) => {
     // 按 orderCode 排序
     return a.orderCode.localeCompare(b.orderCode);

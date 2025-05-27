@@ -21,7 +21,7 @@ if (!drugCode) {
   fetchDrugData(drugCode);
 }
 
-// 擷取藥品數據的函數
+// 擷取藥品數據的函式
 async function fetchDrugData(code) {
   try {
     const response = await fetch(`https://drugtw.com/api/drugs?q=${code}`);

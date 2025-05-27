@@ -18,7 +18,7 @@
  * - twoColumn: 雙欄顯示
  * - threeColumn: 三欄顯示
  * - fourColumn: 四欄顯示
- * - byType: 依檢驗類型分組顯示
+ * - byType: 依檢驗型別分組顯示
  */
 export const DEFAULT_LAB_TESTS = [
   { orderCode: '08011C-WBC', displayName: 'WBC', enabled: false },

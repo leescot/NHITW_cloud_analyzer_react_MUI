@@ -22,7 +22,7 @@ import FormatPreview from './labCopyFormat/FormatPreview';
 import useFormatEditorState from './labCopyFormat/useFormatEditorState';
 import { createHeaderLabHandlers, createItemLabHandlers } from './labCopyFormat/dragDropHandlers';
 
-// 檢驗報告自訂格式編輯器組件
+// 檢驗報告自訂格式編輯器元件
 const LabCustomFormatEditor = ({ appSettings, setAppSettings, generalDisplaySettings }) => {
   // 響應式布局
   const theme = useTheme();
@@ -197,7 +197,7 @@ const LabCustomFormatEditor = ({ appSettings, setAppSettings, generalDisplaySett
       <Box sx={{ display: 'flex', flexDirection: 'column', bgcolor: '#f8f8f8', pt: 1, px: 2, pb: 1, borderRadius: 1, mb: 1 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
           <Typography variant="subtitle1" fontWeight="medium" sx={{ width: '100%', textAlign: 'center' }}>
-            格式類型選擇與預覽
+            格式型別選擇與預覽
           </Typography>
         </Box>
         

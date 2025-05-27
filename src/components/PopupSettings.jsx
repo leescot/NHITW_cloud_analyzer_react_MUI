@@ -20,10 +20,10 @@ import HelpIcon from '@mui/icons-material/Help';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import VolunteerActivismIcon from '@mui/icons-material/VolunteerActivism';
 
-// 引入標籤顏色工具函數
+// 引入標籤顏色工具函式
 import { getTabColor, getTabSelectedColor } from '../utils/tabColorUtils';
 
-// 導入拆分出的組件
+// 導入拆分出的元件
 import DataStatusTab from './settings/DataStatusTab';
 import GeneralDisplaySettings from './settings/GeneralDisplaySettings';
 import MedicationSettings from './settings/MedicationSettings';
@@ -252,9 +252,9 @@ const PopupSettings = () => {
     }]
   ]);
 
-  // 組件掛載時初始化
+  // 元件掛載時初始化
   useEffect(() => {
-    console.log('PopupSettings 組件已掛載');
+    console.log('PopupSettings 元件已掛載');
 
     // 立即更新資料狀態
     updateDataStatus(setDataStatus);
@@ -311,7 +311,7 @@ const PopupSettings = () => {
 
     // 清理監聽器和間隔
     return () => {
-      console.log('清理 PopupSettings 組件');
+      console.log('清理 PopupSettings 元件');
       chrome.runtime.onMessage.removeListener(handleMessage);
       chrome.storage.onChanged.removeListener(handleStorageChange);
       clearInterval(intervalId);

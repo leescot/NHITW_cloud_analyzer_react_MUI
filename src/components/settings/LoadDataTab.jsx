@@ -19,7 +19,7 @@ import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import DeleteIcon from '@mui/icons-material/Delete';
 import DownloadIcon from '@mui/icons-material/Download';
 
-// 資料類型對照表
+// 資料型別對照表
 const dataTypeMap = new Map([
   ['medication', '西藥處方'],
   ['labData', '檢驗報告'],

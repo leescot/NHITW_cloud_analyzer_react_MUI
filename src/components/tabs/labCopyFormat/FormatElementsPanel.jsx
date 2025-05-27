@@ -198,7 +198,7 @@ const FormatElementsPanel = ({
     return formatType === 'header' ? ELEMENT_SECTIONS.LABHEADER : ELEMENT_SECTIONS.LABCONTENT;
   };
 
-  // 函數處理器
+  // 函式處理器
   const handleCloseTextDialog = () => {
     setTextDialogOpen(false);
   };

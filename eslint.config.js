@@ -31,7 +31,7 @@ export default [
       // 引用客製化推薦程式碼風格規則，及做一些微調
       // ref: https://eslint.style/rules
       ...stylisticCustomized.rules,
-      "@stylistic/arrow-parens": "off",  // 取消強制箭頭函數加括號
+      "@stylistic/arrow-parens": "off",  // 取消強制箭頭函式加括號
       "@stylistic/brace-style": "off",  // 取消強制處理花括號前後換行
       "@stylistic/comma-dangle": "off",  // 取消強制多行物件尾部加逗點
       "@stylistic/eol-last": "off",  // 取消強制檔尾換行

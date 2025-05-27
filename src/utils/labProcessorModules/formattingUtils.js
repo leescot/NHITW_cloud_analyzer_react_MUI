@@ -1,4 +1,4 @@
-// 資料格式化相關函數
+// 資料格式化相關函式
 import { getAbbreviation } from './abbreviationUtils.js';
 import { normalizeValue, getValueStatus } from './valueUtils.js';
 import { parseReferenceRange, isZeroReferenceRange, getReferenceRangeDisplayText } from './referenceRangeUtils.js';

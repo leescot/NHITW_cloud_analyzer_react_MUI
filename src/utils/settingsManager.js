@@ -1,5 +1,5 @@
 // settingsManager.js
-// 統一管理所有設置相關的函數
+// 統一管理所有設置相關的函式
 
 import { DEFAULT_SETTINGS } from "../config/defaultSettings";
 import { DEFAULT_LAB_TESTS } from "../config/labTests";
@@ -142,9 +142,9 @@ export const loadAllSettings = async () => {
 };
 
 /**
- * 設置變更的監聽處理函數
- * @param {Function} callback - 設置變更時的回調函數
- * @returns {Function} 移除監聽器的函數
+ * 設置變更的監聽處理函式
+ * @param {Function} callback - 設置變更時的回調函式
+ * @returns {Function} 移除監聽器的函式
  */
 export const listenForSettingsChanges = (callback) => {
   const handleStorageChange = (changes, area) => {
@@ -156,7 +156,7 @@ export const listenForSettingsChanges = (callback) => {
 
   chrome.storage.onChanged.addListener(handleStorageChange);
 
-  // 返回清理函數
+  // 返回清理函式
   return () => {
     chrome.storage.onChanged.removeListener(handleStorageChange);
   };
@@ -164,8 +164,8 @@ export const listenForSettingsChanges = (callback) => {
 
 /**
  * 監聽 Chrome 擴展消息
- * @param {Function} callback - 收到消息時的回調函數
- * @returns {Function} 移除監聽器的函數
+ * @param {Function} callback - 收到消息時的回調函式
+ * @returns {Function} 移除監聽器的函式
  */
 export const listenForMessages = (callback) => {
   const handleMessage = (message) => {
@@ -174,7 +174,7 @@ export const listenForMessages = (callback) => {
 
   chrome.runtime.onMessage.addListener(handleMessage);
 
-  // 返回清理函數
+  // 返回清理函式
   return () => {
     chrome.runtime.onMessage.removeListener(handleMessage);
   };
@@ -182,8 +182,8 @@ export const listenForMessages = (callback) => {
 
 /**
  * 監聽數據加載完成事件
- * @param {Function} callback - 數據加載完成時的回調函數
- * @returns {Function} 移除監聽器的函數
+ * @param {Function} callback - 數據加載完成時的回調函式
+ * @returns {Function} 移除監聽器的函式
  */
 export const listenForDataFetchCompletion = (callback) => {
   const handleDataFetchCompleted = (event) => {
@@ -192,7 +192,7 @@ export const listenForDataFetchCompletion = (callback) => {
 
   window.addEventListener("dataFetchCompleted", handleDataFetchCompleted);
 
-  // 返回清理函數
+  // 返回清理函式
   return () => {
     window.removeEventListener("dataFetchCompleted", handleDataFetchCompleted);
   };
@@ -201,7 +201,7 @@ export const listenForDataFetchCompletion = (callback) => {
 /**
  * 處理設置變更的消息
  * @param {Object} message - 消息對象
- * @param {Function} settingsUpdateCallback - 設置更新時的回調函數
+ * @param {Function} settingsUpdateCallback - 設置更新時的回調函式
  */
 export const handleSettingChangeMessage = (message, settingsUpdateCallback) => {
   if (message.action === "settingChanged") {
@@ -476,8 +476,8 @@ const handleGeneralDisplaySettingsChange = (event, updateGeneralDisplaySettings)
  * 處理數據加載完成事件中的設置變更
  * @param {Object} event - 事件對象
  * @param {Object} currentSettings - 當前設置
- * @param {Function} updateCallback - 設置更新時的回調函數
- * @param {Object} callbacks - 各種數據處理回調函數
+ * @param {Function} updateCallback - 設置更新時的回調函式
+ * @param {Object} callbacks - 各種數據處理回調函式
  */
 export const handleDataFetchCompletedSettingsChange = (event, currentSettings, updateCallback, callbacks) => {
   // Handle setting changes
@@ -491,14 +491,14 @@ export const handleDataFetchCompletedSettingsChange = (event, currentSettings, u
       ['cloud', () => handleCloudDataSettingsChange(event, currentSettings, updateCallback)]
     ]);
 
-    // 從 Map 中擷取並執行對應的處理函數
+    // 從 Map 中擷取並執行對應的處理函式
     const handler = settingTypeHandlers.get(event.detail.settingType);
     
-    // 如果找到對應的處理函數則執行，否則加載所有設置
+    // 如果找到對應的處理函式則執行，否則加載所有設置
     if (handler) {
       handler();
     } else {
-      // 未知類型，可能需要加載所有設置
+      // 未知型別，可能需要加載所有設置
       loadAllSettings().then(updateCallback);
     }
   }

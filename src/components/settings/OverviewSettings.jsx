@@ -39,7 +39,7 @@ import { DEFAULT_IMAGE_TESTS } from '../../config/imageTests';
 /**
  * FALLBACK_LAB_TESTS - 極簡版的檢驗項目配置
  *
- * 當用戶沒有儲存的設定且 DEFAULT_LAB_TESTS 也不可用時的最小備用配置。
+ * 當使用者沒有儲存的設定且 DEFAULT_LAB_TESTS 也不可用時的最小備用配置。
  * 這個配置應與 DEFAULT_LAB_TESTS 中最重要的幾個項目保持一致。
  */
 export const FALLBACK_LAB_TESTS = [
@@ -64,9 +64,9 @@ export const SPECIAL_LAB_CODES = [
 ];
 
 /**
- * 重設用戶的檢驗項目設定為預設值
+ * 重設使用者的檢驗項目設定為預設值
  *
- * 可在需要重設設定的地方調用此函數，例如：
+ * 可在需要重設設定的地方呼叫此函式，例如：
  * - 設定頁面中的"重設為預設"按鈕
  * - 應用版本更新時
  */
@@ -74,7 +74,7 @@ export const resetLabTestsToDefault = (callback = () => {}) => {
   chrome.storage.sync.set(
     { focusedLabTests: DEFAULT_LAB_TESTS },
     () => {
-      // 通知其他組件設定已更改
+      // 通知其他元件設定已更改
       chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
         if (tabs[0]) {
           chrome.tabs.sendMessage(tabs[0].id, {
@@ -94,7 +94,7 @@ export const resetLabTestsToDefault = (callback = () => {}) => {
 /**
  * FALLBACK_IMAGE_TESTS - 極簡版的影像檢查配置
  *
- * 當用戶沒有儲存的設定且 DEFAULT_IMAGE_TESTS 也不可用時的最小備用配置。
+ * 當使用者沒有儲存的設定且 DEFAULT_IMAGE_TESTS 也不可用時的最小備用配置。
  * 這個配置應與 DEFAULT_IMAGE_TESTS 中最重要的幾個項目保持一致。
  */
 export const FALLBACK_IMAGE_TESTS = [
@@ -103,13 +103,13 @@ export const FALLBACK_IMAGE_TESTS = [
 ];
 
 /**
- * 重設用戶的影像檢查設定為預設值
+ * 重設使用者的影像檢查設定為預設值
  */
 export const resetImageTestsToDefault = (callback = () => {}) => {
   chrome.storage.sync.set(
     { focusedImageTests: DEFAULT_IMAGE_TESTS },
     () => {
-      // 通知其他組件設定已更改
+      // 通知其他元件設定已更改
       chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
         if (tabs[0]) {
           chrome.tabs.sendMessage(tabs[0].id, {
@@ -167,7 +167,7 @@ const OverviewSettings = () => {
       setMedicationTrackingDays(newValue);
       chrome.storage.sync.set({ medicationTrackingDays: newValue });
 
-      // 發送消息給 FloatingIcon 組件更新
+      // 發送消息給 FloatingIcon 元件更新
       chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
         if (tabs[0]) {
           chrome.tabs.sendMessage(tabs[0].id, {
@@ -193,7 +193,7 @@ const OverviewSettings = () => {
       setLabTrackingDays(newValue);
       chrome.storage.sync.set({ labTrackingDays: newValue });
 
-      // 發送消息給 FloatingIcon 組件更新
+      // 發送消息給 FloatingIcon 元件更新
       chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
         if (tabs[0]) {
           chrome.tabs.sendMessage(tabs[0].id, {
@@ -219,7 +219,7 @@ const OverviewSettings = () => {
       setImageTrackingDays(newValue);
       chrome.storage.sync.set({ imageTrackingDays: newValue });
 
-      // 發送消息給 FloatingIcon 組件更新
+      // 發送消息給 FloatingIcon 元件更新
       chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
         if (tabs[0]) {
           chrome.tabs.sendMessage(tabs[0].id, {
@@ -254,7 +254,7 @@ const OverviewSettings = () => {
     setFocusedLabTests(tempLabTests);
     chrome.storage.sync.set({ focusedLabTests: tempLabTests });
 
-    // 發送消息給 FloatingIcon 組件更新
+    // 發送消息給 FloatingIcon 元件更新
     chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
       if (tabs[0]) {
         chrome.tabs.sendMessage(tabs[0].id, {
@@ -319,7 +319,7 @@ const OverviewSettings = () => {
     setFocusedImageTests(tempImageTests);
     chrome.storage.sync.set({ focusedImageTests: tempImageTests });
 
-    // 發送消息給 FloatingIcon 組件更新
+    // 發送消息給 FloatingIcon 元件更新
     chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
       if (tabs[0]) {
         chrome.tabs.sendMessage(tabs[0].id, {

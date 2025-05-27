@@ -2,7 +2,7 @@
 
 ## 概述
 
-本文件提供健保雲端資料擷取器 2.0 內部 API 與函數庫的詳細說明。這些 API 主要用於擴充功能內部元件間的通訊與資料處理。
+本文件提供健保雲端資料擷取器 2.0 內部 API 與函式庫的詳細說明。這些 API 主要用於擴充功能內部元件間的通訊與資料處理。
 
 ## 資料管理 API
 
@@ -12,7 +12,7 @@
 
 主要職責：中央資料管理，提供統一的資料存取介面。
 
-#### 核心函數
+#### 核心函式
 
 ```javascript
 // 處理原始資料
@@ -21,7 +21,7 @@ processData(dataType, rawData)
 // 儲存處理後的資料
 storeProcessedData(dataType, data)
 
-// 擷取特定類型的資料
+// 擷取特定型別的資料
 getDataByType(dataType)
 
 // 清除所有資料
@@ -55,7 +55,7 @@ const medications = getDataByType('medication');
 
 主要職責：管理使用者設定，提供設定的讀取、儲存與應用功能。
 
-#### 核心函數
+#### 核心函式
 
 ```javascript
 // 擷取所有設定
@@ -100,7 +100,7 @@ updateSetting('generalDisplay', 'contentTextSize', 'large');
 
 功能：處理西藥處方資料。
 
-#### 核心函數
+#### 核心函式
 
 ```javascript
 // 處理原始藥物資料
@@ -122,7 +122,7 @@ formatMedicationForCopy(medication, format)
 
 功能：處理檢驗報告資料。
 
-#### 核心函數
+#### 核心函式
 
 ```javascript
 // 處理原始檢驗資料
@@ -144,7 +144,7 @@ generateLabTrendData(labTests, testId)
 
 功能：處理中藥處方資料。
 
-#### 核心函數
+#### 核心函式
 
 ```javascript
 // 處理原始中藥資料
@@ -163,13 +163,13 @@ formatChineseMedForCopy(prescription, format)
 
 功能：處理影像檢查資料。
 
-#### 核心函數
+#### 核心函式
 
 ```javascript
 // 處理原始影像資料
 processImagingData(rawData)
 
-// 依類型分類影像檢查
+// 依型別分類影像檢查
 categorizeByType(imagingTests)
 
 // 提取報告關鍵發現
@@ -182,12 +182,12 @@ extractKeyFindings(report)
 
 位置：`/src/utils/textSizeUtils.js`
 
-功能：提供文字大小相關的輔助函數。
+功能：提供文字大小相關的輔助函式。
 
-#### 核心函數
+#### 核心函式
 
 ```javascript
-// 擷取指定類型的文字大小設定
+// 擷取指定型別的文字大小設定
 getTextSize(type)
 
 // 將設定值轉換為實際的 CSS 尺寸
@@ -198,9 +198,9 @@ convertSizeToCSS(size)
 
 位置：`/src/utils/indicatorUtils.js`
 
-功能：提供指標計算與判斷的輔助函數。
+功能：提供指標計算與判斷的輔助函式。
 
-#### 核心函數
+#### 核心函式
 
 ```javascript
 // 計算腎功能指標
@@ -273,7 +273,7 @@ chrome.scripting.executeScript({
 
 功能：注入到健保雲端網頁，提供資料擷取與使用者介面注入功能。
 
-#### 核心函數
+#### 核心函式
 
 ```javascript
 // 擷取頁面資料
@@ -374,7 +374,7 @@ LabTest = {
 ```javascript
 ImagingTest = {
   id: String,                     // 唯一識別符
-  type: String,                   // 影像類型
+  type: String,                   // 影像型別
   name: String,                   // 檢查名稱
   date: Date,                     // 檢查日期
   hospital: String,               // 檢查醫院
@@ -391,12 +391,12 @@ ImagingTest = {
 try {
   // 操作代碼
 } catch (error) {
-  console.error('錯誤類型: ', error.message);
+  console.error('錯誤型別: ', error.message);
   // 錯誤處理邏輯
 }
 ```
 
-常見錯誤類型:
+常見錯誤型別:
 - 資料擷取錯誤: 網頁結構變更或元素不存在
 - 資料處理錯誤: 資料格式不符預期
 - 設定存取錯誤: 無法讀取或保存設定

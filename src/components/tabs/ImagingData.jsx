@@ -304,7 +304,7 @@ const processImagingData = (data) => {
   };
 };
 
-// ImagingTable 組件 - 處理待取報告
+// ImagingTable 元件 - 處理待取報告
 const PendingImagingTable = ({ data, generalDisplaySettings }) => {
   return (
     <TableContainer component={Paper}>
@@ -405,7 +405,7 @@ const PendingImagingTable = ({ data, generalDisplaySettings }) => {
   );
 };
 
-// ImagingTable 組件 - 處理已有報告
+// ImagingTable 元件 - 處理已有報告
 const ReportImagingTable = ({ data, generalDisplaySettings }) => {
   return (
     <TableContainer component={Paper}>
@@ -636,7 +636,7 @@ const ImagingData = ({ imagingData, generalDisplaySettings }) => {
   // 是否顯示過濾選項
   const shouldShowFilter = hasCTMRIReports || hasUltrasoundReports;
 
-  // 使用 Map 實現過濾邏輯，根據過濾選項取得對應的資料處理函數
+  // 使用 Map 實現過濾邏輯，根據過濾選項取得對應的資料處理函式
   const filterMap = React.useMemo(() => new Map([
     // # zh-TW: 顯示所有報告
     ['all', () => processedData.withReport],
@@ -657,7 +657,7 @@ const ImagingData = ({ imagingData, generalDisplaySettings }) => {
       return processedData.withReport;
     }
     
-    // # zh-TW: 從 Map 擷取對應的過濾函數並執行
+    // # zh-TW: 從 Map 擷取對應的過濾函式並執行
     const filterFunction = filterMap.get(filterOption);
     return filterFunction ? filterFunction() : processedData.withReport;
   }, [processedData.withReport, filterOption, shouldShowFilter, filterMap]);
@@ -669,7 +669,7 @@ const ImagingData = ({ imagingData, generalDisplaySettings }) => {
   // 處理過濾器改變
   const handleFilterChange = (event) => {
     const newValue = event.target.value;
-    // 確保所選類型有報告，否則設置為 'all'
+    // 確保所選型別有報告，否則設置為 'all'
     if (newValue === 'ctmri' && !hasCTMRIReports) {
       setFilterOption('all');
     } else if (newValue === 'ultrasound' && !hasUltrasoundReports) {
@@ -679,7 +679,7 @@ const ImagingData = ({ imagingData, generalDisplaySettings }) => {
     }
   };
 
-  // 當資料更新且所選類型沒有報告時，重設為 'all'
+  // 當資料更新且所選型別沒有報告時，重設為 'all'
   useEffect(() => {
     if (filterOption === 'ctmri' && !hasCTMRIReports) {
       setFilterOption('all');

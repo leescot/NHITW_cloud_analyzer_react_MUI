@@ -7,12 +7,12 @@ export const useCopyLabData = () => {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
 
-  // 關閉 snackbar 的函數
+  // 關閉 snackbar 的函式
   const handleSnackbarClose = () => {
     setSnackbarOpen(false);
   };
 
-  // 複製所有檢驗數據的函數
+  // 複製所有檢驗數據的函式
   const handleSectionLabData = (group, labSettings) => {
     const { copyLabFormat, showUnit, showReference } = labSettings;
     let formattedText = '';
@@ -62,7 +62,7 @@ export const useCopyLabData = () => {
       });
   };
 
-  // 標準垂直格式處理函數
+  // 標準垂直格式處理函式
   const applyStandardVerticalFormat = (group, showUnit, showReference) => {
     // 格式化日期，從 YYYY-MM-DD 轉換為 YYYY/MM/DD
     const formattedDate = formatDate(group.date);
@@ -77,7 +77,7 @@ export const useCopyLabData = () => {
     return formattedText;
   };
 
-  // 標準水平格式處理函數
+  // 標準水平格式處理函式
   const applyStandardHorizontalFormat = (group, showUnit, showReference) => {
     // 格式化日期，從 YYYY-MM-DD 轉換為 YYYY/MM/DD
     const formattedDate = formatDate(group.date);
@@ -91,7 +91,7 @@ export const useCopyLabData = () => {
     return formattedText;
   };
 
-  // 複製使用者選擇的檢驗數據的函數
+  // 複製使用者選擇的檢驗數據的函式
   const handleCopyUserSelectedLabData = (group, groupIndex, selectedLabItems, labSettings) => {
     const { copyLabFormat, showUnit, showReference } = labSettings;
 

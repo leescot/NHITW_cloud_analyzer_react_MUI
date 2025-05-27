@@ -111,7 +111,7 @@ function initializeExtension() {
       console.error("載入本地資料處理器時出錯:", error);
     });
 
-  // 使用 Map 存儲數據類型與對應處理函數的映射
+  // 使用 Map 存儲數據型別與對應處理函式的映射
   const dataTypeHandlers = new Map([
     ["medication", (data) => { window.lastInterceptedMedicationData = data; }],
     ["lab", (data) => { window.lastInterceptedLabData = data; }],
@@ -124,19 +124,19 @@ function initializeExtension() {
     ["patientSummary", (data) => { window.lastInterceptedPatientSummaryData = data; }]
   ]);
 
-  // 建立事件類型處理器映射
+  // 建立事件型別處理器映射
   const eventTypeHandlers = new Map([
     ["dataForExtension", (eventData) => {
       // 创建安全的数据副本
       const safeData = JSON.parse(JSON.stringify(eventData.data));
       
-      // 使用 Map 查找並執行相應的處理函數
+      // 使用 Map 查找並執行相應的處理函式
       const handler = dataTypeHandlers.get(eventData.dataType);
       if (handler) {
         handler(safeData);
       }
 
-      // 使用 setTimeout 確保變量已完全初始化後再觸發事件
+      // 使用 setTimeout 確保變數已完全初始化後再觸發事件
       setTimeout(() => {
         const customEvent = new CustomEvent("dataFetchCompleted", {
           detail: { type: eventData.dataType },
@@ -150,15 +150,15 @@ function initializeExtension() {
     }]
   ]);
 
-  // 在現有的 message 監聽器中添加對各種消息類型的處理
+  // 在現有的 message 監聽器中添加對各種消息型別的處理
   window.addEventListener("message", (event) => {
     // 確保消息來自我們的頁面
     if (event.source !== window) return;
 
     try {
-      // 檢查事件是否有數據和類型
+      // 檢查事件是否有數據和型別
       if (event.data && event.data.type) {
-        // 查找並執行相應的處理函數
+        // 查找並執行相應的處理函式
         const handler = eventTypeHandlers.get(event.data.type);
         if (handler) {
           handler(event.data);
@@ -185,7 +185,7 @@ window.addEventListener("message", (event) => {
   // 將實際的處理邏輯延遲到初始化完成後
   if (event.source !== window) return;
   
-  // 定義需要捕獲的事件類型
+  // 定義需要捕獲的事件型別
   const earlyEventTypes = new Set(["dataForExtension", "localDataCleared"]);
   
   // 儲存早期事件以便初始化後處理

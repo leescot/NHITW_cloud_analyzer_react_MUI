@@ -1,5 +1,5 @@
 // dataManager.js
-// 統一管理所有數據處理相關的函數
+// 統一管理所有數據處理相關的函式
 
 import { medicationProcessor } from "./medicationProcessor";
 import { labProcessor } from "./labProcessor";
@@ -14,11 +14,11 @@ import { cancerScreeningProcessor } from "./cancerScreeningProcessor";
 import { adultHealthCheckProcessor } from "./adultHealthCheckProcessor";
 
 /**
- * 安全調用setter，如果setter不存在則寫入window全局變量
- * @param {Object} setters - 所有setter函數的對象
- * @param {string} setterName - 要調用的setter名稱
+ * 安全呼叫setter，如果setter不存在則寫入window全局變數
+ * @param {Object} setters - 所有setter函式的對象
+ * @param {string} setterName - 要呼叫的setter名稱
  * @param {any} data - 要設置的數據
- * @param {string} dataName - 數據的名稱（用於設置window全局變量）
+ * @param {string} dataName - 數據的名稱（用於設置window全局變數）
  */
 const safeSetter = (setters, setterName, data, dataName) => {
   const setterFn = setters[setterName];
@@ -26,7 +26,7 @@ const safeSetter = (setters, setterName, data, dataName) => {
   if (typeof setterFn === 'function') {
     setterFn(data);
   } else {
-    // 將數據存儲在window全局變量中
+    // 將數據存儲在window全局變數中
     window[`${dataName}Data`] = data;
   }
 };
@@ -35,7 +35,7 @@ const safeSetter = (setters, setterName, data, dataName) => {
  * 處理所有資料來源並回傳處理結果
  * @param {Object} dataSources - 所有資料來源的對象
  * @param {Object} settings - 應用設置對象
- * @param {Function} setters - 用於更新狀態的setter函數對象
+ * @param {Function} setters - 用於更新狀態的setter函式對象
  * @returns {Promise<Object>} - 處理後的數據對象
  */
 export const handleAllData = async (dataSources, settings, setters) => {
@@ -180,7 +180,7 @@ export const handleAllData = async (dataSources, settings, setters) => {
       }]
     ]);
 
-    // 處理每個資料類型
+    // 處理每個資料型別
     for (const [dataType, { process }] of dataProcessors) {
       await process();
     }
@@ -215,11 +215,11 @@ export const collectDataSources = () => {
 };
 
 /**
- * 根據指定的設置重新處理指定類型的數據
- * @param {string} dataType - 要重新處理的數據類型
+ * 根據指定的設置重新處理指定型別的數據
+ * @param {string} dataType - 要重新處理的數據型別
  * @param {Object} data - 原始數據
  * @param {Object} settings - 處理設置
- * @param {Function} setter - 設置狀態的函數
+ * @param {Function} setter - 設置狀態的函式
  */
 export const reprocessData = async (dataType, data, settings, setter) => {
   if (!data || !data.rObject) return;
@@ -235,7 +235,7 @@ export const reprocessData = async (dataType, data, settings, setter) => {
       ['chinesemed', (data) => {
         return chineseMedProcessor.processChineseMedData(data);
       }]
-      // 可以根據需要添加更多的數據類型處理
+      // 可以根據需要添加更多的數據型別處理
     ]);
 
     const processor = processors.get(dataType);

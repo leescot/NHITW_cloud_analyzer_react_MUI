@@ -32,13 +32,13 @@ import { handleSettingChange } from '../../utils/settingsHelper';
 import { DEFAULT_LAB_COPY_ITEMS } from '../../config/labTests';
 
 /**
- * 重設用戶的檢驗複製項目設定為預設值
+ * 重設使用者的檢驗複製項目設定為預設值
  */
 export const resetLabCopyItemsToDefault = (callback = () => {}) => {
   chrome.storage.sync.set(
     { labChooseCopyItems: DEFAULT_LAB_COPY_ITEMS },
     () => {
-      // 通知其他組件設定已更改
+      // 通知其他元件設定已更改
       chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
         if (tabs[0]) {
           chrome.tabs.sendMessage(tabs[0].id, {
@@ -163,7 +163,7 @@ const LabSettings = () => {
 
     setSettings(updatedSettings);
     chrome.storage.sync.set({ labChooseCopyItems: tempCustomCopyItems }, () => {
-      // 發送消息給其他組件更新
+      // 發送消息給其他元件更新
       chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
         if (tabs[0]) {
           chrome.tabs.sendMessage(tabs[0].id, {
@@ -205,7 +205,7 @@ const LabSettings = () => {
     // Only proceed if enableLabCustomCopyFormat is true
     if (!settings.enableLabCustomCopyFormat) return;
     
-    // 發送消息給 background script 或直接調用 FloatingIcon 的方法
+    // 發送消息給 background script 或直接呼叫 FloatingIcon 的方法
     if (window.openFloatingIconDialog) {
       window.openFloatingIconDialog();
       // 等對話框打開後，切換到檢驗自訂格式標籤（索引為10）
@@ -332,7 +332,7 @@ const LabSettings = () => {
               }, 500);
             }}
           >
-            <MenuItem value="byType">依檢驗類型分組顯示</MenuItem>
+            <MenuItem value="byType">依檢驗型別分組顯示</MenuItem>
             <MenuItem value="vertical">直式呈現 (每項檢驗獨立顯示)</MenuItem>
             <MenuItem value="horizontal">橫式呈現 (檢驗項目並排顯示)</MenuItem>
             <MenuItem value="twoColumn">雙欄呈現 (兩欄顯示提高空間利用)</MenuItem>

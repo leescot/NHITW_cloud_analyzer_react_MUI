@@ -1,4 +1,4 @@
-// 更新資料狀態的函數
+// 更新資料狀態的函式
 export const updateDataStatus = (setDataStatus) => {
   chrome.runtime.sendMessage({ action: "getDataStatus" }, (response) => {
     console.log("DATA STATUS RESPONSE:", response);
@@ -26,7 +26,7 @@ export const updateDataStatus = (setDataStatus) => {
   });
 };
 
-// 從存儲鍵擷取狀態鍵的輔助函數 - 使用 Map 代替對象映射
+// 從存儲鍵擷取狀態鍵的輔助函式 - 使用 Map 代替對象映射
 const storageToStatusKeyMap = new Map([
   ['medicationData', 'medication'],
   ['labData', 'labData'],
@@ -41,12 +41,12 @@ const storageToStatusKeyMap = new Map([
   ['cancerScreeningData', 'cancerScreening']
 ]);
 
-// 從存儲鍵擷取狀態鍵的輔助函數
+// 從存儲鍵擷取狀態鍵的輔助函式
 const getStatusKeyFromStorageKey = (storageKey) => {
   return storageToStatusKeyMap.get(storageKey) || storageKey;
 };
 
-// 設定變更處理函數
+// 設定變更處理函式
 export const handleSettingChange = (settingName, value, setLocalState, localStateProp, settingType) => {
   // Add special logging for displayLabFormat changes
   if (settingName === 'displayLabFormat') {
@@ -112,7 +112,7 @@ export const handleSettingChange = (settingName, value, setLocalState, localStat
 // Initialize the static property
 handleSettingChange.hasLoggedTabsWarning = false;
 
-// 手動擷取資料處理函數
+// 手動擷取資料處理函式
 export const handleFetchData = (setDataStatus) => {
   if (chrome?.tabs?.query) {
     chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
@@ -136,7 +136,7 @@ export const handleFetchData = (setDataStatus) => {
   }
 };
 
-// 清除資料處理函數
+// 清除資料處理函式
 export const handleClearData = (setDataStatus) => {
   // 使用 Array 存儲需要清除的數據鍵
   const dataKeysToRemove = [

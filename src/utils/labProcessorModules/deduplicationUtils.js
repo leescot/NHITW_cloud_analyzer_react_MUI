@@ -1,4 +1,4 @@
-// 資料去重處理相關函數
+// 資料去重處理相關函式
 import { normalizeValue } from './valueUtils.js';
 import { isGFRItem } from './abbreviationUtils.js';
 

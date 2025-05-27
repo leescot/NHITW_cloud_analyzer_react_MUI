@@ -154,7 +154,7 @@ const FormatPreview = ({
     return isText && item.value === ']';
   });
   
-  // 使用 Map 來處理格式類型與選擇狀態，提高可讀性和可擴展性 #zh-TW
+  // 使用 Map 來處理格式型別與選擇狀態，提高可讀性和可擴展性 #zh-TW
   const formatTypesMap = new Map([
     ['customVertical', {
       name: '垂直排列',
@@ -168,7 +168,7 @@ const FormatPreview = ({
     }]
   ]);
   
-  // 從 Map 取得所需的格式類型數據 #zh-TW
+  // 從 Map 取得所需的格式型別數據 #zh-TW
   const verticalFormat = formatTypesMap.get('customVertical');
   const horizontalFormat = formatTypesMap.get('customHorizontal');
   

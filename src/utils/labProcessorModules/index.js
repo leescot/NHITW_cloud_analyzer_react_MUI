@@ -70,7 +70,7 @@ const labProcessor = {
   // 表格數據準備
   prepareLabTableData,
 
-  // 處理檢驗資料的主要函數
+  // 處理檢驗資料的主要函式
   processLabData(labData, settings = {}) {
     if (!labData || !labData.rObject || !Array.isArray(labData.rObject)) {
       console.error('Invalid lab data format:', labData);

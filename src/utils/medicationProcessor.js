@@ -214,7 +214,7 @@ export const medicationProcessor = {
     return roundedDose.toString();
   },
 
-  // 處理藥物資料的主要函數
+  // 處理藥物資料的主要函式
   processMedicationData(data) {
     if (!data || !data.rObject || !Array.isArray(data.rObject)) {
       console.error("無效的藥物資料格式");
@@ -241,7 +241,7 @@ export const medicationProcessor = {
         if (window.medicationFormatSettings) {
           // console.log("使用全局藥物格式設定:", window.medicationFormatSettings);
           
-          // 建立深度複製以確保數組被正確複製
+          // 建立深度複製以確保陣列被正確複製
           const deepCopiedSettings = {};
           
           // 直接複製基本值
@@ -249,13 +249,13 @@ export const medicationProcessor = {
             if (!Array.isArray(window.medicationFormatSettings[key])) {
               deepCopiedSettings[key] = window.medicationFormatSettings[key];
             } else {
-              // 使用 JSON 深度複製數組
+              // 使用 JSON 深度複製陣列
               deepCopiedSettings[key] = JSON.parse(JSON.stringify(window.medicationFormatSettings[key]));
             }
           });
           
-          // 記錄深度複製的數組以驗證
-          // console.log("深度複製的數組:", {
+          // 記錄深度複製的陣列以驗證
+          // console.log("深度複製的陣列:", {
           //   標題格式長度: deepCopiedSettings.customMedicationHeaderCopyFormat?.length,
           //   藥物格式長度: deepCopiedSettings.customMedicationDrugCopyFormat?.length
           // });
@@ -274,22 +274,22 @@ export const medicationProcessor = {
             drugSeparator: settings.drugSeparator
           });
           
-          // 改進: 如果啟用了自訂格式但 Chrome storage 中沒有全局變量，設置全局變量
+          // 改進: 如果啟用了自訂格式但 Chrome storage 中沒有全局變數，設置全局變數
           if (settings.enableMedicationCustomCopyFormat && 
               (settings.customMedicationHeaderCopyFormat || settings.customMedicationDrugCopyFormat)) {
               
-            // console.log("從 Chrome storage 設置全局格式變量");
+            // console.log("從 Chrome storage 設置全局格式變數");
             
             // 創建全局設定對象 (如果不存在)
             if (!window.medicationFormatSettings) {
               window.medicationFormatSettings = {};
             }
             
-            // 複製自訂格式設定到全局變量
+            // 複製自訂格式設定到全局變數
             if (settings.customMedicationHeaderCopyFormat) {
               window.medicationFormatSettings.customMedicationHeaderCopyFormat = 
                   JSON.parse(JSON.stringify(settings.customMedicationHeaderCopyFormat));
-              // 設置備份變量
+              // 設置備份變數
               window.customMedicationHeaderCopyFormat = 
                   JSON.parse(JSON.stringify(settings.customMedicationHeaderCopyFormat));
             }
@@ -297,7 +297,7 @@ export const medicationProcessor = {
             if (settings.customMedicationDrugCopyFormat) {
               window.medicationFormatSettings.customMedicationDrugCopyFormat = 
                   JSON.parse(JSON.stringify(settings.customMedicationDrugCopyFormat));
-              // 設置備份變量
+              // 設置備份變數
               window.customMedicationDrugCopyFormat = 
                   JSON.parse(JSON.stringify(settings.customMedicationDrugCopyFormat));
             }
@@ -310,7 +310,7 @@ export const medicationProcessor = {
             window.medicationFormatSettings.drugSeparator = 
                 settings.drugSeparator;
             
-            // console.log("全局變量設置完成:", {
+            // console.log("全局變數設置完成:", {
             //   hasGlobalSettings: !!window.medicationFormatSettings,
             //   hasHeaderArray: !!window.customMedicationHeaderCopyFormat,
             //   headerLength: window.customMedicationHeaderCopyFormat?.length,
@@ -362,13 +362,13 @@ export const medicationProcessor = {
           };
 
           data.rObject.forEach((record) => {
-            // 從 hosp 欄位中提取醫院名稱和就診類型
+            // 從 hosp 欄位中提取醫院名稱和就診型別
             const hospValue = getFieldValue(record, "hosp");
             const hospParts = hospValue.split(";");
             const hospitalName = hospParts[0] || "";
             const visitType = hospParts.length > 1 ? hospParts[1] || "" : "";
 
-            // 創建包含日期、醫院、就診類型和 ICD 代碼的唯一鍵
+            // 創建包含日期、醫院、就診型別和 ICD 代碼的唯一鍵
             const key = `${getFieldValue(record, "date")}_${hospitalName}_${visitType}_${getFieldValue(record, "icd_code")}`;
 
             if (!processedRecords[key]) {
@@ -417,7 +417,7 @@ export const medicationProcessor = {
             });
           });
 
-          // 轉換為數組並按日期排序（最新的優先）
+          // 轉換為陣列並按日期排序（最新的優先）
           const groupedData = Object.values(processedRecords);
 
           groupedData.sort((a, b) => {
@@ -491,10 +491,10 @@ export const medicationProcessor = {
     //   drugSeparator: enhancedGroupInfo.drugSeparator
     // });
 
-    // 定義驗證自訂格式配置的函數
+    // 定義驗證自訂格式配置的函式
     const isValidArray = (array) => Array.isArray(array) && array.length > 0;
 
-    // 檢查自訂格式數組是否有效（非空）
+    // 檢查自訂格式陣列是否有效（非空）
     let hasValidHeaderFormat = isValidArray(enhancedGroupInfo.customMedicationHeaderCopyFormat);
     let hasValidDrugFormat = isValidArray(enhancedGroupInfo.customMedicationDrugCopyFormat);
 
@@ -506,7 +506,7 @@ export const medicationProcessor = {
     //   drugFormatLength: enhancedGroupInfo.customMedicationDrugCopyFormat?.length
     // });
 
-    // 建立格式數組來源映射
+    // 建立格式陣列來源映射
     const formatArraySources = new Map([
       ['header', {
         validate: (config) => isValidArray(config.customMedicationHeaderCopyFormat),
@@ -532,11 +532,11 @@ export const medicationProcessor = {
     const isCustomFormat = ['custom', 'customVertical', 'customHorizontal'].includes(format);
     const needsCustomFormatArrays = isCustomFormat && (!hasValidHeaderFormat || !hasValidDrugFormat);
 
-    // 如果需要自訂格式但缺少必要的數組
+    // 如果需要自訂格式但缺少必要的陣列
     if (needsCustomFormatArrays) {
-      // console.log("檢查全局變量中的自訂格式數組");
+      // console.log("檢查全局變數中的自訂格式陣列");
       
-      // 處理自訂格式數組配置
+      // 處理自訂格式陣列配置
       for (const [key, configMeta] of formatArraySources.entries()) {
         // 如果當前配置有效，跳過
         if (configMeta.validate(enhancedGroupInfo)) continue;
@@ -546,7 +546,7 @@ export const medicationProcessor = {
           const source = sourceFunc(enhancedGroupInfo);
           
           if (isValidArray(source)) {
-            // 複製數組到 enhancedGroupInfo
+            // 複製陣列到 enhancedGroupInfo
             enhancedGroupInfo[configMeta.target] = JSON.parse(JSON.stringify(source));
             
             // 更新驗證標記
@@ -560,7 +560,7 @@ export const medicationProcessor = {
       }
       
       // 記錄設定更新後的狀態
-      // console.log("全局變量檢查後的自訂格式狀態:", {
+      // console.log("全局變數檢查後的自訂格式狀態:", {
       //   hasValidHeaderFormat,
       //   hasValidDrugFormat,
       //   headerLength: enhancedGroupInfo.customMedicationHeaderCopyFormat?.length,
