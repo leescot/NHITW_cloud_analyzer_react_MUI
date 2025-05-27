@@ -69,7 +69,7 @@ const Overview_DischargeRecords = ({ dischargeData = [], generalDisplaySettings 
     }
   };
 
-  // 處理開啟出院病摘的函數
+  // 處理開啟出院病摘的函式
   const handleOpenMedicalAbstract = (mdsFile) => {
     if (!mdsFile) {
       console.warn('無法開啟病摘：缺少檔案資訊');

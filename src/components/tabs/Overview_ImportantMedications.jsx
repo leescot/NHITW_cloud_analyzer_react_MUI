@@ -86,7 +86,7 @@ const Overview_ImportantMedications = ({
     });
   });
 
-  // isWithinLastNDays 函數重構使用 Map 來處理不同的日期格式
+  // isWithinLastNDays 函式重構使用 Map 來處理不同的日期格式
   function isWithinLastNDays(dateStr, days) {
     if (!dateStr) {
       return false;
@@ -260,7 +260,7 @@ const Overview_ImportantMedications = ({
     });
   }
 
-  // 修改 getColorInfo 函數，使用 Map 代替 if-else
+  // 修改 getColorInfo 函式，使用 Map 代替 if-else
   const getColorInfo = (colorName) => {
     const colorMap = new Map([
       ['red', {
@@ -292,7 +292,7 @@ const Overview_ImportantMedications = ({
     };
   };
 
-  // 修改 getCategoryIcon 函數，使用 Map 代替 if-else
+  // 修改 getCategoryIcon 函式，使用 Map 代替 if-else
   const getCategoryIcon = (groupName) => {
     const iconMap = new Map([
       ['NSAID', <MedicationIcon fontSize="small" sx={{ fontSize: '0.85rem' }} />],
@@ -414,7 +414,7 @@ const Overview_ImportantMedications = ({
   const handleDrugImageClick = (drugcode) => {
     // console.log("Opening drug image for drugcode:", drugcode);
     if (!drugcode) {
-      setSnackbarMessage("無法獲取藥品代碼");
+      setSnackbarMessage("無法擷取藥品代碼");
       setSnackbarOpen(true);
       return;
     }

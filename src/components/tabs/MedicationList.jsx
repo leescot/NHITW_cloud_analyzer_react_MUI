@@ -28,9 +28,9 @@ const MedicationList = ({
   // 添加搜尋功能狀態
   const [searchText, setSearchText] = useState("");
 
-  // 獲取可用的訪問類型並設置默認選項
+  // 擷取可用的訪問類型並設置默認選項
   useEffect(() => {
-    // 獲取所有不同的訪問類型
+    // 擷取所有不同的訪問類型
     const visitTypes = new Set();
     let hasOutpatient = false;
     let hasEmergency = false;
@@ -45,7 +45,7 @@ const MedicationList = ({
       }
     });
 
-    // 轉換為數組
+    // 轉換為陣列
     const typesArray = Array.from(visitTypes);
     setAvailableVisitTypes(typesArray);
 
@@ -90,7 +90,7 @@ const MedicationList = ({
       )]
     ]);
 
-    // 獲取對應的過濾函數
+    // 擷取對應的過濾函式
     const filterFunc = visitTypeFilterMap.get(selectedVisitType) || 
                       ((visitType) => visitTypeFilterMap.get("default")(visitType));
 
@@ -156,12 +156,12 @@ const MedicationList = ({
     setSearchText(event.target.value);
   };
 
-  // 關閉 snackbar 的函數
+  // 關閉 snackbar 的函式
   const handleSnackbarClose = () => {
     setSnackbarOpen(false);
   };
 
-  // 複製藥物的函數 - 從 FloatingIcon 移過來
+  // 複製藥物的函式 - 從 FloatingIcon 移過來
   const handleCopyMedications = (medications, group) => {
     if (settings.medicationCopyFormat === "none") {
       return;
@@ -232,7 +232,7 @@ const MedicationList = ({
       });
   };
 
-  // 判斷藥物所屬顏色的函數
+  // 判斷藥物所屬顏色的函式
   const getMedicationColor = (medication) => {
     if (!settings.enableATC5Colors) return null;
 
@@ -289,7 +289,7 @@ const MedicationList = ({
     return null;
   };
 
-  // 判斷藥物是否應該以粗體顯示的函數
+  // 判斷藥物是否應該以粗體顯示的函式
   const shouldBeBold = (medication) => {
     // if (!settings.enableATC5Colors) return false;
 
@@ -328,7 +328,7 @@ const MedicationList = ({
     return false;
   };
 
-  // 根據看診類型獲取顏色
+  // 根據看診類型擷取顏色
   const getVisitTypeColor = (visitType) => {
     // 使用 Map 取代 switch 結構
     const visitTypeColorMap = new Map([
@@ -346,7 +346,7 @@ const MedicationList = ({
   // Add new function to handle drug image link click
   const handleDrugImageClick = (drugcode) => {
     if (!drugcode) {
-      setSnackbarMessage("無法獲取藥品代碼");
+      setSnackbarMessage("無法擷取藥品代碼");
       setSnackbarOpen(true);
       return;
     }

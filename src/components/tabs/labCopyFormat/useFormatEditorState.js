@@ -199,7 +199,7 @@ const useFormatEditorState = (appSettings, setAppSettings) => {
     });
     
     // Show success message
-    setSnackbarMessage('已重置為新的預設格式');
+    setSnackbarMessage('已重設為新的預設格式');
     setSnackbarSeverity('success');
     setSnackbarOpen(true);
   };

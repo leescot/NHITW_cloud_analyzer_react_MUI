@@ -65,7 +65,7 @@ if (document.readyState === "loading") {
 
 // 移除定时器，改为在数据保存或加载时直接更新 localStorage
 
-// 初始化函數
+// 初始化函式
 function initialize() {
   // console.log('Initializing automated NHI data extractor');
   if (isOnLoginPage()) {
@@ -217,7 +217,7 @@ function isOnLoginPage() {
 function isOnTargetPage() {
   const url = window.location.href;
   
-  // 使用 Map 存儲目標頁面路徑
+  // 使用 Map 儲存目標頁面路徑
   const targetPaths = new Map([
     ["medcloud2.nhi.gov.tw/imu/IMUE1000/IMUE0008", "用藥紀錄"],
     ["medcloud2.nhi.gov.tw/imu/IMUE1000/IMUE0060", "檢驗報告"],
@@ -304,14 +304,14 @@ async function checkAndInitUserSession() {
   }
 }
 
-// 改進清除之前資料的函數，確保背景腳本也被通知
+// 改進清除之前資料的函式，確保背景腳本也被通知
 function clearPreviousData() {
-  // 直接調用實際執行清除的函數
-  // 不進行去抖動檢查，因為這可能從其他地方直接調用
+  // 直接呼叫實際執行清除的函式
+  // 不進行去抖動檢查，因為這可能從其他地方直接呼叫
   performClearPreviousData();
 }
 
-// 實際執行清除資料的函數，帶有去抖動機制
+// 實際執行清除資料的函式，帶有去抖動機制
 function performClearPreviousData() {
   const currentTime = Date.now();
 
@@ -362,12 +362,12 @@ function performClearPreviousData() {
     action: "clearSessionData",
   });
 
-  // 重置重試計數和標誌
+  // 重設重試計數和標誌
   retryCount = 0;
   hasExtractedToken = false;
 }
 
-// 從頁面提取用戶識別信息
+// 從頁面提取使用者識別信息
 async function extractUserInfo() {
   const currentTime = Date.now();
 
@@ -402,7 +402,7 @@ async function extractUserInfo() {
     console.log("Could not extract user info from token:", error);
   }
 
-  // 方法2: 從 URL 獲取（備用）
+  // 方法2: 從 URL 擷取（備用）
   try {
     const urlParams = new URLSearchParams(window.location.search);
     const patientId = urlParams.get("patientId") || urlParams.get("pid");
@@ -417,7 +417,7 @@ async function extractUserInfo() {
     console.log("Could not extract patient ID from URL:", error);
   }
 
-  // 方法3: 從 DOM 獲取（次要備用）
+  // 方法3: 從 DOM 擷取（次要備用）
   try {
     const patientInfoElements = document.querySelectorAll(
       ".patient-info, .patient-name, .card-no"
@@ -454,7 +454,7 @@ function observeUrlChanges() {
       lastUrl = window.location.href;
       console.log("URL changed to:", lastUrl);
 
-      // 重置使用者資訊快取，確保頁面變更後重新提取
+      // 重設使用者資訊快取，確保頁面變更後重新提取
       cachedUserInfo = null;
       lastUserInfoExtractTime = 0;
 
@@ -466,7 +466,7 @@ function observeUrlChanges() {
 
       if (isOnTargetPage()) {
         console.log("Navigation to target page detected");
-        isDataFetchingStarted = false; // 重置狀態
+        isDataFetchingStarted = false; // 重設狀態
         checkAndInitUserSession().then((isNewSession) => {
           if (isNewSession || !window.lastInterceptedMedicationData?.rObject) {
             fetchAllDataTypes();
@@ -498,7 +498,7 @@ const API_URL_PATTERNS = new Map([
   // ["specialChineseMedCare", "/imu/api/imue0170/imue0170s02/get-data"]
 ]);
 
-// 數據處理模塊 - 封裝數據提取與處理相關功能
+// 數據處理模組 - 封裝數據提取與處理相關功能
 const DataProcessor = {
   // Map 定義集中管理，提高封裝性
   // API URL 模式映射表
@@ -608,22 +608,22 @@ const DataProcessor = {
     return recordsArray && Array.isArray(recordsArray);
   },
   
-  // 獲取數據類型對應的變數名
+  // 擷取數據類型對應的變數名
   getVarName(dataType) {
     return this.dataVarMap.get(dataType);
   },
   
-  // 獲取數據類型對應的 action
+  // 擷取數據類型對應的 action
   getAction(dataType) {
     return this.actionMap.get(dataType);
   },
   
-  // 獲取數據類型對應的顯示文字
+  // 擷取數據類型對應的顯示文字
   getTypeText(dataType) {
     return this.typeTextMap.get(dataType);
   },
   
-  // 根據 URL 獲取對應的數據類型
+  // 根據 URL 擷取對應的數據類型
   getDataTypeFromUrl(url) {
     const foundEntry = Array.from(this.API_URL_PATTERNS.entries())
       .find(([_, pattern]) => url.includes(pattern));
@@ -666,10 +666,10 @@ const DataProcessor = {
         timestamp: Date.now() // 添加时间戳以识别数据新鲜度
       };
       
-      // 從 dataVarMap 中獲取所有數據類型和對應的變數名
+      // 從 dataVarMap 中擷取所有數據類型和對應的變數名
       // 這樣避免硬編碼重複數據類型，使維護更容易
       for (const [dataType, varName] of this.dataVarMap.entries()) {
-        // 特殊處理 labdata 類型，對應的存儲鍵為 lab
+        // 特殊處理 labdata 類型，對應的儲存鍵為 lab
         const storageKey = dataType === 'labdata' ? 'lab' : dataType;
         dataToShare[storageKey] = window[varName];
       }
@@ -682,7 +682,7 @@ const DataProcessor = {
       if (hasData) {
         localStorage.setItem('NHITW_DATA', JSON.stringify(dataToShare));
         
-        // 觸發存儲事件，便於其他擴展監聽
+        // 觸發儲存事件，便於其他擴展監聽
         window.dispatchEvent(new Event('storage'));
       }
     } catch (error) {
@@ -733,7 +733,7 @@ const DataProcessor = {
     );
   },
   
-  // 保存數據函數
+  // 保存數據函式
   saveData(data, dataType, source = "unknown") {
     // 數據檢驗和更新邏輯
     if (!this.validateAndUpdateData(data, dataType)) {
@@ -748,7 +748,7 @@ const DataProcessor = {
   },
 };
 
-// 使用此模塊替換原有的 getDataTypeFromUrl 函數
+// 使用此模組替換原有的 getDataTypeFromUrl 函式
 function getDataTypeFromUrl(url) {
   return DataProcessor.getDataTypeFromUrl(url);
 }
@@ -762,7 +762,7 @@ function setupMonitoring() {
 
   console.log("Setting up API monitoring");
   isMonitoring = true;
-  hasExtractedToken = false; // 重置令牌狀態
+  hasExtractedToken = false; // 重設令牌狀態
 
   // 設置請求頭捕獲
   captureXhrRequestHeaders();
@@ -929,9 +929,9 @@ function setupMonitoring() {
   console.log("Fetch monitoring set up");
 }
 
-// 保存數據的函數 - 對外接口
+// 保存數據的函式 - 對外接口
 function saveData(data, dataType, source = "unknown") {
-  // 直接調用 DataProcessor 模塊的方法
+  // 直接呼叫 DataProcessor 模組的方法
   DataProcessor.saveData(data, dataType, source);
 }
 
@@ -1008,7 +1008,7 @@ function captureXhrRequestHeaders() {
     return originalSetRequestHeader.apply(this, arguments);
   };
 
-  // 監聽open來獲取URL
+  // 監聽open來擷取URL
   XHR.open = function () {
     const method = arguments[0];
     const url = arguments[1];
@@ -1051,7 +1051,7 @@ function captureXhrRequestHeaders() {
 function extractAuthorizationToken() {
   // console.log('Searching for authorization token...');
 
-  // 方法1: 優先使用已捕獲的請求頭中獲取
+  // 方法1: 優先使用已捕獲的請求頭中擷取
   if (
     lastSuccessfulRequestHeaders &&
     lastSuccessfulRequestHeaders["Authorization"]
@@ -1079,7 +1079,7 @@ function extractAuthorizationToken() {
     console.log("Could not access sessionStorage:", error);
   }
 
-  // 方法3: 嘗試從頁面上的script標籤獲取
+  // 方法3: 嘗試從頁面上的script標籤擷取
   try {
     const scripts = document.querySelectorAll("script");
     for (let script of scripts) {
@@ -1130,7 +1130,7 @@ function validateToken(token) {
     // 移除Bearer前綴
     const jwtToken = token.startsWith("Bearer ") ? token.substring(7) : token;
 
-    // 拆分令牌以獲取payload部分
+    // 拆分令牌以擷取payload部分
     const parts = jwtToken.split(".");
     if (parts.length !== 3) {
       return false;
@@ -1150,7 +1150,7 @@ function validateToken(token) {
 
     // 檢查使用者ID與當前會話是否一致
     if (currentUserSession) {
-      // 如果當前會話是從用戶ID提取的，則應該在令牌中找到該ID
+      // 如果當前會話是從使用者ID提取的，則應該在令牌中找到該ID
       if (currentUserSession.includes("patient_") && payload.UserID2) {
         const sessionUserId = currentUserSession.replace("patient_", "");
         if (!payload.UserID2.includes(sessionUserId)) {
@@ -1195,9 +1195,9 @@ function shouldFetchData(dataType) {
   return Promise.resolve(true);
 }
 
-// 在 content.js 中添加一個新函數，用於獲取所有類型的資料
+// 在 content.js 中添加一個新函式，用於擷取所有類型的資料
 function fetchAllDataTypes() {
-  // console.log("開始獲取所有資料類型");
+  // console.log("開始擷取所有資料類型");
 
   if (isBatchFetchInProgress) {
     // console.log("已有批次抓取進行中，跳過本次請求");
@@ -1224,12 +1224,12 @@ function fetchAllDataTypes() {
   isDataFetchingStarted = true;
   window.nhiDataBeingFetched = true;
 
-  // 先獲取主選單資料(masterMenu)，以判斷有哪些資料可獲取
+  // 先擷取主選單資料(masterMenu)，以判斷有哪些資料可擷取
   enhancedFetchData("masterMenu")
     .then((menuResult) => {
-      // console.log("獲取主選單資料成功，開始處理其他資料");
+      // console.log("擷取主選單資料成功，開始處理其他資料");
 
-      // 定義所有要獲取的資料類型
+      // 定義所有要擷取的資料類型
       const dataTypes = [
         "medication",
         "labdata",
@@ -1245,12 +1245,12 @@ function fetchAllDataTypes() {
         // "specialChineseMedCare",
       ];
 
-      // 根據授權過濾並獲取資料類型
+      // 根據授權過濾並擷取資料類型
       const fetchPromises = dataTypes.map((dataType) => {
         if (isDataTypeAuthorized(dataType)) {
           // console.log(`${dataType} 已授權，開始取資料`);
           return enhancedFetchData(dataType).catch((err) => {
-            console.error(`獲取 ${dataType} 資料時發生錯誤:`, err);
+            console.error(`擷取 ${dataType} 資料時發生錯誤:`, err);
             return { status: "error", recordCount: 0, error: err, dataType };
           });
         } else {
@@ -1260,14 +1260,14 @@ function fetchAllDataTypes() {
         }
       });
 
-      // 獲取設定並根據設定決定是否抓取特殊資料類型
+      // 擷取設定並根據設定決定是否抓取特殊資料類型
       const specialDataTypes = ["adultHealthCheck", "cancerScreening"];
       const specialFetchPromises = specialDataTypes.map((dataType) => {
         return shouldFetchData(dataType).then((shouldFetch) => {
           if (shouldFetch && isDataTypeAuthorized(dataType)) {
-            // console.log(`${dataType} 已授權且設定要抓取，開始獲取資料`);
+            // console.log(`${dataType} 已授權且設定要抓取，開始擷取資料`);
             return enhancedFetchData(dataType).catch((err) => {
-              console.error(`獲取 ${dataType} 資料時發生錯誤:`, err);
+              console.error(`擷取 ${dataType} 資料時發生錯誤:`, err);
               return { status: "error", recordCount: 0, error: err, dataType };
             });
           } else {
@@ -1281,10 +1281,10 @@ function fetchAllDataTypes() {
       return Promise.all([...fetchPromises, ...specialFetchPromises]);
     })
     .catch((err) => {
-      console.error("獲取主選單資料失敗:", err);
+      console.error("擷取主選單資料失敗:", err);
 
-      // 如果獲取主選單資料失敗，則使用原本的方式獲取所有資料
-      console.log("切換到無授權檢查模式，嘗試獲取所有資料類型");
+      // 如果擷取主選單資料失敗，則使用原本的方式擷取所有資料
+      console.log("切換到無授權檢查模式，嘗試擷取所有資料類型");
 
       return Promise.all([
         enhancedFetchData("medication").catch((err) => ({
@@ -1335,7 +1335,7 @@ function fetchAllDataTypes() {
       ]);
     })
     .then((results) => {
-      // console.log("所有資料獲取完成，結果:", results);
+      // console.log("所有資料擷取完成，結果:", results);
 
       // 使用 Map 創建計數對象
       const countsMap = new Map([
@@ -1348,9 +1348,9 @@ function fetchAllDataTypes() {
         ["discharge", 0],
         ["medDays", 0],
         ["patientSummary", 0],
-        ["masterMenu", 1], // 主選單資料已獲取
-        ["adultHealthCheck", 1], // 成人預防保健資料已獲取
-        ["cancerScreening", 1], // 四癌篩檢結果資料已獲取
+        ["masterMenu", 1], // 主選單資料已擷取
+        ["adultHealthCheck", 1], // 成人預防保健資料已擷取
+        ["cancerScreening", 1], // 四癌篩檢結果資料已擷取
       ]);
       
       // 填充實際計數
@@ -1407,7 +1407,7 @@ function fetchAllDataTypes() {
       });
     })
     .catch((error) => {
-      console.error("獲取資料時發生錯誤:", error);
+      console.error("擷取資料時發生錯誤:", error);
     })
     .finally(() => {
       isBatchFetchInProgress = false;
@@ -1479,12 +1479,12 @@ function enhancedFetchData(dataType, options = {}) {
   // 設置請求狀態
   pendingRequests[dataType] = true;
   let retryCount = 0;
-  // console.log(`開始獲取 ${dataType} 資料 - ${new Date().toISOString()}`);
+  // console.log(`開始擷取 ${dataType} 資料 - ${new Date().toISOString()}`);
 
-  // 主要的獲取邏輯
+  // 主要的擷取邏輯
   const attemptFetch = () => {
     return new Promise((resolve, reject) => {
-      // 構建 API URL
+      // 建置 API URL
       const apiPath = apiPathMap.get(dataType);
       let apiUrl;
       
@@ -1501,7 +1501,7 @@ function enhancedFetchData(dataType, options = {}) {
           "&insert_log=true";
       }
 
-      // 構建請求頭
+      // 建置請求頭
       const headers = {
         Accept: "application/json, text/plain, */*",
         "X-Requested-With": "XMLHttpRequest",
@@ -1510,7 +1510,7 @@ function enhancedFetchData(dataType, options = {}) {
       // 添加授權令牌
       const authToken = extractAuthorizationToken();
       if (!authToken) {
-        const error = new Error("無法獲取授權令牌");
+        const error = new Error("無法擷取授權令牌");
         pendingRequests[dataType] = false;
 
         return reject(error);
@@ -1605,7 +1605,7 @@ function enhancedFetchData(dataType, options = {}) {
   return attemptFetch();
 }
 
-// 修改 extractAndSaveToken 函數，移除自動觸發獲取數據的部分
+// 修改 extractAndSaveToken 函式，移除自動觸發擷取數據的部分
 function extractAndSaveToken() {
   if (hasExtractedToken) {
     console.log("Token already extracted, skipping additional extraction");
@@ -1621,7 +1621,7 @@ function extractAndSaveToken() {
   return false;
 }
 
-// 新增輔助函數來獲取資料類型的中文名稱
+// 新增輔助函式來擷取資料類型的中文名稱
 function getTypeText(type) {
   return DataProcessor.getTypeText(type) || type;
 }
@@ -1646,7 +1646,7 @@ const nodeToDataTypeMap = new Map([
 
 // 新增: 檢查資料類型是否有授權
 function isDataTypeAuthorized(dataType) {
-  // 如果尚未獲取主選單資料，預設所有資料類型都有授權
+  // 如果尚未擷取主選單資料，預設所有資料類型都有授權
   if (!window.lastInterceptedMasterMenuData) {
     return true;
   }
@@ -1734,7 +1734,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
         // 只有在一定時間後才清除資料並啟動新的抓取，避免重複清除
         if (!isBatchFetchInProgress) {
-          // 使用統一的清除資料函數，它已內建去抖動機制
+          // 使用統一的清除資料函式，它已內建去抖動機制
           performClearPreviousData();
 
           // 如果清除資料後再執行抓取
@@ -1755,7 +1755,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 
   if (message.action === "apiCallCompleted") {
     // console.log("API call completed with status:", message.statusCode);
-    isDataFetchingStarted = false; // 抓取完成後重置
+    isDataFetchingStarted = false; // 抓取完成後重設
   }
 
   if (message.action === "manualFetchData") {
@@ -1843,10 +1843,10 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   return true;
 });
 
-window.fetchNHI_Data = fetchAllDataTypes; // 暴露抓取所有資料的函數
-window.getSessionData = extractUserInfo; // 暴露會話資訊提取函數
+window.fetchNHI_Data = fetchAllDataTypes; // 暴露抓取所有資料的函式
+window.getSessionData = extractUserInfo; // 暴露會話資訊提取函式
 
-// 新增一個自動觸發函數，頁面加載完成後檢查並啟動抓取功能
+// 新增一個自動觸發函式，頁面加載完成後檢查並啟動抓取功能
 function triggerExtraction() {
   console.log("Checking if we need to extract data on this page...");
   const currentPage = window.location.href;
@@ -1930,7 +1930,7 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
         const blob = new Blob([jsonString], { type: "application/json" });
         const url = URL.createObjectURL(blob);
 
-        // 建立下載連結並點擊
+        // 建立下載連結並點選
         const downloadLink = document.createElement("a");
         downloadLink.href = url;
         downloadLink.download = fileName;
@@ -1952,7 +1952,7 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
         });
       } else {
         sendResponse({
-          error: "無法獲取病人資料",
+          error: "無法擷取病人資料",
           status: "error",
         });
       }

@@ -203,7 +203,7 @@ const FormatPreview = ({
         </Typography>
         <Typography variant="caption" color="text.secondary">
           {formatType === 'customHorizontal' ? 
-            `檢驗項目分隔符號: "${itemSeparator}"` : 
+            `檢驗項目分隔字元號: "${itemSeparator}"` : 
             '每個檢驗項目獨立一行顯示'}
         </Typography>
       </Box>

@@ -1,8 +1,8 @@
-// 自定義檢驗項目參考範圍配置
+// 自訂檢驗項目參考範圍配置
 // 這個機制允許為特定檢驗項目覆蓋原始的參考範圍
 
 /**
- * 自定義參考範圍映射表
+ * 自訂參考範圍映射表
  * 格式: {
  *   orderCode: {
  *     min: number | null, // 最小值，如果沒有下限則為 null
@@ -44,16 +44,16 @@ const customReferenceRanges = {
 };
 
 /**
- * 檢查檢驗項目是否有自定義參考範圍
+ * 檢查檢驗項目是否有自訂參考範圍
  * @param {string} orderCode - 檢驗項目代碼
- * @returns {boolean} - 是否有自定義參考範圍
+ * @returns {boolean} - 是否有自訂參考範圍
  */
 const hasCustomReferenceRange = (orderCode) => {
   return customReferenceRanges.hasOwnProperty(orderCode);
 };
 
 /**
- * 獲取檢驗項目的自定義參考範圍
+ * 擷取檢驗項目的自訂參考範圍
  * @param {string} orderCode - 檢驗項目代碼
  * @returns {Object|null} - 參考範圍對象，如果沒有則返回 null
  */

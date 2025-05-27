@@ -1,10 +1,10 @@
 // Drag and drop handlers for format editor elements
 
 /**
- * 創建標題格式的拖放處理函數
+ * 創建標題格式的拖放處理函式
  * @param {Array} elements - 當前的元素陣列
- * @param {Function} setElements - 更新元素陣列的函數
- * @returns {Object} 包含所有拖放處理函數的物件
+ * @param {Function} setElements - 更新元素陣列的函式
+ * @returns {Object} 包含所有拖放處理函式的物件
  */
 export const createHeaderLabHandlers = (elements, setElements) => {
   let dragItem = null;
@@ -76,10 +76,10 @@ export const createHeaderLabHandlers = (elements, setElements) => {
 };
 
 /**
- * 創建檢驗項目格式的拖放處理函數
+ * 創建檢驗項目格式的拖放處理函式
  * @param {Array} elements - 當前的元素陣列
- * @param {Function} setElements - 更新元素陣列的函數
- * @returns {Object} 包含所有拖放處理函數的物件
+ * @param {Function} setElements - 更新元素陣列的函式
+ * @returns {Object} 包含所有拖放處理函式的物件
  */
 export const createItemLabHandlers = (elements, setElements) => {
   let dragItem = null;

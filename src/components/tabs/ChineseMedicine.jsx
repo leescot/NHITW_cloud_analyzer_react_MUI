@@ -13,12 +13,12 @@ const ChineseMedicine = ({
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
 
-  // 關閉 snackbar 的函數
+  // 關閉 snackbar 的函式
   const handleSnackbarClose = () => {
     setSnackbarOpen(false);
   };
 
-  // 複製中藥的函數 - 從 FloatingIcon 移過來
+  // 複製中藥的函式 - 從 FloatingIcon 移過來
   const handleCopyChineseMedications = (medications, group) => {
     if (chineseMedSettings.copyFormat === "none") {
       return;

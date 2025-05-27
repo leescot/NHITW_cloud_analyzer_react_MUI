@@ -1,5 +1,5 @@
 /**
- * 標籤顏色工具函數
+ * 標籤顏色工具函式
  * 用於根據設定和標籤類型生成顏色
  */
 
@@ -35,7 +35,7 @@ const TAB_COLORS = {
 };
 
 /**
- * 獲取標籤顏色
+ * 擷取標籤顏色
  * @param {Object} generalDisplaySettings - 一般顯示設定
  * @param {string} tabType - 標籤類型
  * @param {boolean} hasData - 是否有數據
@@ -75,7 +75,7 @@ export const getTabColor = (generalDisplaySettings, tabType, hasData = true) => 
 };
 
 /**
- * 獲取標籤選中顏色
+ * 擷取標籤選中顏色
  * @param {Object} generalDisplaySettings - 一般顯示設定
  * @param {string} tabType - 標籤類型
  * @param {boolean} hasData - 是否有數據

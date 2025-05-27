@@ -28,9 +28,9 @@ const LabItemDisplay = ({
   const labId = `${groupIndex}-${labIndex}`;
   const isSelected = selectedLabItems[groupIndex]?.[labId] || false;
 
-  // 使用 Map 來決定渲染哪個組件
+  // 使用 Map 來決定渲染哪個元件
   const displayComponents = new Map([
-    // 顯示帶有複選框的版本 - 當啟用自定義複製且顯示格式不是垂直或水平
+    // 顯示帶有複選框的版本 - 當啟用自訂複製且顯示格式不是垂直或水平
     [
       () => enableLabChooseCopy && 
             (displayLabFormat !== 'vertical' && 
@@ -119,7 +119,7 @@ const LabItemDisplay = ({
     ]
   ]);
 
-  // 渲染合適的組件
+  // 渲染合適的元件
   let renderedComponent = null;
   for (const [condition, renderer] of displayComponents) {
     if (condition()) {

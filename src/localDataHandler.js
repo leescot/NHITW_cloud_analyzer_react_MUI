@@ -11,7 +11,7 @@ let localDataStatus = {
 };
 
 /**
- * 從 Chrome storage 加載自定義格式設定
+ * 從 Chrome storage 加載自訂格式設定
  * @returns {Promise<Object>} - 格式設定
  */
 async function loadCustomFormatSettings() {
@@ -36,7 +36,7 @@ async function loadCustomFormatSettings() {
  * @param {string} dataType - 資料類型
  */
 function triggerDataFetchCompleted(dataType) {
-  // 使用 setTimeout 確保變量已完全初始化後再觸發事件
+  // 使用 setTimeout 確保變數已完全初始化後再觸發事件
   setTimeout(() => {
     const customEvent = new CustomEvent("dataFetchCompleted", {
       detail: { type: dataType },
@@ -74,22 +74,22 @@ function setGlobalMedicationFormatSettings(settings) {
     if (!Array.isArray(settings[key])) {
       window.medicationFormatSettings[key] = settings[key];
     } else {
-      // 深度複製數組，確保複製完整
+      // 深度複製陣列，確保複製完整
       window.medicationFormatSettings[key] = JSON.parse(JSON.stringify(settings[key]));
     }
   });
   
-  // 驗證複製後的數組是否完整
+  // 驗證複製後的陣列是否完整
   if (Array.isArray(settings.customMedicationHeaderCopyFormat) && 
       Array.isArray(settings.customMedicationDrugCopyFormat)) {
-    // console.log("驗證自定義格式數組設置後:", {
+    // console.log("驗證自訂格式陣列設置後:", {
     //   原始標題長度: settings.customMedicationHeaderCopyFormat.length,
     //   複製後標題長度: window.medicationFormatSettings.customMedicationHeaderCopyFormat.length,
     //   原始藥物長度: settings.customMedicationDrugCopyFormat.length,
     //   複製後藥物長度: window.medicationFormatSettings.customMedicationDrugCopyFormat.length
     // });
     
-    // 直接存儲到全局變量，以防其他方式丟失
+    // 直接儲存到全局變數，以防其他方式丟失
     window.customMedicationHeaderCopyFormat = JSON.parse(JSON.stringify(settings.customMedicationHeaderCopyFormat));
     window.customMedicationDrugCopyFormat = JSON.parse(JSON.stringify(settings.customMedicationDrugCopyFormat));
   }
@@ -105,18 +105,18 @@ export async function processLocalData(jsonData, filename) {
   console.log('開始處理本地 JSON 資料:', filename);
 
   try {
-    // 重置資料類型追蹤
+    // 重設資料類型追蹤
     const loadedTypes = [];
 
-    // 預先從 Chrome storage 加載自定義格式設定 (改為同步等待)
+    // 預先從 Chrome storage 加載自訂格式設定 (改為同步等待)
     // 這樣能確保處理藥物資料時有正確的格式設定
     if (jsonData.medication) {
       try {
         const settings = await loadCustomFormatSettings();
-        console.log('已加載自定義格式設定:', settings);
+        console.log('已加載自訂格式設定:', settings);
         setGlobalMedicationFormatSettings(settings);
       } catch (error) {
-        console.error('加載自定義格式設定時出錯:', error);
+        console.error('加載自訂格式設定時出錯:', error);
       }
     }
 
@@ -228,16 +228,16 @@ export async function processLocalData(jsonData, filename) {
         // 觸發 storage 事件，便於其他擴充功能監聽
         window.dispatchEvent(new Event('storage'));
         
-        // 如果有廣播函數，也調用它以保持兼容性
+        // 如果有廣播函式，也呼叫它以保持兼容性
         // if (typeof broadcastDataToOtherExtensions === 'function') {
         //   broadcastDataToOtherExtensions();
         // } else if (typeof window.broadcastDataToOtherExtensions === 'function') {
         //   window.broadcastDataToOtherExtensions();
         // } else {
-        //   // 直接發送自定義事件
+        //   // 直接發送自訂事件
         //   const event = new CustomEvent('NHITW_DATA_UPDATED', { detail: dataToShare });
         //   document.dispatchEvent(event);
-        //   console.log('直接發送自定義事件完成');
+        //   console.log('直接發送自訂事件完成');
         // }
       } catch (error) {
         // console.error('保存資料到 localStorage 或廣播時發生錯誤:', error);
@@ -292,7 +292,7 @@ export function clearLocalData() {
       window[varName] = defaultValue;
     }
 
-    // 重置狀態
+    // 重設狀態
     localDataStatus = {
       loaded: false,
       source: '',
@@ -321,7 +321,7 @@ export function clearLocalData() {
 }
 
 /**
- * 獲取本地資料狀態
+ * 擷取本地資料狀態
  * @returns {Object} - 本地資料狀態
  */
 export function getLocalDataStatus() {
@@ -347,13 +347,13 @@ export const localDataHandler = {
     console.log(`開始處理本地 JSON 資料: ${filename}`);
 
     try {
-      // 加載自定義格式設定
+      // 加載自訂格式設定
       try {
         const settings = await loadCustomFormatSettings();
-        console.log('已加載自定義格式設定:', settings);
+        console.log('已加載自訂格式設定:', settings);
         setGlobalMedicationFormatSettings(settings);
       } catch (error) {
-        console.error('加載自定義格式設定時出錯:', error);
+        console.error('加載自訂格式設定時出錯:', error);
       }
       
       // 根據結構和檔名處理不同資料類型
@@ -378,7 +378,7 @@ export const localDataHandler = {
         return localDataStatus;
       }
 
-      // 使用 Map 存儲不同資料類型的處理邏輯
+      // 使用 Map 儲存不同資料類型的處理邏輯
       const dataProcessors = new Map([
         ["medication", async () => {
           const medicationProcessor = (await import("./utils/medicationProcessor.js")).default;
@@ -458,7 +458,7 @@ export const localDataHandler = {
     return clearLocalData();
   },
 
-  // 獲取本地資料狀態
+  // 擷取本地資料狀態
   getLocalDataStatus() {
     return getLocalDataStatus();
   }

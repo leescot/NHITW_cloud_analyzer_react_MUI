@@ -22,7 +22,7 @@ import FormatPreview from './labCopyFormat/FormatPreview';
 import useFormatEditorState from './labCopyFormat/useFormatEditorState';
 import { createHeaderLabHandlers, createItemLabHandlers } from './labCopyFormat/dragDropHandlers';
 
-// 檢驗報告自訂格式編輯器組件
+// 檢驗報告自訂格式編輯器元件
 const LabCustomFormatEditor = ({ appSettings, setAppSettings, generalDisplaySettings }) => {
   // 響應式布局
   const theme = useTheme();
@@ -169,7 +169,7 @@ const LabCustomFormatEditor = ({ appSettings, setAppSettings, generalDisplaySett
             }}
             size="small"
           >
-            重置為預設
+            重設為預設
           </Button>
           {/* {process.env.NODE_ENV === 'development' && (
             <Button
@@ -178,7 +178,7 @@ const LabCustomFormatEditor = ({ appSettings, setAppSettings, generalDisplaySett
               onClick={testCurrentSeparator}
               size="small"
             >
-              測試分隔符
+              測試分隔字元
             </Button>
           )} */}
           <Button

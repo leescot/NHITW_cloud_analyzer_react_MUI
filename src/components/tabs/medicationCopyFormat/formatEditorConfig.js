@@ -110,7 +110,7 @@ export const getAvailableElements = (drugSeparator, formatType = 'all') => {
     // Create a drugsep element for drug separator
     const drugsepElement = { 
       id: 'drugsep', 
-      display: '藥品分隔符', 
+      display: '藥品分隔字元', 
       value: drugSeparator || ',', 
       group: 'format',
       section: ELEMENT_SECTIONS.DRUG
@@ -124,7 +124,7 @@ export const getAvailableElements = (drugSeparator, formatType = 'all') => {
     // Add drug separator
     const drugsepElement = { 
       id: 'drugsep', 
-      display: '藥品分隔符', 
+      display: '藥品分隔字元', 
       value: drugSeparator || ',', 
       group: 'format',
       section: ELEMENT_SECTIONS.DRUG
@@ -251,6 +251,6 @@ export const renderElem = (item, index, drugData) => {
     return item.value;
   }
   
-  // 從 Map 中獲取值，如果找不到則返回空字符串 #zh-TW
+  // 從 Map 中擷取值，如果找不到則返回空字符串 #zh-TW
   return elementValuesMap.get(baseId) || '';
 }; 

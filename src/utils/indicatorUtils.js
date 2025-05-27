@@ -39,7 +39,7 @@ export const getCKDStage = (gfrValue) => {
   return null; // 沒有 CKD 或數據不可用
 };
 
-// 檢查是否有 90 天內的影像檢查的通用函數
+// 檢查是否有 90 天內的影像檢查的通用函式
 const hasRecentScan = (imagingData, orderCodes) => {
   if (!imagingData || (!imagingData.withReport && !imagingData.withoutReport)) {
     return false;

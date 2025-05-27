@@ -1,6 +1,6 @@
 /**
  * cancerScreeningProcessor.js
- * 處理四癌篩檢資料的相關函數
+ * 處理四癌篩檢資料的相關函式
  */
 
 export const cancerScreeningProcessor = {

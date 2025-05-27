@@ -101,7 +101,7 @@ const Overview_ImagingTests = ({
   // Add function to view image (imported from ImagingData.jsx)
   const viewImage = async (imageParams) => {
     try {
-      // 嘗試多種方式獲取授權令牌
+      // 嘗試多種方式擷取授權令牌
       let authToken = null;
 
       // Try from sessionStorage first
@@ -126,11 +126,11 @@ const Overview_ImagingTests = ({
       }
 
       if (!authToken) {
-        alert("無法獲取授權令牌，請重新整理頁面後再試");
+        alert("無法擷取授權令牌，請重新整理頁面後再試");
         return;
       }
 
-      // 發送請求獲取影像數據
+      // 發送請求擷取影像數據
       const response = await fetch("https://medcloud2.nhi.gov.tw/imu/api/imuecommon/imuecommon/get-ctmri2", {
         method: "POST",
         headers: {
@@ -156,7 +156,7 @@ const Overview_ImagingTests = ({
         throw new Error('API 回應中沒有影像 URL');
       }
 
-      // 存儲影像數據到 sessionStorage
+      // 儲存影像數據到 sessionStorage
       const imgData = {
         fileName: data.ctmri_url,
         apiName: "imue0130"

@@ -1,13 +1,13 @@
 /**
  * medicationCopyFormatter.js
- * 處理藥物清單的自定義複製格式功能
+ * 處理藥物清單的自訂複製格式功能
  */
 
 import { medicationProcessor } from './medicationProcessor.js';
 
 export const medicationCopyFormatter = {
   /**
-   * 應用自定義格式到藥物清單
+   * 應用自訂格式到藥物清單
    * @param {Array} medications - 藥物資料陣列
    * @param {Object} groupInfo - 包含格式設定的群組資訊
    * @returns {String} - 格式化後的文字
@@ -26,7 +26,7 @@ export const medicationCopyFormatter = {
       drugSeparator: groupInfo.drugSeparator
     }));
     
-    // 定義驗證陣列是否有效的函數
+    // 定義驗證陣列是否有效的函式
     const isValidArray = (array) => Array.isArray(array) && array.length > 0;
     
     // 使用 Map 定義陣列處理器
@@ -37,7 +37,7 @@ export const medicationCopyFormatter = {
         process: (info, backup) => {
           if (!isValidArray(info.customMedicationHeaderCopyFormat) && 
               isValidArray(backup)) {
-            console.log("使用全局變量中的備份標題格式數組");
+            console.log("使用全局變數中的備份標題格式陣列");
             info.customMedicationHeaderCopyFormat = JSON.parse(JSON.stringify(backup));
             return true;
           }
@@ -50,7 +50,7 @@ export const medicationCopyFormatter = {
         process: (info, backup) => {
           if (!isValidArray(info.customMedicationDrugCopyFormat) && 
               isValidArray(backup)) {
-            console.log("使用全局變量中的備份藥物格式數組");
+            console.log("使用全局變數中的備份藥物格式陣列");
             info.customMedicationDrugCopyFormat = JSON.parse(JSON.stringify(backup));
             return true;
           }
@@ -67,8 +67,8 @@ export const medicationCopyFormatter = {
     
     const { customMedicationHeaderCopyFormat, customMedicationDrugCopyFormat } = groupInfo;
     
-    // 詳細檢查自定義格式設定
-    console.log("自定義格式數組檢查:", {
+    // 詳細檢查自訂格式設定
+    console.log("自訂格式陣列檢查:", {
       headerFormat: customMedicationHeaderCopyFormat,
       headerFormatType: typeof customMedicationHeaderCopyFormat,
       headerFormatIsArray: Array.isArray(customMedicationHeaderCopyFormat),
@@ -79,13 +79,13 @@ export const medicationCopyFormatter = {
       drugFormatLength: Array.isArray(customMedicationDrugCopyFormat) ? customMedicationDrugCopyFormat.length : 0
     });
     
-    // 更嚴格地驗證自定義格式是否可用
+    // 更嚴格地驗證自訂格式是否可用
     const hasHeaderFormat = isValidArray(customMedicationHeaderCopyFormat);
     const hasDrugFormat = isValidArray(customMedicationDrugCopyFormat);
     
     // 如果缺少格式定義，則記錄並回退到預設格式
     if (!hasHeaderFormat || !hasDrugFormat) {
-      console.log("已選擇自定義格式但缺少格式定義:", {
+      console.log("已選擇自訂格式但缺少格式定義:", {
         format: "customVertical",
         hasHeaderFormat,
         hasDrugFormat
@@ -96,33 +96,33 @@ export const medicationCopyFormatter = {
     }
     
     try {
-      // 將藥物資料轉換為文字，使用自定義格式
+      // 將藥物資料轉換為文字，使用自訂格式
       return this.generateCustomTextOutput(medications, 
                                         customMedicationHeaderCopyFormat, 
                                         customMedicationDrugCopyFormat, 
                                         groupInfo);
     } catch (error) {
-      console.error("應用自定義格式時出錯:", error);
+      console.error("應用自訂格式時出錯:", error);
       // 發生錯誤時，回退到預設垂直格式
       return this.applyVerticalFormat(medications, groupInfo);
     }
   },
 
   /**
-   * 分析格式元素的輔助函數
-   * @param {Array} headerFormat - 標題格式數組
-   * @param {Array} drugFormat - 藥物格式數組
+   * 分析格式元素的輔助函式
+   * @param {Array} headerFormat - 標題格式陣列
+   * @param {Array} drugFormat - 藥物格式陣列
    */
   analyzeFormatElements(headerFormat, drugFormat) {
     if (!Array.isArray(headerFormat) || !Array.isArray(drugFormat)) {
-      console.warn("無效的格式數組:", {
+      console.warn("無效的格式陣列:", {
         headerFormat: typeof headerFormat,
         drugFormat: typeof drugFormat
       });
       return;
     }
     
-    console.log("分析自定義格式元素:");
+    console.log("分析自訂格式元素:");
     console.log("標題格式有", headerFormat.length, "個元素:", 
       headerFormat.map(item => `{id: ${item.id}, group: ${item.group}, value: ${item.value}}`));
     console.log("藥物格式有", drugFormat.length, "個元素:", 
@@ -146,16 +146,16 @@ export const medicationCopyFormatter = {
   },
 
   /**
-   * 生成自定義文字輸出
+   * 生成自訂文字輸出
    * @param {Array} medications - 藥物清單
-   * @param {Array} headerFormat - 標題格式數組
-   * @param {Array} drugFormat - 藥物格式數組
+   * @param {Array} headerFormat - 標題格式陣列
+   * @param {Array} drugFormat - 藥物格式陣列
    * @param {Object} groupInfo - 格式設定資訊
    * @returns {String} - 格式化後的文字
    */
   generateCustomTextOutput(medications, headerFormat, drugFormat, groupInfo) {
     // 詳細驗證傳入的參數
-    console.log("generateCustomTextOutput 被調用，參數:", {
+    console.log("generateCustomTextOutput 被呼叫，參數:", {
       medications: medications.length,
       headerFormat: headerFormat, 
       headerFormatLength: Array.isArray(headerFormat) ? headerFormat.length : 0,
@@ -170,11 +170,11 @@ export const medicationCopyFormatter = {
     // 堅實的安全檢查
     if (!Array.isArray(headerFormat) || headerFormat.length === 0 || 
         !Array.isArray(drugFormat) || drugFormat.length === 0) {
-      console.error("提供給 generateCustomTextOutput 的格式數組無效");
+      console.error("提供給 generateCustomTextOutput 的格式陣列無效");
       return this.applyVerticalFormat(medications, groupInfo);
     }
     
-    // 嘗試讀取第一個格式項目的屬性，以確認格式數組結構
+    // 嘗試讀取第一個格式項目的屬性，以確認格式陣列結構
     try {
       const headerSample = headerFormat[0];
       const drugSample = drugFormat[0];
@@ -205,7 +205,7 @@ export const medicationCopyFormatter = {
       ['icdname', groupInfo.icd_name || ''],
     ]);
     
-    // 構建頭部信息
+    // 建置頭部信息
     let header = '';
     for (const item of headerFormat) {
       // 提取基本 ID（移除前綴和計數器）
@@ -229,7 +229,7 @@ export const medicationCopyFormatter = {
       header += action();
     }
     
-    // 藥物屬性映射函數
+    // 藥物屬性映射函式
     const getMedicationProperty = (med, formatItem) => {
       // 提取基本 ID（移除前綴和計數器）
       let baseId = formatItem.id.split('_')[0];
@@ -259,7 +259,7 @@ export const medicationCopyFormatter = {
       return medPropertyMap.get(baseId) || '';
     };
     
-    // 構建藥物列表
+    // 建置藥物列表
     const isHorizontal = groupInfo.isHorizontal !== undefined 
       ? groupInfo.isHorizontal 
       : (groupInfo.medicationCopyFormat && groupInfo.medicationCopyFormat.toLowerCase().includes('horizontal'));
@@ -268,7 +268,7 @@ export const medicationCopyFormatter = {
       let medText = '';
       
       for (const item of drugFormat) {
-        // 獲取藥物屬性值
+        // 擷取藥物屬性值
         medText += getMedicationProperty(med, item);
       }
       return medText;
@@ -278,7 +278,7 @@ export const medicationCopyFormatter = {
     // 明確定義垂直格式
     const isVertical = !isHorizontal;
     
-    console.log("自定義格式換行設定:", {
+    console.log("自訂格式換行設定:", {
       format: groupInfo.medicationCopyFormat || groupInfo.formatType,
       formatType: groupInfo.formatType,
       isHorizontal,
@@ -298,18 +298,18 @@ export const medicationCopyFormatter = {
       }]
     ]);
     
-    // 根據格式類型獲取配置
+    // 根據格式類型擷取配置
     const formatType = isHorizontal ? 'horizontal' : 'vertical';
     const formatConfig = formatConfigs.get(formatType);
     
-    // 獲取合適的分隔符
+    // 擷取合適的分隔字元
     const separator = formatConfig.separator;
     
-    console.log(`使用分隔符: "${separator === '\n' ? '\\n' : separator}" (${formatConfig.description})`);
-    console.log(`藥物之間的分隔符: "${groupInfo.drugSeparator || '未設定，使用預設值'}"`);
+    console.log(`使用分隔字元: "${separator === '\n' ? '\\n' : separator}" (${formatConfig.description})`);
+    console.log(`藥物之間的分隔字元: "${groupInfo.drugSeparator || '未設定，使用預設值'}"`);
     
     const result = header + separator + medsText;
-    console.log("最終自定義格式結果:", result);
+    console.log("最終自訂格式結果:", result);
     return result;
   },
 
@@ -320,7 +320,7 @@ export const medicationCopyFormatter = {
    * @returns {String} - 格式化後的文字
    */
   applyVerticalFormat(medications, groupInfo) {
-    console.log("由於自定義格式問題，應用預設垂直格式");
+    console.log("由於自訂格式問題，應用預設垂直格式");
     
     // 使用日期和醫院格式化標頭
     let header = `${groupInfo.date} - ${groupInfo.hosp}`;

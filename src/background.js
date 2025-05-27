@@ -77,7 +77,7 @@ const DATA_TYPE_TO_STORAGE_KEY = {
   'patientSummary': 'patientSummaryData'
 };
 
-// 動作與處理函數的映射
+// 動作與處理函式的映射
 const ACTION_HANDLERS = new Map([
   ['openPopup', (message, sender, sendResponse) => {
     chrome.action.openPopup();
@@ -86,7 +86,7 @@ const ACTION_HANDLERS = new Map([
   
   ['userSessionChanged', (message, sender, sendResponse) => {
     // console.log("User session changed, resetting temporary data");
-    // 重置當前會話數據
+    // 重設當前會話數據
     Object.keys(currentSessionData).forEach(key => {
       currentSessionData[key] = null;
     });
@@ -103,7 +103,7 @@ const ACTION_HANDLERS = new Map([
   
   ['clearSessionData', (message, sender, sendResponse) => {
     // console.log("Clearing session data");
-    // 重置當前會話數據
+    // 重設當前會話數據
     Object.keys(currentSessionData).forEach(key => {
       currentSessionData[key] = null;
     });
@@ -119,7 +119,7 @@ const ACTION_HANDLERS = new Map([
   }],
   
   ['getDataStatus', (message, sender, sendResponse) => {
-    // 獲取存儲的所有數據狀態
+    // 擷取儲存的所有數據狀態
     chrome.storage.local.get(Object.values(DATA_TYPE_TO_STORAGE_KEY), (result) => {
       // console.log("STORAGE DATA DEBUG:", result);
       const dataStatus = {};
@@ -164,7 +164,7 @@ const ACTION_HANDLERS = new Map([
     return true; // 保持消息通道開放以進行異步響應
   }],
   
-  // 使用通用處理函數處理所有數據保存操作
+  // 使用通用處理函式處理所有數據保存操作
   ['saveMedicationData', saveDataHandler('medication')],
   ['saveLabData', saveDataHandler('labdata')],
   ['saveChineseMedData', saveDataHandler('chinesemed')],
@@ -183,7 +183,7 @@ const ACTION_HANDLERS = new Map([
   }]
 ]);
 
-// 通用數據保存處理函數
+// 通用數據保存處理函式
 function saveDataHandler(type) {
   return function(message, sender, sendResponse) {
     const storageKey = DATA_TYPE_TO_STORAGE_KEY[type];
@@ -233,14 +233,14 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   // 檢查是否有會話變更
   if (message.userSession && message.userSession !== currentSessionData.currentUserSession) {
     // console.log("User session changed, resetting temporary data");
-    // 重置當前會話數據
+    // 重設當前會話數據
     Object.keys(currentSessionData).forEach(key => {
       currentSessionData[key] = null;
     });
     currentSessionData.currentUserSession = message.userSession;
   }
 
-  // 查找並執行對應的處理函數
+  // 查找並執行對應的處理函式
   const handler = ACTION_HANDLERS.get(message.action);
   if (handler) {
     handler(message, sender, sendResponse);
@@ -258,7 +258,7 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
       changeInfo.url.includes('medcloud2.nhi.gov.tw/imu/IMUE1000/IMUE0001'))) {
     console.log("Detected navigation to login page, clearing session data");
 
-    // 重置當前會話數據
+    // 重設當前會話數據
     Object.keys(currentSessionData).forEach(key => {
       currentSessionData[key] = null;
     });
@@ -271,7 +271,7 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   }
 });
 
-// 通用數據保存函數
+// 通用數據保存函式
 function saveDataToStorage(type, data, userSession) {
   const storageKey = DATA_TYPE_TO_STORAGE_KEY[type.toLowerCase()] || type + 'Data';
 

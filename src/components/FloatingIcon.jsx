@@ -53,7 +53,7 @@ import {
   handleDataFetchCompletedSettingsChange,
 } from "../utils/settingsManager";
 
-// 引入標籤顏色工具函數
+// 引入標籤顏色工具函式
 import { getTabColor, getTabSelectedColor } from "../utils/tabColorUtils";
 
 // import ContentCopyIcon from "@mui/icons-material/ContentCopy";
@@ -108,7 +108,7 @@ import KidneyStatusIndicator from "./indicators/KidneyStatusIndicator";
 import { DEFAULT_SETTINGS } from "../config/defaultSettings";
 import { DEFAULT_ATC5_GROUPS } from "../config/medicationGroups";
 
-// 刪除未使用的組件和函數，或移動到實際使用它們的地方
+// 刪除未使用的元件和函式，或移動到實際使用它們的地方
 // ImagingTable, getLabStatusColor, getLabValueColor
 
 // Add a global flag to prevent multiple openings
@@ -175,7 +175,7 @@ const FloatingIcon = () => {
 
     initializeSettings();
 
-    // 設置變更監聽處理函數
+    // 設置變更監聽處理函式
     const removeSettingsListener = listenForSettingsChanges((newSettings) => {
       // 更新所有設置狀態
       setAppSettings({
@@ -216,7 +216,7 @@ const FloatingIcon = () => {
       }
     });
 
-    // 消息監聽處理函數
+    // 消息監聽處理函式
     const removeMessageListener = listenForMessages((message) => {
       if (message.action === "settingChanged" && message.allSettings) {
         // 觸發設置重新加載
@@ -270,12 +270,12 @@ const FloatingIcon = () => {
       }
     });
 
-    // 數據加載完成事件監聽處理函數
+    // 數據加載完成事件監聽處理函式
     const removeDataFetchCompletionListener = listenForDataFetchCompletion(
       (event) => {
         // 處理設置變更
         if (event.detail?.settingsChanged) {
-          // 準備回調函數
+          // 準備回調函式
           const callbacks = {
             reprocessMedication: (data, settings) =>
               reprocessData(
@@ -309,7 +309,7 @@ const FloatingIcon = () => {
       }
     );
 
-    // 清理函數
+    // 清理函式
     return () => {
       removeSettingsListener();
       removeMessageListener();
@@ -317,12 +317,12 @@ const FloatingIcon = () => {
     };
   }, []);
 
-  // 在組件載入時處理資料
+  // 在元件載入時處理資料
   const handleData = async () => {
     // 使用dataManager收集資料來源
     const dataSources = collectDataSources();
 
-    // 創建所有setter函數的對象
+    // 創建所有setter函式的對象
     const setters = {
       setGroupedMedications,
       setGroupedLabs,
@@ -407,7 +407,7 @@ const FloatingIcon = () => {
       background: "transparent",
     };
 
-    // 使用 Map 來存儲不同位置的樣式
+    // 使用 Map 來儲存不同位置的樣式
     const positionStyleMap = new Map([
       ["top-right", { ...baseStyle, top: "20px" }],
       ["middle-right", { ...baseStyle, top: "50%", transform: "translateY(-50%)" }],
@@ -664,7 +664,7 @@ const FloatingIcon = () => {
               </Tabs>
             </Paper>
 
-            {/* 狀態指示器區域 - 使用導入的指示器組件 */}
+            {/* 狀態指示器區域 - 使用導入的指示器元件 */}
             <Box
               sx={{
                 display: "flex",

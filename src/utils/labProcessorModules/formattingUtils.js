@@ -1,4 +1,4 @@
-// 資料格式化相關函數
+// 資料格式化相關函式
 import { getAbbreviation } from './abbreviationUtils.js';
 import { normalizeValue, getValueStatus } from './valueUtils.js';
 import { parseReferenceRange, isZeroReferenceRange, getReferenceRangeDisplayText } from './referenceRangeUtils.js';
@@ -17,10 +17,10 @@ const formatLabData = (lab) => {
   const formattedReference = getReferenceRangeDisplayText(lab.consult_value, lab.order_code, lab.hosp);
   // console.log('formattedReference:', formattedReference);
 
-  // 檢查是否有自定義參考範圍
+  // 檢查是否有自訂參考範圍
   let referenceMin, referenceMax;
   if (hasCustomReferenceRange(lab.order_code)) {
-    // 使用自定義參考範圍
+    // 使用自訂參考範圍
     const customRange = getCustomReferenceRange(lab.order_code);
     referenceMin = customRange.min;
     referenceMax = customRange.max;
@@ -43,7 +43,7 @@ const formatLabData = (lab) => {
   //   _usingCustomRange: lab._usingCustomRange
   // });
 
-  // 獲取縮寫名稱 - 傳入 itemName
+  // 擷取縮寫名稱 - 傳入 itemName
   const abbrName = getAbbreviation(lab.order_code, lab.unit_data, lab.assay_item_name);
 
   // 檢查是否有多個數值
@@ -118,8 +118,8 @@ const formatLabData = (lab) => {
     value: normalizedValue,  // 範圍形式的值（如 "10-15"）或單一標準化值
     unit: lab.unit_data,
     consultValue: consultValue,
-    referenceMin: referenceMin,  // 參考值下限 (可能是自定義的)
-    referenceMax: referenceMax,  // 參考值上限 (可能是自定義的)
+    referenceMin: referenceMin,  // 參考值下限 (可能是自訂的)
+    referenceMax: referenceMax,  // 參考值上限 (可能是自訂的)
     formattedReference: formattedReference, // 新增: 格式化後的參考範圍文本
     type: lab.assay_tp_cname,
     orderName: lab.order_name,
@@ -129,9 +129,9 @@ const formatLabData = (lab) => {
     abbrName: abbrName,          // 縮寫屬性
     hasMultipleValues: hasMultipleValues,  // 標記是否有多個數值
     valueRange: valueRange,      // 數值範圍資訊，包含最小值、最大值和時間點
-    _usingCustomRange: lab._usingCustomRange || false, // 是否使用自定義參考範圍
-    _originalReferenceMin: lab._originalReferenceMin,   // 原始參考值下限 (僅當使用自定義參考範圍時)
-    _originalReferenceMax: lab._originalReferenceMax    // 原始參考值上限 (僅當使用自定義參考範圍時)
+    _usingCustomRange: lab._usingCustomRange || false, // 是否使用自訂參考範圍
+    _originalReferenceMin: lab._originalReferenceMin,   // 原始參考值下限 (僅當使用自訂參考範圍時)
+    _originalReferenceMax: lab._originalReferenceMax    // 原始參考值上限 (僅當使用自訂參考範圍時)
   };
 };
 

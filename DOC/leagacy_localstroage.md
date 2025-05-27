@@ -4,11 +4,11 @@
 
 ## 資料儲存概述
 
-NHITW 健保雲端系統資料擷取擴充功能通過 `saveDataToLocalStorage()` 函數將擷取的健保雲端資料儲存到瀏覽器的 `localStorage` 中。這使得其他擴充功能可以讀取這些資料，不需要重新擷取。
+NHITW 健保雲端系統資料擷取擴充功能通過 `saveDataToLocalStorage()` 函式將擷取的健保雲端資料儲存到瀏覽器的 `localStorage` 中。這使得其他擴充功能可以讀取這些資料，不需要重新擷取。
 
 ## 資料儲存格式
 
-資料以 JSON 格式存儲在 `localStorage` 中，鍵名為 `NHITW_DATA`。儲存的資料結構如下：
+資料以 JSON 格式儲存在 `localStorage` 中，鍵名為 `NHITW_DATA`。儲存的資料結構如下：
 
 ```javascript
 {

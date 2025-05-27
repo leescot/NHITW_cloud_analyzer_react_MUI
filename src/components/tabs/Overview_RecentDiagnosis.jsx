@@ -1,7 +1,7 @@
 /**
  * Overview_RecentDiagnosis Component
  *
- * 此組件顯示過去180天的最近診斷信息，
+ * 此元件顯示過去180天的最近診斷信息，
  * 按訪問類型分類（門診/急診/住診）。
  * - 門診和急診診斷按頻率排序（最頻繁的優先）
  * - 住診診斷顯示首次發生日期
@@ -42,11 +42,11 @@ const Overview_RecentDiagnosis = ({
     cutoffDate.setDate(now.getDate() - trackingDays);
 
     const outpatientDiagnoses = {};
-    const emergencyDiagnoses = [];  // 從物件改為數組以存儲日期信息
+    const emergencyDiagnoses = [];  // 從物件改為陣列以儲存日期信息
     const inpatientDiagnoses = [];
-    const vaccineRecords = [];      // 疫苗記錄的新數組
+    const vaccineRecords = [];      // 疫苗記錄的新陣列
 
-    // 輔助函數，用於安全解析各種格式的日期
+    // 輔助函式，用於安全解析各種格式的日期
     const parseDate = (dateStr) => {
       if (!dateStr) return null;
 
@@ -64,7 +64,7 @@ const Overview_RecentDiagnosis = ({
       return parsedDate;
     };
 
-    // 輔助函數，檢查 ICD 代碼是否為疫苗代碼
+    // 輔助函式，檢查 ICD 代碼是否為疫苗代碼
     const isVaccineCode = (icdCode) => {
       if (!icdCode) return false;
 
@@ -124,7 +124,7 @@ const Overview_RecentDiagnosis = ({
       };
     };
 
-    // 處理疫苗記錄的輔助函數
+    // 處理疫苗記錄的輔助函式
     const processVaccineRecord = (group, normalizedIcdCode, diagnosisKey, isChineseMed) => {
       // 檢查是否有J07開頭的疫苗藥物
       let hasVaccineMedication = false;
@@ -316,7 +316,7 @@ const Overview_RecentDiagnosis = ({
     const visibleDiagnoses = diagnoses.slice(0, 5);
     const hasMore = diagnoses.length > 5;
 
-    // 從Map中獲取類別配置
+    // 從Map中擷取類別配置
     const config = categoryConfig.get(title) || categoryConfig.get("門診"); // 默認為門診配置
     const { shortTitle, color, bgColor, isInpatient, isEmergency, isVaccine } = config;
 

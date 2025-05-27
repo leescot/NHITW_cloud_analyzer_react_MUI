@@ -2,7 +2,7 @@ import React, { useState, useEffect } from "react";
 import { Box, Divider, Snackbar } from "@mui/material";
 import TypographySizeWrapper from "../utils/TypographySizeWrapper";
 
-// 引入拆分出的子組件
+// 引入拆分出的子元件
 import { useCopyLabData } from "./lab/LabCopyFeatures";
 import LabHeader from "./lab/LabHeader";
 import TypeBasedLayout from "./lab/TypeBasedLayout";
@@ -110,7 +110,7 @@ const LabData = ({ groupedLabs, settings, labSettings, generalDisplaySettings })
     console.log("Current displayLabFormat:", labSettings?.displayLabFormat);
   }, [labSettings]);
 
-  // 使用自定義 Hook 處理複製功能
+  // 使用自訂 Hook 處理複製功能
   const {
     snackbarOpen,
     snackbarMessage,
@@ -232,7 +232,7 @@ const LabData = ({ groupedLabs, settings, labSettings, generalDisplaySettings })
     return Object.values(selectedLabItems[groupIndex]).some(selected => selected);
   };
 
-  // 將複製處理函數封裝，加入必要的參數
+  // 將複製處理函式封裝，加入必要的參數
   const handleSectionLabData = (group) => {
     copySectionLabData(group, completeLabSettings);
   };
@@ -241,7 +241,7 @@ const LabData = ({ groupedLabs, settings, labSettings, generalDisplaySettings })
     copyUserSelectedLabData(group, groupIndex, selectedLabItems, completeLabSettings);
   };
 
-  // 處理複製所有檢驗數據的函數
+  // 處理複製所有檢驗數據的函式
   const handleCopyAllLabData = () => {
     if (filteredGroupedLabs.length === 0) {
       setSnackbarMessage("沒有可複製的檢驗資料");
@@ -253,7 +253,7 @@ const LabData = ({ groupedLabs, settings, labSettings, generalDisplaySettings })
     const { copyLabFormat, showUnit, showReference } = completeLabSettings;
     let allFormattedText = '';
 
-    // 創建格式化函數映射
+    // 創建格式化函式映射
     const formatFunctions = {
       vertical: () => {
         // 垂直格式: 每個組一個區塊，每個項目一行
@@ -285,31 +285,31 @@ const LabData = ({ groupedLabs, settings, labSettings, generalDisplaySettings })
         }).join("\n\n");
       },
       customVertical: () => {
-        // 嘗試使用自定義格式，如果失敗則回退到標準垂直格式
+        // 嘗試使用自訂格式，如果失敗則回退到標準垂直格式
         try {
           return filteredGroupedLabs.map(group => {
             return labCopyFormatter.applyCustomFormat(group.labs, group, completeLabSettings);
           }).join("\n\n");
         } catch (error) {
-          console.error("應用自定義格式時出錯:", error);
+          console.error("應用自訂格式時出錯:", error);
           return formatFunctions.vertical();
         }
       },
       customHorizontal: () => {
-        // 嘗試使用自定義格式，如果失敗則回退到標準水平格式
+        // 嘗試使用自訂格式，如果失敗則回退到標準水平格式
         try {
           return filteredGroupedLabs.map(group => {
             return labCopyFormatter.applyCustomFormat(group.labs, group, completeLabSettings);
           }).join("\n\n");
         } catch (error) {
-          console.error("應用自定義格式時出錯:", error);
+          console.error("應用自訂格式時出錯:", error);
           return formatFunctions.horizontal();
         }
       },
       default: () => formatFunctions.horizontal() // 默認使用水平格式
     };
 
-    // 選擇格式化函數
+    // 選擇格式化函式
     const formatFunction = formatFunctions[copyLabFormat] || formatFunctions.default;
     
     // 執行格式化
@@ -343,8 +343,8 @@ const LabData = ({ groupedLabs, settings, labSettings, generalDisplaySettings })
     return columnCountMap.get(completeLabSettings.displayLabFormat) || columnCountMap.get("default");
   };
 
-  // 使用 Map 來儲存不同的布局組件
-  // # zh-TW: 使用 Map 來決定要渲染的布局組件
+  // 使用 Map 來儲存不同的布局元件
+  // # zh-TW: 使用 Map 來決定要渲染的布局元件
   const layoutComponentMap = new Map([
     ["byType", (group, index) => (
       <TypeBasedLayout
@@ -401,7 +401,7 @@ const LabData = ({ groupedLabs, settings, labSettings, generalDisplaySettings })
   // 決定要使用哪種布局
   // # zh-TW: 根據設定和條件決定要使用的布局類型
   const getLayoutComponent = (group, index) => {
-    // 直接使用 Map 來獲取對應的布局組件
+    // 直接使用 Map 來擷取對應的布局元件
     const layoutRenderer = layoutComponentMap.get(completeLabSettings.displayLabFormat);
     if (layoutRenderer) {
       return layoutRenderer(group, index);
@@ -433,7 +433,7 @@ const LabData = ({ groupedLabs, settings, labSettings, generalDisplaySettings })
       ) : (
         filteredGroupedLabs.map((group, index) => (
           <Box key={index} sx={{ mb: 2 }}>
-            {/* 檢驗數據標題區域 - 使用提取出的 LabHeader 組件 */}
+            {/* 檢驗數據標題區域 - 使用提取出的 LabHeader 元件 */}
             <LabHeader
               group={group}
               index={index}

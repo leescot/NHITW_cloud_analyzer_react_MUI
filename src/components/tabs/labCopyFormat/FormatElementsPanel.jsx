@@ -198,7 +198,7 @@ const FormatElementsPanel = ({
     return formatType === 'header' ? ELEMENT_SECTIONS.LABHEADER : ELEMENT_SECTIONS.LABCONTENT;
   };
 
-  // 函數處理器
+  // 函式處理器
   const handleCloseTextDialog = () => {
     setTextDialogOpen(false);
   };
@@ -618,7 +618,7 @@ const FormatElementsPanel = ({
                   color: isHorizontalFormat ? 'primary.main' : 'text.secondary'
                 }}
               >
-                檢驗項目分隔符:
+                檢驗項目分隔字元:
               </Typography>
               <TextField
                 size="small"
@@ -782,20 +782,20 @@ const FormatElementsPanel = ({
         
         {/* Separator dialog */}
         <Dialog open={separatorDialogOpen} onClose={handleCloseSeparatorDialog}>
-          <DialogTitle>設定檢驗項目分隔符</DialogTitle>
+          <DialogTitle>設定檢驗項目分隔字元</DialogTitle>
           <DialogContent>
             <TextField
               autoFocus
               margin="dense"
-              label="分隔符"
+              label="分隔字元"
               fullWidth
               variant="outlined"
               value={tempSeparator}
               onChange={(e) => setTempSeparator(e.target.value)}
-              helperText="此分隔符會在水平格式下用於分隔檢驗項目"
+              helperText="此分隔字元會在水平格式下用於分隔檢驗項目"
             />
             <Alert severity="info" sx={{ mt: 2 }}>
-              常用分隔符: 逗號加空格 ", " 或是斜線加空格 " / "
+              常用分隔字元: 逗號加空格 ", " 或是斜線加空格 " / "
             </Alert>
           </DialogContent>
           <DialogActions>

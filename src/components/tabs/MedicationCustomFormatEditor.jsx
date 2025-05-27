@@ -22,7 +22,7 @@ import FormatPreview from './medicationCopyFormat/FormatPreview';
 import useFormatEditorState from './medicationCopyFormat/useFormatEditorState';
 import { createHeaderDragHandlers, createDrugDragHandlers } from './medicationCopyFormat/dragDropHandlers';
 
-// 西藥自訂格式編輯器組件
+// 西藥自訂格式編輯器元件
 const MedicationCustomFormatEditor = ({ appSettings, setAppSettings, generalDisplaySettings }) => {
   // 響應式布局
   const theme = useTheme();
@@ -148,7 +148,7 @@ const MedicationCustomFormatEditor = ({ appSettings, setAppSettings, generalDisp
             }}
             size="small"
           >
-            重置為預設
+            重設為預設
           </Button>
           <Button
             variant="contained"

@@ -1,5 +1,5 @@
 export const chineseMedProcessor = {
-  // 處理中藥資料的主要函數
+  // 處理中藥資料的主要函式
   processChineseMedData(data) {
     if (!data || !data.rObject || !Array.isArray(data.rObject)) {
       return [];

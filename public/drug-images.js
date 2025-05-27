@@ -1,8 +1,8 @@
-// 從 URL 獲取藥品代碼
+// 從 URL 擷取藥品代碼
 const urlParams = new URLSearchParams(window.location.search);
 const drugCode = urlParams.get('code');
 
-// 獲取 DOM 元素
+// 擷取 DOM 元素
 const drugInfoElement = document.getElementById('drug-info');
 const galleryElement = document.getElementById('gallery');
 const loadingElement = document.getElementById('loading');
@@ -17,16 +17,16 @@ if (!drugCode) {
   errorElement.textContent = '未提供藥品代碼';
   errorElement.style.display = 'block';
 } else {
-  // 獲取藥品數據
+  // 擷取藥品數據
   fetchDrugData(drugCode);
 }
 
-// 獲取藥品數據的函數
+// 擷取藥品數據的函式
 async function fetchDrugData(code) {
   try {
     const response = await fetch(`https://drugtw.com/api/drugs?q=${code}`);
     if (!response.ok) {
-      throw new Error('無法獲取藥品數據');
+      throw new Error('無法擷取藥品數據');
     }
 
     const data = await response.json();
@@ -111,7 +111,7 @@ function closeModal() {
 // 為關閉按鈕添加事件監聽器
 document.getElementById('closeModalBtn').addEventListener('click', closeModal);
 
-// 點擊模態框外部關閉
+// 點選模態框外部關閉
 window.onclick = function(event) {
   if (event.target === modal) {
     closeModal();

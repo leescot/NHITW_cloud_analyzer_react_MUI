@@ -1,6 +1,6 @@
 /**
  * adultHealthCheckProcessor.js
- * 處理成人預防保健資料的相關函數
+ * 處理成人預防保健資料的相關函式
  */
 
 export const adultHealthCheckProcessor = {

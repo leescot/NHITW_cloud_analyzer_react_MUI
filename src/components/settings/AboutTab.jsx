@@ -20,7 +20,7 @@ import EmailIcon from '@mui/icons-material/Email';
 import GitHubIcon from '@mui/icons-material/GitHub';
 import LanguageIcon from '@mui/icons-material/Language';
 
-// 從 manifest 獲取版本資訊
+// 從 manifest 擷取版本資訊
 const manifestData = chrome.runtime.getManifest();
 
 // 貢獻者資料

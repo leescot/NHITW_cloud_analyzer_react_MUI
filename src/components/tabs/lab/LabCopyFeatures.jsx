@@ -7,17 +7,17 @@ export const useCopyLabData = () => {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
 
-  // 關閉 snackbar 的函數
+  // 關閉 snackbar 的函式
   const handleSnackbarClose = () => {
     setSnackbarOpen(false);
   };
 
-  // 複製所有檢驗數據的函數
+  // 複製所有檢驗數據的函式
   const handleSectionLabData = (group, labSettings) => {
     const { copyLabFormat, showUnit, showReference } = labSettings;
     let formattedText = '';
 
-    // 確保自定義格式的設定是完整的
+    // 確保自訂格式的設定是完整的
     const customSettingsInfo = {
       format: copyLabFormat,
       hasHeaderFormat: Array.isArray(labSettings.customLabHeaderCopyFormat) && labSettings.customLabHeaderCopyFormat.length > 0,
@@ -25,15 +25,15 @@ export const useCopyLabData = () => {
     };
     console.log("LabCopyFeatures: 處理格式設定:", customSettingsInfo);
 
-    // 檢查是否為自定義格式
+    // 檢查是否為自訂格式
     if (copyLabFormat === "customVertical" || copyLabFormat === "customHorizontal") {
-      // 使用自定義格式處理器來生成格式化文本
+      // 使用自訂格式處理器來生成格式化文本
       try {
         // 確保 itemSeparator 值被使用
-        console.log("使用的項目分隔符:", labSettings.itemSeparator || ', ');
+        console.log("使用的項目分隔字元:", labSettings.itemSeparator || ', ');
         formattedText = labCopyFormatter.applyCustomFormat(group.labs, group, labSettings);
       } catch (error) {
-        console.error("應用自定義格式時出錯:", error);
+        console.error("應用自訂格式時出錯:", error);
         // 出錯時回退到標準格式
         if (copyLabFormat === "customVertical") {
           formattedText = applyStandardVerticalFormat(group, showUnit, showReference);
@@ -62,7 +62,7 @@ export const useCopyLabData = () => {
       });
   };
 
-  // 標準垂直格式處理函數
+  // 標準垂直格式處理函式
   const applyStandardVerticalFormat = (group, showUnit, showReference) => {
     // 格式化日期，從 YYYY-MM-DD 轉換為 YYYY/MM/DD
     const formattedDate = formatDate(group.date);
@@ -77,7 +77,7 @@ export const useCopyLabData = () => {
     return formattedText;
   };
 
-  // 標準水平格式處理函數
+  // 標準水平格式處理函式
   const applyStandardHorizontalFormat = (group, showUnit, showReference) => {
     // 格式化日期，從 YYYY-MM-DD 轉換為 YYYY/MM/DD
     const formattedDate = formatDate(group.date);
@@ -91,7 +91,7 @@ export const useCopyLabData = () => {
     return formattedText;
   };
 
-  // 複製使用者選擇的檢驗數據的函數
+  // 複製使用者選擇的檢驗數據的函式
   const handleCopyUserSelectedLabData = (group, groupIndex, selectedLabItems, labSettings) => {
     const { copyLabFormat, showUnit, showReference } = labSettings;
 
@@ -121,7 +121,7 @@ export const useCopyLabData = () => {
 
     let formattedText = '';
 
-    // 確保自定義格式的設定是完整的
+    // 確保自訂格式的設定是完整的
     const customSettingsInfo = {
       format: copyLabFormat,
       hasHeaderFormat: Array.isArray(labSettings.customLabHeaderCopyFormat) && labSettings.customLabHeaderCopyFormat.length > 0,
@@ -129,15 +129,15 @@ export const useCopyLabData = () => {
     };
     console.log("LabCopyFeatures (selected): 處理格式設定:", customSettingsInfo);
 
-    // 檢查是否為自定義格式
+    // 檢查是否為自訂格式
     if (copyLabFormat === "customVertical" || copyLabFormat === "customHorizontal") {
-      // 使用自定義格式處理器來生成格式化文本
+      // 使用自訂格式處理器來生成格式化文本
       try {
         // 確保 itemSeparator 值被使用
-        console.log("使用的項目分隔符 (選擇複製):", labSettings.itemSeparator || ', ');
+        console.log("使用的項目分隔字元 (選擇複製):", labSettings.itemSeparator || ', ');
         formattedText = labCopyFormatter.applyCustomFormat(filteredLabs, group, labSettings);
       } catch (error) {
-        console.error("應用自定義格式時出錯:", error);
+        console.error("應用自訂格式時出錯:", error);
         // 出錯時回退到標準格式
         if (copyLabFormat === "customVertical") {
           formattedText = applyStandardVerticalFormat(filteredGroup, showUnit, showReference);

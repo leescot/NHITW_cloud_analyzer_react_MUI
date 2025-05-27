@@ -3,7 +3,7 @@ import { Chip, Tooltip } from "@mui/material";
 import ReportRoundedIcon from '@mui/icons-material/ReportRounded';
 import { NOTE_TEXT_SIZES } from "../../utils/textSizeUtils";
 
-// 腎臟狀態指示器組件
+// 腎臟狀態指示器元件
 const KidneyStatusIndicator = ({ stage, fontSize }) => {
   if (stage === null) return null;
 

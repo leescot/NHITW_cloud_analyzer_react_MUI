@@ -2,7 +2,7 @@
 
 ## 概述
 
-本文件提供健保雲端資料擷取器 2.0 內部 API 與函數庫的詳細說明。這些 API 主要用於擴充功能內部元件間的通訊與資料處理。
+本文件提供健保雲端資料擷取器 2.0 內部 API 與函式庫的詳細說明。這些 API 主要用於擴充功能內部元件間的通訊與資料處理。
 
 ## 資料管理 API
 
@@ -12,7 +12,7 @@
 
 主要職責：中央資料管理，提供統一的資料存取介面。
 
-#### 核心函數
+#### 核心函式
 
 ```javascript
 // 處理原始資料
@@ -21,7 +21,7 @@ processData(dataType, rawData)
 // 儲存處理後的資料
 storeProcessedData(dataType, data)
 
-// 獲取特定類型的資料
+// 擷取特定類型的資料
 getDataByType(dataType)
 
 // 清除所有資料
@@ -30,7 +30,7 @@ clearAllData()
 // 檢查資料是否已載入
 isDataLoaded(dataType)
 
-// 獲取資料載入狀態
+// 擷取資料載入狀態
 getDataLoadingStatus(dataType)
 ```
 
@@ -55,28 +55,28 @@ const medications = getDataByType('medication');
 
 主要職責：管理使用者設定，提供設定的讀取、儲存與應用功能。
 
-#### 核心函數
+#### 核心函式
 
 ```javascript
-// 獲取所有設定
+// 擷取所有設定
 getAllSettings()
 
-// 獲取特定類別的設定
+// 擷取特定類別的設定
 getSettingsByCategory(category)
 
-// 獲取特定設定項
+// 擷取特定設定項
 getSetting(category, key)
 
 // 更新設定
 updateSetting(category, key, value)
 
-// 保存設定到 Chrome 存儲
+// 保存設定到 Chrome 儲存
 saveSettings()
 
-// 從 Chrome 存儲載入設定
+// 從 Chrome 儲存載入設定
 loadSettings()
 
-// 重置設定為預設值
+// 重設設定為預設值
 resetToDefault()
 ```
 
@@ -85,7 +85,7 @@ resetToDefault()
 ```javascript
 import { getSetting, updateSetting } from '../utils/settingsManager';
 
-// 獲取設定
+// 擷取設定
 const textSize = getSetting('generalDisplay', 'contentTextSize');
 
 // 更新設定
@@ -100,7 +100,7 @@ updateSetting('generalDisplay', 'contentTextSize', 'large');
 
 功能：處理西藥處方資料。
 
-#### 核心函數
+#### 核心函式
 
 ```javascript
 // 處理原始藥物資料
@@ -122,7 +122,7 @@ formatMedicationForCopy(medication, format)
 
 功能：處理檢驗報告資料。
 
-#### 核心函數
+#### 核心函式
 
 ```javascript
 // 處理原始檢驗資料
@@ -144,7 +144,7 @@ generateLabTrendData(labTests, testId)
 
 功能：處理中藥處方資料。
 
-#### 核心函數
+#### 核心函式
 
 ```javascript
 // 處理原始中藥資料
@@ -163,7 +163,7 @@ formatChineseMedForCopy(prescription, format)
 
 功能：處理影像檢查資料。
 
-#### 核心函數
+#### 核心函式
 
 ```javascript
 // 處理原始影像資料
@@ -182,12 +182,12 @@ extractKeyFindings(report)
 
 位置：`/src/utils/textSizeUtils.js`
 
-功能：提供文字大小相關的輔助函數。
+功能：提供文字大小相關的輔助函式。
 
-#### 核心函數
+#### 核心函式
 
 ```javascript
-// 獲取指定類型的文字大小設定
+// 擷取指定類型的文字大小設定
 getTextSize(type)
 
 // 將設定值轉換為實際的 CSS 尺寸
@@ -198,9 +198,9 @@ convertSizeToCSS(size)
 
 位置：`/src/utils/indicatorUtils.js`
 
-功能：提供指標計算與判斷的輔助函數。
+功能：提供指標計算與判斷的輔助函式。
 
-#### 核心函數
+#### 核心函式
 
 ```javascript
 // 計算腎功能指標
@@ -252,7 +252,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 用於管理和操作瀏覽器標籤頁。
 
 ```javascript
-// 獲取當前標籤頁
+// 擷取當前標籤頁
 chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
   const activeTab = tabs[0];
   // 對標籤頁進行操作
@@ -273,7 +273,7 @@ chrome.scripting.executeScript({
 
 功能：注入到健保雲端網頁，提供資料擷取與使用者介面注入功能。
 
-#### 核心函數
+#### 核心函式
 
 ```javascript
 // 擷取頁面資料

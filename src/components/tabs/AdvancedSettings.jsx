@@ -18,7 +18,7 @@ import ScienceIcon from '@mui/icons-material/Science';
 // Other icons can be imported for future settings pages
 
 /**
- * 進階設定主組件 - 管理多個設定頁面
+ * 進階設定主元件 - 管理多個設定頁面
  */
 const AdvancedSettings = ({ appSettings, setAppSettings, generalDisplaySettings }) => {
   // 當前選擇的設定頁面索引
@@ -26,7 +26,7 @@ const AdvancedSettings = ({ appSettings, setAppSettings, generalDisplaySettings 
   // 是否啟用實驗室自訂複製格式
   const [enableLabCustomFormat, setEnableLabCustomFormat] = useState(false);
 
-  // 獲取設定狀態
+  // 擷取設定狀態
   useEffect(() => {
     chrome.storage.sync.get(
       {

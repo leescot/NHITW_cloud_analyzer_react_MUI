@@ -1,6 +1,6 @@
 import { medicationProcessor } from "../../../utils/medicationProcessor";
 
-// 判斷藥物所屬顏色的函數
+// 判斷藥物所屬顏色的函式
 export const getMedicationColor = (medication, settings) => {
   if (!settings.enableATC5Colors) return null;
 
@@ -55,7 +55,7 @@ export const getMedicationColor = (medication, settings) => {
   return null;
 };
 
-// 判斷藥物是否應該以粗體顯示的函數
+// 判斷藥物是否應該以粗體顯示的函式
 export const shouldBeBold = (medication, settings) => {
   // if (!settings.enableATC5Colors) return false;
 
@@ -95,7 +95,7 @@ export const shouldBeBold = (medication, settings) => {
   return false;
 };
 
-// 根據看診類型獲取顏色
+// 根據看診類型擷取顏色
 export const getVisitTypeColor = (visitType) => {
   // 使用 Map 儲存看診類型與顏色的映射關係
   const visitTypeColorMap = new Map([
@@ -108,7 +108,7 @@ export const getVisitTypeColor = (visitType) => {
   return visitTypeColorMap.get(visitType) || "primary.main";
 };
 
-// 複製藥物的函數
+// 複製藥物的函式
 export const handleCopyMedications = (medications, group, settings, setSnackbarMessage, setSnackbarOpen) => {
   if (settings.medicationCopyFormat === "none") {
     return;
@@ -141,10 +141,10 @@ export const handleCopyMedications = (medications, group, settings, setSnackbarM
     });
 };
 
-// 處理藥物圖片連結點擊
+// 處理藥物圖片連結點選
 export const handleDrugImageClick = (drugcode, setSnackbarMessage, setSnackbarOpen) => {
   if (!drugcode) {
-    setSnackbarMessage("無法獲取藥品代碼");
+    setSnackbarMessage("無法擷取藥品代碼");
     setSnackbarOpen(true);
     return;
   }

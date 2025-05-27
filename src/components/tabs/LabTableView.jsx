@@ -19,7 +19,7 @@ import TypographySizeWrapper from "../utils/TypographySizeWrapper";
 
 const LabTableView = ({ groupedLabs, labSettings, generalDisplaySettings }) => {
   // console.log("LabTableView rendering with lab settings:", labSettings);
-  // 獲取所有可用的檢驗類型
+  // 擷取所有可用的檢驗類型
   const allLabTypes = labProcessor.getAllLabTypes(groupedLabs);
 
   // 按指定順序排序檢驗類型
@@ -28,7 +28,7 @@ const LabTableView = ({ groupedLabs, labSettings, generalDisplaySettings }) => {
   // 狀態管理選擇的檢驗類型 - 初始值設為排序後的第一個類型（如果有的話）
   const [selectedType, setSelectedType] = useState(labTypes.length > 0 ? labTypes[0].value : 'all');
 
-  // 按優先順序排序檢驗類型的輔助函數
+  // 按優先順序排序檢驗類型的輔助函式
   function sortLabTypes(types) {
     const priorityTypes = ["生化學檢查", "血液學檢查", "尿液檢查"];
     const priorityMap = new Map(priorityTypes.map((type, index) => [type, index]));
@@ -102,7 +102,7 @@ const LabTableView = ({ groupedLabs, labSettings, generalDisplaySettings }) => {
     // 判斷日期格式是否有效
     const dateStatus = parts.length === 3 ? 'valid' : 'invalid';
     
-    // 使用 Map 獲取對應的格式化函數
+    // 使用 Map 擷取對應的格式化函式
     return dateFormatterMap.get(dateStatus)(dateStatus === 'valid' ? parts : dateStr);
   };
 
@@ -120,19 +120,19 @@ const LabTableView = ({ groupedLabs, labSettings, generalDisplaySettings }) => {
     ["default", "inherit"] // 正常值
   ]);
 
-  // 定義根據異常值狀態獲取顏色的函數
+  // 定義根據異常值狀態擷取顏色的函式
   const getStatusColor = (valueStatus, highlightAbnormal) => {
     // 如果不需要標示異常值，直接返回預設值
     if (!highlightAbnormal) return "inherit";
-    // 根據狀態從 Map 中獲取顏色，若找不到則使用預設值
+    // 根據狀態從 Map 中擷取顏色，若找不到則使用預設值
     return statusColorMap.get(valueStatus) || statusColorMap.get("default");
   };
 
-  // 定義根據異常值狀態獲取背景色的函數
+  // 定義根據異常值狀態擷取背景色的函式
   const getStatusBackgroundColor = (valueStatus, highlightAbnormal) => {
     // 如果不需要標示異常值，直接返回預設值
     if (!highlightAbnormal) return "inherit";
-    // 根據狀態從 Map 中獲取背景色，若找不到則使用預設值
+    // 根據狀態從 Map 中擷取背景色，若找不到則使用預設值
     return statusBackgroundColorMap.get(valueStatus) || statusBackgroundColorMap.get("default");
   };
 

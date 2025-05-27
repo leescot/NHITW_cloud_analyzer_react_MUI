@@ -1,7 +1,7 @@
-// 表格數據準備相關函數
+// 表格數據準備相關函式
 import { isMultiItemOrderCode } from './abbreviationUtils.js';
 
-// 修改表格數據準備函數，添加類型過濾
+// 修改表格數據準備函式，添加類型過濾
 const prepareLabTableData = (groupedLabs, selectedType = null) => {
   if (!groupedLabs || !Array.isArray(groupedLabs) || groupedLabs.length === 0) {
     return { dates: [], items: [] };
@@ -73,7 +73,7 @@ const prepareLabTableData = (groupedLabs, selectedType = null) => {
           });
         }
 
-        // 存儲日期的值
+        // 儲存日期的值
         const item = specialItems.get(abbrKey);
         const dateKey = `${group.date}_${group.hosp}`;
         item.values[dateKey] = createValueObject(lab);
@@ -105,7 +105,7 @@ const prepareLabTableData = (groupedLabs, selectedType = null) => {
           });
         }
 
-        // 存儲日期的值
+        // 儲存日期的值
         const item = itemMap.get(specialKey);
         const dateKey = `${group.date}_${group.hosp}`;
         item.values[dateKey] = createValueObject(lab);
@@ -116,7 +116,7 @@ const prepareLabTableData = (groupedLabs, selectedType = null) => {
     }]
   ]);
 
-  // 創建值對象的輔助函數
+  // 創建值對象的輔助函式
   const createValueObject = (lab) => {
     return {
       value: lab.value,
@@ -193,7 +193,7 @@ const prepareLabTableData = (groupedLabs, selectedType = null) => {
           });
         }
 
-        // 存儲日期的值
+        // 儲存日期的值
         const item = itemMap.get(key);
         const dateKey = `${group.date}_${group.hosp}`;
         item.values[dateKey] = createValueObject(lab);
@@ -209,7 +209,7 @@ const prepareLabTableData = (groupedLabs, selectedType = null) => {
             isMultiItem: false,
             values: {},
             abbrName: lab.abbrName || null,  // 添加縮寫屬性
-            // 存儲可能的別名
+            // 儲存可能的別名
             aliases: new Set([itemKey])
           });
         } else {
@@ -218,7 +218,7 @@ const prepareLabTableData = (groupedLabs, selectedType = null) => {
           item.aliases.add(itemKey);
         }
 
-        // 存儲日期的值
+        // 儲存日期的值
         const item = itemMap.get(orderCode);
         const dateKey = `${group.date}_${group.hosp}`;
         item.values[dateKey] = createValueObject(lab);
@@ -226,7 +226,7 @@ const prepareLabTableData = (groupedLabs, selectedType = null) => {
     });
   });
 
-  // 將 Map 轉換為數組並排序
+  // 將 Map 轉換為陣列並排序
   const items = Array.from(itemMap.values()).sort((a, b) => {
     // 按 orderCode 排序
     return a.orderCode.localeCompare(b.orderCode);

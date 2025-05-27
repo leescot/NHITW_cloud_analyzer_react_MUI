@@ -2,7 +2,7 @@ import React from 'react';
 import { Chip, Tooltip } from "@mui/material";
 import { NOTE_TEXT_SIZES } from "../../utils/textSizeUtils";
 
-// 狀態指示器組件
+// 狀態指示器元件
 const StatusIndicator = ({ label, hasData, icon, fontSize, tooltipTitle }) => {
   // 使用 NOTE_TEXT_SIZES 並設定默認值
   const fontSizeValue = NOTE_TEXT_SIZES[fontSize] || NOTE_TEXT_SIZES['small'];

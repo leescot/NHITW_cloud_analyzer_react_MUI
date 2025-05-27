@@ -4,7 +4,7 @@ import { updateDataStatus } from './utils/settingsHelper.js';
 
 function App() {
   useEffect(() => {
-    console.log('PopupSettings 組件已掛載');
+    console.log('PopupSettings 元件已掛載');
 
     // 立即更新資料狀態
     updateDataStatus();
@@ -28,7 +28,7 @@ function App() {
 
     // 清理監聽器和間隔
     return () => {
-      console.log('清理 PopupSettings 組件');
+      console.log('清理 PopupSettings 元件');
       chrome.storage.onChanged.removeListener(handleStorageChange);
       clearInterval(intervalId);
     };

@@ -107,7 +107,7 @@ export const getAvailableElements = (itemSeparator, formatType = 'all') => {
     // Create an itemsep element for lab item separator
     const itemsepElement = { 
       id: 'itemsep', 
-      display: '檢驗項目分隔符', 
+      display: '檢驗項目分隔字元', 
       value: itemSeparator || ',', 
       group: 'format',
       section: ELEMENT_SECTIONS.LABCONTENT
@@ -121,7 +121,7 @@ export const getAvailableElements = (itemSeparator, formatType = 'all') => {
     // Add lab item separator
     const itemsepElement = { 
       id: 'itemsep', 
-      display: '檢驗項目分隔符', 
+      display: '檢驗項目分隔字元', 
       value: itemSeparator || ',', 
       group: 'format',
       section: ELEMENT_SECTIONS.LABCONTENT
@@ -233,6 +233,6 @@ export const renderElem = (item, index, labData) => {
     return item.value;
   }
   
-  // 從 Map 中獲取元素值或返回空字符串
+  // 從 Map 中擷取元素值或返回空字符串
   return elementValuesMap.get(baseId) || '';
 }; 

@@ -210,7 +210,7 @@ const useFormatEditorState = (appSettings, setAppSettings) => {
     });
     
     // Show success message
-    setSnackbarMessage('已重置為新的預設格式');
+    setSnackbarMessage('已重設為新的預設格式');
     setSnackbarSeverity('success');
     setSnackbarOpen(true);
   };
@@ -310,7 +310,7 @@ const useFormatEditorState = (appSettings, setAppSettings) => {
 
   /**
    * 保存當前設置
-   * @param {Object} customSettings - 自定義設置
+   * @param {Object} customSettings - 自訂設置
    */
   const saveCurrentSettings = (customSettings = {}) => {
     const {
@@ -328,7 +328,7 @@ const useFormatEditorState = (appSettings, setAppSettings) => {
     // 保存當前格式類型
     setSavedFormatType(medicationCopyFormat);
     
-    // 保存到 Chrome 存儲
+    // 保存到 Chrome 儲存
     const settingsToSave = [
       ['medicationCopyFormat', medicationCopyFormat, 'western'],
       ['drugSeparator', customDrugSeparator, 'western'],

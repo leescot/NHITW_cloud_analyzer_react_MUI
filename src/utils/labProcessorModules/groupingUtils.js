@@ -1,4 +1,4 @@
-// 資料分組相關函數
+// 資料分組相關函式
 import { formatLabData } from './formattingUtils.js';
 
 // 將檢驗資料依照日期分組
@@ -33,7 +33,7 @@ const sortGroupedData = (grouped) => {
     });
 };
 
-// 新增函數：收集所有檢驗類型
+// 新增函式：收集所有檢驗類型
 const getAllLabTypes = (groupedLabs) => {
   if (!groupedLabs || !Array.isArray(groupedLabs)) {
     return [];

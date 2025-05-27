@@ -48,7 +48,7 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
     setMedNameLookup(newLookup);
   }, [groupedMedications]);
 
-  // 判斷藥物所屬顏色的函數 (與 MedicationList 中相同)
+  // 判斷藥物所屬顏色的函式 (與 MedicationList 中相同)
   const getMedicationColor = (name) => {
     if (!settings?.enableATC5Colors) return null;
 
@@ -125,13 +125,13 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
 
     setHasATC5ColoredMeds(hasColoredMeds);
 
-    // 如果沒有 ATC5 顏色藥物且當前選擇的是 "colored_only"，則重置為默認過濾器
+    // 如果沒有 ATC5 顏色藥物且當前選擇的是 "colored_only"，則重設為默認過濾器
     if (!hasColoredMeds && dayFilter === "colored_only") {
       setDayFilter("gte7");
     }
   }, [medNameLookup, settings, dayFilter]);
 
-  // 判斷藥物是否應該以粗體顯示的函數
+  // 判斷藥物是否應該以粗體顯示的函式
   const shouldBeBold = (name) => {
     if (!settings?.enableATC5Colors) return false;
 
@@ -187,7 +187,7 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
     const dateHospToKeyMap = {};
     const keyToDateHospMap = {};
 
-    // 提取處理單個藥物數據的函數
+    // 提取處理單個藥物數據的函式
     const processMedicationData = (med, date, hosp, medicineMap) => {
       const medName = med.name;
       // 創建一個唯一的鍵來表示日期和醫院的組合
@@ -198,7 +198,7 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
         medicineMap.set(medName, new Map());
       }
       
-      // 獲取藥物的日期醫院組合 Map
+      // 擷取藥物的日期醫院組合 Map
       const dateHospMap = medicineMap.get(medName);
       
       // 建立當前藥物的劑量和頻次資訊
@@ -227,7 +227,7 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
           df => df.perDosage === med.perDosage && df.frequency === med.frequency
         );
         
-        // 如果不是重複的，添加到 dosageFreqs 數組
+        // 如果不是重複的，添加到 dosageFreqs 陣列
         if (!hasDuplicate) {
           existingMed.dosageFreqs.push(currentDosageFreq);
         }
@@ -253,7 +253,7 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
       });
     });
 
-    // 將日期醫院組合轉換為排序的數組 (最新日期優先)
+    // 將日期醫院組合轉換為排序的陣列 (最新日期優先)
     const sortedDateHospKeys = Array.from(allDateHospPairs).sort((a, b) => {
       // 提取日期部分進行比較
       const dateA = a.split('__')[0];
@@ -290,7 +290,7 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
       ["colored_only", (_, medName) => getMedicationColor(medName) !== null]
     ]),
     
-    // 獲取過濾函數
+    // 擷取過濾函式
     getFilterFunction(filterName) {
       return this.definitions.get(filterName) || (() => true);
     },
@@ -302,7 +302,7 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
     }
   };
   
-  // 對藥物按天數進行過濾的函數
+  // 對藥物按天數進行過濾的函式
   const filterMedicinesByDays = (medicines) => {
     return Array.from(medicines).filter(([medName, dateHospMap]) => {
       // 檢查藥物是否有任何符合過濾條件的日期記錄
@@ -313,7 +313,7 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
     });
   };
 
-  // 獲取應該顯示的日期醫院組合列
+  // 擷取應該顯示的日期醫院組合列
   const getVisibleDateHospKeys = (processedData, filteredMedicines) => {
     if (dayFilter === "all") {
       return processedData.dateHospKeys;
@@ -333,7 +333,7 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
     return processedData.dateHospKeys.filter((key) => keysWithData.has(key));
   };
 
-  // 獲取最近的日期醫院組合
+  // 擷取最近的日期醫院組合
   const getMostRecentDateHospKey = (dateHospMap, medName) => {
     const filteredKeys = Array.from(dateHospMap.entries())
       .filter(([_, medData]) => {
@@ -350,12 +350,12 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
     return filteredKeys.length > 0 ? filteredKeys[0][0] : null;
   };
 
-  // 過濾選項變更處理函數
+  // 過濾選項變更處理函式
   const handleFilterChange = (event) => {
     setDayFilter(event.target.value);
   };
 
-  // 獲取處理後的資料
+  // 擷取處理後的資料
   const processedData = processMedicationTableData(groupedMedications);
   const filteredMedicines = filterMedicinesByDays(processedData.medicines);
 
@@ -389,7 +389,7 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
   // Add drug image click handler
   const handleDrugImageClick = (drugcode) => {
     if (!drugcode) {
-      setSnackbarMessage("無法獲取藥品代碼");
+      setSnackbarMessage("無法擷取藥品代碼");
       setSnackbarOpen(true);
       return;
     }
@@ -403,7 +403,7 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
 
   // 在 TableCell 的渲染部分修改為顯示多種頻次
   const renderMultipleDosages = (dosageFreqs) => {
-    // 格式化單個劑量頻次的函數
+    // 格式化單個劑量頻次的函式
     const formatDosageFrequency = (df) => 
       df.perDosage !== "SPECIAL"
         ? `${df.perDosage}# ${df.frequency}`
@@ -429,7 +429,7 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
     return sortedDosageFreqs.map(formatDosageFrequency).join(" + ");
   };
 
-  // 藥物劑量顯示 Cell 組件 - 封裝單個劑量顯示邏輯
+  // 藥物劑量顯示 Cell 元件 - 封裝單個劑量顯示邏輯
   const MedicationDosageCell = ({ medData, shouldDisplay, generalDisplaySettings }) => {
     if (!shouldDisplay) {
       return null;
@@ -496,7 +496,7 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
     );
   };
 
-  // 檢查藥物在特定日期醫院組合是否應該顯示的函數
+  // 檢查藥物在特定日期醫院組合是否應該顯示的函式
   const shouldDisplayMedication = (medData, dayFilter, name) => {
     if (!medData) return false;
     
@@ -685,7 +685,7 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
               </TableHead>
               <TableBody>
                 {sortedFilteredMedicines.map(([name, dateHospMap]) => {
-                  // 獲取藥物的顏色
+                  // 擷取藥物的顏色
                   const medicationColor = getMedicationColor(name);
                   // 檢查藥物是否應該以粗體顯示
                   const isBold = shouldBeBold(name);

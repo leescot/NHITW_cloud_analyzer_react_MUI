@@ -111,7 +111,7 @@ function initializeExtension() {
       console.error("載入本地資料處理器時出錯:", error);
     });
 
-  // 使用 Map 存儲數據類型與對應處理函數的映射
+  // 使用 Map 儲存數據類型與對應處理函式的映射
   const dataTypeHandlers = new Map([
     ["medication", (data) => { window.lastInterceptedMedicationData = data; }],
     ["lab", (data) => { window.lastInterceptedLabData = data; }],
@@ -130,13 +130,13 @@ function initializeExtension() {
       // 创建安全的数据副本
       const safeData = JSON.parse(JSON.stringify(eventData.data));
       
-      // 使用 Map 查找並執行相應的處理函數
+      // 使用 Map 查找並執行相應的處理函式
       const handler = dataTypeHandlers.get(eventData.dataType);
       if (handler) {
         handler(safeData);
       }
 
-      // 使用 setTimeout 確保變量已完全初始化後再觸發事件
+      // 使用 setTimeout 確保變數已完全初始化後再觸發事件
       setTimeout(() => {
         const customEvent = new CustomEvent("dataFetchCompleted", {
           detail: { type: eventData.dataType },
@@ -158,7 +158,7 @@ function initializeExtension() {
     try {
       // 檢查事件是否有數據和類型
       if (event.data && event.data.type) {
-        // 查找並執行相應的處理函數
+        // 查找並執行相應的處理函式
         const handler = eventTypeHandlers.get(event.data.type);
         if (handler) {
           handler(event.data);
