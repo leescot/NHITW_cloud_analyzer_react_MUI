@@ -21,7 +21,7 @@ processData(dataType, rawData)
 // 儲存處理後的資料
 storeProcessedData(dataType, data)
 
-// 獲取特定類型的資料
+// 擷取特定類型的資料
 getDataByType(dataType)
 
 // 清除所有資料
@@ -30,7 +30,7 @@ clearAllData()
 // 檢查資料是否已載入
 isDataLoaded(dataType)
 
-// 獲取資料載入狀態
+// 擷取資料載入狀態
 getDataLoadingStatus(dataType)
 ```
 
@@ -58,13 +58,13 @@ const medications = getDataByType('medication');
 #### 核心函數
 
 ```javascript
-// 獲取所有設定
+// 擷取所有設定
 getAllSettings()
 
-// 獲取特定類別的設定
+// 擷取特定類別的設定
 getSettingsByCategory(category)
 
-// 獲取特定設定項
+// 擷取特定設定項
 getSetting(category, key)
 
 // 更新設定
@@ -76,7 +76,7 @@ saveSettings()
 // 從 Chrome 存儲載入設定
 loadSettings()
 
-// 重置設定為預設值
+// 重設設定為預設值
 resetToDefault()
 ```
 
@@ -85,7 +85,7 @@ resetToDefault()
 ```javascript
 import { getSetting, updateSetting } from '../utils/settingsManager';
 
-// 獲取設定
+// 擷取設定
 const textSize = getSetting('generalDisplay', 'contentTextSize');
 
 // 更新設定
@@ -187,7 +187,7 @@ extractKeyFindings(report)
 #### 核心函數
 
 ```javascript
-// 獲取指定類型的文字大小設定
+// 擷取指定類型的文字大小設定
 getTextSize(type)
 
 // 將設定值轉換為實際的 CSS 尺寸
@@ -252,7 +252,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 用於管理和操作瀏覽器標籤頁。
 
 ```javascript
-// 獲取當前標籤頁
+// 擷取當前標籤頁
 chrome.tabs.query({ active: true, currentWindow: true }, tabs => {
   const activeTab = tabs[0];
   // 對標籤頁進行操作

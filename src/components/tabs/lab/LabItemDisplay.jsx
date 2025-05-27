@@ -30,7 +30,7 @@ const LabItemDisplay = ({
 
   // 使用 Map 來決定渲染哪個組件
   const displayComponents = new Map([
-    // 顯示帶有複選框的版本 - 當啟用自定義複製且顯示格式不是垂直或水平
+    // 顯示帶有複選框的版本 - 當啟用自訂複製且顯示格式不是垂直或水平
     [
       () => enableLabChooseCopy && 
             (displayLabFormat !== 'vertical' && 

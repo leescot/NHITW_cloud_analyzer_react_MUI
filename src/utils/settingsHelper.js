@@ -26,7 +26,7 @@ export const updateDataStatus = (setDataStatus) => {
   });
 };
 
-// 從存儲鍵獲取狀態鍵的輔助函數 - 使用 Map 代替對象映射
+// 從存儲鍵擷取狀態鍵的輔助函數 - 使用 Map 代替對象映射
 const storageToStatusKeyMap = new Map([
   ['medicationData', 'medication'],
   ['labData', 'labData'],
@@ -41,7 +41,7 @@ const storageToStatusKeyMap = new Map([
   ['cancerScreeningData', 'cancerScreening']
 ]);
 
-// 從存儲鍵獲取狀態鍵的輔助函數
+// 從存儲鍵擷取狀態鍵的輔助函數
 const getStatusKeyFromStorageKey = (storageKey) => {
   return storageToStatusKeyMap.get(storageKey) || storageKey;
 };

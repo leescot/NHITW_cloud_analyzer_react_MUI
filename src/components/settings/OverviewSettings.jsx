@@ -64,10 +64,10 @@ export const SPECIAL_LAB_CODES = [
 ];
 
 /**
- * 重置用戶的檢驗項目設定為預設值
+ * 重設用戶的檢驗項目設定為預設值
  *
- * 可在需要重置設定的地方調用此函數，例如：
- * - 設定頁面中的"重置為預設"按鈕
+ * 可在需要重設設定的地方調用此函數，例如：
+ * - 設定頁面中的"重設為預設"按鈕
  * - 應用版本更新時
  */
 export const resetLabTestsToDefault = (callback = () => {}) => {
@@ -103,7 +103,7 @@ export const FALLBACK_IMAGE_TESTS = [
 ];
 
 /**
- * 重置用戶的影像檢查設定為預設值
+ * 重設用戶的影像檢查設定為預設值
  */
 export const resetImageTestsToDefault = (callback = () => {}) => {
   chrome.storage.sync.set(
@@ -269,7 +269,7 @@ const OverviewSettings = () => {
     setDialogOpen(false);
   };
 
-  // 重置检验清单到默认设置
+  // 重設检验清单到默认设置
   const handleResetLabTests = () => {
     setTempLabTests([...DEFAULT_LAB_TESTS]);
   };
@@ -334,7 +334,7 @@ const OverviewSettings = () => {
     setImageDialogOpen(false);
   };
 
-  // 重置影像清單到默认设置
+  // 重設影像清單到默认设置
   const handleResetImageTests = () => {
     setTempImageTests([...DEFAULT_IMAGE_TESTS]);
   };
@@ -517,7 +517,7 @@ const OverviewSettings = () => {
               color="secondary"
               sx={{ mr: 'auto' }}
             >
-              重置為預設
+              重設為預設
             </Button>
             <Button onClick={handleSaveLabTests} color="primary" variant="contained">
               保存
@@ -563,7 +563,7 @@ const OverviewSettings = () => {
               color="secondary"
               sx={{ mr: 'auto' }}
             >
-              重置為預設
+              重設為預設
             </Button>
             <Button onClick={handleSaveImageTests} color="primary" variant="contained">
               保存

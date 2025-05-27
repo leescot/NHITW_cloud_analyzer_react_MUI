@@ -86,7 +86,7 @@ const ACTION_HANDLERS = new Map([
   
   ['userSessionChanged', (message, sender, sendResponse) => {
     // console.log("User session changed, resetting temporary data");
-    // 重置當前會話數據
+    // 重設當前會話數據
     Object.keys(currentSessionData).forEach(key => {
       currentSessionData[key] = null;
     });
@@ -103,7 +103,7 @@ const ACTION_HANDLERS = new Map([
   
   ['clearSessionData', (message, sender, sendResponse) => {
     // console.log("Clearing session data");
-    // 重置當前會話數據
+    // 重設當前會話數據
     Object.keys(currentSessionData).forEach(key => {
       currentSessionData[key] = null;
     });
@@ -119,7 +119,7 @@ const ACTION_HANDLERS = new Map([
   }],
   
   ['getDataStatus', (message, sender, sendResponse) => {
-    // 獲取存儲的所有數據狀態
+    // 擷取存儲的所有數據狀態
     chrome.storage.local.get(Object.values(DATA_TYPE_TO_STORAGE_KEY), (result) => {
       // console.log("STORAGE DATA DEBUG:", result);
       const dataStatus = {};
@@ -233,7 +233,7 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   // 檢查是否有會話變更
   if (message.userSession && message.userSession !== currentSessionData.currentUserSession) {
     // console.log("User session changed, resetting temporary data");
-    // 重置當前會話數據
+    // 重設當前會話數據
     Object.keys(currentSessionData).forEach(key => {
       currentSessionData[key] = null;
     });
@@ -258,7 +258,7 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
       changeInfo.url.includes('medcloud2.nhi.gov.tw/imu/IMUE1000/IMUE0001'))) {
     console.log("Detected navigation to login page, clearing session data");
 
-    // 重置當前會話數據
+    // 重設當前會話數據
     Object.keys(currentSessionData).forEach(key => {
       currentSessionData[key] = null;
     });

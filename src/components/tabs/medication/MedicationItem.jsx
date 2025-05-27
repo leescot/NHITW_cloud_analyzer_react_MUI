@@ -11,7 +11,7 @@ const MedicationItem = ({
   setSnackbarMessage,
   setSnackbarOpen
 }) => {
-  // 獲取藥物的顏色
+  // 擷取藥物的顏色
   const medicationColor = getMedicationColor(med, settings);
   // 檢查藥物是否應該以粗體顯示
   const isBold = shouldBeBold(med, settings);

@@ -730,7 +730,7 @@ const MedicationSettings = () => {
               onClick={handleResetSettings}
               color="secondary"
             >
-              ATC設定重置為預設
+              ATC設定重設為預設
             </Button>
           </DialogActions>
         </Dialog>

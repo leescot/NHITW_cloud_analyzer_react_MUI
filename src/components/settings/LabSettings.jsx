@@ -32,7 +32,7 @@ import { handleSettingChange } from '../../utils/settingsHelper';
 import { DEFAULT_LAB_COPY_ITEMS } from '../../config/labTests';
 
 /**
- * 重置用戶的檢驗複製項目設定為預設值
+ * 重設用戶的檢驗複製項目設定為預設值
  */
 export const resetLabCopyItemsToDefault = (callback = () => {}) => {
   chrome.storage.sync.set(
@@ -179,7 +179,7 @@ const LabSettings = () => {
     setCustomCopyDialogOpen(false);
   };
 
-  // 重置自訂複製項目到默认设置
+  // 重設自訂複製項目到默认设置
   const handleResetCustomCopyItems = () => {
     // Create a fresh deep copy of the default items
     const resetItems = JSON.parse(JSON.stringify(DEFAULT_LAB_COPY_ITEMS));
@@ -405,7 +405,7 @@ const LabSettings = () => {
               color="secondary"
               sx={{ mr: 'auto' }}
             >
-              重置為預設
+              重設為預設
             </Button>
             <Button onClick={handleSaveCustomCopyItems} color="primary" variant="contained">
               保存

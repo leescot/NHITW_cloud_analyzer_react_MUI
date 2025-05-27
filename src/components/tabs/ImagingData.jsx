@@ -23,10 +23,10 @@ import TypographySizeWrapper from "../utils/TypographySizeWrapper";
 // Function to open imaging study in a new window
 const viewImage = async (imageParams) => {
   try {
-    // 嘗試多種方式獲取授權令牌
+    // 嘗試多種方式擷取授權令牌
     let authToken = null;
 
-    // 方法1: 直接嘗試從 chrome storage 獲取
+    // 方法1: 直接嘗試從 chrome storage 擷取
     try {
       await new Promise((resolve) => {
         chrome.storage.local.get('nhiToken', function(result) {
@@ -40,7 +40,7 @@ const viewImage = async (imageParams) => {
       // Silent error handling
     }
 
-    // 方法2: 嘗試從 window.extractAuthorizationToken() 獲取
+    // 方法2: 嘗試從 window.extractAuthorizationToken() 擷取
     if (!authToken && window.extractAuthorizationToken) {
       try {
         authToken = window.extractAuthorizationToken();
@@ -49,7 +49,7 @@ const viewImage = async (imageParams) => {
       }
     }
 
-    // 方法3: 嘗試從 sessionStorage 獲取
+    // 方法3: 嘗試從 sessionStorage 擷取
     if (!authToken) {
       const tokenKeys = ['jwt_token', 'token', 'access_token', 'auth_token', 'nhi_extractor_token'];
       for (const key of tokenKeys) {
@@ -61,7 +61,7 @@ const viewImage = async (imageParams) => {
       }
     }
 
-    // 方法4: 嘗試從 localStorage 獲取
+    // 方法4: 嘗試從 localStorage 擷取
     if (!authToken) {
       const tokenKeys = ['jwt_token', 'token', 'access_token', 'auth_token', 'nhi_extractor_token'];
       for (const key of tokenKeys) {
@@ -91,11 +91,11 @@ const viewImage = async (imageParams) => {
     }
 
     if (!authToken) {
-      alert("無法獲取授權令牌，請重新整理頁面後再試");
+      alert("無法擷取授權令牌，請重新整理頁面後再試");
       return;
     }
 
-    // 發送請求獲取影像數據，先嘗試原始格式
+    // 發送請求擷取影像數據，先嘗試原始格式
     try {
       const response = await fetch("https://medcloud2.nhi.gov.tw/imu/api/imuecommon/imuecommon/get-ctmri2", {
         method: "POST",
@@ -657,7 +657,7 @@ const ImagingData = ({ imagingData, generalDisplaySettings }) => {
       return processedData.withReport;
     }
     
-    // # zh-TW: 從 Map 獲取對應的過濾函數並執行
+    // # zh-TW: 從 Map 擷取對應的過濾函數並執行
     const filterFunction = filterMap.get(filterOption);
     return filterFunction ? filterFunction() : processedData.withReport;
   }, [processedData.withReport, filterOption, shouldShowFilter, filterMap]);
@@ -679,7 +679,7 @@ const ImagingData = ({ imagingData, generalDisplaySettings }) => {
     }
   };
 
-  // 當資料更新且所選類型沒有報告時，重置為 'all'
+  // 當資料更新且所選類型沒有報告時，重設為 'all'
   useEffect(() => {
     if (filterOption === 'ctmri' && !hasCTMRIReports) {
       setFilterOption('all');

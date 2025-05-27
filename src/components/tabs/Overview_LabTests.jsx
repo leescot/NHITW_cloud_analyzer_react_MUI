@@ -52,7 +52,7 @@ const Overview_LabTests = ({ groupedLabs = [], labData, overviewSettings = {}, g
     return [];
   }, [groupedLabs, labData]);
 
-  // 獲取狀態顏色
+  // 擷取狀態顏色
   const getStatusColor = (test, highlightAbnormal = true) => {
     if (!test || !highlightAbnormal) return "inherit";
 
@@ -65,7 +65,7 @@ const Overview_LabTests = ({ groupedLabs = [], labData, overviewSettings = {}, g
     return "inherit"; // 正常值
   };
 
-  // 獲取背景顏色
+  // 擷取背景顏色
   const getStatusBackgroundColor = (test, highlightAbnormal = true) => {
     if (!test || !highlightAbnormal) return "inherit";
 

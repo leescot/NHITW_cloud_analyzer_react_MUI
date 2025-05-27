@@ -112,13 +112,13 @@ const labProcessor = {
       const formattedReference = getReferenceRangeDisplayText(lab.consult_value, lab.order_code, lab.hosp);
       // console.log(`${lab.assay_item_name} - formattedReference direct:`, formattedReference);
 
-      // 檢查是否有自定義參考範圍
+      // 檢查是否有自訂參考範圍
       let referenceMin, referenceMax;
       let usingCustomRange = false;
       let originalConsultValue, originalReferenceMin, originalReferenceMax;
 
       if (hasCustomReferenceRange(lab.order_code)) {
-        // 使用自定義參考範圍
+        // 使用自訂參考範圍
         const customRange = getCustomReferenceRange(lab.order_code);
         referenceMin = customRange.min;
         referenceMax = customRange.max;
@@ -141,7 +141,7 @@ const labProcessor = {
       // 使用 Map 重構值狀態判斷邏輯
       // 1. 創建條件檢查和對應動作的 Map
       const valueStatusChecks = new Map([
-        // 檢查是否跳過異常標記 (零參考範圍且非自定義範圍)
+        // 檢查是否跳過異常標記 (零參考範圍且非自訂範圍)
         [() => (lab.consult_value && this.isZeroReferenceRange(lab.consult_value) && !usingCustomRange), 
          () => { valueStatus = "normal"; }],
          
@@ -204,7 +204,7 @@ const labProcessor = {
       // 設定 isAbnormal 當值狀態不是 normal 時
       isAbnormal = valueStatus !== "normal";
 
-      // 獲取縮寫名稱 - 傳入 itemName 作為新參數
+      // 擷取縮寫名稱 - 傳入 itemName 作為新參數
       const abbrName = this.getAbbreviation(lab.order_code, lab.unit_data, lab.assay_item_name);
 
       // 檢查是否有多值數據
@@ -291,13 +291,13 @@ const labProcessor = {
         orderName: lab.order_name || '',
         orderCode: lab.order_code || '',
         consultValue: consultValue,  // Always include the reference values
-        referenceMin: referenceMin,  // 參考值下限 (可能是自定義的)
-        referenceMax: referenceMax,  // 參考值上限 (可能是自定義的)
+        referenceMin: referenceMin,  // 參考值下限 (可能是自訂的)
+        referenceMax: referenceMax,  // 參考值上限 (可能是自訂的)
         formattedReference: formattedReference,  // 直接添加格式化的参考范围文本
         isAbnormal: isAbnormal,      // 保留為向後兼容
         valueStatus: valueStatus,    // 新增詳細狀態 (normal, high, low)
         abbrName: abbrName,          // 新增縮寫屬性
-        // 自定義參考範圍相關資訊
+        // 自訂參考範圍相關資訊
         _usingCustomRange: usingCustomRange,
         _originalConsultValue: originalConsultValue,
         _originalReferenceMin: originalReferenceMin,

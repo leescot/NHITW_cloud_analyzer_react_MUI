@@ -414,7 +414,7 @@ const Overview_ImportantMedications = ({
   const handleDrugImageClick = (drugcode) => {
     // console.log("Opening drug image for drugcode:", drugcode);
     if (!drugcode) {
-      setSnackbarMessage("無法獲取藥品代碼");
+      setSnackbarMessage("無法擷取藥品代碼");
       setSnackbarOpen(true);
       return;
     }

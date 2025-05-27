@@ -36,13 +36,13 @@ const dataTypeMap = new Map([
 const handleDownloadJSON = (setDownloading, setSnackbar) => {
   setDownloading(true);
 
-  // 從 content script 獲取所有資料
+  // 從 content script 擷取所有資料
   chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
     if (!tabs || !tabs[0] || !tabs[0].id) {
       setDownloading(false);
       setSnackbar({
         open: true,
-        message: '無法獲取當前標籤頁資訊',
+        message: '無法擷取當前標籤頁資訊',
         severity: 'error'
       });
       return;
@@ -147,12 +147,12 @@ const LoadDataTab = ({ localDataStatus, setSnackbar }) => {
         return;
       }
 
-      // 獲取當前標籤頁
+      // 擷取當前標籤頁
       chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
         if (!tabs || !tabs[0] || !tabs[0].id) {
           setSnackbar({
             open: true,
-            message: '無法獲取當前標籤頁',
+            message: '無法擷取當前標籤頁',
             severity: 'error'
           });
           setLoading(false);
@@ -215,7 +215,7 @@ const LoadDataTab = ({ localDataStatus, setSnackbar }) => {
 
   // 清除本地資料
   // const handleClearLocalData = () => {
-  //   // 獲取當前標籤頁
+  //   // 擷取當前標籤頁
   //   chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
   //     if (tabs && tabs[0] && tabs[0].id) {
   //       // 傳送訊息給內容腳本清除資料
@@ -339,7 +339,7 @@ const LoadDataTab = ({ localDataStatus, setSnackbar }) => {
         </Paper>
       ) : (
         <Alert severity="info" sx={{ mb: 2 }}>
-          請選擇 JSON 檔案並點擊「載入檔案」
+          請選擇 JSON 檔案並點選「載入檔案」
         </Alert>
       )}
 

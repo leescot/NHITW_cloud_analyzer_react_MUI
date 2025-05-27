@@ -95,7 +95,7 @@ export const shouldBeBold = (medication, settings) => {
   return false;
 };
 
-// 根據看診類型獲取顏色
+// 根據看診類型擷取顏色
 export const getVisitTypeColor = (visitType) => {
   // 使用 Map 儲存看診類型與顏色的映射關係
   const visitTypeColorMap = new Map([
@@ -141,10 +141,10 @@ export const handleCopyMedications = (medications, group, settings, setSnackbarM
     });
 };
 
-// 處理藥物圖片連結點擊
+// 處理藥物圖片連結點選
 export const handleDrugImageClick = (drugcode, setSnackbarMessage, setSnackbarOpen) => {
   if (!drugcode) {
-    setSnackbarMessage("無法獲取藥品代碼");
+    setSnackbarMessage("無法擷取藥品代碼");
     setSnackbarOpen(true);
     return;
   }

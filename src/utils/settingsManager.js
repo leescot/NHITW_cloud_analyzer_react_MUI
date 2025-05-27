@@ -311,7 +311,7 @@ const handleLabSettingsChange = (event, currentSettings, updateCallback, callbac
     if (settingKey === 'itemSeparator') {
       console.log(`Special handling for item separator: "${updatedValue}" (${typeof updatedValue})`);
       
-      // 確保分隔符是字符串
+      // 確保分隔字元是字符串
       if (typeof updatedValue !== 'string') {
         console.warn(`Invalid itemSeparator value: ${updatedValue}, converting to string`);
         updatedValue = String(updatedValue || ',');
@@ -491,7 +491,7 @@ export const handleDataFetchCompletedSettingsChange = (event, currentSettings, u
       ['cloud', () => handleCloudDataSettingsChange(event, currentSettings, updateCallback)]
     ]);
 
-    // 從 Map 中獲取並執行對應的處理函數
+    // 從 Map 中擷取並執行對應的處理函數
     const handler = settingTypeHandlers.get(event.detail.settingType);
     
     // 如果找到對應的處理函數則執行，否則加載所有設置

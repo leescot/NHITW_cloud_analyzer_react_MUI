@@ -152,7 +152,7 @@ export const dashboardProcessor = {
       }]
     ]);
 
-    // 使用 Map 中的處理邏輯獲取結果
+    // 使用 Map 中的處理邏輯擷取結果
     return {
       western: dataProcessors.get('western').extractData(),
       chinese: dataProcessors.get('chinese').extractData()

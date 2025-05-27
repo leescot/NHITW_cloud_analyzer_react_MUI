@@ -61,10 +61,10 @@ const TypographySizeWrapper = ({
   // 根據變體或明確的 textSizeType 確定要使用的文字大小類型
   const sizeType = textSizeType || VARIANT_TO_SIZE_TYPE.get(variant) || 'content';
 
-  // 從設置中獲取正確的字體大小
+  // 從設置中擷取正確的字體大小
   const sizeMap = SIZE_TYPE_TO_SIZES.get(sizeType);
   
-  // 根據 sizeType 獲取相應的設置屬性名
+  // 根據 sizeType 擷取相應的設置屬性名
   const settingKey = `${sizeType}TextSize`;
   const sizeSetting = settings[settingKey] || (sizeType === 'title' ? 'medium' : sizeType === 'note' ? 'small' : 'medium');
   

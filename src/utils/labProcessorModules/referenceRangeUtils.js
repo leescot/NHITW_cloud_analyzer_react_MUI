@@ -18,7 +18,7 @@ const cleanNumericValue = (value) => {
   return value;
 };
 
-// 檢查是否需要使用自定義參考範圍
+// 檢查是否需要使用自訂參考範圍
 const shouldUseCustomRange = (orderCode, hosp) => {
   if (!orderCode || !hosp) return false;
 
@@ -67,7 +67,7 @@ const formatHDLReferenceRange = (referenceStr) => {
 
 // 定義參考範圍解析策略的 Map
 const referenceRangeStrategies = new Map([
-  // 策略 1: 檢查是否需要使用自定義參考範圍
+  // 策略 1: 檢查是否需要使用自訂參考範圍
   ["customRange", (cleanStr, orderCode, hosp) => {
     if (shouldUseCustomRange(orderCode, hosp)) {
       return getCustomReferenceRange(orderCode);
@@ -250,7 +250,7 @@ const parseReferenceRange = (referenceStr, orderCode = null, hosp = null) => {
 
 // 格式化規則 Map
 const displayFormatStrategies = new Map([
-  // 自定義參考範圍
+  // 自訂參考範圍
   ["customRange", (referenceStr, orderCode, hosp) => {
     if (shouldUseCustomRange(orderCode, hosp)) {
       const customRange = getCustomReferenceRange(orderCode);
@@ -385,7 +385,7 @@ const formatReferenceRangeForDisplay = (referenceStr, orderCode = null, hosp = n
   return cleanStr.replace(/[\[\]]/g, '');
 };
 
-// 從原始格式和解析後的參考範圍獲取顯示文本
+// 從原始格式和解析後的參考範圍擷取顯示文本
 const getReferenceRangeDisplayText = (referenceStr, orderCode = null, hosp = null) => {
   if (!referenceStr) return '';
 

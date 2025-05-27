@@ -110,7 +110,7 @@ const LabData = ({ groupedLabs, settings, labSettings, generalDisplaySettings })
     console.log("Current displayLabFormat:", labSettings?.displayLabFormat);
   }, [labSettings]);
 
-  // 使用自定義 Hook 處理複製功能
+  // 使用自訂 Hook 處理複製功能
   const {
     snackbarOpen,
     snackbarMessage,
@@ -285,24 +285,24 @@ const LabData = ({ groupedLabs, settings, labSettings, generalDisplaySettings })
         }).join("\n\n");
       },
       customVertical: () => {
-        // 嘗試使用自定義格式，如果失敗則回退到標準垂直格式
+        // 嘗試使用自訂格式，如果失敗則回退到標準垂直格式
         try {
           return filteredGroupedLabs.map(group => {
             return labCopyFormatter.applyCustomFormat(group.labs, group, completeLabSettings);
           }).join("\n\n");
         } catch (error) {
-          console.error("應用自定義格式時出錯:", error);
+          console.error("應用自訂格式時出錯:", error);
           return formatFunctions.vertical();
         }
       },
       customHorizontal: () => {
-        // 嘗試使用自定義格式，如果失敗則回退到標準水平格式
+        // 嘗試使用自訂格式，如果失敗則回退到標準水平格式
         try {
           return filteredGroupedLabs.map(group => {
             return labCopyFormatter.applyCustomFormat(group.labs, group, completeLabSettings);
           }).join("\n\n");
         } catch (error) {
-          console.error("應用自定義格式時出錯:", error);
+          console.error("應用自訂格式時出錯:", error);
           return formatFunctions.horizontal();
         }
       },
@@ -401,7 +401,7 @@ const LabData = ({ groupedLabs, settings, labSettings, generalDisplaySettings })
   // 決定要使用哪種布局
   // # zh-TW: 根據設定和條件決定要使用的布局類型
   const getLayoutComponent = (group, index) => {
-    // 直接使用 Map 來獲取對應的布局組件
+    // 直接使用 Map 來擷取對應的布局組件
     const layoutRenderer = layoutComponentMap.get(completeLabSettings.displayLabFormat);
     if (layoutRenderer) {
       return layoutRenderer(group, index);

@@ -169,7 +169,7 @@ const LabCustomFormatEditor = ({ appSettings, setAppSettings, generalDisplaySett
             }}
             size="small"
           >
-            重置為預設
+            重設為預設
           </Button>
           {/* {process.env.NODE_ENV === 'development' && (
             <Button
@@ -178,7 +178,7 @@ const LabCustomFormatEditor = ({ appSettings, setAppSettings, generalDisplaySett
               onClick={testCurrentSeparator}
               size="small"
             >
-              測試分隔符
+              測試分隔字元
             </Button>
           )} */}
           <Button

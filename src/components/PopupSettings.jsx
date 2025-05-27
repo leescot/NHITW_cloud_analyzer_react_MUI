@@ -78,7 +78,7 @@ const PopupSettings = () => {
 
   // 開發者模式狀態
   const [developerMode, setDeveloperMode] = useState(false);
-  // 點擊計數器
+  // 點選計數器
   const [clickCount, setClickCount] = useState(0);
 
   // Add tab state
@@ -144,7 +144,7 @@ const PopupSettings = () => {
   ]);
 
   const handleTabChange = (event, newValue) => {
-    // 檢查是否點擊了"開啟雲端"標籤
+    // 檢查是否點選了"開啟雲端"標籤
     const lastTabIndex = developerMode ? 5 : 4;
     if (newValue === lastTabIndex) {
       // 開啟雲端連結而不切換標籤
@@ -160,7 +160,7 @@ const PopupSettings = () => {
     setSnackbar(prev => ({ ...prev, open: false }));
   };
 
-  // 使用 Map 處理開發者模式的不同點擊次數情況
+  // 使用 Map 處理開發者模式的不同點選次數情況
   const handleDeveloperModeActions = new Map([
     [5, {
       action: (currentMode) => {
@@ -183,13 +183,13 @@ const PopupSettings = () => {
     }]
   ]);
 
-  // 處理底部文字點擊事件
+  // 處理底部文字點選事件
   const handleFooterClick = () => {
     // 增加計數器
     const newCount = clickCount + 1;
     setClickCount(newCount);
 
-    // 使用 Map 處理開發者模式的點擊邏輯
+    // 使用 Map 處理開發者模式的點選邏輯
     const actionConfig = handleDeveloperModeActions.get(newCount);
     if (actionConfig) {
       const { message, severity } = actionConfig.action(developerMode);
@@ -201,26 +201,26 @@ const PopupSettings = () => {
         severity
       });
 
-      // 重置計數器
+      // 重設計數器
       setTimeout(() => setClickCount(0), 500);
     } else {
-      // 只在開發者模式已啟用的情況下且點擊次數在範圍內才顯示點擊提示
+      // 只在開發者模式已啟用的情況下且點選次數在範圍內才顯示點選提示
       if (developerMode && newCount > 0 && newCount < 7) {
         setSnackbar({
           open: true,
-          message: `再點擊 ${7 - newCount} 次以關閉開發者模式`,
+          message: `再點選 ${7 - newCount} 次以關閉開發者模式`,
           severity: 'info',
           autoHideDuration: 1000
         });
       }
     }
 
-    // 如果超過7次點擊未處理，重置計數器
+    // 如果超過7次點選未處理，重設計數器
     if (newCount > 7) {
       setClickCount(0);
     }
 
-    // 設定計數器重置計時器(5秒內未完成點擊將重置)
+    // 設定計數器重設計時器(5秒內未完成點選將重設)
     if (newCount === 1) {
       setTimeout(() => {
         setClickCount(0);
@@ -434,9 +434,9 @@ const PopupSettings = () => {
           borderTop: 1,
           borderColor: 'divider',
           textAlign: 'center',
-          cursor: 'pointer'  // 添加點擊游標
+          cursor: 'pointer'  // 添加點選游標
         }}
-        onClick={handleFooterClick}  // 添加點擊事件
+        onClick={handleFooterClick}  // 添加點選事件
       >
         <Typography
           variant="body2"

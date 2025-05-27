@@ -148,7 +148,7 @@ const MedicationCustomFormatEditor = ({ appSettings, setAppSettings, generalDisp
             }}
             size="small"
           >
-            重置為預設
+            重設為預設
           </Button>
           <Button
             variant="contained"

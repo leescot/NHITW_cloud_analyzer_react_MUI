@@ -1,13 +1,13 @@
 /**
  * medicationCopyFormatter.js
- * 處理藥物清單的自定義複製格式功能
+ * 處理藥物清單的自訂複製格式功能
  */
 
 import { medicationProcessor } from './medicationProcessor.js';
 
 export const medicationCopyFormatter = {
   /**
-   * 應用自定義格式到藥物清單
+   * 應用自訂格式到藥物清單
    * @param {Array} medications - 藥物資料陣列
    * @param {Object} groupInfo - 包含格式設定的群組資訊
    * @returns {String} - 格式化後的文字
@@ -67,8 +67,8 @@ export const medicationCopyFormatter = {
     
     const { customMedicationHeaderCopyFormat, customMedicationDrugCopyFormat } = groupInfo;
     
-    // 詳細檢查自定義格式設定
-    console.log("自定義格式數組檢查:", {
+    // 詳細檢查自訂格式設定
+    console.log("自訂格式數組檢查:", {
       headerFormat: customMedicationHeaderCopyFormat,
       headerFormatType: typeof customMedicationHeaderCopyFormat,
       headerFormatIsArray: Array.isArray(customMedicationHeaderCopyFormat),
@@ -79,13 +79,13 @@ export const medicationCopyFormatter = {
       drugFormatLength: Array.isArray(customMedicationDrugCopyFormat) ? customMedicationDrugCopyFormat.length : 0
     });
     
-    // 更嚴格地驗證自定義格式是否可用
+    // 更嚴格地驗證自訂格式是否可用
     const hasHeaderFormat = isValidArray(customMedicationHeaderCopyFormat);
     const hasDrugFormat = isValidArray(customMedicationDrugCopyFormat);
     
     // 如果缺少格式定義，則記錄並回退到預設格式
     if (!hasHeaderFormat || !hasDrugFormat) {
-      console.log("已選擇自定義格式但缺少格式定義:", {
+      console.log("已選擇自訂格式但缺少格式定義:", {
         format: "customVertical",
         hasHeaderFormat,
         hasDrugFormat
@@ -96,13 +96,13 @@ export const medicationCopyFormatter = {
     }
     
     try {
-      // 將藥物資料轉換為文字，使用自定義格式
+      // 將藥物資料轉換為文字，使用自訂格式
       return this.generateCustomTextOutput(medications, 
                                         customMedicationHeaderCopyFormat, 
                                         customMedicationDrugCopyFormat, 
                                         groupInfo);
     } catch (error) {
-      console.error("應用自定義格式時出錯:", error);
+      console.error("應用自訂格式時出錯:", error);
       // 發生錯誤時，回退到預設垂直格式
       return this.applyVerticalFormat(medications, groupInfo);
     }
@@ -122,7 +122,7 @@ export const medicationCopyFormatter = {
       return;
     }
     
-    console.log("分析自定義格式元素:");
+    console.log("分析自訂格式元素:");
     console.log("標題格式有", headerFormat.length, "個元素:", 
       headerFormat.map(item => `{id: ${item.id}, group: ${item.group}, value: ${item.value}}`));
     console.log("藥物格式有", drugFormat.length, "個元素:", 
@@ -146,7 +146,7 @@ export const medicationCopyFormatter = {
   },
 
   /**
-   * 生成自定義文字輸出
+   * 生成自訂文字輸出
    * @param {Array} medications - 藥物清單
    * @param {Array} headerFormat - 標題格式數組
    * @param {Array} drugFormat - 藥物格式數組
@@ -268,7 +268,7 @@ export const medicationCopyFormatter = {
       let medText = '';
       
       for (const item of drugFormat) {
-        // 獲取藥物屬性值
+        // 擷取藥物屬性值
         medText += getMedicationProperty(med, item);
       }
       return medText;
@@ -278,7 +278,7 @@ export const medicationCopyFormatter = {
     // 明確定義垂直格式
     const isVertical = !isHorizontal;
     
-    console.log("自定義格式換行設定:", {
+    console.log("自訂格式換行設定:", {
       format: groupInfo.medicationCopyFormat || groupInfo.formatType,
       formatType: groupInfo.formatType,
       isHorizontal,
@@ -298,18 +298,18 @@ export const medicationCopyFormatter = {
       }]
     ]);
     
-    // 根據格式類型獲取配置
+    // 根據格式類型擷取配置
     const formatType = isHorizontal ? 'horizontal' : 'vertical';
     const formatConfig = formatConfigs.get(formatType);
     
-    // 獲取合適的分隔符
+    // 擷取合適的分隔字元
     const separator = formatConfig.separator;
     
-    console.log(`使用分隔符: "${separator === '\n' ? '\\n' : separator}" (${formatConfig.description})`);
-    console.log(`藥物之間的分隔符: "${groupInfo.drugSeparator || '未設定，使用預設值'}"`);
+    console.log(`使用分隔字元: "${separator === '\n' ? '\\n' : separator}" (${formatConfig.description})`);
+    console.log(`藥物之間的分隔字元: "${groupInfo.drugSeparator || '未設定，使用預設值'}"`);
     
     const result = header + separator + medsText;
-    console.log("最終自定義格式結果:", result);
+    console.log("最終自訂格式結果:", result);
     return result;
   },
 
@@ -320,7 +320,7 @@ export const medicationCopyFormatter = {
    * @returns {String} - 格式化後的文字
    */
   applyVerticalFormat(medications, groupInfo) {
-    console.log("由於自定義格式問題，應用預設垂直格式");
+    console.log("由於自訂格式問題，應用預設垂直格式");
     
     // 使用日期和醫院格式化標頭
     let header = `${groupInfo.date} - ${groupInfo.hosp}`;

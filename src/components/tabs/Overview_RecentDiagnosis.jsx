@@ -316,7 +316,7 @@ const Overview_RecentDiagnosis = ({
     const visibleDiagnoses = diagnoses.slice(0, 5);
     const hasMore = diagnoses.length > 5;
 
-    // 從Map中獲取類別配置
+    // 從Map中擷取類別配置
     const config = categoryConfig.get(title) || categoryConfig.get("門診"); // 默認為門診配置
     const { shortTitle, color, bgColor, isInpatient, isEmergency, isVaccine } = config;
 

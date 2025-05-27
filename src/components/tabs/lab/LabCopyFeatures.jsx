@@ -17,7 +17,7 @@ export const useCopyLabData = () => {
     const { copyLabFormat, showUnit, showReference } = labSettings;
     let formattedText = '';
 
-    // 確保自定義格式的設定是完整的
+    // 確保自訂格式的設定是完整的
     const customSettingsInfo = {
       format: copyLabFormat,
       hasHeaderFormat: Array.isArray(labSettings.customLabHeaderCopyFormat) && labSettings.customLabHeaderCopyFormat.length > 0,
@@ -25,15 +25,15 @@ export const useCopyLabData = () => {
     };
     console.log("LabCopyFeatures: 處理格式設定:", customSettingsInfo);
 
-    // 檢查是否為自定義格式
+    // 檢查是否為自訂格式
     if (copyLabFormat === "customVertical" || copyLabFormat === "customHorizontal") {
-      // 使用自定義格式處理器來生成格式化文本
+      // 使用自訂格式處理器來生成格式化文本
       try {
         // 確保 itemSeparator 值被使用
-        console.log("使用的項目分隔符:", labSettings.itemSeparator || ', ');
+        console.log("使用的項目分隔字元:", labSettings.itemSeparator || ', ');
         formattedText = labCopyFormatter.applyCustomFormat(group.labs, group, labSettings);
       } catch (error) {
-        console.error("應用自定義格式時出錯:", error);
+        console.error("應用自訂格式時出錯:", error);
         // 出錯時回退到標準格式
         if (copyLabFormat === "customVertical") {
           formattedText = applyStandardVerticalFormat(group, showUnit, showReference);
@@ -121,7 +121,7 @@ export const useCopyLabData = () => {
 
     let formattedText = '';
 
-    // 確保自定義格式的設定是完整的
+    // 確保自訂格式的設定是完整的
     const customSettingsInfo = {
       format: copyLabFormat,
       hasHeaderFormat: Array.isArray(labSettings.customLabHeaderCopyFormat) && labSettings.customLabHeaderCopyFormat.length > 0,
@@ -129,15 +129,15 @@ export const useCopyLabData = () => {
     };
     console.log("LabCopyFeatures (selected): 處理格式設定:", customSettingsInfo);
 
-    // 檢查是否為自定義格式
+    // 檢查是否為自訂格式
     if (copyLabFormat === "customVertical" || copyLabFormat === "customHorizontal") {
-      // 使用自定義格式處理器來生成格式化文本
+      // 使用自訂格式處理器來生成格式化文本
       try {
         // 確保 itemSeparator 值被使用
-        console.log("使用的項目分隔符 (選擇複製):", labSettings.itemSeparator || ', ');
+        console.log("使用的項目分隔字元 (選擇複製):", labSettings.itemSeparator || ', ');
         formattedText = labCopyFormatter.applyCustomFormat(filteredLabs, group, labSettings);
       } catch (error) {
-        console.error("應用自定義格式時出錯:", error);
+        console.error("應用自訂格式時出錯:", error);
         // 出錯時回退到標準格式
         if (copyLabFormat === "customVertical") {
           formattedText = applyStandardVerticalFormat(filteredGroup, showUnit, showReference);

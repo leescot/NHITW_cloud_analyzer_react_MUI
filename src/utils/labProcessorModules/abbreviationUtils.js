@@ -122,13 +122,13 @@ const specialHandlers = new Map([
       ["hco3", "HCO3"]
     ]);
     
-    // 嘗試從映射中獲取縮寫
+    // 嘗試從映射中擷取縮寫
     const lowerItemName = itemName.toLowerCase();
     return gasAnalysisMap.get(lowerItemName) || itemName;
   }]
 ]);
 
-// 獲取縮寫的方法 - 使用 Map 結構重構
+// 擷取縮寫的方法 - 使用 Map 結構重構
 const getAbbreviation = (orderCode, unitData = '', itemName = '') => {
   // 檢查是否有 orderCode 和 itemName
   if (!orderCode || !itemName) return '';

@@ -1,26 +1,26 @@
-這個程式的執行流程主要分為三個關鍵部分：用戶識別(UserID)取得、授權令牌(Token)獲取和資料擷取。
+這個程式的執行流程主要分為三個關鍵部分：用戶識別(UserID)取得、授權令牌(Token)擷取和資料擷取。
 
 ## 用戶識別(UserID)流程
 
 1. 從`initialize()`開始，調用`checkAndInitUserSession()`
-2. `extractUserInfo()`會嘗試多種方式獲取用戶ID:
+2. `extractUserInfo()`會嘗試多種方式擷取用戶ID:
    - 從JWT令牌解析UserID (優先)
    - 從URL參數提取patientId
-   - 從DOM元素獲取病患資訊
+   - 從DOM元素擷取病患資訊
    - 最後使用時間戳作為備用
 
 識別格式會以`patient_{ID}`、`token_{prefix}`、`dom_{text}`或`session_{timestamp}`存儲。
 
 **更新**: 新增使用者資訊快取機制，設定5秒內不重複提取令牌，減少系統負擔。
 
-## 授權令牌(Token)獲取流程
+## 授權令牌(Token)擷取流程
 
 1. `captureXhrRequestHeaders()`監聽所有XHR請求頭，捕獲Authorization頭部
-2. `extractAuthorizationToken()`嘗試多種方式獲取令牌:
+2. `extractAuthorizationToken()`嘗試多種方式擷取令牌:
    - 使用已捕獲的請求頭中的Authorization (優先)
-   - 從sessionStorage獲取(健保系統實際使用方式)
+   - 從sessionStorage擷取(健保系統實際使用方式)
    - 從頁面script標籤中查找
-   - 從localStorage獲取(最後嘗試)
+   - 從localStorage擷取(最後嘗試)
 3. `validateToken()`驗證JWT令牌有效性
 4. `saveToken()`儲存令牌並通知背景腳本
 
@@ -29,16 +29,16 @@
 1. `setupMonitoring()`設置XHR和fetch監聽，劫持網路請求
 2. 檢測符合特定API路徑的請求(藥歷、檢驗資料、中醫用藥等多種類型)
 3. `fetchAllDataTypes()`同時啟動所有資料類型的抓取:
-   - 先獲取主選單(masterMenu)資料來判斷使用者有權限的資料類型
-   - 過濾並只獲取有授權的資料類型
+   - 先擷取主選單(masterMenu)資料來判斷使用者有權限的資料類型
+   - 過濾並只擷取有授權的資料類型
    - 使用`Promise.all`併發請求所有資料
-   - 每種類型透過`enhancedFetchData()`單獨獲取
+   - 每種類型透過`enhancedFetchData()`單獨擷取
 4. `enhancedFetchData()`處理單一資料類型:
    - 構建API URL
    - 添加授權令牌和必要請求頭
    - 發送請求並處理返回資料
    - 實作重試機制
-5. `saveData()`保存獲取到的資料:
+5. `saveData()`保存擷取到的資料:
    - 更新全局變數(如`lastInterceptedMedicationData`)
    - 發送資料給background script儲存
 
@@ -99,7 +99,7 @@ masterMenu API 回傳的 "prsnAuth" 陣列包含目前使用者有權限存取�
 
 4. **URL變更監控**：
    - 新增 `observeUrlChanges()` 監控URL變化
-   - URL變更時重置用戶資訊快取，確保頁面變更後重新提取
+   - URL變更時重設用戶資訊快取，確保頁面變更後重新提取
 
 5. **用戶資訊快取**：
    - 添加 `cachedUserInfo` 和 `lastUserInfoExtractTime` 以減少重複提取

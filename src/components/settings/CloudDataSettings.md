@@ -6,7 +6,7 @@
 
 ## 1. 設定值保存流程
 
-1. **使用者點擊開關** - 當使用者在 CloudDataSettings 組件中切換開關時，觸發 `handleLocalSettingChange` 函數。
+1. **使用者點選開關** - 當使用者在 CloudDataSettings 組件中切換開關時，觸發 `handleLocalSettingChange` 函數。
 
 2. **本地狀態更新** - 首先更新組件內的 `settings` 狀態，以即時反映在 UI 上：
    ```jsx
@@ -46,7 +46,7 @@
    const specialFetchPromises = specialDataTypes.map((dataType) => {
      return shouldFetchData(dataType).then((shouldFetch) => {
        if (shouldFetch && isDataTypeAuthorized(dataType)) {
-         console.log(`${dataType} 已授權且設定要抓取，開始獲取資料`);
+         console.log(`${dataType} 已授權且設定要抓取，開始擷取資料`);
          return enhancedFetchData(dataType);
        } else {
          console.log(`${dataType} 設定不抓取或無授權，返回空集合`);
@@ -155,7 +155,7 @@
    )}
    ```
 
-3. **組件資料獲取** - 即使沒有從父組件傳遞資料，各組件也會嘗試從全局變數獲取資料：
+3. **組件資料擷取** - 即使沒有從父組件傳遞資料，各組件也會嘗試從全局變數擷取資料：
    ```jsx
    useEffect(() => {
      // 如果有 prop 資料，使用它
@@ -164,7 +164,7 @@
        return;
      }
      
-     // 否則，嘗試從全局變數獲取資料
+     // 否則，嘗試從全局變數擷取資料
      if (window.adultHealthCheckData) {
        console.log("Found adult health check data in window global:", window.adultHealthCheckData);
        setCombinedData(window.adultHealthCheckData);
@@ -180,7 +180,7 @@
 2. `dataManager.js` 中的 `safeSetter` 函數找不到已註冊的 `setAdultHealthCheckData` 函數
 3. 系統會自動將資料存在 `window.adultHealthCheckData` 全局變數中
 
-這不是錯誤，而是一種備用機制，因為 Overview_AdultHealthCheck 組件會檢查全局變數來獲取資料，所以資料仍然可以正確顯示。
+這不是錯誤，而是一種備用機制，因為 Overview_AdultHealthCheck 組件會檢查全局變數來擷取資料，所以資料仍然可以正確顯示。
 
 ## 總結
 
@@ -191,4 +191,4 @@
 4. 下次資料抓取時根據設定決定是否抓取 → 
 5. 資料處理後保存在 React 狀態或全局變數 → 
 6. UI 根據設定決定是否顯示相應組件 → 
-7. 組件從 props 或全局變數獲取資料顯示
+7. 組件從 props 或全局變數擷取資料顯示

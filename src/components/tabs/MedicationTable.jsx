@@ -125,7 +125,7 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
 
     setHasATC5ColoredMeds(hasColoredMeds);
 
-    // 如果沒有 ATC5 顏色藥物且當前選擇的是 "colored_only"，則重置為默認過濾器
+    // 如果沒有 ATC5 顏色藥物且當前選擇的是 "colored_only"，則重設為默認過濾器
     if (!hasColoredMeds && dayFilter === "colored_only") {
       setDayFilter("gte7");
     }
@@ -198,7 +198,7 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
         medicineMap.set(medName, new Map());
       }
       
-      // 獲取藥物的日期醫院組合 Map
+      // 擷取藥物的日期醫院組合 Map
       const dateHospMap = medicineMap.get(medName);
       
       // 建立當前藥物的劑量和頻次資訊
@@ -290,7 +290,7 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
       ["colored_only", (_, medName) => getMedicationColor(medName) !== null]
     ]),
     
-    // 獲取過濾函數
+    // 擷取過濾函數
     getFilterFunction(filterName) {
       return this.definitions.get(filterName) || (() => true);
     },
@@ -313,7 +313,7 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
     });
   };
 
-  // 獲取應該顯示的日期醫院組合列
+  // 擷取應該顯示的日期醫院組合列
   const getVisibleDateHospKeys = (processedData, filteredMedicines) => {
     if (dayFilter === "all") {
       return processedData.dateHospKeys;
@@ -333,7 +333,7 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
     return processedData.dateHospKeys.filter((key) => keysWithData.has(key));
   };
 
-  // 獲取最近的日期醫院組合
+  // 擷取最近的日期醫院組合
   const getMostRecentDateHospKey = (dateHospMap, medName) => {
     const filteredKeys = Array.from(dateHospMap.entries())
       .filter(([_, medData]) => {
@@ -355,7 +355,7 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
     setDayFilter(event.target.value);
   };
 
-  // 獲取處理後的資料
+  // 擷取處理後的資料
   const processedData = processMedicationTableData(groupedMedications);
   const filteredMedicines = filterMedicinesByDays(processedData.medicines);
 
@@ -389,7 +389,7 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
   // Add drug image click handler
   const handleDrugImageClick = (drugcode) => {
     if (!drugcode) {
-      setSnackbarMessage("無法獲取藥品代碼");
+      setSnackbarMessage("無法擷取藥品代碼");
       setSnackbarOpen(true);
       return;
     }
@@ -685,7 +685,7 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
               </TableHead>
               <TableBody>
                 {sortedFilteredMedicines.map(([name, dateHospMap]) => {
-                  // 獲取藥物的顏色
+                  // 擷取藥物的顏色
                   const medicationColor = getMedicationColor(name);
                   // 檢查藥物是否應該以粗體顯示
                   const isBold = shouldBeBold(name);

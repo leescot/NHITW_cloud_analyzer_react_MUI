@@ -91,16 +91,16 @@ const FormatElementsPanel = ({
               color: isHorizontalFormat ? 'primary.main' : 'text.primary'
             }}
           >
-            藥物分隔符設定 {isHorizontalFormat && '(橫式格式使用)'}
+            藥物分隔字元設定 {isHorizontalFormat && '(橫式格式使用)'}
           </Typography>
           
           <TextField
             fullWidth
             size="small"
-            label="藥物間分隔符號"
+            label="藥物間分隔字元號"
             value={drugSeparator}
             onChange={(e) => setDrugSeparator(e.target.value)}
-            helperText={isHorizontalFormat ? "在橫式格式中，此分隔符號將用於分隔藥物" : "僅用於橫式格式"}
+            helperText={isHorizontalFormat ? "在橫式格式中，此分隔字元號將用於分隔藥物" : "僅用於橫式格式"}
             FormHelperTextProps={{
               sx: { color: isHorizontalFormat ? 'primary.main' : 'text.secondary' }
             }}
@@ -119,7 +119,7 @@ const FormatElementsPanel = ({
 
   // Determine element's group color
   const getElementGroupColor = (item, intensity = 'color') => {
-    // 從ID獲取基本ID部分
+    // 從ID擷取基本ID部分
     const baseId = item.id.split('_')[0];
     
     // Handle section-specific elements
@@ -478,7 +478,7 @@ const FormatElementsPanel = ({
                   color: isHorizontalFormat ? 'primary.main' : 'text.secondary'
                 }}
               >
-                藥物分隔符:
+                藥物分隔字元:
               </Typography>
               <TextField
                 size="small"

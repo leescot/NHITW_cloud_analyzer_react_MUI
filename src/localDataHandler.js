@@ -11,7 +11,7 @@ let localDataStatus = {
 };
 
 /**
- * 從 Chrome storage 加載自定義格式設定
+ * 從 Chrome storage 加載自訂格式設定
  * @returns {Promise<Object>} - 格式設定
  */
 async function loadCustomFormatSettings() {
@@ -82,7 +82,7 @@ function setGlobalMedicationFormatSettings(settings) {
   // 驗證複製後的數組是否完整
   if (Array.isArray(settings.customMedicationHeaderCopyFormat) && 
       Array.isArray(settings.customMedicationDrugCopyFormat)) {
-    // console.log("驗證自定義格式數組設置後:", {
+    // console.log("驗證自訂格式數組設置後:", {
     //   原始標題長度: settings.customMedicationHeaderCopyFormat.length,
     //   複製後標題長度: window.medicationFormatSettings.customMedicationHeaderCopyFormat.length,
     //   原始藥物長度: settings.customMedicationDrugCopyFormat.length,
@@ -105,18 +105,18 @@ export async function processLocalData(jsonData, filename) {
   console.log('開始處理本地 JSON 資料:', filename);
 
   try {
-    // 重置資料類型追蹤
+    // 重設資料類型追蹤
     const loadedTypes = [];
 
-    // 預先從 Chrome storage 加載自定義格式設定 (改為同步等待)
+    // 預先從 Chrome storage 加載自訂格式設定 (改為同步等待)
     // 這樣能確保處理藥物資料時有正確的格式設定
     if (jsonData.medication) {
       try {
         const settings = await loadCustomFormatSettings();
-        console.log('已加載自定義格式設定:', settings);
+        console.log('已加載自訂格式設定:', settings);
         setGlobalMedicationFormatSettings(settings);
       } catch (error) {
-        console.error('加載自定義格式設定時出錯:', error);
+        console.error('加載自訂格式設定時出錯:', error);
       }
     }
 
@@ -234,10 +234,10 @@ export async function processLocalData(jsonData, filename) {
         // } else if (typeof window.broadcastDataToOtherExtensions === 'function') {
         //   window.broadcastDataToOtherExtensions();
         // } else {
-        //   // 直接發送自定義事件
+        //   // 直接發送自訂事件
         //   const event = new CustomEvent('NHITW_DATA_UPDATED', { detail: dataToShare });
         //   document.dispatchEvent(event);
-        //   console.log('直接發送自定義事件完成');
+        //   console.log('直接發送自訂事件完成');
         // }
       } catch (error) {
         // console.error('保存資料到 localStorage 或廣播時發生錯誤:', error);
@@ -292,7 +292,7 @@ export function clearLocalData() {
       window[varName] = defaultValue;
     }
 
-    // 重置狀態
+    // 重設狀態
     localDataStatus = {
       loaded: false,
       source: '',
@@ -321,7 +321,7 @@ export function clearLocalData() {
 }
 
 /**
- * 獲取本地資料狀態
+ * 擷取本地資料狀態
  * @returns {Object} - 本地資料狀態
  */
 export function getLocalDataStatus() {
@@ -347,13 +347,13 @@ export const localDataHandler = {
     console.log(`開始處理本地 JSON 資料: ${filename}`);
 
     try {
-      // 加載自定義格式設定
+      // 加載自訂格式設定
       try {
         const settings = await loadCustomFormatSettings();
-        console.log('已加載自定義格式設定:', settings);
+        console.log('已加載自訂格式設定:', settings);
         setGlobalMedicationFormatSettings(settings);
       } catch (error) {
-        console.error('加載自定義格式設定時出錯:', error);
+        console.error('加載自訂格式設定時出錯:', error);
       }
       
       // 根據結構和檔名處理不同資料類型
@@ -458,7 +458,7 @@ export const localDataHandler = {
     return clearLocalData();
   },
 
-  // 獲取本地資料狀態
+  // 擷取本地資料狀態
   getLocalDataStatus() {
     return getLocalDataStatus();
   }

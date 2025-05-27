@@ -26,7 +26,7 @@ const AdvancedSettings = ({ appSettings, setAppSettings, generalDisplaySettings 
   // 是否啟用實驗室自訂複製格式
   const [enableLabCustomFormat, setEnableLabCustomFormat] = useState(false);
 
-  // 獲取設定狀態
+  // 擷取設定狀態
   useEffect(() => {
     chrome.storage.sync.get(
       {

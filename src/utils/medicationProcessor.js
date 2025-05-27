@@ -148,7 +148,7 @@ export const medicationProcessor = {
       return "SPECIAL";
     }
 
-    // 從匹配到的頻次字串中獲取完整頻次
+    // 從匹配到的頻次字串中擷取完整頻次
     const freq = freqMatch ? freqMatch[0].toUpperCase() : "PRN";
 
     // 檢查是否是特殊頻次（QOD, TIW, BIW, QW）
@@ -234,7 +234,7 @@ export const medicationProcessor = {
       drugSeparator: ",",
     };
 
-    // 從 Chrome storage 獲取使用者設定
+    // 從 Chrome storage 擷取使用者設定
     return new Promise((resolve) => {
       chrome.storage.sync.get(defaultSettings, (settings) => {
         // 檢查全局格式設定（來自本地資料處理器）
@@ -260,7 +260,7 @@ export const medicationProcessor = {
           //   藥物格式長度: deepCopiedSettings.customMedicationDrugCopyFormat?.length
           // });
           
-          // 合併全局設定與獲取的設定
+          // 合併全局設定與擷取的設定
           settings = {
             ...settings,
             ...deepCopiedSettings
@@ -274,7 +274,7 @@ export const medicationProcessor = {
             drugSeparator: settings.drugSeparator
           });
           
-          // 改進: 如果啟用了自定義格式但 Chrome storage 中沒有全局變量，設置全局變量
+          // 改進: 如果啟用了自訂格式但 Chrome storage 中沒有全局變量，設置全局變量
           if (settings.enableMedicationCustomCopyFormat && 
               (settings.customMedicationHeaderCopyFormat || settings.customMedicationDrugCopyFormat)) {
               
@@ -285,7 +285,7 @@ export const medicationProcessor = {
               window.medicationFormatSettings = {};
             }
             
-            // 複製自定義格式設定到全局變量
+            // 複製自訂格式設定到全局變量
             if (settings.customMedicationHeaderCopyFormat) {
               window.medicationFormatSettings.customMedicationHeaderCopyFormat = 
                   JSON.parse(JSON.stringify(settings.customMedicationHeaderCopyFormat));
@@ -341,7 +341,7 @@ export const medicationProcessor = {
             ["drugcode", { primary: "drug_code", default: "" }]
           ]);
 
-          // 從記錄中獲取特定欄位的值
+          // 從記錄中擷取特定欄位的值
           const getFieldValue = (record, fieldMapping, isDefault = false) => {
             const mapping = fieldMappings.get(fieldMapping);
             if (!mapping) return "";
@@ -390,7 +390,7 @@ export const medicationProcessor = {
               medicationName = this.simplifyMedicineName(medicationName);
             }
 
-            // 獲取總量並計算每劑量
+            // 擷取總量並計算每劑量
             const totalQty = getFieldValue(record, "dosage", true);
             const frequency = getFieldValue(record, "frequency", true);
             const days = getFieldValue(record, "days", true);
@@ -453,7 +453,7 @@ export const medicationProcessor = {
     //   drugSeparator: groupInfo.drugSeparator
     // }));
 
-    // 建立分隔符獲取策略
+    // 建立分隔字元擷取策略
     const getSeparator = () => {
       const sources = [
         groupInfo.drugSeparator,
@@ -468,7 +468,7 @@ export const medicationProcessor = {
     
     const drugSeparatorFromSettings = getSeparator();
       
-    // console.log("藥物分隔符檢查:", {
+    // console.log("藥物分隔字元檢查:", {
     //   fromGroupInfo: groupInfo.drugSeparator,
     //   fromGlobalSettings: window.medicationFormatSettings?.drugSeparator,
     //   fromCustomGlobal: window.customDrugSeparator,
@@ -478,10 +478,10 @@ export const medicationProcessor = {
     // 確保 groupInfo 包含所有必要的設定
     const enhancedGroupInfo = {
       ...groupInfo,
-      // 確保自定義格式設定存在
+      // 確保自訂格式設定存在
       customMedicationHeaderCopyFormat: groupInfo.customMedicationHeaderCopyFormat || [],
       customMedicationDrugCopyFormat: groupInfo.customMedicationDrugCopyFormat || [],
-      // 確保分隔符設定存在，使用多重檢查確保我們有一個值
+      // 確保分隔字元設定存在，使用多重檢查確保我們有一個值
       drugSeparator: drugSeparatorFromSettings
     };
 
@@ -491,10 +491,10 @@ export const medicationProcessor = {
     //   drugSeparator: enhancedGroupInfo.drugSeparator
     // });
 
-    // 定義驗證自定義格式配置的函數
+    // 定義驗證自訂格式配置的函數
     const isValidArray = (array) => Array.isArray(array) && array.length > 0;
 
-    // 檢查自定義格式數組是否有效（非空）
+    // 檢查自訂格式數組是否有效（非空）
     let hasValidHeaderFormat = isValidArray(enhancedGroupInfo.customMedicationHeaderCopyFormat);
     let hasValidDrugFormat = isValidArray(enhancedGroupInfo.customMedicationDrugCopyFormat);
 
@@ -528,20 +528,20 @@ export const medicationProcessor = {
       }]
     ]);
 
-    // 檢查是否需要並可以使用自定義格式
+    // 檢查是否需要並可以使用自訂格式
     const isCustomFormat = ['custom', 'customVertical', 'customHorizontal'].includes(format);
     const needsCustomFormatArrays = isCustomFormat && (!hasValidHeaderFormat || !hasValidDrugFormat);
 
-    // 如果需要自定義格式但缺少必要的數組
+    // 如果需要自訂格式但缺少必要的數組
     if (needsCustomFormatArrays) {
-      // console.log("檢查全局變量中的自定義格式數組");
+      // console.log("檢查全局變量中的自訂格式數組");
       
-      // 處理自定義格式數組配置
+      // 處理自訂格式數組配置
       for (const [key, configMeta] of formatArraySources.entries()) {
         // 如果當前配置有效，跳過
         if (configMeta.validate(enhancedGroupInfo)) continue;
         
-        // 嘗試從可能的來源獲取有效配置
+        // 嘗試從可能的來源擷取有效配置
         for (const sourceFunc of configMeta.sources) {
           const source = sourceFunc(enhancedGroupInfo);
           
@@ -560,7 +560,7 @@ export const medicationProcessor = {
       }
       
       // 記錄設定更新後的狀態
-      // console.log("全局變量檢查後的自定義格式狀態:", {
+      // console.log("全局變量檢查後的自訂格式狀態:", {
       //   hasValidHeaderFormat,
       //   hasValidDrugFormat,
       //   headerLength: enhancedGroupInfo.customMedicationHeaderCopyFormat?.length,
@@ -589,28 +589,28 @@ export const medicationProcessor = {
       }]
     ]);
 
-    // 處理自定義格式特殊情況
+    // 處理自訂格式特殊情況
     if (isCustomFormat) {
       const isHorizontal = format === 'customHorizontal';
       
-      // console.log("使用自定義格式設定:", {
+      // console.log("使用自訂格式設定:", {
       //   format,
       //   isHorizontal,
       //   drugSeparator: enhancedGroupInfo.drugSeparator
       // });
       
-      // 增強 groupInfo 以支持自定義格式
+      // 增強 groupInfo 以支持自訂格式
       enhancedGroupInfo.formatType = format;
       enhancedGroupInfo.isHorizontal = isHorizontal;
       
-      // 使用 medicationCopyFormatter 處理自定義格式
+      // 使用 medicationCopyFormatter 處理自訂格式
       const customResult = medicationCopyFormatter.applyCustomFormat(medications, enhancedGroupInfo);
       if (customResult !== null) {
         return customResult;
       }
     }
     
-    // 獲取適當的格式處理器
+    // 擷取適當的格式處理器
     const formatHandler = formatHandlers.get(format) || ((med) => med.name);
     
     // 應用格式處理器到每個藥物
@@ -630,12 +630,12 @@ export const medicationProcessor = {
       }]
     ]);
 
-    // 根據格式決定分隔符號和換行
+    // 根據格式決定分隔字元號和換行
     const isHorizontal = format.includes("Horizontal");
     const formatType = isHorizontal ? 'horizontal' : 'vertical';
     const config = formatConfig.get(formatType);
     
-    // console.log("藥物分隔符設定:", {
+    // console.log("藥物分隔字元設定:", {
     //   format,
     //   isHorizontal,
     //   drugSeparator: enhancedGroupInfo.drugSeparator,

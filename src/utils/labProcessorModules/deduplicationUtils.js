@@ -180,7 +180,7 @@ const deduplicateLabData = (labArray) => {
     const orderCode = lab.order_code || '';
     const value = normalizeValue(lab.assay_value || '');
 
-    // 獲取時間點信息
+    // 擷取時間點信息
     const timeInfo = lab.real_inspect_date?.split(' ')[1] ||
                    (lab.case_time ? new Date(lab.case_time).toTimeString().split(' ')[0] : '');
 
