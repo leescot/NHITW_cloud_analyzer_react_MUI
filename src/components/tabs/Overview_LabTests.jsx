@@ -231,7 +231,7 @@ const Overview_LabTests = ({ groupedLabs = [], labData, overviewSettings = {}, g
               });
             };
 
-            // 使用 Map 建立 CBC 項目型別映射
+            // 使用 Map 建立 CBC 項目類型映射
             const cbcItemTypes = new Map([
               ['WBC', {
                 keywords: ['WBC', '白血球'],
@@ -302,7 +302,7 @@ const Overview_LabTests = ({ groupedLabs = [], labData, overviewSettings = {}, g
             if (labGroup.labs && Array.isArray(labGroup.labs)) {
               labGroup.labs.forEach(lab => {
                 if (targetOrderCodes.includes(lab.orderCode)) {
-                  // 使用 Map 為特殊處理的測試型別定義處理邏輯
+                  // 使用 Map 為特殊處理的測試類型定義處理邏輯
                   const specialTestHandlers = new Map([
                     ['09015C', () => {
                       // 使用 abbrName 來判斷是否為 GFR
@@ -446,7 +446,7 @@ const Overview_LabTests = ({ groupedLabs = [], labData, overviewSettings = {}, g
 
             // Determine the display order based on the user's settings
             if (overviewSettings.focusedLabTests && Array.isArray(overviewSettings.focusedLabTests)) {
-              // 創建一個 Map 來存儲順序規則
+              // 創建一個 Map 來儲存順序規則
               const orderCodeToDisplayMap = new Map([
                 ['08011C-WBC', 'WBC'],
                 ['08011C-Hb', 'Hb'],

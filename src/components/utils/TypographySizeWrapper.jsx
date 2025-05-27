@@ -20,7 +20,7 @@ const NOTE_TEXT_SIZES = {
   large: '1rem'      // body1 等效 (16px)
 };
 
-// 變體到文字大小型別的映射
+// 變體到文字大小類型的映射
 const VARIANT_TO_SIZE_TYPE = new Map([
   ['h6', 'title'],
   ['h5', 'title'],
@@ -29,7 +29,7 @@ const VARIANT_TO_SIZE_TYPE = new Map([
   // 其他變體預設為 'content'
 ]);
 
-// 文字大小型別到對應尺寸集合的映射
+// 文字大小類型到對應尺寸集合的映射
 const SIZE_TYPE_TO_SIZES = new Map([
   ['title', TITLE_TEXT_SIZES],
   ['note', NOTE_TEXT_SIZES],
@@ -58,7 +58,7 @@ const TypographySizeWrapper = ({
   // 確保 generalDisplaySettings 已定義
   const settings = generalDisplaySettings || { titleTextSize: 'medium', contentTextSize: 'medium', noteTextSize: 'small' };
 
-  // 根據變體或明確的 textSizeType 確定要使用的文字大小型別
+  // 根據變體或明確的 textSizeType 確定要使用的文字大小類型
   const sizeType = textSizeType || VARIANT_TO_SIZE_TYPE.get(variant) || 'content';
 
   // 從設置中擷取正確的字體大小

@@ -7,7 +7,7 @@ export const updateDataStatus = (setDataStatus) => {
       // Make a copy to avoid direct state mutation
       const updatedStatus = { ...response.dataStatus };
 
-      // 使用 Map 存儲預期的鍵和默認值
+      // 使用 Map 儲存預期的鍵和默認值
       const expectedKeys = [
         'medication', 'labData', 'chineseMed', 'imaging',
         'allergy', 'surgery', 'discharge', 'medDays', 'patientSummary',
@@ -26,7 +26,7 @@ export const updateDataStatus = (setDataStatus) => {
   });
 };
 
-// 從存儲鍵擷取狀態鍵的輔助函式 - 使用 Map 代替對象映射
+// 從儲存鍵擷取狀態鍵的輔助函式 - 使用 Map 代替對象映射
 const storageToStatusKeyMap = new Map([
   ['medicationData', 'medication'],
   ['labData', 'labData'],
@@ -41,7 +41,7 @@ const storageToStatusKeyMap = new Map([
   ['cancerScreeningData', 'cancerScreening']
 ]);
 
-// 從存儲鍵擷取狀態鍵的輔助函式
+// 從儲存鍵擷取狀態鍵的輔助函式
 const getStatusKeyFromStorageKey = (storageKey) => {
   return storageToStatusKeyMap.get(storageKey) || storageKey;
 };
@@ -138,7 +138,7 @@ export const handleFetchData = (setDataStatus) => {
 
 // 清除資料處理函式
 export const handleClearData = (setDataStatus) => {
-  // 使用 Array 存儲需要清除的數據鍵
+  // 使用 Array 儲存需要清除的數據鍵
   const dataKeysToRemove = [
     'medicationData',
     'labData',

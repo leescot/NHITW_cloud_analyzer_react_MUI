@@ -122,7 +122,7 @@ const viewImage = async (imageParams) => {
         throw new Error('API 回應中沒有影像 URL');
       }
 
-      // 存儲影像數據到 sessionStorage
+      // 儲存影像數據到 sessionStorage
       const imgData = {
         fileName: data.ctmri_url,
         apiName: "imue0130"
@@ -165,7 +165,7 @@ const viewImage = async (imageParams) => {
             throw new Error('API 回應中沒有影像 URL');
           }
 
-          // 存儲影像數據到 sessionStorage
+          // 儲存影像數據到 sessionStorage
           const imgData = {
             fileName: retryData.ctmri_url,
             apiName: "imue0130"
@@ -669,7 +669,7 @@ const ImagingData = ({ imagingData, generalDisplaySettings }) => {
   // 處理過濾器改變
   const handleFilterChange = (event) => {
     const newValue = event.target.value;
-    // 確保所選型別有報告，否則設置為 'all'
+    // 確保所選類型有報告，否則設置為 'all'
     if (newValue === 'ctmri' && !hasCTMRIReports) {
       setFilterOption('all');
     } else if (newValue === 'ultrasound' && !hasUltrasoundReports) {
@@ -679,7 +679,7 @@ const ImagingData = ({ imagingData, generalDisplaySettings }) => {
     }
   };
 
-  // 當資料更新且所選型別沒有報告時，重設為 'all'
+  // 當資料更新且所選類型沒有報告時，重設為 'all'
   useEffect(() => {
     if (filterOption === 'ctmri' && !hasCTMRIReports) {
       setFilterOption('all');

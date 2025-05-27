@@ -16,7 +16,7 @@ let currentSessionData = {
   currentUserSession: null
 };
 
-// 定義 API 端點和對應的數據型別
+// 定義 API 端點和對應的數據類型
 const API_ENDPOINTS = {
   allergy: "medcloud2.nhi.gov.tw/imu/api/imue0040/imue0040s02/get-data",
   surgery: "medcloud2.nhi.gov.tw/imu/api/imue0020/imue0020s02/get-data",
@@ -64,7 +64,7 @@ Object.entries(API_ENDPOINTS).forEach(([type, endpoint]) => {
   );
 });
 
-// 數據型別與對應的 storage 鍵值映射
+// 數據類型與對應的 storage 鍵值映射
 const DATA_TYPE_TO_STORAGE_KEY = {
   'medication': 'medicationData',
   'labdata': 'labData',
@@ -119,12 +119,12 @@ const ACTION_HANDLERS = new Map([
   }],
   
   ['getDataStatus', (message, sender, sendResponse) => {
-    // 擷取存儲的所有數據狀態
+    // 擷取儲存的所有數據狀態
     chrome.storage.local.get(Object.values(DATA_TYPE_TO_STORAGE_KEY), (result) => {
       // console.log("STORAGE DATA DEBUG:", result);
       const dataStatus = {};
 
-      // 處理所有數據型別
+      // 處理所有數據類型
       const processDataType = (typeKey, storageKey) => {
         const dataObj = result[storageKey];
         // 處理大小寫不一致的情況
@@ -140,7 +140,7 @@ const ACTION_HANDLERS = new Map([
         }
       };
 
-      // 映射數據型別到 UI 顯示名稱
+      // 映射數據類型到 UI 顯示名稱
       const displayNameMap = {
         'medication': 'medication',
         'labdata': 'labData',
@@ -153,7 +153,7 @@ const ACTION_HANDLERS = new Map([
         'patientSummary': 'patientSummary'
       };
 
-      // 處理每個數據型別
+      // 處理每個數據類型
       Object.entries(DATA_TYPE_TO_STORAGE_KEY).forEach(([type, storageKey]) => {
         const displayName = displayNameMap[type] || type;
         processDataType(displayName, storageKey);

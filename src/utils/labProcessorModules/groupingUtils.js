@@ -33,7 +33,7 @@ const sortGroupedData = (grouped) => {
     });
 };
 
-// 新增函式：收集所有檢驗型別
+// 新增函式：收集所有檢驗類型
 const getAllLabTypes = (groupedLabs) => {
   if (!groupedLabs || !Array.isArray(groupedLabs)) {
     return [];
@@ -41,7 +41,7 @@ const getAllLabTypes = (groupedLabs) => {
 
   const typeSet = new Set();
 
-  // 遍歷所有檢驗資料收集型別
+  // 遍歷所有檢驗資料收集類型
   groupedLabs.forEach(group => {
     group.labs.forEach(lab => {
       if (lab.type) {

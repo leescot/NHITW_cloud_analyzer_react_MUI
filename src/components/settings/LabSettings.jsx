@@ -332,7 +332,7 @@ const LabSettings = () => {
               }, 500);
             }}
           >
-            <MenuItem value="byType">依檢驗型別分組顯示</MenuItem>
+            <MenuItem value="byType">依檢驗類型分組顯示</MenuItem>
             <MenuItem value="vertical">直式呈現 (每項檢驗獨立顯示)</MenuItem>
             <MenuItem value="horizontal">橫式呈現 (檢驗項目並排顯示)</MenuItem>
             <MenuItem value="twoColumn">雙欄呈現 (兩欄顯示提高空間利用)</MenuItem>

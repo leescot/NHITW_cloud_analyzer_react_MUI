@@ -1,7 +1,7 @@
 // 表格數據準備相關函式
 import { isMultiItemOrderCode } from './abbreviationUtils.js';
 
-// 修改表格數據準備函式，添加型別過濾
+// 修改表格數據準備函式，添加類型過濾
 const prepareLabTableData = (groupedLabs, selectedType = null) => {
   if (!groupedLabs || !Array.isArray(groupedLabs) || groupedLabs.length === 0) {
     return { dates: [], items: [] };
@@ -73,7 +73,7 @@ const prepareLabTableData = (groupedLabs, selectedType = null) => {
           });
         }
 
-        // 存儲日期的值
+        // 儲存日期的值
         const item = specialItems.get(abbrKey);
         const dateKey = `${group.date}_${group.hosp}`;
         item.values[dateKey] = createValueObject(lab);
@@ -105,7 +105,7 @@ const prepareLabTableData = (groupedLabs, selectedType = null) => {
           });
         }
 
-        // 存儲日期的值
+        // 儲存日期的值
         const item = itemMap.get(specialKey);
         const dateKey = `${group.date}_${group.hosp}`;
         item.values[dateKey] = createValueObject(lab);
@@ -158,7 +158,7 @@ const prepareLabTableData = (groupedLabs, selectedType = null) => {
 
       const orderCode = lab.orderCode || '';
 
-      // 如果指定了型別過濾器，檢查項目是否匹配
+      // 如果指定了類型過濾器，檢查項目是否匹配
       if (selectedType && lab.type !== selectedType) {
         return; // 跳過不匹配的項目
       }
@@ -193,7 +193,7 @@ const prepareLabTableData = (groupedLabs, selectedType = null) => {
           });
         }
 
-        // 存儲日期的值
+        // 儲存日期的值
         const item = itemMap.get(key);
         const dateKey = `${group.date}_${group.hosp}`;
         item.values[dateKey] = createValueObject(lab);
@@ -209,7 +209,7 @@ const prepareLabTableData = (groupedLabs, selectedType = null) => {
             isMultiItem: false,
             values: {},
             abbrName: lab.abbrName || null,  // 添加縮寫屬性
-            // 存儲可能的別名
+            // 儲存可能的別名
             aliases: new Set([itemKey])
           });
         } else {
@@ -218,7 +218,7 @@ const prepareLabTableData = (groupedLabs, selectedType = null) => {
           item.aliases.add(itemKey);
         }
 
-        // 存儲日期的值
+        // 儲存日期的值
         const item = itemMap.get(orderCode);
         const dateKey = `${group.date}_${group.hosp}`;
         item.values[dateKey] = createValueObject(lab);

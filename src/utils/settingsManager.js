@@ -498,7 +498,7 @@ export const handleDataFetchCompletedSettingsChange = (event, currentSettings, u
     if (handler) {
       handler();
     } else {
-      // 未知型別，可能需要加載所有設置
+      // 未知類型，可能需要加載所有設置
       loadAllSettings().then(updateCallback);
     }
   }

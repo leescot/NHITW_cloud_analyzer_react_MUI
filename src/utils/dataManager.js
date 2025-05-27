@@ -26,7 +26,7 @@ const safeSetter = (setters, setterName, data, dataName) => {
   if (typeof setterFn === 'function') {
     setterFn(data);
   } else {
-    // 將數據存儲在window全局變數中
+    // 將數據儲存在window全局變數中
     window[`${dataName}Data`] = data;
   }
 };
@@ -180,7 +180,7 @@ export const handleAllData = async (dataSources, settings, setters) => {
       }]
     ]);
 
-    // 處理每個資料型別
+    // 處理每個資料類型
     for (const [dataType, { process }] of dataProcessors) {
       await process();
     }
@@ -215,8 +215,8 @@ export const collectDataSources = () => {
 };
 
 /**
- * 根據指定的設置重新處理指定型別的數據
- * @param {string} dataType - 要重新處理的數據型別
+ * 根據指定的設置重新處理指定類型的數據
+ * @param {string} dataType - 要重新處理的數據類型
  * @param {Object} data - 原始數據
  * @param {Object} settings - 處理設置
  * @param {Function} setter - 設置狀態的函式
@@ -235,7 +235,7 @@ export const reprocessData = async (dataType, data, settings, setter) => {
       ['chinesemed', (data) => {
         return chineseMedProcessor.processChineseMedData(data);
       }]
-      // 可以根據需要添加更多的數據型別處理
+      // 可以根據需要添加更多的數據類型處理
     ]);
 
     const processor = processors.get(dataType);

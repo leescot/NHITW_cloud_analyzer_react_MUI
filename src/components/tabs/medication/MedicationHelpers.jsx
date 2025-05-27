@@ -95,9 +95,9 @@ export const shouldBeBold = (medication, settings) => {
   return false;
 };
 
-// 根據看診型別擷取顏色
+// 根據看診類型擷取顏色
 export const getVisitTypeColor = (visitType) => {
-  // 使用 Map 儲存看診型別與顏色的映射關係
+  // 使用 Map 儲存看診類型與顏色的映射關係
   const visitTypeColorMap = new Map([
     ["急診", "#c62828"], // 較柔和的紅色
     ["住診", "#388e3c"], // 較柔和的綠色

@@ -1,6 +1,6 @@
 /**
  * 標籤顏色工具函式
- * 用於根據設定和標籤型別生成顏色
+ * 用於根據設定和標籤類型生成顏色
  */
 
 // 標籤顏色常數
@@ -22,7 +22,7 @@ const TAB_COLORS = {
     help: { primary: "#2196f3", dark: "#0d47a1" }, // 藍色
     settings: { primary: "#607d8b", dark: "#455a64" }, // 藍灰色
 
-    // PopupSettings 標籤 - 各標籤型別使用唯一名稱
+    // PopupSettings 標籤 - 各標籤類型使用唯一名稱
     popupSettings: { primary: "#0d47a1", dark: "#0d47a1" }, // 深藍色
     dataStatus: { primary: "#e65100", dark: "#e65100" }, // 橙色
     about: { primary: "#673ab7", dark: "#4a148c" }, // 紫色
@@ -37,7 +37,7 @@ const TAB_COLORS = {
 /**
  * 擷取標籤顏色
  * @param {Object} generalDisplaySettings - 一般顯示設定
- * @param {string} tabType - 標籤型別
+ * @param {string} tabType - 標籤類型
  * @param {boolean} hasData - 是否有數據
  * @returns {string} 顏色代碼
  */
@@ -77,7 +77,7 @@ export const getTabColor = (generalDisplaySettings, tabType, hasData = true) => 
 /**
  * 擷取標籤選中顏色
  * @param {Object} generalDisplaySettings - 一般顯示設定
- * @param {string} tabType - 標籤型別
+ * @param {string} tabType - 標籤類型
  * @param {boolean} hasData - 是否有數據
  * @returns {string} 顏色代碼
  */

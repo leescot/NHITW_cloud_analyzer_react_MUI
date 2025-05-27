@@ -160,7 +160,7 @@ export const dashboardProcessor = {
   },
 
   getLabSummary() {
-    // 使用 Map 定義不同型別的檢驗項目
+    // 使用 Map 定義不同類型的檢驗項目
     const labCategories = new Map([
       ['lipid', []], // 血脂
       ['glucose', []], // 血糖

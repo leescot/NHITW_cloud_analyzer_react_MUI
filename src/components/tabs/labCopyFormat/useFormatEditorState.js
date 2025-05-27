@@ -104,7 +104,7 @@ const useFormatEditorState = (appSettings, setAppSettings) => {
     // 對空格和文字元素確保有 lab 前綴
     const baseId = itemToAdd.id.split('_')[0];
     
-    // 使用 Map 代替 if-else 來處理需要添加前綴的元素型別
+    // 使用 Map 代替 if-else 來處理需要添加前綴的元素類型
     const prefixMap = new Map([
       ['space', true],
       ['text', true]

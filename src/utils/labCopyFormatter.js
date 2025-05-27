@@ -207,14 +207,14 @@ export const labCopyFormatter = {
       }
     };
     
-    // 根據格式型別決定輸出方式
+    // 根據格式類型決定輸出方式
     const isHorizontal = labSettings.copyLabFormat === "customHorizontal";
     
     // 建置檢驗項目列表
     let labItemsText = '';
     
     if (isHorizontal) {
-      // 確保分隔字元是字符串型別
+      // 確保分隔字元是字符串類型
       const itemSeparator = String(labSettings.itemSeparator || ', ');
       
       // 記錄使用的分隔字元

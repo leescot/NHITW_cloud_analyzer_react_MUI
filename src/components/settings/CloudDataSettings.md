@@ -40,7 +40,7 @@
 
 設定更改後，影響 legacyContent.js 中的資料抓取邏輯：
 
-1. **檢查是否應抓取資料** - 當執行 `fetchAllDataTypes()` 函式時，會根據設定決定是否抓取特殊資料型別：
+1. **檢查是否應抓取資料** - 當執行 `fetchAllDataTypes()` 函式時，會根據設定決定是否抓取特殊資料類型：
    ```jsx
    const specialDataTypes = ["adultHealthCheck", "cancerScreening"];
    const specialFetchPromises = specialDataTypes.map((dataType) => {

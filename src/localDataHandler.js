@@ -33,7 +33,7 @@ async function loadCustomFormatSettings() {
 
 /**
  * 觸發資料載入完成事件
- * @param {string} dataType - 資料型別
+ * @param {string} dataType - 資料類型
  */
 function triggerDataFetchCompleted(dataType) {
   // 使用 setTimeout 確保變數已完全初始化後再觸發事件
@@ -48,7 +48,7 @@ function triggerDataFetchCompleted(dataType) {
 /**
  * 通知擴充功能資料已載入
  * @param {string} source - 資料來源
- * @param {Array} dataTypes - 已載入的資料型別
+ * @param {Array} dataTypes - 已載入的資料類型
  */
 function notifyExtensionDataLoaded(source, dataTypes) {
   // 發送訊息給 background script
@@ -89,7 +89,7 @@ function setGlobalMedicationFormatSettings(settings) {
     //   複製後藥物長度: window.medicationFormatSettings.customMedicationDrugCopyFormat.length
     // });
     
-    // 直接存儲到全局變數，以防其他方式丟失
+    // 直接儲存到全局變數，以防其他方式丟失
     window.customMedicationHeaderCopyFormat = JSON.parse(JSON.stringify(settings.customMedicationHeaderCopyFormat));
     window.customMedicationDrugCopyFormat = JSON.parse(JSON.stringify(settings.customMedicationDrugCopyFormat));
   }
@@ -105,7 +105,7 @@ export async function processLocalData(jsonData, filename) {
   console.log('開始處理本地 JSON 資料:', filename);
 
   try {
-    // 重設資料型別追蹤
+    // 重設資料類型追蹤
     const loadedTypes = [];
 
     // 預先從 Chrome storage 加載自訂格式設定 (改為同步等待)
@@ -120,7 +120,7 @@ export async function processLocalData(jsonData, filename) {
       }
     }
 
-    // 使用 Map 定義資料型別及其處理邏輯
+    // 使用 Map 定義資料類型及其處理邏輯
     const dataTypeHandlers = new Map([
       ['medication', () => {
         window.lastInterceptedMedicationData = JSON.parse(JSON.stringify(jsonData.medication));
@@ -179,7 +179,7 @@ export async function processLocalData(jsonData, filename) {
       }]
     ]);
 
-    // 檢查並處理每種資料型別
+    // 檢查並處理每種資料類型
     for (const [dataType, handler] of dataTypeHandlers.entries()) {
       if (jsonData[dataType]) {
         handler();
@@ -251,7 +251,7 @@ export async function processLocalData(jsonData, filename) {
     } else {
       return {
         success: false,
-        message: '沒有找到可識別的資料型別',
+        message: '沒有找到可識別的資料類型',
         loadedTypes: []
       };
     }
@@ -356,7 +356,7 @@ export const localDataHandler = {
         console.error('加載自訂格式設定時出錯:', error);
       }
       
-      // 根據結構和檔名處理不同資料型別
+      // 根據結構和檔名處理不同資料類型
       await this.processJsonData(data, localDataStatus, filename);
     } catch (error) {
       console.error("處理 JSON 資料時出錯:", error);
@@ -371,14 +371,14 @@ export const localDataHandler = {
   async processJsonData(data, localDataStatus, filename) {
     try {
       const dataType = this.detectDataType(data, filename);
-      // console.log("檢測到資料型別:", dataType);
+      // console.log("檢測到資料類型:", dataType);
 
       if (dataType === "unknown") {
         localDataStatus.message = "無法識別的資料格式";
         return localDataStatus;
       }
 
-      // 使用 Map 存儲不同資料型別的處理邏輯
+      // 使用 Map 儲存不同資料類型的處理邏輯
       const dataProcessors = new Map([
         ["medication", async () => {
           const medicationProcessor = (await import("./utils/medicationProcessor.js")).default;
@@ -391,7 +391,7 @@ export const localDataHandler = {
           window.lastInterceptedLabData = data;
           localDataStatus.loadedTypes.push("lab");
         }]
-        // 其他資料型別的處理可以在這裡添加
+        // 其他資料類型的處理可以在這裡添加
       ]);
 
       // 執行對應的處理邏輯
@@ -405,16 +405,16 @@ export const localDataHandler = {
       localDataStatus.message = `成功載入 ${localDataStatus.loadedTypes.length} 種資料`;
 
     } catch (error) {
-      console.error("檢測資料型別時出錯:", error);
-      localDataStatus.message = `檢測資料型別時出錯: ${error.message}`;
+      console.error("檢測資料類型時出錯:", error);
+      localDataStatus.message = `檢測資料類型時出錯: ${error.message}`;
     }
 
     return localDataStatus;
   },
 
-  // 檢測資料型別
+  // 檢測資料類型
   detectDataType(data, filename) {
-    // 檔名到資料型別的映射
+    // 檔名到資料類型的映射
     const filenamePatterns = new Map([
       [/藥|med/i, "medication"],
       [/檢驗|lab/i, "lab"]
@@ -432,7 +432,7 @@ export const localDataHandler = {
       }
     }
 
-    // 欄位特徵到資料型別的映射
+    // 欄位特徵到資料類型的映射
     const fieldPatterns = new Map([
       [["MED_DESC", "MED_ITEM", "drug_ename", "DRUG_CODE"], "medication"],
       [["LAB_NAME", "lab_item", "LAB_RESULT"], "lab"]

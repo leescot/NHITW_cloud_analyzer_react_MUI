@@ -19,27 +19,27 @@ import TypographySizeWrapper from "../utils/TypographySizeWrapper";
 
 const LabTableView = ({ groupedLabs, labSettings, generalDisplaySettings }) => {
   // console.log("LabTableView rendering with lab settings:", labSettings);
-  // 擷取所有可用的檢驗型別
+  // 擷取所有可用的檢驗類型
   const allLabTypes = labProcessor.getAllLabTypes(groupedLabs);
 
-  // 按指定順序排序檢驗型別
+  // 按指定順序排序檢驗類型
   const labTypes = sortLabTypes(allLabTypes);
 
-  // 狀態管理選擇的檢驗型別 - 初始值設為排序後的第一個型別（如果有的話）
+  // 狀態管理選擇的檢驗類型 - 初始值設為排序後的第一個類型（如果有的話）
   const [selectedType, setSelectedType] = useState(labTypes.length > 0 ? labTypes[0].value : 'all');
 
-  // 按優先順序排序檢驗型別的輔助函式
+  // 按優先順序排序檢驗類型的輔助函式
   function sortLabTypes(types) {
     const priorityTypes = ["生化學檢查", "血液學檢查", "尿液檢查"];
     const priorityMap = new Map(priorityTypes.map((type, index) => [type, index]));
 
-    // 將所有型別轉換為具有標籤和值的對象
+    // 將所有類型轉換為具有標籤和值的對象
     const typeObjects = types.map(type => ({
       label: type,
       value: type
     }));
 
-    // 排序: 優先型別按指定順序，其他型別按原順序，"所有檢驗"放最後
+    // 排序: 優先類型按指定順序，其他類型按原順序，"所有檢驗"放最後
     return typeObjects.sort((a, b) => {
       const priorityA = priorityMap.has(a.label) ? priorityMap.get(a.label) : 999;
       const priorityB = priorityMap.has(b.label) ? priorityMap.get(b.label) : 999;
@@ -50,13 +50,13 @@ const LabTableView = ({ groupedLabs, labSettings, generalDisplaySettings }) => {
   // 添加"所有檢驗"選項（放在最後）
   const radioOptions = [...labTypes, { label: "所有檢驗", value: "all" }];
 
-  // 根據選擇的型別準備表格數據
+  // 根據選擇的類型準備表格數據
   const { dates, items } = labProcessor.prepareLabTableData(
     groupedLabs,
     selectedType === 'all' ? null : selectedType
   );
 
-  // 型別選擇變更處理
+  // 類型選擇變更處理
   const handleTypeChange = (event) => {
     setSelectedType(event.target.value);
   };
@@ -178,7 +178,7 @@ const LabTableView = ({ groupedLabs, labSettings, generalDisplaySettings }) => {
   return (
     // 調整容器高度，減少重疊問題
     <Box sx={{ height: 'calc(100vh - 220px)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
-      {/* 縮小型別選擇器間距 */}
+      {/* 縮小類型選擇器間距 */}
       <FormControl component="fieldset" sx={{ mx: 1, my: 0.5 }}>
         <RadioGroup
           row

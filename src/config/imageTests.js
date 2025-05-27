@@ -9,7 +9,7 @@
  * - enabled: 是否預設啟用此項目
  *
  * 注意:
- * 1. 僅修改此處不會影響現有使用者的設定，因為他們的配置已存儲在 Chrome storage 中
+ * 1. 僅修改此處不會影響現有使用者的設定，因為他們的配置已儲存在 Chrome storage 中
  * 2. 若要更新所有使用者的設定，需要實現版本升級機制
  */
 export const DEFAULT_IMAGE_TESTS = [

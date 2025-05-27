@@ -14,9 +14,9 @@ const MedicationFilters = ({
   settings,
   onCopyAll
 }) => {
-  // 使用 Map 來定義訪問型別選項及其渲染條件
+  // 使用 Map 來定義訪問類型選項及其渲染條件
   const visitTypeOptions = new Map([
-    // 門診+急診選項，需要同時有門診和急診型別可用
+    // 門診+急診選項，需要同時有門診和急診類型可用
     ['門診+急診', {
       condition: () => availableVisitTypes.includes("門診") && availableVisitTypes.includes("急診"),
       label: '門診+急診'
@@ -129,7 +129,7 @@ const MedicationFilters = ({
         </Button>
       )}
 
-      {/* 如果有多種訪問型別，顯示過濾選項 */}
+      {/* 如果有多種訪問類型，顯示過濾選項 */}
       {availableVisitTypes.length > 1 && (
         <FormControl component="fieldset" sx={{ flexGrow: 2 }}>
           <RadioGroup

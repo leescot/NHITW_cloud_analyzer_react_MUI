@@ -156,7 +156,7 @@ const Overview_ImagingTests = ({
         throw new Error('API 回應中沒有影像 URL');
       }
 
-      // 存儲影像數據到 sessionStorage
+      // 儲存影像數據到 sessionStorage
       const imgData = {
         fileName: data.ctmri_url,
         apiName: "imue0130"

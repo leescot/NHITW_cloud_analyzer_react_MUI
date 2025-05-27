@@ -298,7 +298,7 @@ export const medicationCopyFormatter = {
       }]
     ]);
     
-    // 根據格式型別擷取配置
+    // 根據格式類型擷取配置
     const formatType = isHorizontal ? 'horizontal' : 'vertical';
     const formatConfig = formatConfigs.get(formatType);
     

@@ -3,7 +3,7 @@ import { Box, Grid, Paper } from "@mui/material";
 import TypographySizeWrapper from "../../utils/TypographySizeWrapper";
 import LabItemDisplay from "./LabItemDisplay";
 
-// 按型別分組並分欄顯示
+// 按類型分組並分欄顯示
 const TypeBasedLayout = ({
   labs,
   groupIndex,
@@ -12,7 +12,7 @@ const TypeBasedLayout = ({
   generalDisplaySettings,
   labSettings
 }) => {
-  // 先按型別分組
+  // 先按類型分組
   const labsByType = {};
 
   // 去除重複項目的邏輯 - 使用 Map 按照 itemName+value 來追蹤重複項
@@ -44,10 +44,10 @@ const TypeBasedLayout = ({
     }
   });
 
-  // 檢查是否只有兩種型別的檢驗，並且需要優化空間利用
+  // 檢查是否只有兩種類型的檢驗，並且需要優化空間利用
   const groupKeys = Object.keys(labsByType);
 
-  // 渲染型別組
+  // 渲染類型組
   const renderTypeGroup = (type, labs, title) => (
     <Paper
       elevation={0}
@@ -87,33 +87,33 @@ const TypeBasedLayout = ({
 
   // 使用 Map 來定義不同分組數量的佈局策略
   const layoutStrategies = new Map([
-    // 4個或以上的型別 - 三欄佈局
+    // 4個或以上的類型 - 三欄佈局
     [
       groupCount => groupCount >= 4,
       () => {
-        // 對型別按項目數量排序
+        // 對類型按項目數量排序
         const sortedGroups = [...groupKeys].sort((a, b) => labsByType[b].length - labsByType[a].length);
         
-        // 取出項目數最多的兩個型別
+        // 取出項目數最多的兩個類型
         const largestGroup = sortedGroups[0];
         const secondLargestGroup = sortedGroups[1];
         
-        // 其餘型別
+        // 其餘類型
         const remainingGroups = sortedGroups.slice(2);
         
         return (
           <Grid container spacing={2}>
-            {/* 最大型別組 */}
+            {/* 最大類型組 */}
             <Grid item xs={12} sm={4} key="largest">
               {renderTypeGroup(largestGroup, labsByType[largestGroup])}
             </Grid>
             
-            {/* 第二大型別組 */}
+            {/* 第二大類型組 */}
             <Grid item xs={12} sm={4} key="second-largest">
               {renderTypeGroup(secondLargestGroup, labsByType[secondLargestGroup])}
             </Grid>
             
-            {/* 其餘型別組合併 */}
+            {/* 其餘類型組合併 */}
             <Grid item xs={12} sm={4} key="remaining">
               <Box>
                 {remainingGroups.map((type, typeIndex) => (
@@ -127,7 +127,7 @@ const TypeBasedLayout = ({
         );
       }
     ],
-    // 剛好2種型別的特殊佈局
+    // 剛好2種類型的特殊佈局
     [
       groupCount => groupCount === 2,
       () => {

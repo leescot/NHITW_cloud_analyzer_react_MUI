@@ -117,8 +117,8 @@ nhi-extractor-v08/
 #### 配置目錄 (/src/config)
 
 - `defaultSettings.js` - 默認設定配置
-- `imageTests.js` - 影像檢查型別配置
-- `labTests.js` - 實驗室檢查型別配置
+- `imageTests.js` - 影像檢查類型配置
+- `labTests.js` - 實驗室檢查類型配置
 - `medicationGroups.js` - 藥物分組配置
 
 ### 公共資源目錄 (/public)
@@ -131,7 +131,7 @@ nhi-extractor-v08/
 
 ### 核心功能模組
 
-1. **設定管理系統** - 通過 `settingsManager.js` 管理使用者設定，存儲於 Chrome Storage
+1. **設定管理系統** - 通過 `settingsManager.js` 管理使用者設定，儲存於 Chrome Storage
 2. **數據處理器** - 各種專門的處理器模組處理健保雲端資料的不同部分
 3. **UI界面** - 浮動圖標、設定面板和各種指標元件
 4. **背景處理服務** - 處理頁面間通訊和資料暫存

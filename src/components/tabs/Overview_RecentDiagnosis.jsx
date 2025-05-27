@@ -2,7 +2,7 @@
  * Overview_RecentDiagnosis Component
  *
  * 此元件顯示過去180天的最近診斷信息，
- * 按訪問型別分類（門診/急診/住診）。
+ * 按訪問類型分類（門診/急診/住診）。
  * - 門診和急診診斷按頻率排序（最頻繁的優先）
  * - 住診診斷顯示首次發生日期
  * - 每個類別最多顯示5項，如果超過5項則顯示查看全部提示
@@ -42,7 +42,7 @@ const Overview_RecentDiagnosis = ({
     cutoffDate.setDate(now.getDate() - trackingDays);
 
     const outpatientDiagnoses = {};
-    const emergencyDiagnoses = [];  // 從物件改為陣列以存儲日期信息
+    const emergencyDiagnoses = [];  // 從物件改為陣列以儲存日期信息
     const inpatientDiagnoses = [];
     const vaccineRecords = [];      // 疫苗記錄的新陣列
 
@@ -77,7 +77,7 @@ const Overview_RecentDiagnosis = ({
              normalizedCode.startsWith('Z27');
     };
 
-    // 使用 Map 來定義不同訪問型別的處理邏輯
+    // 使用 Map 來定義不同訪問類型的處理邏輯
     const visitTypeHandlers = new Map([
       ["門診", (diagnosisKey, isChineseMed) => {
         outpatientDiagnoses[diagnosisKey] = {
@@ -116,7 +116,7 @@ const Overview_RecentDiagnosis = ({
       }]
     ]);
 
-    // 設定默認處理邏輯（用於未分類的訪問型別）
+    // 設定默認處理邏輯（用於未分類的訪問類型）
     const defaultHandler = (diagnosisKey, isChineseMed) => {
       outpatientDiagnoses[diagnosisKey] = {
         count: (outpatientDiagnoses[diagnosisKey]?.count || 0) + 1,

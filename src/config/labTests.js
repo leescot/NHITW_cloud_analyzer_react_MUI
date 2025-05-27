@@ -9,7 +9,7 @@
  * - enabled: 是否預設啟用此項目
  *
  * 注意:
- * 1. 僅修改此處不會影響現有使用者的設定，因為他們的配置已存儲在 Chrome storage 中
+ * 1. 僅修改此處不會影響現有使用者的設定，因為他們的配置已儲存在 Chrome storage 中
  * 2. 若要更新所有使用者的設定，需要實現版本升級機制
  * 3. 新增或修改項目時，確保 orderCode 的唯一性
  *
@@ -18,7 +18,7 @@
  * - twoColumn: 雙欄顯示
  * - threeColumn: 三欄顯示
  * - fourColumn: 四欄顯示
- * - byType: 依檢驗型別分組顯示
+ * - byType: 依檢驗類型分組顯示
  */
 export const DEFAULT_LAB_TESTS = [
   { orderCode: '08011C-WBC', displayName: 'WBC', enabled: false },
@@ -60,7 +60,7 @@ export const DEFAULT_LAB_TESTS = [
  *
  * 注意:
  * 1. 使用者可以透過設定界面自訂要複製的項目
- * 2. 設定會存儲在 Chrome storage 中的 labChooseCopyItems 欄位
+ * 2. 設定會儲存在 Chrome storage 中的 labChooseCopyItems 欄位
  */
 export const DEFAULT_LAB_COPY_ITEMS = [
   { orderCode: '08011C-WBC', displayName: 'WBC', enabled: false },

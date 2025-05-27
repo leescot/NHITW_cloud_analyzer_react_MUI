@@ -8,13 +8,13 @@ NHITW 健保雲端系統資料擷取擴充功能通過 `saveDataToLocalStorage()
 
 ## 資料儲存格式
 
-資料以 JSON 格式存儲在 `localStorage` 中，鍵名為 `NHITW_DATA`。儲存的資料結構如下：
+資料以 JSON 格式儲存在 `localStorage` 中，鍵名為 `NHITW_DATA`。儲存的資料結構如下：
 
 ```javascript
 {
   "timestamp": 1619460723445,  // 資料儲存時間戳 (毫秒)
   "medication": { ... },       // 西醫用藥資料
-  "lab": { ... },              // 檢驗資料 (注意: 對應的資料型別是 "labdata")
+  "lab": { ... },              // 檢驗資料 (注意: 對應的資料類型是 "labdata")
   "chinesemed": { ... },       // 中醫用藥資料
   "imaging": { ... },          // 醫療影像資料
   "allergy": { ... },          // 過敏資料
@@ -28,7 +28,7 @@ NHITW 健保雲端系統資料擷取擴充功能通過 `saveDataToLocalStorage()
 }
 ```
 
-每種資料型別的值都包含 `rObject` 屬性，這是一個包含實際記錄的陣列。
+每種資料類型的值都包含 `rObject` 屬性，這是一個包含實際記錄的陣列。
 
 ## 如何存取資料
 
@@ -103,7 +103,7 @@ function isDataFresh(maxAgeInMinutes = 30) {
 
 ## 資料結構詳細說明
 
-每種資料型別的數據結構略有不同，但都遵循以下基本模式：
+每種資料類型的數據結構略有不同，但都遵循以下基本模式：
 
 ```javascript
 {

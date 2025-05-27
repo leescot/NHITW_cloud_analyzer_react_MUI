@@ -362,13 +362,13 @@ export const medicationProcessor = {
           };
 
           data.rObject.forEach((record) => {
-            // 從 hosp 欄位中提取醫院名稱和就診型別
+            // 從 hosp 欄位中提取醫院名稱和就診類型
             const hospValue = getFieldValue(record, "hosp");
             const hospParts = hospValue.split(";");
             const hospitalName = hospParts[0] || "";
             const visitType = hospParts.length > 1 ? hospParts[1] || "" : "";
 
-            // 創建包含日期、醫院、就診型別和 ICD 代碼的唯一鍵
+            // 創建包含日期、醫院、就診類型和 ICD 代碼的唯一鍵
             const key = `${getFieldValue(record, "date")}_${hospitalName}_${visitType}_${getFieldValue(record, "icd_code")}`;
 
             if (!processedRecords[key]) {

@@ -9,7 +9,7 @@
    - 從DOM元素擷取病患資訊
    - 最後使用時間戳作為備用
 
-識別格式會以`patient_{ID}`、`token_{prefix}`、`dom_{text}`或`session_{timestamp}`存儲。
+識別格式會以`patient_{ID}`、`token_{prefix}`、`dom_{text}`或`session_{timestamp}`儲存。
 
 **更新**: 新增使用者資訊快取機制，設定5秒內不重複提取令牌，減少系統負擔。
 
@@ -27,13 +27,13 @@
 ## 資料擷取流程
 
 1. `setupMonitoring()`設置XHR和fetch監聽，劫持網路請求
-2. 檢測符合特定API路徑的請求(藥歷、檢驗資料、中醫用藥等多種型別)
-3. `fetchAllDataTypes()`同時啟動所有資料型別的抓取:
-   - 先擷取主選單(masterMenu)資料來判斷使用者有權限的資料型別
-   - 過濾並只擷取有授權的資料型別
+2. 檢測符合特定API路徑的請求(藥歷、檢驗資料、中醫用藥等多種類型)
+3. `fetchAllDataTypes()`同時啟動所有資料類型的抓取:
+   - 先擷取主選單(masterMenu)資料來判斷使用者有權限的資料類型
+   - 過濾並只擷取有授權的資料類型
    - 使用`Promise.all`併發請求所有資料
-   - 每種型別透過`enhancedFetchData()`單獨擷取
-4. `enhancedFetchData()`處理單一資料型別:
+   - 每種類型透過`enhancedFetchData()`單獨擷取
+4. `enhancedFetchData()`處理單一資料類型:
    - 建置API URL
    - 添加授權令牌和必要請求頭
    - 發送請求並處理返回資料
@@ -46,9 +46,9 @@
 
 ## Master Menu 節點對應表
 
-masterMenu API 回傳的節點ID對應到健保雲端系統的各個頁面和資料型別：
+masterMenu API 回傳的節點ID對應到健保雲端系統的各個頁面和資料類型：
 
-| 節點ID | 群組 | 名稱 | 對應資料型別 | API 端點 |
+| 節點ID | 群組 | 名稱 | 對應資料類型 | API 端點 |
 |--------|------|------|------------|---------|
 | 1.1 | 摘要 | 病人資訊 | patientSummary | /imu/api/imue2000/imue2000s01/get-summary |
 | 1.2 | 摘要 | B、C型肝炎專區 | - | - |
@@ -81,13 +81,13 @@ masterMenu API 回傳的 "prsnAuth" 陣列包含目前使用者有權限存取�
 1. 首先抓取 masterMenu 資料 (/imu/api/imue1000/imue1000s02/master-menu)
 2. 從 masterMenu 的 prsnAuth 陣列中檢查使用者有權限存取的節點
 3. 只針對有授權的節點發送資料請求，未授權的節點則傳回空集合
-4. 若 masterMenu 抓取失敗，則預設嘗試抓取所有資料型別
+4. 若 masterMenu 抓取失敗，則預設嘗試抓取所有資料類型
 
 此方式能大幅減少不必要的API請求，提高應用效能。
 
 ## 新增功能與改進
 
-1. **擴充資料型別**：新增對復健治療(rehabilitation)、針灸治療(acupuncture)和特殊中醫處置(specialChineseMedCare)的支援。
+1. **擴充資料類型**：新增對復健治療(rehabilitation)、針灸治療(acupuncture)和特殊中醫處置(specialChineseMedCare)的支援。
 
 2. **批次資料抓取控制**：
    - 追蹤進行中的批次抓取，避免重複請求

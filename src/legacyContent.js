@@ -152,7 +152,7 @@ function handleTestDataLoad(event) {
       try {
         const data = JSON.parse(e.target.result);
 
-        // 判斷數據型別並載入到對應變數
+        // 判斷數據類型並載入到對應變數
         if (data.medication) {
           lastInterceptedMedicationData = data.medication;
         }
@@ -217,7 +217,7 @@ function isOnLoginPage() {
 function isOnTargetPage() {
   const url = window.location.href;
   
-  // 使用 Map 存儲目標頁面路徑
+  // 使用 Map 儲存目標頁面路徑
   const targetPaths = new Map([
     ["medcloud2.nhi.gov.tw/imu/IMUE1000/IMUE0008", "用藥紀錄"],
     ["medcloud2.nhi.gov.tw/imu/IMUE1000/IMUE0060", "檢驗報告"],
@@ -236,7 +236,7 @@ function isOnTargetPage() {
   return false;
 }
 
-// 使用 Map 來判斷頁面型別
+// 使用 Map 來判斷頁面類型
 const pageTypeMap = new Map([
   ["/IMUE0008", "medication"],
   ["/IMUE0060", "labdata"],
@@ -249,7 +249,7 @@ const pageTypeMap = new Map([
   ["/IMUE2000", "patientsummary"]
 ]);
 
-// 判斷頁面型別
+// 判斷頁面類型
 function getPageType() {
   const url = window.location.href;
   
@@ -520,7 +520,7 @@ const DataProcessor = {
     // ["specialChineseMedCare", "/imu/api/imue0170/imue0170s02/get-data"]
   ]),
   
-  // 數據型別與對應的全局變數
+  // 數據類型與對應的全局變數
   dataVarMap: new Map([
     ["medication", "lastInterceptedMedicationData"],
     ["labdata", "lastInterceptedLabData"],
@@ -539,7 +539,7 @@ const DataProcessor = {
     // ["specialChineseMedCare", "lastInterceptedSpecialChineseMedCareData"]
   ]),
   
-  // 數據型別與對應的 action
+  // 數據類型與對應的 action
   actionMap: new Map([
     ["medication", "saveMedicationData"],
     ["labdata", "saveLabData"],
@@ -558,7 +558,7 @@ const DataProcessor = {
     // ["specialChineseMedCare", "saveSpecialChineseMedCareData"]
   ]),
   
-  // 數據型別與對應的中文顯示文字
+  // 數據類型與對應的中文顯示文字
   typeTextMap: new Map([
     ["medication", "西醫藥歷"],
     ["labdata", "檢驗資料"],
@@ -582,7 +582,7 @@ const DataProcessor = {
     // 檢查 robject（小寫）或 rObject（大寫），兩者都接受
     const recordsArray = data.rObject || data.robject;
     
-    // 對 masterMenu 型別特殊處理
+    // 對 masterMenu 類型特殊處理
     const isMasterMenu = dataType === "masterMenu";
     
     if (!data || (!recordsArray && !isMasterMenu)) {
@@ -601,29 +601,29 @@ const DataProcessor = {
   isValidData(data, dataType) {
     if (!data) return false;
     
-    // 對 masterMenu 型別特殊處理
+    // 對 masterMenu 類型特殊處理
     if (dataType === "masterMenu") return true;
     
     const recordsArray = data.rObject || data.robject;
     return recordsArray && Array.isArray(recordsArray);
   },
   
-  // 擷取數據型別對應的變數名
+  // 擷取數據類型對應的變數名
   getVarName(dataType) {
     return this.dataVarMap.get(dataType);
   },
   
-  // 擷取數據型別對應的 action
+  // 擷取數據類型對應的 action
   getAction(dataType) {
     return this.actionMap.get(dataType);
   },
   
-  // 擷取數據型別對應的顯示文字
+  // 擷取數據類型對應的顯示文字
   getTypeText(dataType) {
     return this.typeTextMap.get(dataType);
   },
   
-  // 根據 URL 擷取對應的數據型別
+  // 根據 URL 擷取對應的數據類型
   getDataTypeFromUrl(url) {
     const foundEntry = Array.from(this.API_URL_PATTERNS.entries())
       .find(([_, pattern]) => url.includes(pattern));
@@ -635,7 +635,7 @@ const DataProcessor = {
   processApiResponse(data, url, source = "API") {
     const dataType = this.getDataTypeFromUrl(url);
     if (!dataType) {
-      console.log("無法從 URL 確定數據型別:", url);
+      console.log("無法從 URL 確定數據類型:", url);
       return null;
     }
     
@@ -666,10 +666,10 @@ const DataProcessor = {
         timestamp: Date.now() // 添加时间戳以识别数据新鲜度
       };
       
-      // 從 dataVarMap 中擷取所有數據型別和對應的變數名
-      // 這樣避免硬編碼重複數據型別，使維護更容易
+      // 從 dataVarMap 中擷取所有數據類型和對應的變數名
+      // 這樣避免硬編碼重複數據類型，使維護更容易
       for (const [dataType, varName] of this.dataVarMap.entries()) {
-        // 特殊處理 labdata 型別，對應的存儲鍵為 lab
+        // 特殊處理 labdata 類型，對應的儲存鍵為 lab
         const storageKey = dataType === 'labdata' ? 'lab' : dataType;
         dataToShare[storageKey] = window[varName];
       }
@@ -682,7 +682,7 @@ const DataProcessor = {
       if (hasData) {
         localStorage.setItem('NHITW_DATA', JSON.stringify(dataToShare));
         
-        // 觸發存儲事件，便於其他擴展監聽
+        // 觸發儲存事件，便於其他擴展監聽
         window.dispatchEvent(new Event('storage'));
       }
     } catch (error) {
@@ -694,7 +694,7 @@ const DataProcessor = {
   validateAndUpdateData(data, dataType) {
     // 使用內部方法進行數據驗證和處理
     if (!this.isValidData(data, dataType)) {
-      console.error(`無效的數據型別: ${dataType}`);
+      console.error(`無效的數據類型: ${dataType}`);
       return false;
     }
     
@@ -707,7 +707,7 @@ const DataProcessor = {
     const action = this.getAction(dataType);
     
     if (!action) {
-      console.error(`不支援的資料型別: ${dataType}`);
+      console.error(`不支援的資料類型: ${dataType}`);
       return false;
     }
     
@@ -939,7 +939,7 @@ function saveData(data, dataType, source = "unknown") {
 function validateAndUpdateData(data, dataType) {
   // 使用內部方法進行數據驗證和處理
   if (!DataProcessor.isValidData(data, dataType)) {
-    console.error(`無效的數據型別: ${dataType}`);
+    console.error(`無效的數據類型: ${dataType}`);
     return false;
   }
   
@@ -952,7 +952,7 @@ function validateAndUpdateData(data, dataType) {
   const action = DataProcessor.getAction(dataType);
   
   if (!action) {
-    console.error(`不支援的資料型別: ${dataType}`);
+    console.error(`不支援的資料類型: ${dataType}`);
     return false;
   }
   
@@ -1174,7 +1174,7 @@ function validateToken(token) {
 
 // 新增: 檢查是否有抓取特定資料的設定
 function shouldFetchData(dataType) {
-  // 只對需要受控制的資料型別進行檢查，其他的預設為 true
+  // 只對需要受控制的資料類型進行檢查，其他的預設為 true
   if (dataType === "adultHealthCheck") {
     // 檢查是否應該抓取成人預防保健資料
     return new Promise((resolve) => {
@@ -1191,13 +1191,13 @@ function shouldFetchData(dataType) {
     });
   }
   
-  // 其他資料型別預設為 true
+  // 其他資料類型預設為 true
   return Promise.resolve(true);
 }
 
-// 在 content.js 中添加一個新函式，用於擷取所有型別的資料
+// 在 content.js 中添加一個新函式，用於擷取所有類型的資料
 function fetchAllDataTypes() {
-  // console.log("開始擷取所有資料型別");
+  // console.log("開始擷取所有資料類型");
 
   if (isBatchFetchInProgress) {
     // console.log("已有批次抓取進行中，跳過本次請求");
@@ -1229,7 +1229,7 @@ function fetchAllDataTypes() {
     .then((menuResult) => {
       // console.log("擷取主選單資料成功，開始處理其他資料");
 
-      // 定義所有要擷取的資料型別
+      // 定義所有要擷取的資料類型
       const dataTypes = [
         "medication",
         "labdata",
@@ -1245,7 +1245,7 @@ function fetchAllDataTypes() {
         // "specialChineseMedCare",
       ];
 
-      // 根據授權過濾並擷取資料型別
+      // 根據授權過濾並擷取資料類型
       const fetchPromises = dataTypes.map((dataType) => {
         if (isDataTypeAuthorized(dataType)) {
           // console.log(`${dataType} 已授權，開始取資料`);
@@ -1255,12 +1255,12 @@ function fetchAllDataTypes() {
           });
         } else {
           // console.log(`${dataType} 無資料，返回空集合`);
-          // 未授權的資料型別返回空集合
+          // 未授權的資料類型返回空集合
           return Promise.resolve(createEmptyDataResult(dataType));
         }
       });
 
-      // 擷取設定並根據設定決定是否抓取特殊資料型別
+      // 擷取設定並根據設定決定是否抓取特殊資料類型
       const specialDataTypes = ["adultHealthCheck", "cancerScreening"];
       const specialFetchPromises = specialDataTypes.map((dataType) => {
         return shouldFetchData(dataType).then((shouldFetch) => {
@@ -1284,7 +1284,7 @@ function fetchAllDataTypes() {
       console.error("擷取主選單資料失敗:", err);
 
       // 如果擷取主選單資料失敗，則使用原本的方式擷取所有資料
-      console.log("切換到無授權檢查模式，嘗試擷取所有資料型別");
+      console.log("切換到無授權檢查模式，嘗試擷取所有資料類型");
 
       return Promise.all([
         enhancedFetchData("medication").catch((err) => ({
@@ -1445,7 +1445,7 @@ function enhancedFetchData(dataType, options = {}) {
     retryInterval = 5000, // 重試間隔（毫秒）
   } = options;
 
-  // 檢查資料型別是否有效
+  // 檢查資料類型是否有效
   const validDataTypes = [
     "medication",
     "labdata",
@@ -1465,7 +1465,7 @@ function enhancedFetchData(dataType, options = {}) {
   ];
 
   if (!validDataTypes.includes(dataType)) {
-    const error = new Error(`不支援的資料型別: ${dataType}`);
+    const error = new Error(`不支援的資料類型: ${dataType}`);
 
     return Promise.reject(error);
   }
@@ -1621,12 +1621,12 @@ function extractAndSaveToken() {
   return false;
 }
 
-// 新增輔助函式來擷取資料型別的中文名稱
+// 新增輔助函式來擷取資料類型的中文名稱
 function getTypeText(type) {
   return DataProcessor.getTypeText(type) || type;
 }
 
-// 新增: 節點ID與資料型別對應表
+// 新增: 節點ID與資料類型對應表
 const nodeToDataTypeMap = new Map([
   ["1.1", "patientsummary"],
   ["2.1", "medication"],
@@ -1644,9 +1644,9 @@ const nodeToDataTypeMap = new Map([
   // ["9.1", "rehabilitation"]
 ]);
 
-// 新增: 檢查資料型別是否有授權
+// 新增: 檢查資料類型是否有授權
 function isDataTypeAuthorized(dataType) {
-  // 如果尚未擷取主選單資料，預設所有資料型別都有授權
+  // 如果尚未擷取主選單資料，預設所有資料類型都有授權
   if (!window.lastInterceptedMasterMenuData) {
     return true;
   }
@@ -1655,7 +1655,7 @@ function isDataTypeAuthorized(dataType) {
     const masterMenuData = window.lastInterceptedMasterMenuData.originalData;
     const prsnAuth = masterMenuData.prsnAuth || [];
 
-    // 反向查找: 從資料型別找到對應的節點ID
+    // 反向查找: 從資料類型找到對應的節點ID
     const nodeIds = [];
     for (const [node, type] of nodeToDataTypeMap.entries()) {
       if (type === dataType) {

@@ -21,7 +21,7 @@ processData(dataType, rawData)
 // 儲存處理後的資料
 storeProcessedData(dataType, data)
 
-// 擷取特定型別的資料
+// 擷取特定類型的資料
 getDataByType(dataType)
 
 // 清除所有資料
@@ -70,10 +70,10 @@ getSetting(category, key)
 // 更新設定
 updateSetting(category, key, value)
 
-// 保存設定到 Chrome 存儲
+// 保存設定到 Chrome 儲存
 saveSettings()
 
-// 從 Chrome 存儲載入設定
+// 從 Chrome 儲存載入設定
 loadSettings()
 
 // 重設設定為預設值
@@ -169,7 +169,7 @@ formatChineseMedForCopy(prescription, format)
 // 處理原始影像資料
 processImagingData(rawData)
 
-// 依型別分類影像檢查
+// 依類型分類影像檢查
 categorizeByType(imagingTests)
 
 // 提取報告關鍵發現
@@ -187,7 +187,7 @@ extractKeyFindings(report)
 #### 核心函式
 
 ```javascript
-// 擷取指定型別的文字大小設定
+// 擷取指定類型的文字大小設定
 getTextSize(type)
 
 // 將設定值轉換為實際的 CSS 尺寸
@@ -374,7 +374,7 @@ LabTest = {
 ```javascript
 ImagingTest = {
   id: String,                     // 唯一識別符
-  type: String,                   // 影像型別
+  type: String,                   // 影像類型
   name: String,                   // 檢查名稱
   date: Date,                     // 檢查日期
   hospital: String,               // 檢查醫院
@@ -391,12 +391,12 @@ ImagingTest = {
 try {
   // 操作代碼
 } catch (error) {
-  console.error('錯誤型別: ', error.message);
+  console.error('錯誤類型: ', error.message);
   // 錯誤處理邏輯
 }
 ```
 
-常見錯誤型別:
+常見錯誤類型:
 - 資料擷取錯誤: 網頁結構變更或元素不存在
 - 資料處理錯誤: 資料格式不符預期
 - 設定存取錯誤: 無法讀取或保存設定

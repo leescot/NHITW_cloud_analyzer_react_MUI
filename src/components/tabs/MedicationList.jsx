@@ -16,7 +16,7 @@ const MedicationList = ({
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
 
-  // 添加訪問型別過濾狀態
+  // 添加訪問類型過濾狀態
   const [selectedVisitType, setSelectedVisitType] = useState("");
   const [availableVisitTypes, setAvailableVisitTypes] = useState([]);
   const [filteredMedications, setFilteredMedications] = useState(groupedMedications);
@@ -28,9 +28,9 @@ const MedicationList = ({
   // 添加搜尋功能狀態
   const [searchText, setSearchText] = useState("");
 
-  // 擷取可用的訪問型別並設置默認選項
+  // 擷取可用的訪問類型並設置默認選項
   useEffect(() => {
-    // 擷取所有不同的訪問型別
+    // 擷取所有不同的訪問類型
     const visitTypes = new Set();
     let hasOutpatient = false;
     let hasEmergency = false;
@@ -59,22 +59,22 @@ const MedicationList = ({
       else if (hasOutpatient) {
         setSelectedVisitType("門診");
       }
-      // 否則選擇第一個可用的型別
+      // 否則選擇第一個可用的類型
       else if (typesArray.length > 0) {
         setSelectedVisitType(typesArray[0]);
       }
     } else {
-      // 如果只有一種訪問型別或沒有，設置為空字符串（顯示全部）
+      // 如果只有一種訪問類型或沒有，設置為空字符串（顯示全部）
       setSelectedVisitType("");
     }
   }, [groupedMedications]);
 
-  // 當選擇的訪問型別或搜尋文字變化時過濾藥物
+  // 當選擇的訪問類型或搜尋文字變化時過濾藥物
   useEffect(() => {
-    // 先用訪問型別過濾
+    // 先用訪問類型過濾
     let visitTypeFiltered = [];
 
-    // 使用 Map 來處理訪問型別過濾邏輯
+    // 使用 Map 來處理訪問類型過濾邏輯
     const visitTypeFilterMap = new Map([
       ["", () => groupedMedications],
       ["顯示所有項目", () => groupedMedications],
@@ -84,7 +84,7 @@ const MedicationList = ({
       ["門診", () => groupedMedications.filter(
         group => group.visitType === "門診" || group.visitType === "藥局"
       )],
-      // 默認過濾器，處理特定訪問型別的情況
+      // 默認過濾器，處理特定訪問類型的情況
       ["default", (visitType) => groupedMedications.filter(
         group => group.visitType === visitType
       )]
@@ -120,7 +120,7 @@ const MedicationList = ({
 
       setFilteredMedications(searchFiltered);
     } else {
-      // 沒有搜尋文字，只用訪問型別過濾
+      // 沒有搜尋文字，只用訪問類型過濾
       setFilteredMedications(visitTypeFiltered);
     }
   }, [selectedVisitType, groupedMedications, searchText]);
@@ -146,7 +146,7 @@ const MedicationList = ({
     }
   }, [filteredMedications, settings.separateShortTermMeds]);
 
-  // 處理訪問型別選擇變化
+  // 處理訪問類型選擇變化
   const handleVisitTypeChange = (event) => {
     setSelectedVisitType(event.target.value);
   };
@@ -328,14 +328,14 @@ const MedicationList = ({
     return false;
   };
 
-  // 根據看診型別擷取顏色
+  // 根據看診類型擷取顏色
   const getVisitTypeColor = (visitType) => {
     // 使用 Map 取代 switch 結構
     const visitTypeColorMap = new Map([
       ["急診", "#c62828"], // 較柔和的紅色
       ["住診", "#388e3c"], // 較柔和的綠色
       ["門診", "primary.main"], // 預設藍色
-      // 其他任何未定義的訪問型別默認為 primary.main
+      // 其他任何未定義的訪問類型默認為 primary.main
       ["default", "primary.main"]
     ]);
 
@@ -371,7 +371,7 @@ const MedicationList = ({
         </TypographySizeWrapper>
       ) : (
         <>
-          {/* 搜尋欄和訪問型別過濾選項 */}
+          {/* 搜尋欄和訪問類型過濾選項 */}
           <MedicationFilters
             searchText={searchText}
             handleSearchChange={handleSearchChange}

@@ -407,7 +407,7 @@ const FloatingIcon = () => {
       background: "transparent",
     };
 
-    // 使用 Map 來存儲不同位置的樣式
+    // 使用 Map 來儲存不同位置的樣式
     const positionStyleMap = new Map([
       ["top-right", { ...baseStyle, top: "20px" }],
       ["middle-right", { ...baseStyle, top: "50%", transform: "translateY(-50%)" }],

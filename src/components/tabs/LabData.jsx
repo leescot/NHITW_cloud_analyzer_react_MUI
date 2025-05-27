@@ -334,7 +334,7 @@ const LabData = ({ groupedLabs, settings, labSettings, generalDisplaySettings })
   const columnCountMap = new Map([
     ["twoColumn", 2],
     ["threeColumn", 3],
-    ["byType", 0],  // 特殊情況，按型別分群
+    ["byType", 0],  // 特殊情況，按類型分群
     ["default", 1]  // 'vertical' 或其他情況
   ]);
 
@@ -399,7 +399,7 @@ const LabData = ({ groupedLabs, settings, labSettings, generalDisplaySettings })
   ]);
 
   // 決定要使用哪種布局
-  // # zh-TW: 根據設定和條件決定要使用的布局型別
+  // # zh-TW: 根據設定和條件決定要使用的布局類型
   const getLayoutComponent = (group, index) => {
     // 直接使用 Map 來擷取對應的布局元件
     const layoutRenderer = layoutComponentMap.get(completeLabSettings.displayLabFormat);

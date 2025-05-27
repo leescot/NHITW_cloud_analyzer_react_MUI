@@ -101,7 +101,7 @@ const DataStatusTab = ({ dataStatus }) => {
 
 // Helper function to get short data type labels
 const getShortLabel = (key) => {
-  // # zh-TW: 使用 Map 來保存資料型別與對應短標籤的映射關係
+  // # zh-TW: 使用 Map 來保存資料類型與對應短標籤的映射關係
   const labels = new Map([
     ['medication', '西藥'],
     ['labData', '檢驗'],
