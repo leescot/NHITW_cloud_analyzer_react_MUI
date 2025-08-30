@@ -141,32 +141,70 @@ const mapColorNameToColorCode = (colorName) => {
   return colorMap.get(colorName) || colorMap.get('default');
 };
 
+// 安全的日期解析函數，避免時區轉換問題
+export const parseDateSafely = (dateString) => {
+  if (!dateString) return null;
+
+  let dateStr = dateString;
+  // 標準化格式為 YYYY/MM/DD
+  if (dateStr.includes('-')) {
+    dateStr = dateStr.replace(/-/g, '/');
+  }
+
+  const parts = dateStr.split('/');
+  if (parts.length >= 3) {
+    return {
+      year: parseInt(parts[0]),
+      month: parseInt(parts[1]),
+      day: parseInt(parts[2])
+    };
+  }
+  return null;
+};
+
 // 将日期格式化为 YYYY/MM/DD
 export const formatDate = (dateString) => {
   if (!dateString) return '';
 
-  // 尝试处理各种日期格式
-  const date = new Date(dateString);
-  if (isNaN(date.getTime())) {
-    // 如果无法解析，直接返回原始字符串
-    return dateString;
+  // 直接處理字符串格式，保持資料來源的原始格式，避免時區轉換問題
+  if (typeof dateString === 'string') {
+    // 如果已經是 YYYY/MM/DD 或 YYY/MM/DD 格式，直接返回
+    if (dateString.includes('/')) {
+      return dateString;
+    }
+    
+    // 將 YYYY-MM-DD 格式轉換為 YYYY/MM/DD，避免 Date 物件轉換
+    if (dateString.includes('-')) {
+      return dateString.replace(/-/g, '/');
+    }
   }
 
-  return date.toISOString().split('T')[0].replace(/-/g, '/');
+  // 如果無法處理，直接返回原始字符串
+  return dateString;
 };
 
 // Format date to show just MM/DD
 export const formatDateShort = (dateString) => {
   if (!dateString) return '';
 
-  const date = new Date(dateString.replace(/\//g, '-'));
-  if (isNaN(date.getTime())) return dateString;
-
-  // Format as MM/DD
-  const month = (date.getMonth() + 1).toString().padStart(2, '0');
-  const day = date.getDate().toString().padStart(2, '0');
-
-  return `${month}/${day}`;
+  // 直接從字符串提取月日，避免 Date 物件的時區轉換
+  let dateStr = dateString;
+  
+  // 處理不同格式的日期字符串
+  if (dateStr.includes('-')) {
+    dateStr = dateStr.replace(/-/g, '/');
+  }
+  
+  // 提取月日部分 (YYYY/MM/DD -> MM/DD)
+  const parts = dateStr.split('/');
+  if (parts.length >= 3) {
+    const month = parts[1].padStart(2, '0');
+    const day = parts[2].padStart(2, '0');
+    return `${month}/${day}`;
+  }
+  
+  // 如果無法處理，返回原始字符串
+  return dateString;
 };
 
 // Filter lab data for important test types and last 90 days
