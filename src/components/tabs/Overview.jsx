@@ -66,14 +66,14 @@ const Overview = ({
   const hasDischargeData = useMemo(() => dischargeData && dischargeData.length > 0, [dischargeData]);
 
   // Check if adult health check should be displayed
-  const shouldShowAdultHealthCheck = useMemo(() => 
-    cloudSettings?.fetchAdultHealthCheck === true, 
+  const shouldShowAdultHealthCheck = useMemo(() =>
+    cloudSettings?.fetchAdultHealthCheck === true,
     [cloudSettings]
   );
 
   // Check if cancer screening should be displayed
-  const shouldShowCancerScreening = useMemo(() => 
-    cloudSettings?.fetchCancerScreening === true, 
+  const shouldShowCancerScreening = useMemo(() =>
+    cloudSettings?.fetchCancerScreening === true,
     [cloudSettings]
   );
 
@@ -87,6 +87,7 @@ const Overview = ({
           <Overview_RecentDiagnosis
             groupedMedications={groupedMedications}
             groupedChineseMeds={groupedChineseMeds}
+            patientSummaryData={patientSummaryData}
             generalDisplaySettings={generalDisplaySettings}
           />
 

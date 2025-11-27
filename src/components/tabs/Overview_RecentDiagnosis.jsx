@@ -32,6 +32,7 @@ import TypographySizeWrapper from "../utils/TypographySizeWrapper";
 const Overview_RecentDiagnosis = ({
   groupedMedications = [],
   groupedChineseMeds = [],
+  patientSummaryData = [],
   generalDisplaySettings = {},
   trackingDays = 180
 }) => {
@@ -45,6 +46,7 @@ const Overview_RecentDiagnosis = ({
     const emergencyDiagnoses = [];  // 從物件改為數組以存儲日期信息
     const inpatientDiagnoses = [];
     const vaccineRecords = [];      // 疫苗記錄的新數組
+    const enrollmentCases = [];     // 收案資訊的新數組
 
     // 輔助函數，用於安全解析各種格式的日期
     const parseDate = (dateStr) => {
@@ -71,10 +73,10 @@ const Overview_RecentDiagnosis = ({
       // 檢查是否以 Z23、Z24、Z25、Z26 或 Z27 開頭
       const normalizedCode = icdCode.toUpperCase();
       return normalizedCode.startsWith('Z23') ||
-             normalizedCode.startsWith('Z24') ||
-             normalizedCode.startsWith('Z25') ||
-             normalizedCode.startsWith('Z26') ||
-             normalizedCode.startsWith('Z27');
+        normalizedCode.startsWith('Z24') ||
+        normalizedCode.startsWith('Z25') ||
+        normalizedCode.startsWith('Z26') ||
+        normalizedCode.startsWith('Z27');
     };
 
     // 使用 Map 來定義不同訪問類型的處理邏輯
@@ -192,9 +194,40 @@ const Overview_RecentDiagnosis = ({
 
     // 處理西藥
     groupedMedications.forEach(group => processMedication(group, false));
-    
+
     // 處理中藥
     groupedChineseMeds.forEach(group => processMedication(group, true));
+
+    // 處理收案資訊
+    if (patientSummaryData && Array.isArray(patientSummaryData)) {
+      patientSummaryData.forEach(item => {
+        // 檢查是否包含收案資訊（通過判斷是否有 "擷取來源為VPN院所登載資料"）
+        if (item.originalText && item.originalText.includes('擷取來源為VPN院所登載資料')) {
+          // 使用全局正則提取所有 <span class='red-sign'> 內容
+          const regex = /<span class='red-sign'>(.*?)<\/span>/g;
+          let match;
+
+          while ((match = regex.exec(item.originalText)) !== null) {
+            const enrollmentText = match[1];
+
+            // 解析收案文字，格式: "糖尿病(DM)照護方案個案(由門諾醫院收案)"
+            // 提取程式名稱與醫院名稱
+            const programMatch = enrollmentText.match(/^(.+?)(?:方案)?個案\(由(.+?)收案\)$/);
+
+            if (programMatch) {
+              const programName = programMatch[1].trim();
+              const hospital = programMatch[2].trim();
+
+              enrollmentCases.push({
+                programName: programName,
+                hospital: hospital,
+                fullText: enrollmentText
+              });
+            }
+          }
+        }
+      });
+    }
 
     // 使用Map定義每種類別的排序邏輯
     const sorters = new Map([
@@ -221,11 +254,11 @@ const Overview_RecentDiagnosis = ({
         return [...data].sort((a, b) => {
           const dateA = parseDate(a.date);
           const dateB = parseDate(b.date);
-          
+
           if (!dateA || !dateB) {
             return a.date.localeCompare(b.date);
           }
-          
+
           return dateB - dateA;
         });
       }],
@@ -233,11 +266,11 @@ const Overview_RecentDiagnosis = ({
         return [...data].sort((a, b) => {
           const dateA = parseDate(a.date);
           const dateB = parseDate(b.date);
-          
+
           if (!dateA || !dateB) {
             return a.date.localeCompare(b.date);
           }
-          
+
           return dateB - dateA;
         });
       }],
@@ -245,11 +278,11 @@ const Overview_RecentDiagnosis = ({
         return [...data].sort((a, b) => {
           const dateA = parseDate(a.date);
           const dateB = parseDate(b.date);
-          
+
           if (!dateA || !dateB) {
             return a.date.localeCompare(b.date);
           }
-          
+
           return dateB - dateA;
         });
       }]
@@ -259,51 +292,66 @@ const Overview_RecentDiagnosis = ({
       outpatient: sorters.get("outpatient")(outpatientDiagnoses),
       emergency: sorters.get("emergency")(emergencyDiagnoses),
       inpatient: sorters.get("inpatient")(inpatientDiagnoses),
-      vaccines: sorters.get("vaccines")(vaccineRecords)
+      vaccines: sorters.get("vaccines")(vaccineRecords),
+      enrollment: enrollmentCases
     };
-  }, [groupedMedications, groupedChineseMeds, trackingDays]);
+  }, [groupedMedications, groupedChineseMeds, patientSummaryData, trackingDays]);
 
   // 檢查是否有診斷數據
   const hasDiagnoses = useMemo(() => {
     return diagnosisData.outpatient.length > 0 ||
-           diagnosisData.emergency.length > 0 ||
-           diagnosisData.inpatient.length > 0 ||
-           diagnosisData.vaccines.length > 0;
+      diagnosisData.emergency.length > 0 ||
+      diagnosisData.inpatient.length > 0 ||
+      diagnosisData.vaccines.length > 0 ||
+      diagnosisData.enrollment.length > 0;
   }, [diagnosisData]);
 
   // 使用Map來定義類別顯示配置
   const categoryConfig = new Map([
-    ["門診", { 
-      shortTitle: "門", 
-      color: "primary.main", 
+    ["門診", {
+      shortTitle: "門",
+      color: "primary.main",
       bgColor: alpha("#2196f3", 0.15),
-      isInpatient: false, 
-      isEmergency: false, 
-      isVaccine: false 
+      isInpatient: false,
+      isEmergency: false,
+      isVaccine: false,
+      isEnrollment: false
     }],
-    ["急診", { 
-      shortTitle: "急", 
-      color: "#c62828", 
+    ["急診", {
+      shortTitle: "急",
+      color: "#c62828",
       bgColor: alpha("#c62828", 0.15),
-      isInpatient: false, 
-      isEmergency: true, 
-      isVaccine: false 
+      isInpatient: false,
+      isEmergency: true,
+      isVaccine: false,
+      isEnrollment: false
     }],
-    ["住診", { 
-      shortTitle: "住", 
-      color: "#388e3c", 
+    ["住診", {
+      shortTitle: "住",
+      color: "#388e3c",
       bgColor: alpha("#388e3c", 0.2),
-      isInpatient: true, 
-      isEmergency: false, 
-      isVaccine: false 
+      isInpatient: true,
+      isEmergency: false,
+      isVaccine: false,
+      isEnrollment: false
     }],
-    ["疫苗", { 
-      shortTitle: "疫", 
-      color: "#1565c0", 
+    ["疫苗", {
+      shortTitle: "疫",
+      color: "#1565c0",
       bgColor: alpha("#1565c0", 0.18),
-      isInpatient: false, 
-      isEmergency: false, 
-      isVaccine: true 
+      isInpatient: false,
+      isEmergency: false,
+      isVaccine: true,
+      isEnrollment: false
+    }],
+    ["案", {
+      shortTitle: "案",
+      color: "#7b1fa2",
+      bgColor: alpha("#7b1fa2", 0.15),
+      isInpatient: false,
+      isEmergency: false,
+      isVaccine: false,
+      isEnrollment: true
     }]
   ]);
 
@@ -318,7 +366,7 @@ const Overview_RecentDiagnosis = ({
 
     // 從Map中獲取類別配置
     const config = categoryConfig.get(title) || categoryConfig.get("門診"); // 默認為門診配置
-    const { shortTitle, color, bgColor, isInpatient, isEmergency, isVaccine } = config;
+    const { shortTitle, color, bgColor, isInpatient, isEmergency, isVaccine, isEnrollment } = config;
 
     return (
       <TableRow>
@@ -417,7 +465,28 @@ const Overview_RecentDiagnosis = ({
                   generalDisplaySettings={generalDisplaySettings}
                   sx={{ mr: 1 }}
                 >
-                  {isVaccine ? (
+                  {isEnrollment ? (
+                    // 對於收案，顯示程式名稱和醫院
+                    <>
+                      {diagnosis.programName}
+                      {diagnosis.hospital && (
+                        <Chip
+                          size="small"
+                          label={diagnosis.hospital}
+                          sx={{
+                            fontSize: '0.7rem',
+                            height: '20px',
+                            ml: 1,
+                            bgcolor: alpha(color, 0.1),
+                            color: color,
+                            border: '1px solid',
+                            borderColor: alpha(color, 0.3),
+                            '& .MuiChip-label': { px: 1 }
+                          }}
+                        />
+                      )}
+                    </>
+                  ) : isVaccine ? (
                     // 對於疫苗，僅顯示藥物名稱（日期和醫院現在在芯片中）
                     <>{diagnosis.medications?.join(', ')}</>
                   ) : isInpatient || isEmergency ? (
@@ -464,7 +533,9 @@ const Overview_RecentDiagnosis = ({
                   <Box>
                     {diagnoses.slice(5).map((diagnosis) => (
                       <Box key={diagnosis.key} sx={{ mb: 0.5 }}>
-                        {isVaccine ? (
+                        {isEnrollment ? (
+                          <>{diagnosis.programName} {diagnosis.hospital}</>
+                        ) : isVaccine ? (
                           <>{diagnosis.date}{diagnosis.hospital ? ` (${diagnosis.hospital})` : ''}: {diagnosis.medications?.join(', ')}</>
                         ) : isInpatient ? (
                           <>{diagnosis.date}{diagnosis.hospital ? ` (${diagnosis.hospital})` : ''}: {diagnosis.name}</>
@@ -507,7 +578,7 @@ const Overview_RecentDiagnosis = ({
           generalDisplaySettings={generalDisplaySettings}
           gutterBottom
         >
-          半年內就醫診斷
+          就醫診斷與收案
         </TypographySizeWrapper>
 
         {!hasDiagnoses ? (
@@ -526,45 +597,61 @@ const Overview_RecentDiagnosis = ({
 
               {/* 添加分隔線（如果有更多類別） */}
               {diagnosisData.outpatient.length > 0 &&
-               (diagnosisData.emergency.length > 0 ||
-                diagnosisData.inpatient.length > 0 ||
-                diagnosisData.vaccines.length > 0) && (
-                <TableRow>
-                  <TableCell colSpan={2} sx={{ padding: '4px 0' }}>
-                    <Divider />
-                  </TableCell>
-                </TableRow>
-              )}
+                (diagnosisData.emergency.length > 0 ||
+                  diagnosisData.inpatient.length > 0 ||
+                  diagnosisData.vaccines.length > 0) && (
+                  <TableRow>
+                    <TableCell colSpan={2} sx={{ padding: '4px 0' }}>
+                      <Divider />
+                    </TableCell>
+                  </TableRow>
+                )}
 
               {/* 渲染急診診斷 */}
               {renderDiagnosisCategory("急診", diagnosisData.emergency)}
 
               {/* 如果需要添加分隔線 */}
               {diagnosisData.emergency.length > 0 &&
-               (diagnosisData.inpatient.length > 0 ||
-                diagnosisData.vaccines.length > 0) && (
-                <TableRow>
-                  <TableCell colSpan={2} sx={{ padding: '4px 0' }}>
-                    <Divider />
-                  </TableCell>
-                </TableRow>
-              )}
+                (diagnosisData.inpatient.length > 0 ||
+                  diagnosisData.vaccines.length > 0) && (
+                  <TableRow>
+                    <TableCell colSpan={2} sx={{ padding: '4px 0' }}>
+                      <Divider />
+                    </TableCell>
+                  </TableRow>
+                )}
 
               {/* 渲染住院診斷 */}
               {renderDiagnosisCategory("住診", diagnosisData.inpatient)}
 
               {/* 添加疫苗前的分隔線（如果需要） */}
               {diagnosisData.inpatient.length > 0 &&
-               diagnosisData.vaccines.length > 0 && (
-                <TableRow>
-                  <TableCell colSpan={2} sx={{ padding: '4px 0' }}>
-                    <Divider />
-                  </TableCell>
-                </TableRow>
-              )}
+                diagnosisData.vaccines.length > 0 && (
+                  <TableRow>
+                    <TableCell colSpan={2} sx={{ padding: '4px 0' }}>
+                      <Divider />
+                    </TableCell>
+                  </TableRow>
+                )}
 
               {/* 渲染疫苗記錄 */}
               {renderDiagnosisCategory("疫苗", diagnosisData.vaccines)}
+
+              {/* 添加收案前的分隔線（如果需要） */}
+              {(diagnosisData.outpatient.length > 0 ||
+                diagnosisData.emergency.length > 0 ||
+                diagnosisData.inpatient.length > 0 ||
+                diagnosisData.vaccines.length > 0) &&
+                diagnosisData.enrollment.length > 0 && (
+                  <TableRow>
+                    <TableCell colSpan={2} sx={{ padding: '4px 0' }}>
+                      <Divider />
+                    </TableCell>
+                  </TableRow>
+                )}
+
+              {/* 渲染收案資訊 */}
+              {renderDiagnosisCategory("案", diagnosisData.enrollment)}
             </TableBody>
           </Table>
         )}
