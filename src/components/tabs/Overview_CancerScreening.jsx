@@ -12,10 +12,10 @@ import BiotechIcon from "@mui/icons-material/Biotech";
 const Overview_CancerScreening = ({ cancerScreeningData, generalDisplaySettings = {} }) => {
   // Extract display settings with defaults
   const { titleTextSize = 'medium', contentTextSize = 'medium' } = generalDisplaySettings;
-  
+
   // State to store the combined data from props or window global
   const [combinedData, setCombinedData] = useState(cancerScreeningData);
-  
+
   // Check for data in window global as fallback
   useEffect(() => {
     // If prop data exists, use it
@@ -23,7 +23,7 @@ const Overview_CancerScreening = ({ cancerScreeningData, generalDisplaySettings 
       setCombinedData(cancerScreeningData);
       return;
     }
-    
+
     // Otherwise, try to get data from window global
     if (window.cancerScreeningData) {
       setCombinedData(window.cancerScreeningData);
@@ -34,12 +34,10 @@ const Overview_CancerScreening = ({ cancerScreeningData, generalDisplaySettings 
   const hasData = () => {
     const result = (
       combinedData &&
-      combinedData.originalData &&
-      combinedData.originalData.robject &&
-      combinedData.originalData.robject.result_data &&
-      Object.keys(combinedData.originalData.robject.result_data).length > 0
+      combinedData.result_data &&
+      Object.keys(combinedData.result_data).length > 0
     );
-    
+
     return result;
   };
 
@@ -56,13 +54,13 @@ const Overview_CancerScreening = ({ cancerScreeningData, generalDisplaySettings 
   // Function to render screening item if data is available
   const renderScreeningItem = (type, label) => {
     if (!hasData()) return null;
-    
-    const data = combinedData.originalData.robject.result_data;
-    
+
+    const data = combinedData.result_data;
+
     if (!data[type] || !data[type].subData || !Array.isArray(data[type].subData) || data[type].subData.length === 0) {
       return (
-        <Typography 
-          variant="body2" 
+        <Typography
+          variant="body2"
           sx={{ fontSize: getTextSize(contentTextSize), mb: 0.5 }}
           key={type}
         >
@@ -70,19 +68,19 @@ const Overview_CancerScreening = ({ cancerScreeningData, generalDisplaySettings 
         </Typography>
       );
     }
-    
+
     const latestData = data[type].subData[0];
-    
+
     return (
-      <Typography 
-        variant="body2" 
+      <Typography
+        variant="body2"
         sx={{ fontSize: getTextSize(contentTextSize), mb: 0.5 }}
         key={type}
       >
-        {label}: {latestData.result} 
-        <Typography 
-          component="span" 
-          variant="body2" 
+        {label}: {latestData.result}
+        <Typography
+          component="span"
+          variant="body2"
           color="text.secondary"
           sx={{ fontSize: getTextSize(contentTextSize) }}
         >

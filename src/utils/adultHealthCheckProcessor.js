@@ -13,41 +13,17 @@ export const adultHealthCheckProcessor = {
     try {
       // Check for data in rawData.rObject (standard structure)
       if (rawData?.rObject?.result_data) {
-        // Deep copy the raw data to avoid reference issues
-        const originalData = {
-          robject: {
-            result_data: JSON.parse(JSON.stringify(rawData.rObject.result_data))
-          }
+        // Return the result_data directly
+        return {
+          result_data: rawData.rObject.result_data
         };
-        
-        // Process data into the expected format
-        const processedData = {
-          originalData
-        };
-        
-        return processedData;
       }
-      
-      // Check for data in rawData.originalData.robject (alternative structure)
-      if (rawData?.originalData?.robject) {
-        // Deep copy the raw data to avoid reference issues
-        const originalData = {
-          robject: {
-            result_data: JSON.parse(JSON.stringify(rawData.originalData.robject))
-          }
-        };
-        
-        // Process data into the expected format
-        const processedData = {
-          originalData
-        };
-        
-        return processedData;
-      }
-      
-      return { originalData: null };
+
+      // No valid data found
+      return { result_data: null };
     } catch (error) {
-      return { originalData: null };
+      console.error('Error processing adult health check data:', error);
+      return { result_data: null };
     }
   }
 }; 

@@ -67,6 +67,7 @@ logs
 __tests__/coverage
 .coverage
 zip/
+.test_data/
 
 # Claude Code configuration
 CLAUDE.md

@@ -24,7 +24,7 @@ async function loadCustomFormatSettings() {
       customMedicationDrugCopyFormat: [],
       drugSeparator: ",",
     };
-    
+
     chrome.storage.sync.get(defaultSettings, (settings) => {
       resolve(settings);
     });
@@ -65,10 +65,10 @@ function notifyExtensionDataLoaded(source, dataTypes) {
  */
 function setGlobalMedicationFormatSettings(settings) {
   // console.log("設置全局藥物格式設定:", settings);
-  
+
   // 創建一個深度複製的全局格式設定
   window.medicationFormatSettings = {};
-  
+
   // 複製基本設定
   Object.keys(settings).forEach(key => {
     if (!Array.isArray(settings[key])) {
@@ -78,17 +78,17 @@ function setGlobalMedicationFormatSettings(settings) {
       window.medicationFormatSettings[key] = JSON.parse(JSON.stringify(settings[key]));
     }
   });
-  
+
   // 驗證複製後的數組是否完整
-  if (Array.isArray(settings.customMedicationHeaderCopyFormat) && 
-      Array.isArray(settings.customMedicationDrugCopyFormat)) {
+  if (Array.isArray(settings.customMedicationHeaderCopyFormat) &&
+    Array.isArray(settings.customMedicationDrugCopyFormat)) {
     // console.log("驗證自定義格式數組設置後:", {
     //   原始標題長度: settings.customMedicationHeaderCopyFormat.length,
     //   複製後標題長度: window.medicationFormatSettings.customMedicationHeaderCopyFormat.length,
     //   原始藥物長度: settings.customMedicationDrugCopyFormat.length,
     //   複製後藥物長度: window.medicationFormatSettings.customMedicationDrugCopyFormat.length
     // });
-    
+
     // 直接存儲到全局變量，以防其他方式丟失
     window.customMedicationHeaderCopyFormat = JSON.parse(JSON.stringify(settings.customMedicationHeaderCopyFormat));
     window.customMedicationDrugCopyFormat = JSON.parse(JSON.stringify(settings.customMedicationDrugCopyFormat));
@@ -120,60 +120,77 @@ export async function processLocalData(jsonData, filename) {
       }
     }
 
+    /**
+     * 清理資料，移除 originalData 以節省記憶體
+     * @param {Object} data - 原始資料
+     * @returns {Object} - 清理後的資料
+     */
+    const cleanData = (data) => {
+      if (!data) return data;
+
+      // 如果資料有 originalData，移除它
+      if (data.originalData) {
+        const { originalData, ...cleanedData } = data;
+        return cleanedData;
+      }
+
+      return data;
+    };
+
     // 使用 Map 定義資料類型及其處理邏輯
     const dataTypeHandlers = new Map([
       ['medication', () => {
-        window.lastInterceptedMedicationData = JSON.parse(JSON.stringify(jsonData.medication));
+        window.lastInterceptedMedicationData = cleanData(JSON.parse(JSON.stringify(jsonData.medication)));
         loadedTypes.push('medication');
         triggerDataFetchCompleted('medication');
       }],
       ['lab', () => {
-        window.lastInterceptedLabData = JSON.parse(JSON.stringify(jsonData.lab));
+        window.lastInterceptedLabData = cleanData(JSON.parse(JSON.stringify(jsonData.lab)));
         loadedTypes.push('labData');
         triggerDataFetchCompleted('lab');
       }],
       ['chinesemed', () => {
-        window.lastInterceptedChineseMedData = JSON.parse(JSON.stringify(jsonData.chinesemed));
+        window.lastInterceptedChineseMedData = cleanData(JSON.parse(JSON.stringify(jsonData.chinesemed)));
         loadedTypes.push('chineseMed');
         triggerDataFetchCompleted('chinesemed');
       }],
       ['imaging', () => {
-        window.lastInterceptedImagingData = JSON.parse(JSON.stringify(jsonData.imaging));
+        window.lastInterceptedImagingData = cleanData(JSON.parse(JSON.stringify(jsonData.imaging)));
         loadedTypes.push('imaging');
         triggerDataFetchCompleted('imaging');
       }],
       ['allergy', () => {
-        window.lastInterceptedAllergyData = JSON.parse(JSON.stringify(jsonData.allergy));
+        window.lastInterceptedAllergyData = cleanData(JSON.parse(JSON.stringify(jsonData.allergy)));
         loadedTypes.push('allergy');
         triggerDataFetchCompleted('allergy');
       }],
       ['surgery', () => {
-        window.lastInterceptedSurgeryData = JSON.parse(JSON.stringify(jsonData.surgery));
+        window.lastInterceptedSurgeryData = cleanData(JSON.parse(JSON.stringify(jsonData.surgery)));
         loadedTypes.push('surgery');
         triggerDataFetchCompleted('surgery');
       }],
       ['discharge', () => {
-        window.lastInterceptedDischargeData = JSON.parse(JSON.stringify(jsonData.discharge));
+        window.lastInterceptedDischargeData = cleanData(JSON.parse(JSON.stringify(jsonData.discharge)));
         loadedTypes.push('discharge');
         triggerDataFetchCompleted('discharge');
       }],
       ['medDays', () => {
-        window.lastInterceptedMedDaysData = JSON.parse(JSON.stringify(jsonData.medDays));
+        window.lastInterceptedMedDaysData = cleanData(JSON.parse(JSON.stringify(jsonData.medDays)));
         loadedTypes.push('medDays');
         triggerDataFetchCompleted('medDays');
       }],
       ['patientSummary', () => {
-        window.lastInterceptedPatientSummaryData = JSON.parse(JSON.stringify(jsonData.patientSummary));
+        window.lastInterceptedPatientSummaryData = cleanData(JSON.parse(JSON.stringify(jsonData.patientSummary)));
         loadedTypes.push('patientSummary');
         triggerDataFetchCompleted('patientSummary');
       }],
       ['adultHealthCheck', () => {
-        window.lastInterceptedAdultHealthCheckData = JSON.parse(JSON.stringify(jsonData.adultHealthCheck));
+        window.lastInterceptedAdultHealthCheckData = cleanData(JSON.parse(JSON.stringify(jsonData.adultHealthCheck)));
         loadedTypes.push('adultHealthCheck');
         triggerDataFetchCompleted('adultHealthCheck');
       }],
       ['cancerScreening', () => {
-        window.lastInterceptedCancerScreeningData = JSON.parse(JSON.stringify(jsonData.cancerScreening));
+        window.lastInterceptedCancerScreeningData = cleanData(JSON.parse(JSON.stringify(jsonData.cancerScreening)));
         loadedTypes.push('cancerScreening');
         triggerDataFetchCompleted('cancerScreening');
       }]
@@ -196,11 +213,11 @@ export async function processLocalData(jsonData, filename) {
 
       // 通知擴充功能資料已載入
       notifyExtensionDataLoaded(filename, loadedTypes);
-      
+
       // 直接保存到 localStorage 並廣播資料
       try {
         // console.log('將資料保存到 localStorage ...');
-        
+
         // 先將數據保存到 localStorage
         const dataToShare = {
           medication: window.lastInterceptedMedicationData,
@@ -220,14 +237,14 @@ export async function processLocalData(jsonData, filename) {
           specialChineseMedCare: window.lastInterceptedSpecialChineseMedCareData,
           timestamp: Date.now()
         };
-        
+
         // 保存到 localStorage
         localStorage.setItem('NHITW_DATA', JSON.stringify(dataToShare));
         // console.log('數據已保存到 localStorage');
-        
+
         // 觸發 storage 事件，便於其他擴充功能監聽
         window.dispatchEvent(new Event('storage'));
-        
+
         // 如果有廣播函數，也調用它以保持兼容性
         // if (typeof broadcastDataToOtherExtensions === 'function') {
         //   broadcastDataToOtherExtensions();
@@ -355,7 +372,7 @@ export const localDataHandler = {
       } catch (error) {
         console.error('加載自定義格式設定時出錯:', error);
       }
-      
+
       // 根據結構和檔名處理不同資料類型
       await this.processJsonData(data, localDataStatus, filename);
     } catch (error) {
@@ -424,7 +441,7 @@ export const localDataHandler = {
     // 從檔名判斷
     if (filename) {
       const lowerFilename = filename.toLowerCase();
-      
+
       for (const [pattern, type] of filenamePatterns.entries()) {
         if (pattern.test(lowerFilename)) {
           return type;
@@ -442,7 +459,7 @@ export const localDataHandler = {
     // 從資料結構判斷
     if (data.rObject && Array.isArray(data.rObject) && data.rObject.length > 0) {
       const firstRecord = data.rObject[0];
-      
+
       for (const [fields, type] of fieldPatterns.entries()) {
         if (fields.some(field => firstRecord[field])) {
           return type;

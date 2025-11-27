@@ -15,7 +15,7 @@ const Overview_AdultHealthCheck = ({ adultHealthCheckData, generalDisplaySetting
 
   // State to store the combined data from props or window global
   const [combinedData, setCombinedData] = useState(adultHealthCheckData);
-  
+
   // Check for data in window global as fallback
   useEffect(() => {
     // If prop data exists, use it
@@ -23,7 +23,7 @@ const Overview_AdultHealthCheck = ({ adultHealthCheckData, generalDisplaySetting
       setCombinedData(adultHealthCheckData);
       return;
     }
-    
+
     // Otherwise, try to get data from window global
     if (window.adultHealthCheckData) {
       setCombinedData(window.adultHealthCheckData);
@@ -34,12 +34,10 @@ const Overview_AdultHealthCheck = ({ adultHealthCheckData, generalDisplaySetting
   const hasData = () => {
     const result = (
       combinedData &&
-      combinedData.originalData &&
-      combinedData.originalData.robject &&
-      combinedData.originalData.robject.result_data &&
-      Object.keys(combinedData.originalData.robject.result_data).length > 0
+      combinedData.result_data &&
+      Object.keys(combinedData.result_data).length > 0
     );
-    
+
     return result;
   };
 
@@ -56,88 +54,88 @@ const Overview_AdultHealthCheck = ({ adultHealthCheckData, generalDisplaySetting
   // Function to render health check data if available
   const renderHealthCheckItem = () => {
     if (!hasData()) return null;
-    
-    const data = combinedData.originalData.robject.result_data;
-    
+
+    const data = combinedData.result_data;
+
     try {
       // Check if result_data is an array within the data object
-      const resultDataArray = Array.isArray(data.result_data) ? data.result_data : data;
-      
+      const resultDataArray = Array.isArray(data) ? data : [data];
+
       // Make sure we have data to display
       if (!resultDataArray || resultDataArray.length === 0) {
         return (
-          <Typography 
-            variant="body2" 
+          <Typography
+            variant="body2"
             sx={{ fontSize: getTextSize(contentTextSize) }}
           >
             無資料
           </Typography>
         );
       }
-      
+
       const latestData = resultDataArray[0]; // Use the first item in the result_data array
-      
+
       return (
         <>
           {/* Title/Date */}
           {latestData.title && (
-            <Typography 
-              variant="body2" 
+            <Typography
+              variant="body2"
               sx={{ fontSize: getTextSize(contentTextSize), mb: 0.5, fontWeight: 'medium' }}
             >
               {latestData.title}
             </Typography>
           )}
-          
+
           {/* Physical measurements */}
-          <Typography 
-            variant="body2" 
+          <Typography
+            variant="body2"
             sx={{ fontSize: getTextSize(contentTextSize), mb: 0.5 }}
           >
-            身高 {latestData.height || '--'} 
-            {' '}/體重 {latestData.weight || '--'} 
-            {' '}/BMI {latestData.bmi || '--'} 
+            身高 {latestData.height || '--'}
+            {' '}/體重 {latestData.weight || '--'}
+            {' '}/BMI {latestData.bmi || '--'}
             {' '}/腰圍 {latestData.waistline || '--'}
             {' '}/血壓 {latestData.base_sbp || '--'}/{latestData.base_ebp || '--'}
           </Typography>
-          
+
           {/* Blood lipids and glucose */}
-          <Typography 
-            variant="body2" 
+          <Typography
+            variant="body2"
             sx={{ fontSize: getTextSize(contentTextSize), mb: 0.5 }}
           >
-            Chol {latestData.cho || '--'} 
-            {' '}/TG {latestData.blod_tg || '--'} 
-            {' '}/LDL {latestData.ldl || '--'} 
-            {' '}/HDL {latestData.hdl || '--'} 
+            Chol {latestData.cho || '--'}
+            {' '}/TG {latestData.blod_tg || '--'}
+            {' '}/LDL {latestData.ldl || '--'}
+            {' '}/HDL {latestData.hdl || '--'}
             {' '}/血糖 {latestData.s_09005c || '--'}
           </Typography>
-          
+
           {/* Kidney function */}
-          <Typography 
-            variant="body2" 
+          <Typography
+            variant="body2"
             sx={{ fontSize: getTextSize(contentTextSize), mb: 0.5 }}
           >
-            BUN {latestData.urine_bun || '--'} 
-            {' '}/Cr {latestData.blod_creat || '--'} 
-            {' '}/GFR {latestData.egfr || '--'} 
+            BUN {latestData.urine_bun || '--'}
+            {' '}/Cr {latestData.blod_creat || '--'}
+            {' '}/GFR {latestData.egfr || '--'}
             {' '}/尿蛋白 {latestData.urine_protein || '--'}
           </Typography>
-          
+
           {/* Liver function */}
-          <Typography 
-            variant="body2" 
+          <Typography
+            variant="body2"
             sx={{ fontSize: getTextSize(contentTextSize) }}
           >
-            GOT {latestData.sgot || '--'} 
+            GOT {latestData.sgot || '--'}
             {' '}/GPT {latestData.sgpt || '--'}
           </Typography>
         </>
       );
     } catch (error) {
       return (
-        <Typography 
-          variant="body2" 
+        <Typography
+          variant="body2"
           sx={{ fontSize: getTextSize(contentTextSize) }}
         >
           資料格式錯誤: {error.message}

@@ -216,7 +216,7 @@ function isOnLoginPage() {
 // 檢查是否在目標頁面
 function isOnTargetPage() {
   const url = window.location.href;
-  
+
   // 使用 Map 存儲目標頁面路徑
   const targetPaths = new Map([
     ["medcloud2.nhi.gov.tw/imu/IMUE1000/IMUE0008", "用藥紀錄"],
@@ -232,7 +232,7 @@ function isOnTargetPage() {
       return true;
     }
   }
-  
+
   return false;
 }
 
@@ -252,14 +252,14 @@ const pageTypeMap = new Map([
 // 判斷頁面類型
 function getPageType() {
   const url = window.location.href;
-  
+
   // 檢查 URL 是否包含定義在 Map 中的任何一個路徑
   for (const [path, type] of pageTypeMap.entries()) {
     if (url.includes(path)) {
       return type;
     }
   }
-  
+
   return "unknown";
 }
 
@@ -519,7 +519,7 @@ const DataProcessor = {
     // ["acupuncture", "/imu/api/imue0100/imue0100s02/get-data"],
     // ["specialChineseMedCare", "/imu/api/imue0170/imue0170s02/get-data"]
   ]),
-  
+
   // 數據類型與對應的全局變數
   dataVarMap: new Map([
     ["medication", "lastInterceptedMedicationData"],
@@ -538,7 +538,7 @@ const DataProcessor = {
     // ["acupuncture", "lastInterceptedAcupunctureData"],
     // ["specialChineseMedCare", "lastInterceptedSpecialChineseMedCareData"]
   ]),
-  
+
   // 數據類型與對應的 action
   actionMap: new Map([
     ["medication", "saveMedicationData"],
@@ -557,7 +557,7 @@ const DataProcessor = {
     // ["acupuncture", "saveAcupunctureData"],
     // ["specialChineseMedCare", "saveSpecialChineseMedCareData"]
   ]),
-  
+
   // 數據類型與對應的中文顯示文字
   typeTextMap: new Map([
     ["medication", "西醫藥歷"],
@@ -576,61 +576,60 @@ const DataProcessor = {
     // ["acupuncture", "針灸治療"],
     // ["specialChineseMedCare", "特殊中醫處置"]
   ]),
-  
+
   // 處理原始數據，統一數據格式
   normalizeData(data, dataType) {
     // 檢查 robject（小寫）或 rObject（大寫），兩者都接受
     const recordsArray = data.rObject || data.robject;
-    
+
     // 對 masterMenu 類型特殊處理
     const isMasterMenu = dataType === "masterMenu";
-    
+
     if (!data || (!recordsArray && !isMasterMenu)) {
       console.error(`Invalid data for type ${dataType}`);
       return null;
     }
-    
-    // 統一格式
+
+    // 統一格式，只保留 rObject，不再儲存 originalData 以節省記憶體
     return {
-      rObject: isMasterMenu ? [data] : recordsArray,
-      originalData: data,
+      rObject: isMasterMenu ? [data] : recordsArray
     };
   },
-  
+
   // 檢查數據是否為有效
   isValidData(data, dataType) {
     if (!data) return false;
-    
+
     // 對 masterMenu 類型特殊處理
     if (dataType === "masterMenu") return true;
-    
+
     const recordsArray = data.rObject || data.robject;
     return recordsArray && Array.isArray(recordsArray);
   },
-  
+
   // 獲取數據類型對應的變數名
   getVarName(dataType) {
     return this.dataVarMap.get(dataType);
   },
-  
+
   // 獲取數據類型對應的 action
   getAction(dataType) {
     return this.actionMap.get(dataType);
   },
-  
+
   // 獲取數據類型對應的顯示文字
   getTypeText(dataType) {
     return this.typeTextMap.get(dataType);
   },
-  
+
   // 根據 URL 獲取對應的數據類型
   getDataTypeFromUrl(url) {
     const foundEntry = Array.from(this.API_URL_PATTERNS.entries())
       .find(([_, pattern]) => url.includes(pattern));
-    
+
     return foundEntry ? foundEntry[0] : null;
   },
-  
+
   // 處理 API 響應數據
   processApiResponse(data, url, source = "API") {
     const dataType = this.getDataTypeFromUrl(url);
@@ -638,26 +637,26 @@ const DataProcessor = {
       console.log("無法從 URL 確定數據類型:", url);
       return null;
     }
-    
+
     // 標準化數據
     const normalizedData = this.normalizeData(data, dataType);
     if (!normalizedData) return null;
-    
+
     // 更新全局變數
     const varName = this.getVarName(dataType);
     if (varName) {
       window[varName] = normalizedData;
     }
-    
+
     // 保存數據
     this.saveData(normalizedData, dataType, source);
-    
+
     return {
       dataType,
       data: normalizedData
     };
   },
-  
+
   // 保存數據到 localStorage
   saveDataToLocalStorage() {
     try {
@@ -665,7 +664,7 @@ const DataProcessor = {
       const dataToShare = {
         timestamp: Date.now() // 添加时间戳以识别数据新鲜度
       };
-      
+
       // 從 dataVarMap 中獲取所有數據類型和對應的變數名
       // 這樣避免硬編碼重複數據類型，使維護更容易
       for (const [dataType, varName] of this.dataVarMap.entries()) {
@@ -673,15 +672,15 @@ const DataProcessor = {
         const storageKey = dataType === 'labdata' ? 'lab' : dataType;
         dataToShare[storageKey] = window[varName];
       }
-      
+
       // 檢查是否有數據
-      const hasData = Object.values(dataToShare).some(value => 
+      const hasData = Object.values(dataToShare).some(value =>
         value !== null && value !== undefined && value !== false && value !== ''
       );
-      
+
       if (hasData) {
         localStorage.setItem('NHITW_DATA', JSON.stringify(dataToShare));
-        
+
         // 觸發存儲事件，便於其他擴展監聽
         window.dispatchEvent(new Event('storage'));
       }
@@ -689,7 +688,7 @@ const DataProcessor = {
       console.error('保存数据到 localStorage 时出错:', error);
     }
   },
-  
+
   // 驗證數據有效性並更新全局變數
   validateAndUpdateData(data, dataType) {
     // 使用內部方法進行數據驗證和處理
@@ -697,7 +696,7 @@ const DataProcessor = {
       console.error(`無效的數據類型: ${dataType}`);
       return false;
     }
-    
+
     // 更新全局變數
     const varName = this.getVarName(dataType);
     if (varName) {
@@ -705,19 +704,19 @@ const DataProcessor = {
     }
 
     const action = this.getAction(dataType);
-    
+
     if (!action) {
       console.error(`不支援的資料類型: ${dataType}`);
       return false;
     }
-    
+
     return true;
   },
-  
+
   // 發送數據到後台腳本
   sendDataToBackground(data, dataType) {
     const action = this.getAction(dataType);
-    
+
     chrome.runtime.sendMessage(
       {
         action: action,
@@ -732,7 +731,7 @@ const DataProcessor = {
       }
     );
   },
-  
+
   // 保存數據函數
   saveData(data, dataType, source = "unknown") {
     // 數據檢驗和更新邏輯
@@ -742,7 +741,7 @@ const DataProcessor = {
 
     // 發送消息到後台腳本
     this.sendDataToBackground(data, dataType);
-    
+
     // 保存到 localStorage
     this.saveDataToLocalStorage();
   },
@@ -788,10 +787,10 @@ function setupMonitoring() {
       if (event === "load" || event === "readystatechange") {
         const newHandler = function () {
           // 檢查 URL 是否匹配任一 API 模式
-          const isTargetUrl = Array.from(DataProcessor.API_URL_PATTERNS.values()).some(pattern => 
+          const isTargetUrl = Array.from(DataProcessor.API_URL_PATTERNS.values()).some(pattern =>
             originalUrl && originalUrl.includes(pattern)
           );
-          
+
           if (isTargetUrl) {
             console.log(
               `XHR ${event} event fired for: ${originalUrl}, readyState: ${this.readyState}, status: ${this.status}`
@@ -839,10 +838,10 @@ function setupMonitoring() {
     };
 
     // 檢查 URL 是否匹配任一 API 模式
-    const isTargetUrl = Array.from(DataProcessor.API_URL_PATTERNS.values()).some(pattern => 
+    const isTargetUrl = Array.from(DataProcessor.API_URL_PATTERNS.values()).some(pattern =>
       originalUrl && originalUrl.includes(pattern)
     );
-    
+
     if (isTargetUrl) {
       console.log(`Monitoring XHR request to: ${originalUrl}`);
     }
@@ -859,14 +858,14 @@ function setupMonitoring() {
       typeof input === "string"
         ? input
         : input instanceof Request
-        ? input.url
-        : null;
+          ? input.url
+          : null;
 
     // 檢查 URL 是否匹配任一 API 模式
-    const isTargetUrl = Array.from(DataProcessor.API_URL_PATTERNS.values()).some(pattern => 
+    const isTargetUrl = Array.from(DataProcessor.API_URL_PATTERNS.values()).some(pattern =>
       url && url.includes(pattern)
     );
-    
+
     if (isTargetUrl) {
       console.log(`Monitoring fetch request to: ${url}`);
 
@@ -942,7 +941,7 @@ function validateAndUpdateData(data, dataType) {
     console.error(`無效的數據類型: ${dataType}`);
     return false;
   }
-  
+
   // 更新全局變數
   const varName = DataProcessor.getVarName(dataType);
   if (varName) {
@@ -950,19 +949,19 @@ function validateAndUpdateData(data, dataType) {
   }
 
   const action = DataProcessor.getAction(dataType);
-  
+
   if (!action) {
     console.error(`不支援的資料類型: ${dataType}`);
     return false;
   }
-  
+
   return true;
 }
 
 // 发送数据到后台脚本
 function sendDataToBackground(data, dataType) {
   const action = DataProcessor.getAction(dataType);
-  
+
   chrome.runtime.sendMessage(
     {
       action: action,
@@ -1016,10 +1015,10 @@ function captureXhrRequestHeaders() {
     this._url = url;
 
     // 檢查 URL 是否匹配任一 API 模式
-    const isTargetUrl = Array.from(DataProcessor.API_URL_PATTERNS.values()).some(pattern => 
+    const isTargetUrl = Array.from(DataProcessor.API_URL_PATTERNS.values()).some(pattern =>
       url && url.includes(pattern)
     );
-    
+
     if (isTargetUrl) {
       const xhr = this;
       this.addEventListener("loadend", function () {
@@ -1190,7 +1189,7 @@ function shouldFetchData(dataType) {
       });
     });
   }
-  
+
   // 其他資料類型預設為 true
   return Promise.resolve(true);
 }
@@ -1273,7 +1272,7 @@ function fetchAllDataTypes() {
           } else {
             // console.log(`${dataType} 設定不抓取或無授權，返回空集合`);
             return Promise.resolve(createEmptyDataResult(dataType));
-          }獲
+          } 獲
         });
       });
 
@@ -1352,7 +1351,7 @@ function fetchAllDataTypes() {
         ["adultHealthCheck", 1], // 成人預防保健資料已獲取
         ["cancerScreening", 1], // 四癌篩檢結果資料已獲取
       ]);
-      
+
       // 填充實際計數
       results.forEach(result => {
         if (result.dataType === "medication") countsMap.set("medication", result.recordCount || 0);
@@ -1487,7 +1486,7 @@ function enhancedFetchData(dataType, options = {}) {
       // 構建 API URL
       const apiPath = apiPathMap.get(dataType);
       let apiUrl;
-      
+
       if (dataType === "patientsummary") {
         apiUrl =
           `https://medcloud2.nhi.gov.tw/imu/api/${apiPath}?drug_phet=false&drug_hemo=false&ctmri_assay=false&ctmri_dent=true&cli_datetime=` +
@@ -1557,7 +1556,7 @@ function enhancedFetchData(dataType, options = {}) {
               dataType === "masterMenu")
           ) {
             let rObject;
-            
+
             if (dataType === "medDays") {
               rObject = Array.isArray(data) ? data : [data];
             } else if (dataType === "patientsummary") {
@@ -1567,18 +1566,17 @@ function enhancedFetchData(dataType, options = {}) {
             } else {
               rObject = Array.isArray(recordsArray) ? recordsArray : [];
             }
-            
+
             const normalizedData = {
-              rObject: rObject,
-              originalData: data,
+              rObject: rObject
             };
-            
+
             // 使用 Map 更新全局變數
             const varName = DataProcessor.getVarName(dataType);
             if (varName) {
               window[varName] = normalizedData;
             }
-            
+
             saveData(normalizedData, dataType, "direct");
             const recordCount = normalizedData.rObject.length;
             // console.log(`${dataType} 請求完成 - ${new Date().toISOString()}`);
@@ -1652,8 +1650,10 @@ function isDataTypeAuthorized(dataType) {
   }
 
   try {
-    const masterMenuData = window.lastInterceptedMasterMenuData.originalData;
-    const prsnAuth = masterMenuData.prsnAuth || [];
+    const masterMenuData = window.lastInterceptedMasterMenuData;
+    // masterMenu 的資料在 rObject[0] 中
+    const menuData = masterMenuData.rObject?.[0] || masterMenuData;
+    const prsnAuth = menuData.prsnAuth || [];
 
     // 反向查找: 從資料類型找到對應的節點ID
     const nodeIds = [];
@@ -1676,8 +1676,7 @@ function isDataTypeAuthorized(dataType) {
 function createEmptyDataResult(dataType) {
   // Create empty data structure
   const emptyData = {
-    rObject: [],
-    originalData: { rObject: [] },
+    rObject: []
   };
 
   // 使用 Map 更新對應的全局變數
@@ -1700,8 +1699,8 @@ function injectFloatingIcon() {
   div.innerHTML = `
     <div style="position: fixed; right: 20px; top: 50%; transform: translateY(-50%); z-index: 9999;">
       <img src="${chrome.runtime.getURL(
-        "images/icon-128.png"
-      )}" style="width: 48px; height: 48px; cursor: pointer;" />
+    "images/icon-128.png"
+  )}" style="width: 48px; height: 48px; cursor: pointer;" />
     </div>
   `;
   div.onclick = () => chrome.runtime.sendMessage({ action: "openPopup" });
@@ -1916,12 +1915,12 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
         )
           .toString()
           .padStart(2, "0")}${date.getDate().toString().padStart(2, "0")}_${date
-          .getHours()
-          .toString()
-          .padStart(2, "0")}${date
-          .getMinutes()
-          .toString()
-          .padStart(2, "0")}.json`;
+            .getHours()
+            .toString()
+            .padStart(2, "0")}${date
+              .getMinutes()
+              .toString()
+              .padStart(2, "0")}.json`;
 
         // 轉換成 JSON 字串
         const jsonString = JSON.stringify(patientData, null, 2);
