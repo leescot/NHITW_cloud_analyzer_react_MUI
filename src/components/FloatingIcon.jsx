@@ -108,6 +108,12 @@ import KidneyStatusIndicator from "./indicators/KidneyStatusIndicator";
 import { DEFAULT_SETTINGS } from "../config/defaultSettings";
 import { DEFAULT_ATC5_GROUPS } from "../config/medicationGroups";
 
+// Import user info utilities
+import {
+  extractUserInfoFromToken,
+  formatUserInfoDisplay,
+} from "../utils/userInfoUtils";
+
 // 刪除未使用的組件和函數，或移動到實際使用它們的地方
 // ImagingTable, getLabStatusColor, getLabValueColor
 
@@ -118,6 +124,7 @@ const FloatingIcon = () => {
   const [open, setOpen] = useState(false);
   const [tabValue, setTabValue] = useState(0);
   const [groupedMedications, setGroupedMedications] = useState([]);
+  const [userInfo, setUserInfo] = useState(null);
   const [groupedLabs, setGroupedLabs] = useState([]);
   const [groupedChineseMeds, setGroupedChineseMeds] = useState([]);
   const [imagingData, setImagingData] = useState({
@@ -222,7 +229,7 @@ const FloatingIcon = () => {
         // 觸發設置重新加載
         initializeSettings();
       }
-      
+
       // 處理切換到自訂設定標籤的消息
       if (message.action === "switchToCustomFormatTab") {
         // 如果對話框未打開，先打開它
@@ -234,7 +241,7 @@ const FloatingIcon = () => {
           setTabValue(message.tabIndex);
         }
       }
-      
+
       // 處理切換到檢驗自訂格式編輯器的消息
       if (message.action === "switchToLabCustomFormatTab") {
         // 如果對話框未打開，先打開它
@@ -246,7 +253,7 @@ const FloatingIcon = () => {
           setTabValue(message.tabIndex);
         }
       }
-      
+
       // 處理打開自訂格式編輯器的消息
       if (message.action === "openCustomFormatEditor") {
         if (!open) {
@@ -370,6 +377,14 @@ const FloatingIcon = () => {
     };
   }, [open, generalDisplaySettings]);
 
+  // Extract user information when the dialog opens or data changes
+  useEffect(() => {
+    if (open) {
+      const info = extractUserInfoFromToken();
+      setUserInfo(info);
+    }
+  }, [open]);
+
   const handleClick = () => {
     setOpen(true);
 
@@ -415,8 +430,8 @@ const FloatingIcon = () => {
     ]);
 
     // 返回匹配的樣式或默認值（底部右側）
-    return positionStyleMap.get(generalDisplaySettings.floatingIconPosition) || 
-           positionStyleMap.get("bottom-right");
+    return positionStyleMap.get(generalDisplaySettings.floatingIconPosition) ||
+      positionStyleMap.get("bottom-right");
   };
 
   return (
@@ -482,8 +497,34 @@ const FloatingIcon = () => {
                 backgroundColor: "#f5f9ff", // Light blue background
                 borderRadius: "8px",
                 boxShadow: "0 2px 4px rgba(0,0,0,0.08)",
+                display: "flex",
+                alignItems: "center",
               }}
             >
+              {/* User Info Display - shown before tabs, not selectable */}
+              {userInfo && formatUserInfoDisplay(userInfo) && (
+                <Box
+                  sx={{
+                    display: "flex",
+                    alignItems: "center",
+                    px: 2,
+                    py: 0.75,
+                    fontWeight: "bold",
+                    color: "#1976d2",
+                    fontSize:
+                      (generalDisplaySettings &&
+                        generalDisplaySettings.contentTextSize &&
+                        CONTENT_TEXT_SIZES[
+                        generalDisplaySettings.contentTextSize
+                        ]) ||
+                      CONTENT_TEXT_SIZES["medium"],
+                    borderRight: "1px solid #e0e0e0",
+                    flexShrink: 0,
+                  }}
+                >
+                  {formatUserInfoDisplay(userInfo)}
+                </Box>
+              )}
               <Tabs
                 value={tabValue}
                 onChange={handleTabChange}
@@ -499,6 +540,7 @@ const FloatingIcon = () => {
                 }}
                 sx={{
                   minHeight: "36px", // Reduced from default 48px
+                  flex: 1,
                   "& .MuiTab-root": {
                     minHeight: "36px", // Reduced tab height
                     padding: "6px 12px", // Reduced padding
@@ -506,7 +548,7 @@ const FloatingIcon = () => {
                       (generalDisplaySettings &&
                         generalDisplaySettings.contentTextSize &&
                         CONTENT_TEXT_SIZES[
-                          generalDisplaySettings.contentTextSize
+                        generalDisplaySettings.contentTextSize
                         ]) ||
                       CONTENT_TEXT_SIZES["medium"], // Use contentTextSize with fallback
                     fontWeight: "medium",
@@ -599,10 +641,9 @@ const FloatingIcon = () => {
                   }}
                 />
                 <Tab
-                  label={`影像 (${
-                    imagingData.withReport.length +
+                  label={`影像 (${imagingData.withReport.length +
                     imagingData.withoutReport.length
-                  })`}
+                    })`}
                   icon={<ImageIcon sx={{ fontSize: "1rem" }} />}
                   iconPosition="start"
                   sx={{
@@ -610,14 +651,14 @@ const FloatingIcon = () => {
                     color:
                       imagingData.withReport.length +
                         imagingData.withoutReport.length >
-                      0
+                        0
                         ? getTabColor(generalDisplaySettings, "imaging")
                         : "#9e9e9e",
                     "&.Mui-selected": {
                       color:
                         imagingData.withReport.length +
                           imagingData.withoutReport.length >
-                        0
+                          0
                           ? getTabSelectedColor(generalDisplaySettings, "imaging")
                           : "#616161",
                     },
