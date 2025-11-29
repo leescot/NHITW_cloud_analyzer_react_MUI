@@ -112,10 +112,11 @@ export const DEFAULT_SETTINGS = {
     alwaysOpenOverviewTab: true,
     useColorfulTabs: true,
   },
-  
+
   // 雲端資料設定
   cloud: {
     fetchAdultHealthCheck: false,
     fetchCancerScreening: false,
+    fetchHbcvdata: false,
   },
 };
