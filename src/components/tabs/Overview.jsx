@@ -71,11 +71,17 @@ const Overview = ({
     [cloudSettings]
   );
 
-  // Check if cancer screening should be displayed
   const shouldShowCancerScreening = useMemo(() =>
     cloudSettings?.fetchCancerScreening === true,
     [cloudSettings]
   );
+
+  useEffect(() => {
+    console.log("[Overview] adultHealthCheckData prop:", adultHealthCheckData);
+    console.log("[Overview] cancerScreeningData prop:", cancerScreeningData);
+    console.log("[Overview] shouldShowAdultHealthCheck:", shouldShowAdultHealthCheck);
+    console.log("[Overview] shouldShowCancerScreening:", shouldShowCancerScreening);
+  }, [adultHealthCheckData, cancerScreeningData, shouldShowAdultHealthCheck, shouldShowCancerScreening]);
 
   return (
     <Box sx={{ p: 0 }}>

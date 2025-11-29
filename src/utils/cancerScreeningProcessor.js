@@ -11,12 +11,26 @@ export const cancerScreeningProcessor = {
    */
   processCancerScreeningData(rawData) {
     try {
-      // Check for data in rawData.rObject (standard structure)
+      // 1. Try to get data from rObject array (new normalized format)
+      if (rawData?.rObject && Array.isArray(rawData.rObject) && rawData.rObject.length > 0) {
+        // The data we want is in the first element of the array
+        return rawData.rObject[0];
+      }
+
+      // 2. Try to get data from originalData (new normalized format fallback)
+      if (rawData?.originalData?.robject) {
+        return rawData.originalData.robject;
+      }
+
+      // 3. Try to get data directly (legacy format or direct object)
+      // Cancer screening data structure might have specific keys like colorectal, etc.
+      if (rawData?.colorectal || rawData?.oralMucosa || rawData?.mammography || rawData?.papSmears) {
+        return rawData;
+      }
+
+      // 4. Try to get from rObject if it's not an array (unexpected but possible legacy)
       if (rawData?.rObject?.result_data) {
-        // Return the result_data directly
-        return {
-          result_data: rawData.rObject.result_data
-        };
+        return rawData.rObject;
       }
 
       // No valid data found

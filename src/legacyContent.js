@@ -579,20 +579,49 @@ const DataProcessor = {
 
   // 處理原始數據，統一數據格式
   normalizeData(data, dataType) {
+    // DEBUG: 輸出 adultHealthCheck 和 cancerScreening 的原始資料
+    if (dataType === "adultHealthCheck" || dataType === "cancerScreening") {
+      console.log(`[DEBUG] normalizeData 接收到 ${dataType} 資料:`, data);
+    }
+
     // 檢查 robject（小寫）或 rObject（大寫），兩者都接受
     const recordsArray = data.rObject || data.robject;
 
-    // 對 masterMenu 類型特殊處理
-    const isMasterMenu = dataType === "masterMenu";
+    // 對 masterMenu, adultHealthCheck, cancerScreening 類型特殊處理
+    // 這些類型的 API 回應格式不同，robject 是物件而非陣列
+    const isSpecialType = dataType === "masterMenu" ||
+      dataType === "adultHealthCheck" ||
+      dataType === "cancerScreening";
 
-    if (!data || (!recordsArray && !isMasterMenu)) {
+    if (!data || (!recordsArray && !isSpecialType)) {
       console.error(`Invalid data for type ${dataType}`);
       return null;
     }
 
-    // 統一格式，只保留 rObject，不再儲存 originalData 以節省記憶體
+    // 統一格式
+    // 對於不同的特殊類型，使用不同的包裝方式
+    if (isSpecialType) {
+      let normalizedData;
+
+      if (dataType === "masterMenu") {
+        // masterMenu 需要包裝整個 data 物件（包含 prsnAuth 等授權資訊）
+        normalizedData = {
+          rObject: [data]
+        };
+      } else {
+        // adultHealthCheck 和 cancerScreening 只包裝 robject，不保留 originalData 以節省記憶體
+        normalizedData = {
+          rObject: recordsArray ? [recordsArray] : []
+        };
+        console.log(`[DEBUG] ${dataType} 標準化後資料:`, normalizedData);
+      }
+
+      return normalizedData;
+    }
+
+    // 對於其他類型，只保留 rObject
     return {
-      rObject: isMasterMenu ? [data] : recordsArray
+      rObject: recordsArray
     };
   },
 
@@ -600,8 +629,12 @@ const DataProcessor = {
   isValidData(data, dataType) {
     if (!data) return false;
 
-    // 對 masterMenu 類型特殊處理
-    if (dataType === "masterMenu") return true;
+    // 對 masterMenu, adultHealthCheck, cancerScreening 類型特殊處理
+    if (dataType === "masterMenu" ||
+      dataType === "adultHealthCheck" ||
+      dataType === "cancerScreening") {
+      return true;
+    }
 
     const recordsArray = data.rObject || data.robject;
     return recordsArray && Array.isArray(recordsArray);
@@ -633,6 +666,14 @@ const DataProcessor = {
   // 處理 API 響應數據
   processApiResponse(data, url, source = "API") {
     const dataType = this.getDataTypeFromUrl(url);
+
+    // DEBUG: 輸出 adultHealthCheck 和 cancerScreening 的處理流程
+    if (dataType === "adultHealthCheck" || dataType === "cancerScreening") {
+      console.log(`[DEBUG] processApiResponse - 偵測到 ${dataType} 類型`);
+      console.log(`[DEBUG] URL: ${url}`);
+      console.log(`[DEBUG] 原始資料:`, data);
+    }
+
     if (!dataType) {
       console.log("無法從 URL 確定數據類型:", url);
       return null;
@@ -646,6 +687,9 @@ const DataProcessor = {
     const varName = this.getVarName(dataType);
     if (varName) {
       window[varName] = normalizedData;
+      if (dataType === "adultHealthCheck" || dataType === "cancerScreening") {
+        console.log(`[DEBUG] ${dataType} 已更新到全局變數 ${varName}:`, window[varName]);
+      }
     }
 
     // 保存數據
@@ -798,11 +842,27 @@ function setupMonitoring() {
 
             if (this.readyState === 4 && this.status === 200) {
               try {
+                // DEBUG: 檢查是否為 adultHealthCheck 或 cancerScreening 的 API
+                const isHealthCheckUrl = originalUrl.includes("/imue0140/imue0140s01/hpa-data");
+                const isCancerScreeningUrl = originalUrl.includes("/imue0150/imue0150s01/hpa-data");
+
+                if (isHealthCheckUrl || isCancerScreeningUrl) {
+                  const urlType = isHealthCheckUrl ? "adultHealthCheck" : "cancerScreening";
+                  console.log(`[DEBUG] ========== 偵測到 ${urlType} API 回應 ==========`);
+                  console.log(`[DEBUG] URL: ${originalUrl}`);
+                  console.log(`[DEBUG] 回應大小: ${this.responseText.length} bytes`);
+                }
+
                 console.log(
                   `Complete XHR response received, size: ${this.responseText.length} bytes`
                 );
 
                 const data = JSON.parse(this.responseText);
+
+                if (isHealthCheckUrl || isCancerScreeningUrl) {
+                  const urlType = isHealthCheckUrl ? "adultHealthCheck" : "cancerScreening";
+                  console.log(`[DEBUG] ${urlType} 解析後的 JSON:`, data);
+                }
 
                 // 使用 DataProcessor 處理 API 響應數據
                 const result = DataProcessor.processApiResponse(data, originalUrl, "XHR");
@@ -1261,18 +1321,22 @@ function fetchAllDataTypes() {
 
       // 獲取設定並根據設定決定是否抓取特殊資料類型
       const specialDataTypes = ["adultHealthCheck", "cancerScreening"];
+      console.log("[DEBUG] 開始檢查特殊資料類型:", specialDataTypes);
       const specialFetchPromises = specialDataTypes.map((dataType) => {
         return shouldFetchData(dataType).then((shouldFetch) => {
-          if (shouldFetch && isDataTypeAuthorized(dataType)) {
-            // console.log(`${dataType} 已授權且設定要抓取，開始獲取資料`);
+          const isAuthorized = isDataTypeAuthorized(dataType);
+          console.log(`[DEBUG] ${dataType} - shouldFetch: ${shouldFetch}, isAuthorized: ${isAuthorized}`);
+
+          if (shouldFetch && isAuthorized) {
+            console.log(`[DEBUG] ========== 開始抓取 ${dataType} ==========`);
             return enhancedFetchData(dataType).catch((err) => {
               console.error(`獲取 ${dataType} 資料時發生錯誤:`, err);
               return { status: "error", recordCount: 0, error: err, dataType };
             });
           } else {
-            // console.log(`${dataType} 設定不抓取或無授權，返回空集合`);
+            console.log(`[DEBUG] ${dataType} 設定不抓取或無授權，返回空集合`);
             return Promise.resolve(createEmptyDataResult(dataType));
-          } 獲
+          }
         });
       });
 
@@ -1547,39 +1611,56 @@ function enhancedFetchData(dataType, options = {}) {
           return response.json();
         })
         .then((data) => {
+          // DEBUG: 輸出 adultHealthCheck 和 cancerScreening 的回應
+          if (dataType === "adultHealthCheck" || dataType === "cancerScreening") {
+            console.log(`[DEBUG] enhancedFetchData 收到 ${dataType} 回應:`, data);
+          }
+
           const recordsArray = data.rObject || data.robject;
           if (
             data &&
             (recordsArray !== undefined ||
               dataType === "medDays" ||
               dataType === "patientsummary" ||
-              dataType === "masterMenu")
+              dataType === "masterMenu" ||
+              dataType === "adultHealthCheck" ||
+              dataType === "cancerScreening")
           ) {
             let rObject;
+            let normalizedData;
 
             if (dataType === "medDays") {
               rObject = Array.isArray(data) ? data : [data];
+              normalizedData = { rObject: rObject };
             } else if (dataType === "patientsummary") {
               rObject = Array.isArray(recordsArray) ? recordsArray : (recordsArray ? [recordsArray] : []);
+              normalizedData = { rObject: rObject };
             } else if (dataType === "masterMenu") {
-              rObject = [data]; // For masterMenu, wrap the entire response in an array
+              // masterMenu 需要包裝整個 data 物件（包含 prsnAuth 等授權資訊）
+              rObject = [data];
+              normalizedData = { rObject: rObject };
+            } else if (dataType === "adultHealthCheck" || dataType === "cancerScreening") {
+              // adultHealthCheck 和 cancerScreening 只包裝 robject，不保留 originalData 以節省記憶體
+              rObject = recordsArray ? [recordsArray] : [];
+              normalizedData = { rObject: rObject };
+              console.log(`[DEBUG] ${dataType} 標準化後的資料:`, normalizedData);
             } else {
               rObject = Array.isArray(recordsArray) ? recordsArray : [];
+              normalizedData = { rObject: rObject };
             }
-
-            const normalizedData = {
-              rObject: rObject
-            };
 
             // 使用 Map 更新全局變數
             const varName = DataProcessor.getVarName(dataType);
             if (varName) {
               window[varName] = normalizedData;
+              if (dataType === "adultHealthCheck" || dataType === "cancerScreening") {
+                console.log(`[DEBUG] ${dataType} 已更新全局變數 ${varName}:`, window[varName]);
+              }
             }
 
             saveData(normalizedData, dataType, "direct");
             const recordCount = normalizedData.rObject.length;
-            // console.log(`${dataType} 請求完成 - ${new Date().toISOString()}`);
+            console.log(`[DEBUG] ${dataType} 請求完成，記錄數: ${recordCount}`);
             resolve({
               status: "success",
               recordCount: recordCount,
@@ -1587,6 +1668,7 @@ function enhancedFetchData(dataType, options = {}) {
               data: normalizedData,
             });
           } else {
+            console.error(`[DEBUG] ${dataType} 資料格式不符，data:`, data);
             throw new Error(`${dataType} 資料格式不符`);
           }
         })
@@ -1970,4 +2052,4 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
 function saveDataToLocalStorage() {
   // 直接调用 DataProcessor 模块中的方法
   DataProcessor.saveDataToLocalStorage();
-}
+} 

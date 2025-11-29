@@ -141,6 +141,8 @@ const FloatingIcon = () => {
     recentMedications: { western: [], chinese: [] },
     labSummary: {},
   });
+  const [adultHealthCheckData, setAdultHealthCheckData] = useState(null);
+  const [cancerScreeningData, setCancerScreeningData] = useState(null);
   const [generalDisplaySettings, setGeneralDisplaySettings] = useState(
     DEFAULT_SETTINGS.general
   );
@@ -341,6 +343,8 @@ const FloatingIcon = () => {
       setMedDaysData,
       setPatientSummaryData,
       setDashboardData,
+      setAdultHealthCheckData,
+      setCancerScreeningData,
     };
 
     // 使用dataManager處理所有資料
@@ -784,6 +788,8 @@ const FloatingIcon = () => {
               generalDisplaySettings={generalDisplaySettings}
               labSettings={appSettings.lab}
               cloudSettings={appSettings.cloud}
+              adultHealthCheckData={adultHealthCheckData}
+              cancerScreeningData={cancerScreeningData}
             />
           </TabPanel>
 

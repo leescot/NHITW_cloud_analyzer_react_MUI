@@ -32,12 +32,25 @@ const Overview_CancerScreening = ({ cancerScreeningData, generalDisplaySettings 
 
   // Function to determine if data exists and has results
   const hasData = () => {
-    const result = (
-      combinedData &&
-      combinedData.result_data &&
-      Object.keys(combinedData.result_data).length > 0
-    );
+    // 檢查新的資料結構：rObject[0] 或 originalData.robject
+    if (!combinedData) {
+      return false;
+    }
 
+    // 嘗試從 rObject 取得資料
+    const dataFromRObject = combinedData.rObject && combinedData.rObject[0];
+    // 嘗試從 originalData.robject 取得資料
+    const dataFromOriginal = combinedData.originalData && combinedData.originalData.robject;
+    // 或者直接從 combinedData（舊格式）
+    const dataFromDirect = combinedData.colorectal || combinedData.oralMucosa || combinedData.mammography || combinedData.papSmears || combinedData.lungCancer;
+
+    const actualData = dataFromRObject || dataFromOriginal || (dataFromDirect ? combinedData : null);
+
+    // 癌症篩檢的資料結構不同，檢查是否有任何篩檢項目
+    const result = (
+      actualData &&
+      (actualData.colorectal || actualData.oralMucosa || actualData.mammography || actualData.papSmears || actualData.lungCancer)
+    );
     return result;
   };
 
@@ -55,7 +68,15 @@ const Overview_CancerScreening = ({ cancerScreeningData, generalDisplaySettings 
   const renderScreeningItem = (type, label) => {
     if (!hasData()) return null;
 
-    const data = combinedData.result_data;
+    // 取得實際資料（支援多種格式）
+    const dataFromRObject = combinedData.rObject && combinedData.rObject[0];
+    const dataFromOriginal = combinedData.originalData && combinedData.originalData.robject;
+    const dataFromDirect = (combinedData.colorectal || combinedData.oralMucosa || combinedData.mammography || combinedData.papSmears || combinedData.lungCancer) ? combinedData : null;
+
+    const actualData = dataFromRObject || dataFromOriginal || dataFromDirect;
+
+    if (!actualData) return null;
+    const data = actualData;
 
     if (!data[type] || !data[type].subData || !Array.isArray(data[type].subData) || data[type].subData.length === 0) {
       return (
@@ -112,7 +133,7 @@ const Overview_CancerScreening = ({ cancerScreeningData, generalDisplaySettings 
             fontSize: getTextSize(titleTextSize),
           }}
         >
-          四癌篩檢結果
+          癌症篩檢結果
         </Typography>
       </Box>
 
@@ -122,6 +143,7 @@ const Overview_CancerScreening = ({ cancerScreeningData, generalDisplaySettings 
           {renderScreeningItem('oralMucosa', '口腔黏膜')}
           {renderScreeningItem('mammography', '乳房攝影')}
           {renderScreeningItem('papSmears', '子宮頸癌')}
+          {renderScreeningItem('lungCancer', '肺癌篩檢')}
         </Box>
       ) : (
         <Typography

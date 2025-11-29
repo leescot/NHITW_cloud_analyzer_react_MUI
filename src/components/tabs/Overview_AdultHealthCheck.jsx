@@ -32,12 +32,26 @@ const Overview_AdultHealthCheck = ({ adultHealthCheckData, generalDisplaySetting
 
   // Function to determine if data exists and has results
   const hasData = () => {
-    const result = (
-      combinedData &&
-      combinedData.result_data &&
-      Object.keys(combinedData.result_data).length > 0
-    );
+    // 檢查新的資料結構：rObject[0] 或 originalData.robject
+    if (!combinedData) {
+      return false;
+    }
 
+    // 嘗試從 rObject 取得資料
+    const dataFromRObject = combinedData.rObject && combinedData.rObject[0];
+    // 嘗試從 originalData.robject 取得資料
+    const dataFromOriginal = combinedData.originalData && combinedData.originalData.robject;
+    // 或者直接從 combinedData（如果它包含 result_data）
+    const dataFromDirect = combinedData.result_data ? combinedData : null;
+
+    const actualData = dataFromRObject || dataFromOriginal || dataFromDirect;
+
+    const result = (
+      actualData &&
+      actualData.result_data &&
+      Array.isArray(actualData.result_data) &&
+      actualData.result_data.length > 0
+    );
     return result;
   };
 
@@ -55,7 +69,13 @@ const Overview_AdultHealthCheck = ({ adultHealthCheckData, generalDisplaySetting
   const renderHealthCheckItem = () => {
     if (!hasData()) return null;
 
-    const data = combinedData.result_data;
+    // 取得實際資料（支援多種格式）
+    const dataFromRObject = combinedData.rObject && combinedData.rObject[0];
+    const dataFromOriginal = combinedData.originalData && combinedData.originalData.robject;
+    const dataFromDirect = combinedData.result_data ? combinedData : null;
+
+    const actualData = dataFromRObject || dataFromOriginal || dataFromDirect;
+    const data = actualData.result_data;
 
     try {
       // Check if result_data is an array within the data object
