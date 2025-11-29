@@ -18,6 +18,7 @@ const CloudDataSettings = () => {
   const [settings, setSettings] = useState({
     fetchAdultHealthCheck: DEFAULT_SETTINGS.cloud.fetchAdultHealthCheck,
     fetchCancerScreening: DEFAULT_SETTINGS.cloud.fetchCancerScreening,
+    fetchHbcvdata: DEFAULT_SETTINGS.cloud.fetchHbcvdata,
   });
 
   useEffect(() => {
@@ -25,10 +26,12 @@ const CloudDataSettings = () => {
     chrome.storage.sync.get({
       fetchAdultHealthCheck: DEFAULT_SETTINGS.cloud.fetchAdultHealthCheck,
       fetchCancerScreening: DEFAULT_SETTINGS.cloud.fetchCancerScreening,
+      fetchHbcvdata: DEFAULT_SETTINGS.cloud.fetchHbcvdata,
     }, (items) => {
       setSettings({
         fetchAdultHealthCheck: items.fetchAdultHealthCheck,
         fetchCancerScreening: items.fetchCancerScreening,
+        fetchHbcvdata: items.fetchHbcvdata,
       });
     });
   }, []);
@@ -61,7 +64,7 @@ const CloudDataSettings = () => {
           <FormHelperText sx={{ color: 'warning.main', mb: 1 }}>
             此頁設定需重新讀卡才會抓取資料
           </FormHelperText>
-          
+
           <FormControlLabel
             control={
               <Switch
@@ -87,6 +90,19 @@ const CloudDataSettings = () => {
             label="抓取「四癌篩檢結果」資料"
           />
           <FormHelperText>原網站資料所在：檢查與檢驗/四癌篩檢結果</FormHelperText>
+
+          <FormControlLabel
+            control={
+              <Switch
+                checked={settings.fetchHbcvdata}
+                onChange={(e) => handleLocalSettingChange('fetchHbcvdata', e.target.checked)}
+                name="fetchHbcvdata"
+                color="primary"
+              />
+            }
+            label="抓取「B、C肝炎專區」資料"
+          />
+          <FormHelperText>原網站資料所在:檢查與檢驗/B、C肝炎專區</FormHelperText>
         </Box>
       </AccordionDetails>
     </Accordion>
