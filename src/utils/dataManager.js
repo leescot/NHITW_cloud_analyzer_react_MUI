@@ -12,6 +12,7 @@ import { medDaysProcessor } from "./medDaysProcessor";
 import { patientSummaryProcessor } from "./patientSummaryProcessor";
 import { cancerScreeningProcessor } from "./cancerScreeningProcessor";
 import { adultHealthCheckProcessor } from "./adultHealthCheckProcessor";
+import { hbcvdataProcessor } from "./hbcvdataProcessor";
 
 /**
  * 安全調用setter，如果setter不存在則寫入window全局變量
@@ -22,7 +23,7 @@ import { adultHealthCheckProcessor } from "./adultHealthCheckProcessor";
  */
 const safeSetter = (setters, setterName, data, dataName) => {
   const setterFn = setters[setterName];
-  
+
   if (typeof setterFn === 'function') {
     setterFn(data);
   } else {
@@ -158,7 +159,7 @@ export const handleAllData = async (dataSources, settings, setters) => {
             const processedCancerScreening = cancerScreeningProcessor.processCancerScreeningData(
               dataSources.cancerScreening
             );
-            
+
             // Use safeSetter to handle the case where the setter might not exist
             safeSetter(setters, 'setCancerScreeningData', processedCancerScreening, 'cancerScreening');
             results.cancerScreening = processedCancerScreening;
@@ -171,10 +172,29 @@ export const handleAllData = async (dataSources, settings, setters) => {
             const processedAdultHealthCheck = adultHealthCheckProcessor.processAdultHealthCheckData(
               dataSources.adultHealthCheck
             );
-            
+
             // Use safeSetter to handle the case where the setter might not exist
             safeSetter(setters, 'setAdultHealthCheckData', processedAdultHealthCheck, 'adultHealthCheck');
             results.adultHealthCheck = processedAdultHealthCheck;
+          }
+        }
+      }],
+      ['hbcvdata', {
+        process: () => {
+          console.log("[dataManager] Processing hbcvdata, dataSources.hbcvdata:", dataSources.hbcvdata);
+          if (dataSources.hbcvdata) {
+            const processedHbcvdata = hbcvdataProcessor.processHbcvdataData(
+              dataSources.hbcvdata
+            );
+
+            console.log("[dataManager] Processed hbcvdata:", processedHbcvdata);
+            console.log("[dataManager] Calling safeSetter with setHbcvData");
+
+            // Use safeSetter to handle the case where the setter might not exist
+            safeSetter(setters, 'setHbcvData', processedHbcvdata, 'hbcv');
+            results.hbcvdata = processedHbcvdata;
+          } else {
+            console.log("[dataManager] No hbcvdata in dataSources");
           }
         }
       }]
@@ -208,8 +228,11 @@ export const collectDataSources = () => {
     medDays: window.lastInterceptedMedDaysData,
     patientSummary: window.lastInterceptedPatientSummaryData,
     cancerScreening: window.lastInterceptedCancerScreeningData,
-    adultHealthCheck: window.lastInterceptedAdultHealthCheckData
+    adultHealthCheck: window.lastInterceptedAdultHealthCheckData,
+    hbcvdata: window.lastInterceptedHbcvdata
   };
+
+  console.log("[dataManager] collectDataSources - hbcvdata:", sources.hbcvdata);
 
   return sources;
 };

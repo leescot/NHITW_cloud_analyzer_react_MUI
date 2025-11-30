@@ -143,6 +143,7 @@ const FloatingIcon = () => {
   });
   const [adultHealthCheckData, setAdultHealthCheckData] = useState(null);
   const [cancerScreeningData, setCancerScreeningData] = useState(null);
+  const [hbcvData, setHbcvData] = useState(null);
   const [generalDisplaySettings, setGeneralDisplaySettings] = useState(
     DEFAULT_SETTINGS.general
   );
@@ -345,6 +346,7 @@ const FloatingIcon = () => {
       setDashboardData,
       setAdultHealthCheckData,
       setCancerScreeningData,
+      setHbcvData,
     };
 
     // 使用dataManager處理所有資料
@@ -790,6 +792,7 @@ const FloatingIcon = () => {
               cloudSettings={appSettings.cloud}
               adultHealthCheckData={adultHealthCheckData}
               cancerScreeningData={cancerScreeningData}
+              hbcvData={hbcvData}
             />
           </TabPanel>
 

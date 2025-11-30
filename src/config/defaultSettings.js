@@ -117,6 +117,6 @@ export const DEFAULT_SETTINGS = {
   cloud: {
     fetchAdultHealthCheck: false,
     fetchCancerScreening: false,
-    fetchHbcvdata: false,
+    fetchHbcvdata: true,
   },
 };

@@ -193,6 +193,11 @@ export async function processLocalData(jsonData, filename) {
         window.lastInterceptedCancerScreeningData = cleanData(JSON.parse(JSON.stringify(jsonData.cancerScreening)));
         loadedTypes.push('cancerScreening');
         triggerDataFetchCompleted('cancerScreening');
+      }],
+      ['hbcvdata', () => {
+        window.lastInterceptedHbcvdata = cleanData(JSON.parse(JSON.stringify(jsonData.hbcvdata)));
+        loadedTypes.push('hbcvdata');
+        triggerDataFetchCompleted('hbcvdata');
       }]
     ]);
 
@@ -232,6 +237,7 @@ export async function processLocalData(jsonData, filename) {
           masterMenu: window.lastInterceptedMasterMenuData,
           adultHealthCheck: window.lastInterceptedAdultHealthCheckData,
           cancerScreening: window.lastInterceptedCancerScreeningData,
+          hbcvdata: window.lastInterceptedHbcvdata,
           rehabilitation: window.lastInterceptedRehabilitationData,
           acupuncture: window.lastInterceptedAcupunctureData,
           specialChineseMedCare: window.lastInterceptedSpecialChineseMedCareData,
@@ -301,6 +307,7 @@ export function clearLocalData() {
       ['lastInterceptedPatientSummaryData', null],
       ['lastInterceptedAdultHealthCheckData', null],
       ['lastInterceptedCancerScreeningData', null],
+      ['lastInterceptedHbcvdata', null],
       ['lastProcessedMedicationData', null]
     ]);
 

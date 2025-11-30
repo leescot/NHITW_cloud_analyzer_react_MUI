@@ -29,6 +29,7 @@ import Overview_DischargeRecords from "./Overview_DischargeRecords";
 import Overview_ImagingTests from "./Overview_ImagingTests";
 import Overview_AdultHealthCheck from "./Overview_AdultHealthCheck";
 import Overview_CancerScreening from "./Overview_CancerScreening";
+import Overview_hbcvdata from "./Overview_hbcvdata";
 
 // 導入從配置文件中移出的常數
 import { DEFAULT_LAB_TESTS } from '../../config/labTests';
@@ -47,6 +48,7 @@ const Overview = ({
   imagingData = { withReport: [], withoutReport: [] },
   adultHealthCheckData = null,
   cancerScreeningData = null,
+  hbcvData = null,
   settings = {},
   overviewSettings = {
     medicationTrackingDays: 180,
@@ -57,7 +59,7 @@ const Overview = ({
   },
   generalDisplaySettings = { titleTextSize: 'medium', contentTextSize: 'medium', noteTextSize: 'small' },
   labSettings = {},
-  cloudSettings = { fetchAdultHealthCheck: true, fetchCancerScreening: true }
+  cloudSettings = { fetchAdultHealthCheck: true, fetchCancerScreening: true, fetchHbcvdata: true }
 }) => {
   // Check if components have data
   const hasMedications = useMemo(() => groupedMedications && groupedMedications.length > 0, [groupedMedications]);
@@ -76,12 +78,19 @@ const Overview = ({
     [cloudSettings]
   );
 
+  const shouldShowHbcvdata = useMemo(() =>
+    cloudSettings?.fetchHbcvdata === true,
+    [cloudSettings]
+  );
+
   useEffect(() => {
     console.log("[Overview] adultHealthCheckData prop:", adultHealthCheckData);
     console.log("[Overview] cancerScreeningData prop:", cancerScreeningData);
+    console.log("[Overview] hbcvData prop:", hbcvData);
     console.log("[Overview] shouldShowAdultHealthCheck:", shouldShowAdultHealthCheck);
     console.log("[Overview] shouldShowCancerScreening:", shouldShowCancerScreening);
-  }, [adultHealthCheckData, cancerScreeningData, shouldShowAdultHealthCheck, shouldShowCancerScreening]);
+    console.log("[Overview] shouldShowHbcvdata:", shouldShowHbcvdata);
+  }, [adultHealthCheckData, cancerScreeningData, hbcvData, shouldShowAdultHealthCheck, shouldShowCancerScreening, shouldShowHbcvdata]);
 
   return (
     <Box sx={{ p: 0 }}>
@@ -120,6 +129,14 @@ const Overview = ({
           {shouldShowCancerScreening && (
             <Overview_CancerScreening
               cancerScreeningData={cancerScreeningData}
+              generalDisplaySettings={generalDisplaySettings}
+            />
+          )}
+
+          {/* B、C肝炎專區 - only display if setting is enabled */}
+          {shouldShowHbcvdata && (
+            <Overview_hbcvdata
+              hbcvData={hbcvData}
               generalDisplaySettings={generalDisplaySettings}
             />
           )}
