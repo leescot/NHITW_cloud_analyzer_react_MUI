@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Paper, Typography, Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@mui/material";
 import VaccinesIcon from "@mui/icons-material/Vaccines";
+import { checkAbnormalValue, extractHospitalName } from "../../utils/hbcvdataProcessor.js";
 
 /**
  * Component for displaying Hepatitis B & C data
@@ -105,26 +106,32 @@ const Overview_hbcvdata = ({ hbcvData, generalDisplaySettings = {} }) => {
                     檢驗結果
                 </Typography>
                 <Box sx={{ pl: 1 }}>
-                    {actualData.result_data.map((item, index) => (
-                        <Typography
-                            key={index}
-                            variant="body2"
-                            sx={{
-                                fontSize: getTextSize(contentTextSize),
-                                mb: 0.5
-                            }}
-                        >
-                            {item.assay_item_name}: {item.assay_value}
+                    {actualData.result_data.map((item, index) => {
+                        // 檢查是否異常
+                        const { isAbnormal, status } = checkAbnormalValue(item.assay_value, item.consult_value);
+
+                        return (
                             <Typography
-                                component="span"
+                                key={index}
                                 variant="body2"
-                                color="text.secondary"
-                                sx={{ fontSize: getTextSize(contentTextSize) }}
+                                sx={{
+                                    fontSize: getTextSize(contentTextSize),
+                                    mb: 0.5,
+                                    color: isAbnormal ? 'error.main' : 'inherit'
+                                }}
                             >
-                                {' '}({item.real_inspect_date})
+                                {item.assay_item_name}: {item.assay_value}
+                                <Typography
+                                    component="span"
+                                    variant="body2"
+                                    color="text.secondary"
+                                    sx={{ fontSize: getTextSize(contentTextSize) }}
+                                >
+                                    {' '}({item.real_inspect_date})
+                                </Typography>
                             </Typography>
-                        </Typography>
-                    ))}
+                        );
+                    })}
                 </Box>
             </Box>
         );
@@ -167,7 +174,7 @@ const Overview_hbcvdata = ({ hbcvData, generalDisplaySettings = {} }) => {
                                 color="text.secondary"
                                 sx={{ fontSize: getTextSize(contentTextSize) }}
                             >
-                                {' '}({item.func_date} {stripHtml(item.hosp)})
+                                {' '}({item.func_date} {extractHospitalName(item.hosp)})
                             </Typography>
                         </Typography>
                     ))}
