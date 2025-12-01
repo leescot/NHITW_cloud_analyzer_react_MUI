@@ -51,7 +51,7 @@ masterMenu API 回傳的節點ID對應到健保雲端系統的各個頁面和資
 | 節點ID | 群組 | 名稱 | 對應資料類型 | API 端點 |
 |--------|------|------|------------|---------|
 | 1.1 | 摘要 | 病人資訊 | patientSummary | /imu/api/imue2000/imue2000s01/get-summary |
-| 1.2 | 摘要 | B、C型肝炎專區 | - | - |
+| 1.2 | 摘要 | B、C型肝炎專區 | hbcvdata | /imu/api/imue0180/imue0180s01/hbcv-data |
 | 1.3 | 摘要 | 特殊給付限制 | - | - |
 | 2.1 | 西醫用藥 | 用藥紀錄 | medication | /imu/api/imue0008/imue0008s02/get-data |
 | 2.2 | 西醫用藥 | 特定管制用藥 | - | - |
@@ -63,6 +63,7 @@ masterMenu API 回傳的節點ID對應到健保雲端系統的各個頁面和資
 | 4.1 | 牙科處置紀錄 | 牙科處置紀錄項目 | - | - |
 | 5.1 | 過敏紀錄 | 過敏紀錄 | allergy | /imu/api/imue0040/imue0040s02/get-data |
 | 6.1 | 檢查與檢驗 | 檢查檢驗結果 | labdata | /imu/api/imue0060/imue0060s02/get-data |
+| 6.1 | 檢查與檢驗 | 檢查檢驗結果-圖形化查詢 | labdraw | /imu/api/imue0060/imue0060s03/get-data |
 | 6.2 | 檢查與檢驗 | 影像及病理 | imaging | /imu/api/imue0130/imue0130s02/get-data |
 | 6.3 | 檢查與檢驗 | 成人預防保健 | adultHealthCheck | /imu/api/imue0140/imue0140s01/hpa-data |
 | 6.4 | 檢查與檢驗 | 四癌篩檢結果 | cancerScreening | /imu/api/imue0150/imue0150s01/hpa-data |

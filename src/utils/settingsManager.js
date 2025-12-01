@@ -67,10 +67,11 @@ export const loadAllSettings = async () => {
       floatingIconPosition: DEFAULT_SETTINGS.general.floatingIconPosition,
       alwaysOpenOverviewTab: DEFAULT_SETTINGS.general.alwaysOpenOverviewTab,
       useColorfulTabs: DEFAULT_SETTINGS.general.useColorfulTabs,
-      
+
       // Cloud data settings
       fetchAdultHealthCheck: DEFAULT_SETTINGS.cloud.fetchAdultHealthCheck,
       fetchCancerScreening: DEFAULT_SETTINGS.cloud.fetchCancerScreening,
+      fetchHbcvdata: DEFAULT_SETTINGS.cloud.fetchHbcvdata,
     }, (items) => {
       // 組織所有設置到一個結構化對象
       const allSettings = {
@@ -133,6 +134,7 @@ export const loadAllSettings = async () => {
         cloud: {
           fetchAdultHealthCheck: items.fetchAdultHealthCheck,
           fetchCancerScreening: items.fetchCancerScreening,
+          fetchHbcvdata: items.fetchHbcvdata,
         }
       };
 
@@ -243,7 +245,7 @@ const handleChineseMedSettingsChange = (event, currentSettings, updateCallback, 
  */
 const handleLabSettingsChange = (event, currentSettings, updateCallback, callbacks) => {
   console.log("Lab settings change event:", event.detail);
-  
+
   if (event.detail.allSettings) {
     // 更新所有檢驗設置
     const newLabSettings = {
@@ -278,75 +280,75 @@ const handleLabSettingsChange = (event, currentSettings, updateCallback, callbac
     // 單一設置變更
     let updatedValue = event.detail.value;
     let settingKey = event.detail.setting;
-    
+
     console.log(`Updating single lab setting: ${settingKey} = ${JSON.stringify(updatedValue)}`);
-    
+
     // 特別處理 displayLabFormat
     if (settingKey === 'displayLabFormat') {
       console.log(`Special handling for display format: ${updatedValue}`);
-      
+
       // 創建新的設置對象，確保 displayLabFormat 被正確設置
       const updatedSettings = {
         ...currentSettings.lab,
         displayLabFormat: updatedValue
       };
-      
+
       console.log("Updated lab settings with new display format:", updatedSettings);
-      
+
       // 更新設置
       updateCallback({
         ...currentSettings,
         lab: updatedSettings
       });
-      
+
       // 重新處理檢驗數據
       if (window.lastInterceptedLabData && callbacks.reprocessLab) {
         callbacks.reprocessLab(window.lastInterceptedLabData, updatedSettings);
       }
-      
+
       return; // 提前返回，不執行後面的代碼
     }
-    
+
     // 特別處理 itemSeparator
     if (settingKey === 'itemSeparator') {
       console.log(`Special handling for item separator: "${updatedValue}" (${typeof updatedValue})`);
-      
+
       // 確保分隔符是字符串
       if (typeof updatedValue !== 'string') {
         console.warn(`Invalid itemSeparator value: ${updatedValue}, converting to string`);
         updatedValue = String(updatedValue || ',');
       }
-      
+
       // 確保有可讀的日誌輸出
       const loggableSeparator = updatedValue
         .replace(/\n/g, '\\n')
         .replace(/\r/g, '\\r')
         .replace(/\t/g, '\\t');
-        
+
       console.log(`Sanitized itemSeparator: "${loggableSeparator}" (${typeof updatedValue})`);
-      
+
       // 創建新的設置對象，確保 itemSeparator 被正確設置
       const updatedSettings = {
         ...currentSettings.lab,
         itemSeparator: updatedValue
       };
-      
+
       console.log("Updated lab settings with new item separator:", updatedSettings);
-      
+
       // 更新設置
       updateCallback({
         ...currentSettings,
         lab: updatedSettings
       });
-      
+
       // 重新處理檢驗數據
       if (window.lastInterceptedLabData && callbacks.reprocessLab) {
         callbacks.reprocessLab(window.lastInterceptedLabData, updatedSettings);
       }
-      
+
       return; // 提前返回，不執行後面的代碼
     }
-    
+
     // 其他設置的一般處理
     const updatedSettings = {
       ...currentSettings.lab,
@@ -407,8 +409,8 @@ const handleOverviewSettingsChange = (event, currentSettings, updateCallback, ca
 
     // 處理特定設置變更
     if (event.detail.setting === "medicationTrackingDays" &&
-        window.lastInterceptedMedicationData?.rObject &&
-        callbacks.reprocessMedication) {
+      window.lastInterceptedMedicationData?.rObject &&
+      callbacks.reprocessMedication) {
       callbacks.reprocessMedication(window.lastInterceptedMedicationData, currentSettings.western);
     }
   }
@@ -423,6 +425,7 @@ const handleCloudDataSettingsChange = (event, currentSettings, updateCallback) =
     const newCloudSettings = {
       fetchAdultHealthCheck: event.detail.allSettings.fetchAdultHealthCheck,
       fetchCancerScreening: event.detail.allSettings.fetchCancerScreening,
+      fetchHbcvdata: event.detail.allSettings.fetchHbcvdata,
     };
 
     // 更新設置
@@ -493,7 +496,7 @@ export const handleDataFetchCompletedSettingsChange = (event, currentSettings, u
 
     // 從 Map 中獲取並執行對應的處理函數
     const handler = settingTypeHandlers.get(event.detail.settingType);
-    
+
     // 如果找到對應的處理函數則執行，否則加載所有設置
     if (handler) {
       handler();

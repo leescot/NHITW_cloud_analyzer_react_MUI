@@ -6,6 +6,7 @@ let currentPatientId = null; // 新增追踪當前病人
 // 在檔案頂部定義全局變數
 window.lastInterceptedMedicationData = null;
 window.lastInterceptedLabData = null;
+window.lastInterceptedLabDrawData = null; // 新增檢驗圖形化查詢資料
 window.lastInterceptedChineseMedData = null;
 window.lastInterceptedImagingData = null;
 window.lastInterceptedAllergyData = null;
@@ -16,6 +17,7 @@ window.lastInterceptedPatientSummaryData = null;
 window.lastInterceptedMasterMenuData = null; // 新增主選單數據
 window.lastInterceptedAdultHealthCheckData = null; // 新增成人預防保健資料
 window.lastInterceptedCancerScreeningData = null; // 新增四癌篩檢結果資料
+window.lastInterceptedHbcvdata = null; // 新增B、C肝炎專區資料
 // window.lastInterceptedRehabilitationData = null; // 新增復健資料
 // window.lastInterceptedAcupunctureData = null; // 新增針灸資料
 // window.lastInterceptedSpecialChineseMedCareData = null; // 新增特殊中醫處置資料
@@ -44,6 +46,7 @@ let isDataFetchingStarted = false;
 let pendingRequests = {
   medication: false,
   labdata: false,
+  labdraw: false, // 新增檢驗圖形化查詢
   chinesemed: false,
   imaging: false,
   allergy: false,
@@ -54,6 +57,7 @@ let pendingRequests = {
   masterMenu: false, // 新增主選單
   adultHealthCheck: false, // 新增成人預防保健
   cancerScreening: false, // 新增四癌篩檢結果
+  hbcvdata: false, // 新增B、C肝炎專區
 };
 
 // 在頁面加載後自動初始化
@@ -191,6 +195,7 @@ function handleTestDataLoad(event) {
 function clearTestData() {
   lastInterceptedMedicationData = null;
   lastInterceptedLabData = null;
+  lastInterceptedLabDrawData = null;
   lastInterceptedChineseMedData = null;
   lastInterceptedImagingData = null;
   lastInterceptedAllergyData = null;
@@ -201,6 +206,7 @@ function clearTestData() {
   lastInterceptedMasterMenuData = null;
   lastInterceptedAdultHealthCheckData = null;
   lastInterceptedCancerScreeningData = null;
+  lastInterceptedHbcvdata = null;
   // console.log('Test data cleared');
 }
 
@@ -341,6 +347,7 @@ function performClearPreviousData() {
       }
       lastInterceptedMedicationData = null;
       lastInterceptedLabData = null;
+      lastInterceptedLabDrawData = null;
       lastInterceptedChineseMedData = null;
       lastInterceptedImagingData = null;
       lastInterceptedAllergyData = null;
@@ -351,6 +358,7 @@ function performClearPreviousData() {
       lastInterceptedMasterMenuData = null;
       lastInterceptedAdultHealthCheckData = null;
       lastInterceptedCancerScreeningData = null;
+      lastInterceptedHbcvdata = null;
       // lastInterceptedRehabilitationData = null;
       // lastInterceptedAcupunctureData = null;
       // lastInterceptedSpecialChineseMedCareData = null;
@@ -483,6 +491,7 @@ function observeUrlChanges() {
 const API_URL_PATTERNS = new Map([
   ["medication", "/imu/api/imue0008/imue0008s02/get-data"],
   ["labdata", "/imu/api/imue0060/imue0060s02/get-data"],
+  ["labdraw", "/imu/api/imue0060/imue0060s03/get-data"],
   ["chinesemed", "/imu/api/imue0090/imue0090s02/get-data"],
   ["imaging", "/imu/api/imue0130/imue0130s02/get-data"],
   ["allergy", "/imu/api/imue0040/imue0040s02/get-data"],
@@ -493,6 +502,7 @@ const API_URL_PATTERNS = new Map([
   ["masterMenu", "/imu/api/imue1000/imue1000s02/master-menu"],
   ["adultHealthCheck", "/imu/api/imue0140/imue0140s01/hpa-data"],
   ["cancerScreening", "/imu/api/imue0150/imue0150s01/hpa-data"],
+  ["hbcvdata", "/imu/api/imue0180/imue0180s01/hbcv-data"],
   // ["rehabilitation", "/imu/api/imue0080/imue0080s02/get-data"],
   // ["acupuncture", "/imu/api/imue0100/imue0100s02/get-data"],
   // ["specialChineseMedCare", "/imu/api/imue0170/imue0170s02/get-data"]
@@ -505,6 +515,7 @@ const DataProcessor = {
   API_URL_PATTERNS: new Map([
     ["medication", "/imu/api/imue0008/imue0008s02/get-data"],
     ["labdata", "/imu/api/imue0060/imue0060s02/get-data"],
+    ["labdraw", "/imu/api/imue0060/imue0060s03/get-data"],
     ["chinesemed", "/imu/api/imue0090/imue0090s02/get-data"],
     ["imaging", "/imu/api/imue0130/imue0130s02/get-data"],
     ["allergy", "/imu/api/imue0040/imue0040s02/get-data"],
@@ -515,6 +526,7 @@ const DataProcessor = {
     ["masterMenu", "/imu/api/imue1000/imue1000s02/master-menu"],
     ["adultHealthCheck", "/imu/api/imue0140/imue0140s01/hpa-data"],
     ["cancerScreening", "/imu/api/imue0150/imue0150s01/hpa-data"],
+    ["hbcvdata", "/imu/api/imue0180/imue0180s01/hbcv-data"],
     // ["rehabilitation", "/imu/api/imue0080/imue0080s02/get-data"],
     // ["acupuncture", "/imu/api/imue0100/imue0100s02/get-data"],
     // ["specialChineseMedCare", "/imu/api/imue0170/imue0170s02/get-data"]
@@ -524,6 +536,7 @@ const DataProcessor = {
   dataVarMap: new Map([
     ["medication", "lastInterceptedMedicationData"],
     ["labdata", "lastInterceptedLabData"],
+    ["labdraw", "lastInterceptedLabDrawData"],
     ["chinesemed", "lastInterceptedChineseMedData"],
     ["imaging", "lastInterceptedImagingData"],
     ["allergy", "lastInterceptedAllergyData"],
@@ -534,6 +547,7 @@ const DataProcessor = {
     ["masterMenu", "lastInterceptedMasterMenuData"],
     ["adultHealthCheck", "lastInterceptedAdultHealthCheckData"],
     ["cancerScreening", "lastInterceptedCancerScreeningData"],
+    ["hbcvdata", "lastInterceptedHbcvdata"],
     // ["rehabilitation", "lastInterceptedRehabilitationData"],
     // ["acupuncture", "lastInterceptedAcupunctureData"],
     // ["specialChineseMedCare", "lastInterceptedSpecialChineseMedCareData"]
@@ -543,6 +557,7 @@ const DataProcessor = {
   actionMap: new Map([
     ["medication", "saveMedicationData"],
     ["labdata", "saveLabData"],
+    ["labdraw", "saveLabDrawData"],
     ["chinesemed", "saveChineseMedData"],
     ["imaging", "saveImagingData"],
     ["allergy", "saveAllergyData"],
@@ -553,6 +568,7 @@ const DataProcessor = {
     ["masterMenu", "saveMasterMenuData"],
     ["adultHealthCheck", "saveAdultHealthCheckData"],
     ["cancerScreening", "saveCancerScreeningData"],
+    ["hbcvdata", "saveHbcvdata"],
     // ["rehabilitation", "saveRehabilitationData"],
     // ["acupuncture", "saveAcupunctureData"],
     // ["specialChineseMedCare", "saveSpecialChineseMedCareData"]
@@ -562,6 +578,7 @@ const DataProcessor = {
   typeTextMap: new Map([
     ["medication", "西醫藥歷"],
     ["labdata", "檢驗資料"],
+    ["labdraw", "檢驗圖形化查詢"],
     ["chinesemed", "中醫用藥"],
     ["imaging", "醫療影像"],
     ["allergy", "過敏資料"],
@@ -572,6 +589,7 @@ const DataProcessor = {
     ["masterMenu", "主選單"],
     ["adultHealthCheck", "成人預防保健"],
     ["cancerScreening", "四癌篩檢結果"],
+    ["hbcvdata", "B、C肝炎專區"],
     // ["rehabilitation", "復健治療"],
     // ["acupuncture", "針灸治療"],
     // ["specialChineseMedCare", "特殊中醫處置"]
@@ -579,19 +597,20 @@ const DataProcessor = {
 
   // 處理原始數據，統一數據格式
   normalizeData(data, dataType) {
-    // DEBUG: 輸出 adultHealthCheck 和 cancerScreening 的原始資料
-    if (dataType === "adultHealthCheck" || dataType === "cancerScreening") {
+    // DEBUG: 輸出 adultHealthCheck, cancerScreening 和 hbcvdata 的原始資料
+    if (dataType === "adultHealthCheck" || dataType === "cancerScreening" || dataType === "hbcvdata") {
       console.log(`[DEBUG] normalizeData 接收到 ${dataType} 資料:`, data);
     }
 
     // 檢查 robject（小寫）或 rObject（大寫），兩者都接受
     const recordsArray = data.rObject || data.robject;
 
-    // 對 masterMenu, adultHealthCheck, cancerScreening 類型特殊處理
+    // 對 masterMenu, adultHealthCheck, cancerScreening, hbcvdata 類型特殊處理
     // 這些類型的 API 回應格式不同，robject 是物件而非陣列
     const isSpecialType = dataType === "masterMenu" ||
       dataType === "adultHealthCheck" ||
-      dataType === "cancerScreening";
+      dataType === "cancerScreening" ||
+      dataType === "hbcvdata";
 
     if (!data || (!recordsArray && !isSpecialType)) {
       console.error(`Invalid data for type ${dataType}`);
@@ -609,7 +628,7 @@ const DataProcessor = {
           rObject: [data]
         };
       } else {
-        // adultHealthCheck 和 cancerScreening 只包裝 robject，不保留 originalData 以節省記憶體
+        // adultHealthCheck, cancerScreening 和 hbcvdata 只包裝 robject，不保留 originalData 以節省記憶體
         normalizedData = {
           rObject: recordsArray ? [recordsArray] : []
         };
@@ -629,10 +648,11 @@ const DataProcessor = {
   isValidData(data, dataType) {
     if (!data) return false;
 
-    // 對 masterMenu, adultHealthCheck, cancerScreening 類型特殊處理
+    // 對 masterMenu, adultHealthCheck, cancerScreening, hbcvdata 類型特殊處理
     if (dataType === "masterMenu" ||
       dataType === "adultHealthCheck" ||
-      dataType === "cancerScreening") {
+      dataType === "cancerScreening" ||
+      dataType === "hbcvdata") {
       return true;
     }
 
@@ -667,8 +687,8 @@ const DataProcessor = {
   processApiResponse(data, url, source = "API") {
     const dataType = this.getDataTypeFromUrl(url);
 
-    // DEBUG: 輸出 adultHealthCheck 和 cancerScreening 的處理流程
-    if (dataType === "adultHealthCheck" || dataType === "cancerScreening") {
+    // DEBUG: 輸出 adultHealthCheck, cancerScreening 和 hbcvdata 的處理流程
+    if (dataType === "adultHealthCheck" || dataType === "cancerScreening" || dataType === "hbcvdata") {
       console.log(`[DEBUG] processApiResponse - 偵測到 ${dataType} 類型`);
       console.log(`[DEBUG] URL: ${url}`);
       console.log(`[DEBUG] 原始資料:`, data);
@@ -687,7 +707,7 @@ const DataProcessor = {
     const varName = this.getVarName(dataType);
     if (varName) {
       window[varName] = normalizedData;
-      if (dataType === "adultHealthCheck" || dataType === "cancerScreening") {
+      if (dataType === "adultHealthCheck" || dataType === "cancerScreening" || dataType === "hbcvdata") {
         console.log(`[DEBUG] ${dataType} 已更新到全局變數 ${varName}:`, window[varName]);
       }
     }
@@ -842,12 +862,13 @@ function setupMonitoring() {
 
             if (this.readyState === 4 && this.status === 200) {
               try {
-                // DEBUG: 檢查是否為 adultHealthCheck 或 cancerScreening 的 API
+                // DEBUG: 檢查是否為 adultHealthCheck, cancerScreening 或 hbcvdata 的 API
                 const isHealthCheckUrl = originalUrl.includes("/imue0140/imue0140s01/hpa-data");
                 const isCancerScreeningUrl = originalUrl.includes("/imue0150/imue0150s01/hpa-data");
+                const isHbcvdataUrl = originalUrl.includes("/imue0180/imue0180s01/hbcv-data");
 
-                if (isHealthCheckUrl || isCancerScreeningUrl) {
-                  const urlType = isHealthCheckUrl ? "adultHealthCheck" : "cancerScreening";
+                if (isHealthCheckUrl || isCancerScreeningUrl || isHbcvdataUrl) {
+                  const urlType = isHealthCheckUrl ? "adultHealthCheck" : (isCancerScreeningUrl ? "cancerScreening" : "hbcvdata");
                   console.log(`[DEBUG] ========== 偵測到 ${urlType} API 回應 ==========`);
                   console.log(`[DEBUG] URL: ${originalUrl}`);
                   console.log(`[DEBUG] 回應大小: ${this.responseText.length} bytes`);
@@ -859,8 +880,8 @@ function setupMonitoring() {
 
                 const data = JSON.parse(this.responseText);
 
-                if (isHealthCheckUrl || isCancerScreeningUrl) {
-                  const urlType = isHealthCheckUrl ? "adultHealthCheck" : "cancerScreening";
+                if (isHealthCheckUrl || isCancerScreeningUrl || isHbcvdataUrl) {
+                  const urlType = isHealthCheckUrl ? "adultHealthCheck" : (isCancerScreeningUrl ? "cancerScreening" : "hbcvdata");
                   console.log(`[DEBUG] ${urlType} 解析後的 JSON:`, data);
                 }
 
@@ -1248,6 +1269,13 @@ function shouldFetchData(dataType) {
         resolve(items.fetchCancerScreening);
       });
     });
+  } else if (dataType === "hbcvdata") {
+    // 檢查是否應該抓取B、C肝炎專區資料
+    return new Promise((resolve) => {
+      chrome.storage.sync.get({ fetchHbcvdata: true }, (items) => {
+        resolve(items.fetchHbcvdata);
+      });
+    });
   }
 
   // 其他資料類型預設為 true
@@ -1320,7 +1348,7 @@ function fetchAllDataTypes() {
       });
 
       // 獲取設定並根據設定決定是否抓取特殊資料類型
-      const specialDataTypes = ["adultHealthCheck", "cancerScreening"];
+      const specialDataTypes = ["adultHealthCheck", "cancerScreening", "hbcvdata", "labdraw"];
       console.log("[DEBUG] 開始檢查特殊資料類型:", specialDataTypes);
       const specialFetchPromises = specialDataTypes.map((dataType) => {
         return shouldFetchData(dataType).then((shouldFetch) => {
@@ -1486,6 +1514,7 @@ function fetchAllDataTypes() {
 const apiPathMap = new Map([
   ["medication", "imue0008/imue0008s02/get-data"],
   ["labdata", "imue0060/imue0060s02/get-data"],
+  ["labdraw", "imue0060/imue0060s03/get-data"],
   ["chinesemed", "imue0090/imue0090s02/get-data"],
   ["imaging", "imue0130/imue0130s02/get-data"],
   ["allergy", "imue0040/imue0040s02/get-data"],
@@ -1496,6 +1525,7 @@ const apiPathMap = new Map([
   ["masterMenu", "imue1000/imue1000s02/master-menu"],
   ["adultHealthCheck", "imue0140/imue0140s01/hpa-data"],
   ["cancerScreening", "imue0150/imue0150s01/hpa-data"],
+  ["hbcvdata", "imue0180/imue0180s01/hbcv-data"],
   // ["rehabilitation", "imue0080/imue0080s02/get-data"],
   // ["acupuncture", "imue0160/imue0160s02/get-data"],
   // ["specialChineseMedCare", "imue0170/imue0170s02/get-data"]
@@ -1512,6 +1542,7 @@ function enhancedFetchData(dataType, options = {}) {
   const validDataTypes = [
     "medication",
     "labdata",
+    "labdraw",
     "chinesemed",
     "imaging",
     "allergy",
@@ -1522,6 +1553,7 @@ function enhancedFetchData(dataType, options = {}) {
     "masterMenu",
     "adultHealthCheck",
     "cancerScreening",
+    "hbcvdata",
     // "rehabilitation",
     // "acupuncture",
     // "specialChineseMedCare",
@@ -1621,15 +1653,18 @@ function enhancedFetchData(dataType, options = {}) {
             data &&
             (recordsArray !== undefined ||
               dataType === "medDays" ||
+              dataType === "labdraw" ||
               dataType === "patientsummary" ||
               dataType === "masterMenu" ||
               dataType === "adultHealthCheck" ||
-              dataType === "cancerScreening")
+              dataType === "cancerScreening" ||
+              dataType === "hbcvdata")
           ) {
             let rObject;
             let normalizedData;
 
-            if (dataType === "medDays") {
+            if (dataType === "medDays" || dataType === "labdraw") {
+              // medDays 和 labdraw 直接返回陣列
               rObject = Array.isArray(data) ? data : [data];
               normalizedData = { rObject: rObject };
             } else if (dataType === "patientsummary") {
@@ -1639,8 +1674,8 @@ function enhancedFetchData(dataType, options = {}) {
               // masterMenu 需要包裝整個 data 物件（包含 prsnAuth 等授權資訊）
               rObject = [data];
               normalizedData = { rObject: rObject };
-            } else if (dataType === "adultHealthCheck" || dataType === "cancerScreening") {
-              // adultHealthCheck 和 cancerScreening 只包裝 robject，不保留 originalData 以節省記憶體
+            } else if (dataType === "adultHealthCheck" || dataType === "cancerScreening" || dataType === "hbcvdata") {
+              // adultHealthCheck, cancerScreening 和 hbcvdata 只包裝 robject，不保留 originalData 以節省記憶體
               rObject = recordsArray ? [recordsArray] : [];
               normalizedData = { rObject: rObject };
               console.log(`[DEBUG] ${dataType} 標準化後的資料:`, normalizedData);
@@ -1653,7 +1688,7 @@ function enhancedFetchData(dataType, options = {}) {
             const varName = DataProcessor.getVarName(dataType);
             if (varName) {
               window[varName] = normalizedData;
-              if (dataType === "adultHealthCheck" || dataType === "cancerScreening") {
+              if (dataType === "adultHealthCheck" || dataType === "cancerScreening" || dataType === "hbcvdata") {
                 console.log(`[DEBUG] ${dataType} 已更新全局變數 ${varName}:`, window[varName]);
               }
             }
@@ -1706,9 +1741,10 @@ function getTypeText(type) {
   return DataProcessor.getTypeText(type) || type;
 }
 
-// 新增: 節點ID與資料類型對應表
-const nodeToDataTypeMap = new Map([
+// 新增: 節點ID與資料類型對應表（使用陣列以支援一個節點對應多個資料類型）
+const nodeToDataTypeMap = [
   ["1.1", "patientsummary"],
+  ["1.2", "hbcvdata"],
   ["2.1", "medication"],
   ["2.4", "medDays"],
   ["3.1", "chinesemed"],
@@ -1716,13 +1752,14 @@ const nodeToDataTypeMap = new Map([
   // ["3.3", "specialChineseMedCare"],
   ["5.1", "allergy"],
   ["6.1", "labdata"],
+  ["6.1", "labdraw"], // labdraw 也屬於 6.1 節點
   ["6.2", "imaging"],
   ["6.3", "adultHealthCheck"],
   ["6.4", "cancerScreening"],
   ["7.1", "surgery"],
   ["8.1", "discharge"],
   // ["9.1", "rehabilitation"]
-]);
+];
 
 // 新增: 檢查資料類型是否有授權
 function isDataTypeAuthorized(dataType) {
@@ -1739,7 +1776,7 @@ function isDataTypeAuthorized(dataType) {
 
     // 反向查找: 從資料類型找到對應的節點ID
     const nodeIds = [];
-    for (const [node, type] of nodeToDataTypeMap.entries()) {
+    for (const [node, type] of nodeToDataTypeMap) {
       if (type === dataType) {
         nodeIds.push(node);
       }
@@ -1957,6 +1994,7 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
       const patientData = {
         medication: window.lastInterceptedMedicationData,
         lab: window.lastInterceptedLabData,
+        labdraw: window.lastInterceptedLabDrawData,
         chinesemed: window.lastInterceptedChineseMedData,
         imaging: window.lastInterceptedImagingData,
         allergy: window.lastInterceptedAllergyData,
@@ -1967,6 +2005,7 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
         masterMenu: window.lastInterceptedMasterMenuData,
         adultHealthCheck: window.lastInterceptedAdultHealthCheckData,
         cancerScreening: window.lastInterceptedCancerScreeningData,
+        hbcvdata: window.lastInterceptedHbcvdata,
         // rehabilitation: window.lastInterceptedRehabilitationData,
         // acupuncture: window.lastInterceptedAcupunctureData,
         // specialChineseMedCare: window.lastInterceptedSpecialChineseMedCareData,

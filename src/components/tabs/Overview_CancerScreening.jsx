@@ -64,6 +64,17 @@ const Overview_CancerScreening = ({ cancerScreeningData, generalDisplaySettings 
     return sizes[size] || sizes.medium;
   };
 
+  // Helper function to determine text color based on result
+  const getResultColor = (result) => {
+    if (!result || result === "無資料") {
+      return "text.disabled"; // gray
+    } else if (result === "異常") {
+      return "error.main"; // red
+    } else {
+      return "text.primary"; // black (default)
+    }
+  };
+
   // Function to render screening item if data is available
   const renderScreeningItem = (type, label) => {
     if (!hasData()) return null;
@@ -82,7 +93,11 @@ const Overview_CancerScreening = ({ cancerScreeningData, generalDisplaySettings 
       return (
         <Typography
           variant="body2"
-          sx={{ fontSize: getTextSize(contentTextSize), mb: 0.5 }}
+          sx={{
+            fontSize: getTextSize(contentTextSize),
+            mb: 0.5,
+            color: getResultColor("無資料")
+          }}
           key={type}
         >
           {label}: 無資料
@@ -95,7 +110,11 @@ const Overview_CancerScreening = ({ cancerScreeningData, generalDisplaySettings 
     return (
       <Typography
         variant="body2"
-        sx={{ fontSize: getTextSize(contentTextSize), mb: 0.5 }}
+        sx={{
+          fontSize: getTextSize(contentTextSize),
+          mb: 0.5,
+          color: getResultColor(latestData.result)
+        }}
         key={type}
       >
         {label}: {latestData.result}
