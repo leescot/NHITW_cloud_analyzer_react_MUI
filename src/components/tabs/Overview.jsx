@@ -27,9 +27,7 @@ import Overview_AllergyRecords from "./Overview_AllergyRecords";
 import Overview_SurgeryRecords from "./Overview_SurgeryRecords";
 import Overview_DischargeRecords from "./Overview_DischargeRecords";
 import Overview_ImagingTests from "./Overview_ImagingTests";
-import Overview_AdultHealthCheck from "./Overview_AdultHealthCheck";
-import Overview_CancerScreening from "./Overview_CancerScreening";
-import Overview_hbcvdata from "./Overview_hbcvdata";
+import Overview_IntegratedHealthData from "./Overview_IntegratedHealthData";
 
 // 導入從配置文件中移出的常數
 import { DEFAULT_LAB_TESTS } from '../../config/labTests';
@@ -67,30 +65,13 @@ const Overview = ({
   const hasSurgeryData = useMemo(() => surgeryData && surgeryData.length > 0, [surgeryData]);
   const hasDischargeData = useMemo(() => dischargeData && dischargeData.length > 0, [dischargeData]);
 
-  // Check if adult health check should be displayed
-  const shouldShowAdultHealthCheck = useMemo(() =>
-    cloudSettings?.fetchAdultHealthCheck === true,
-    [cloudSettings]
-  );
-
-  const shouldShowCancerScreening = useMemo(() =>
-    cloudSettings?.fetchCancerScreening === true,
-    [cloudSettings]
-  );
-
-  const shouldShowHbcvdata = useMemo(() =>
-    cloudSettings?.fetchHbcvdata === true,
-    [cloudSettings]
-  );
 
   useEffect(() => {
     console.log("[Overview] adultHealthCheckData prop:", adultHealthCheckData);
     console.log("[Overview] cancerScreeningData prop:", cancerScreeningData);
     console.log("[Overview] hbcvData prop:", hbcvData);
-    console.log("[Overview] shouldShowAdultHealthCheck:", shouldShowAdultHealthCheck);
-    console.log("[Overview] shouldShowCancerScreening:", shouldShowCancerScreening);
-    console.log("[Overview] shouldShowHbcvdata:", shouldShowHbcvdata);
-  }, [adultHealthCheckData, cancerScreeningData, hbcvData, shouldShowAdultHealthCheck, shouldShowCancerScreening, shouldShowHbcvdata]);
+    console.log("[Overview] cloudSettings:", cloudSettings);
+  }, [adultHealthCheckData, cancerScreeningData, hbcvData, cloudSettings]);
 
   return (
     <Box sx={{ p: 0 }}>
@@ -117,29 +98,15 @@ const Overview = ({
 
         {/* 重點檢驗 - 中欄 (1/3) */}
         <Grid item xs={12} md={4.5}>
-          {/* 成人預防保健 - only display if setting is enabled */}
-          {shouldShowAdultHealthCheck && (
-            <Overview_AdultHealthCheck
-              adultHealthCheckData={adultHealthCheckData}
-              generalDisplaySettings={generalDisplaySettings}
-            />
-          )}
+          {/* 整合的健康資料區塊 (成健 / 癌篩 / BC肝) */}
+          <Overview_IntegratedHealthData
+            adultHealthCheckData={adultHealthCheckData}
+            cancerScreeningData={cancerScreeningData}
+            hbcvData={hbcvData}
+            cloudSettings={cloudSettings}
+            generalDisplaySettings={generalDisplaySettings}
+          />
 
-          {/* 四癌篩檢 - only display if setting is enabled */}
-          {shouldShowCancerScreening && (
-            <Overview_CancerScreening
-              cancerScreeningData={cancerScreeningData}
-              generalDisplaySettings={generalDisplaySettings}
-            />
-          )}
-
-          {/* B、C肝炎專區 - only display if setting is enabled */}
-          {shouldShowHbcvdata && (
-            <Overview_hbcvdata
-              hbcvData={hbcvData}
-              generalDisplaySettings={generalDisplaySettings}
-            />
-          )}
 
           {/* 重點檢驗 */}
           <Overview_LabTests
