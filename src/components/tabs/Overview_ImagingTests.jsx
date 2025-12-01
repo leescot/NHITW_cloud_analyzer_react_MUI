@@ -36,6 +36,7 @@ import TypographySizeWrapper from "../utils/TypographySizeWrapper";
 import DescriptionIcon from '@mui/icons-material/Description';
 import PhotoLibraryIcon from '@mui/icons-material/PhotoLibrary';
 import VisibilityIcon from '@mui/icons-material/Visibility';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 
 // 導入從配置文件中移出的常數
 import { DEFAULT_IMAGE_TESTS } from '../../config/imageTests';
@@ -97,6 +98,7 @@ const Overview_ImagingTests = ({
 }) => {
   // Add state for report dialog
   const [reportDialog, setReportDialog] = useState({ open: false, content: '', title: '' });
+  const [copySuccess, setCopySuccess] = useState(false);
 
   // Add function to view image (imported from ImagingData.jsx)
   const viewImage = async (imageParams) => {
@@ -252,24 +254,24 @@ const Overview_ImagingTests = ({
                               break;
                             }
                           }
-                          
+
                           // Highlight specific terms
                           const terms = [/diagnosis/i, /impression/i, /IMP/, /conclusion/i, /診斷/];
                           let highlightedContent = processedContent;
-                          
+
                           // Apply highlighting for tooltip (for all occurrences)
                           terms.forEach(term => {
                             highlightedContent = highlightedContent.replace(
-                              new RegExp(term.source, 'g' + term.flags), 
+                              new RegExp(term.source, 'g' + term.flags),
                               match => `<span style="color: red; font-weight: bold;">${match}</span>`
                             );
                           });
-                          
+
                           // Truncate if needed
-                          const finalContent = highlightedContent.length > 200 
-                            ? highlightedContent.substring(0, 200) + '...' 
+                          const finalContent = highlightedContent.length > 200
+                            ? highlightedContent.substring(0, 200) + '...'
                             : highlightedContent;
-                            
+
                           return (
                             <Typography variant="caption" style={{ whiteSpace: 'pre-line' }}>
                               <div dangerouslySetInnerHTML={{ __html: finalContent }} />
@@ -291,7 +293,7 @@ const Overview_ImagingTests = ({
                               break;
                             }
                           }
-                          
+
                           setReportDialog({
                             open: true,
                             title: `${test.orderName} - ${test.date}`,
@@ -380,22 +382,39 @@ const Overview_ImagingTests = ({
               // Highlight specific terms in red
               const terms = [/diagnosis/i, /impression/i, /IMP/, /conclusion/i, /診斷/];
               let content = reportDialog.content;
-              
+
               // Replace each term with a red-colored version (for all occurrences)
               terms.forEach(term => {
                 // Use replaceAll with a regular expression that has the global flag
                 content = content.replace(
-                  new RegExp(term.source, 'g' + term.flags), 
+                  new RegExp(term.source, 'g' + term.flags),
                   match => `<span style="color: red; font-weight: bold;">${match}</span>`
                 );
               });
-              
+
               // Return content with dangerouslySetInnerHTML
               return <div dangerouslySetInnerHTML={{ __html: content }} />;
             })()}
           </TypographySizeWrapper>
         </DialogContent>
         <DialogActions>
+          <Button
+            startIcon={<ContentCopyIcon />}
+            onClick={() => {
+              // Copy content to clipboard
+              navigator.clipboard.writeText(reportDialog.content)
+                .then(() => {
+                  setCopySuccess(true);
+                  setTimeout(() => setCopySuccess(false), 2000);
+                })
+                .catch(err => {
+                  console.error('Failed to copy:', err);
+                  alert('複製失敗');
+                });
+            }}
+          >
+            {copySuccess ? '已複製' : '複製'}
+          </Button>
           <Button onClick={() => setReportDialog({ ...reportDialog, open: false })}>
             關閉
           </Button>

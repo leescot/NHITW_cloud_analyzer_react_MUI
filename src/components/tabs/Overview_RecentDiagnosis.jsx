@@ -414,7 +414,7 @@ const Overview_RecentDiagnosis = ({
                 {(isInpatient || isEmergency) && (
                   <Chip
                     size="small"
-                    label={`${diagnosis.date}${diagnosis.hospital ? ` (${diagnosis.hospital})` : ''}`}
+                    label={`${diagnosis.date}${diagnosis.hospital ? ` ${diagnosis.hospital}` : ''}`}
                     sx={{
                       fontSize: '0.7rem',
                       height: '20px',
@@ -429,41 +429,26 @@ const Overview_RecentDiagnosis = ({
                 )}
 
                 {isVaccine && (
-                  <Box sx={{ mr: 1 }}>
-                    <Chip
-                      size="small"
-                      label={diagnosis.date}
-                      sx={{
-                        fontSize: '0.7rem',
-                        height: '20px',
-                        mb: 0.3,
-                        bgcolor: 'transparent',
-                        border: '1px solid',
-                        borderColor: color,
-                        color: color,
-                        '& .MuiChip-label': { px: 1 }
-                      }}
-                    />
-                    {diagnosis.hospital && (
-                      <Chip
-                        size="small"
-                        label={diagnosis.hospital}
-                        sx={{
-                          fontSize: '0.65rem',
-                          height: '18px',
-                          bgcolor: alpha(color, 0.08),
-                          color: color,
-                          '& .MuiChip-label': { px: 1 }
-                        }}
-                      />
-                    )}
-                  </Box>
+                  <Chip
+                    size="small"
+                    label={`${diagnosis.date}${diagnosis.hospital ? ` ${diagnosis.hospital}` : ''}`}
+                    sx={{
+                      fontSize: '0.7rem',
+                      height: '20px',
+                      mr: 1,
+                      bgcolor: 'transparent',
+                      border: '1px solid',
+                      borderColor: color,
+                      color: color,
+                      '& .MuiChip-label': { px: 1 }
+                    }}
+                  />
                 )}
 
                 <TypographySizeWrapper
                   textSizeType="content"
                   generalDisplaySettings={generalDisplaySettings}
-                  sx={{ mr: 1 }}
+                  sx={{ mr: 1, display: 'flex', alignItems: 'center' }}
                 >
                   {isEnrollment ? (
                     // 對於收案，顯示程式名稱和醫院
@@ -536,11 +521,11 @@ const Overview_RecentDiagnosis = ({
                         {isEnrollment ? (
                           <>{diagnosis.programName} {diagnosis.hospital}</>
                         ) : isVaccine ? (
-                          <>{diagnosis.date}{diagnosis.hospital ? ` (${diagnosis.hospital})` : ''}: {diagnosis.medications?.join(', ')}</>
+                          <>{diagnosis.date}{diagnosis.hospital ? ` ${diagnosis.hospital}` : ''}: {diagnosis.medications?.join(', ')}</>
                         ) : isInpatient ? (
-                          <>{diagnosis.date}{diagnosis.hospital ? ` (${diagnosis.hospital})` : ''}: {diagnosis.name}</>
+                          <>{diagnosis.date}{diagnosis.hospital ? ` ${diagnosis.hospital}` : ''}: {diagnosis.name}</>
                         ) : isEmergency ? (
-                          <>{diagnosis.date}{diagnosis.hospital ? ` (${diagnosis.hospital})` : ''}: {diagnosis.name}</>
+                          <>{diagnosis.date}{diagnosis.hospital ? ` ${diagnosis.hospital}` : ''}: {diagnosis.name}</>
                         ) : (
                           <>{diagnosis.code} {diagnosis.name} ({diagnosis.count})</>
                         )}
