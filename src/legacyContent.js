@@ -6,6 +6,7 @@ let currentPatientId = null; // 新增追踪當前病人
 // 在檔案頂部定義全局變數
 window.lastInterceptedMedicationData = null;
 window.lastInterceptedLabData = null;
+window.lastInterceptedLabDrawData = null; // 新增檢驗圖形化查詢資料
 window.lastInterceptedChineseMedData = null;
 window.lastInterceptedImagingData = null;
 window.lastInterceptedAllergyData = null;
@@ -45,6 +46,7 @@ let isDataFetchingStarted = false;
 let pendingRequests = {
   medication: false,
   labdata: false,
+  labdraw: false, // 新增檢驗圖形化查詢
   chinesemed: false,
   imaging: false,
   allergy: false,
@@ -193,6 +195,7 @@ function handleTestDataLoad(event) {
 function clearTestData() {
   lastInterceptedMedicationData = null;
   lastInterceptedLabData = null;
+  lastInterceptedLabDrawData = null;
   lastInterceptedChineseMedData = null;
   lastInterceptedImagingData = null;
   lastInterceptedAllergyData = null;
@@ -344,6 +347,7 @@ function performClearPreviousData() {
       }
       lastInterceptedMedicationData = null;
       lastInterceptedLabData = null;
+      lastInterceptedLabDrawData = null;
       lastInterceptedChineseMedData = null;
       lastInterceptedImagingData = null;
       lastInterceptedAllergyData = null;
@@ -487,6 +491,7 @@ function observeUrlChanges() {
 const API_URL_PATTERNS = new Map([
   ["medication", "/imu/api/imue0008/imue0008s02/get-data"],
   ["labdata", "/imu/api/imue0060/imue0060s02/get-data"],
+  ["labdraw", "/imu/api/imue0060/imue0060s03/get-data"],
   ["chinesemed", "/imu/api/imue0090/imue0090s02/get-data"],
   ["imaging", "/imu/api/imue0130/imue0130s02/get-data"],
   ["allergy", "/imu/api/imue0040/imue0040s02/get-data"],
@@ -510,6 +515,7 @@ const DataProcessor = {
   API_URL_PATTERNS: new Map([
     ["medication", "/imu/api/imue0008/imue0008s02/get-data"],
     ["labdata", "/imu/api/imue0060/imue0060s02/get-data"],
+    ["labdraw", "/imu/api/imue0060/imue0060s03/get-data"],
     ["chinesemed", "/imu/api/imue0090/imue0090s02/get-data"],
     ["imaging", "/imu/api/imue0130/imue0130s02/get-data"],
     ["allergy", "/imu/api/imue0040/imue0040s02/get-data"],
@@ -530,6 +536,7 @@ const DataProcessor = {
   dataVarMap: new Map([
     ["medication", "lastInterceptedMedicationData"],
     ["labdata", "lastInterceptedLabData"],
+    ["labdraw", "lastInterceptedLabDrawData"],
     ["chinesemed", "lastInterceptedChineseMedData"],
     ["imaging", "lastInterceptedImagingData"],
     ["allergy", "lastInterceptedAllergyData"],
@@ -550,6 +557,7 @@ const DataProcessor = {
   actionMap: new Map([
     ["medication", "saveMedicationData"],
     ["labdata", "saveLabData"],
+    ["labdraw", "saveLabDrawData"],
     ["chinesemed", "saveChineseMedData"],
     ["imaging", "saveImagingData"],
     ["allergy", "saveAllergyData"],
@@ -570,6 +578,7 @@ const DataProcessor = {
   typeTextMap: new Map([
     ["medication", "西醫藥歷"],
     ["labdata", "檢驗資料"],
+    ["labdraw", "檢驗圖形化查詢"],
     ["chinesemed", "中醫用藥"],
     ["imaging", "醫療影像"],
     ["allergy", "過敏資料"],
@@ -1339,7 +1348,7 @@ function fetchAllDataTypes() {
       });
 
       // 獲取設定並根據設定決定是否抓取特殊資料類型
-      const specialDataTypes = ["adultHealthCheck", "cancerScreening", "hbcvdata"];
+      const specialDataTypes = ["adultHealthCheck", "cancerScreening", "hbcvdata", "labdraw"];
       console.log("[DEBUG] 開始檢查特殊資料類型:", specialDataTypes);
       const specialFetchPromises = specialDataTypes.map((dataType) => {
         return shouldFetchData(dataType).then((shouldFetch) => {
@@ -1505,6 +1514,7 @@ function fetchAllDataTypes() {
 const apiPathMap = new Map([
   ["medication", "imue0008/imue0008s02/get-data"],
   ["labdata", "imue0060/imue0060s02/get-data"],
+  ["labdraw", "imue0060/imue0060s03/get-data"],
   ["chinesemed", "imue0090/imue0090s02/get-data"],
   ["imaging", "imue0130/imue0130s02/get-data"],
   ["allergy", "imue0040/imue0040s02/get-data"],
@@ -1532,6 +1542,7 @@ function enhancedFetchData(dataType, options = {}) {
   const validDataTypes = [
     "medication",
     "labdata",
+    "labdraw",
     "chinesemed",
     "imaging",
     "allergy",
@@ -1642,6 +1653,7 @@ function enhancedFetchData(dataType, options = {}) {
             data &&
             (recordsArray !== undefined ||
               dataType === "medDays" ||
+              dataType === "labdraw" ||
               dataType === "patientsummary" ||
               dataType === "masterMenu" ||
               dataType === "adultHealthCheck" ||
@@ -1651,7 +1663,8 @@ function enhancedFetchData(dataType, options = {}) {
             let rObject;
             let normalizedData;
 
-            if (dataType === "medDays") {
+            if (dataType === "medDays" || dataType === "labdraw") {
+              // medDays 和 labdraw 直接返回陣列
               rObject = Array.isArray(data) ? data : [data];
               normalizedData = { rObject: rObject };
             } else if (dataType === "patientsummary") {
@@ -1728,8 +1741,8 @@ function getTypeText(type) {
   return DataProcessor.getTypeText(type) || type;
 }
 
-// 新增: 節點ID與資料類型對應表
-const nodeToDataTypeMap = new Map([
+// 新增: 節點ID與資料類型對應表（使用陣列以支援一個節點對應多個資料類型）
+const nodeToDataTypeMap = [
   ["1.1", "patientsummary"],
   ["1.2", "hbcvdata"],
   ["2.1", "medication"],
@@ -1739,13 +1752,14 @@ const nodeToDataTypeMap = new Map([
   // ["3.3", "specialChineseMedCare"],
   ["5.1", "allergy"],
   ["6.1", "labdata"],
+  ["6.1", "labdraw"], // labdraw 也屬於 6.1 節點
   ["6.2", "imaging"],
   ["6.3", "adultHealthCheck"],
   ["6.4", "cancerScreening"],
   ["7.1", "surgery"],
   ["8.1", "discharge"],
   // ["9.1", "rehabilitation"]
-]);
+];
 
 // 新增: 檢查資料類型是否有授權
 function isDataTypeAuthorized(dataType) {
@@ -1762,7 +1776,7 @@ function isDataTypeAuthorized(dataType) {
 
     // 反向查找: 從資料類型找到對應的節點ID
     const nodeIds = [];
-    for (const [node, type] of nodeToDataTypeMap.entries()) {
+    for (const [node, type] of nodeToDataTypeMap) {
       if (type === dataType) {
         nodeIds.push(node);
       }
@@ -1980,6 +1994,7 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
       const patientData = {
         medication: window.lastInterceptedMedicationData,
         lab: window.lastInterceptedLabData,
+        labdraw: window.lastInterceptedLabDrawData,
         chinesemed: window.lastInterceptedChineseMedData,
         imaging: window.lastInterceptedImagingData,
         allergy: window.lastInterceptedAllergyData,
