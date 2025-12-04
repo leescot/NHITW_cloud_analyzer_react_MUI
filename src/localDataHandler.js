@@ -108,6 +108,12 @@ export async function processLocalData(jsonData, filename) {
     // 重置資料類型追蹤
     const loadedTypes = [];
 
+    // 處理使用者資訊（如果存在）
+    if (jsonData.userInfo) {
+      window.lastInterceptedUserInfo = JSON.parse(JSON.stringify(jsonData.userInfo));
+      console.log('已載入使用者資訊:', window.lastInterceptedUserInfo);
+    }
+
     // 預先從 Chrome storage 加載自定義格式設定 (改為同步等待)
     // 這樣能確保處理藥物資料時有正確的格式設定
     if (jsonData.medication) {
@@ -225,6 +231,7 @@ export async function processLocalData(jsonData, filename) {
 
         // 先將數據保存到 localStorage
         const dataToShare = {
+          userInfo: window.lastInterceptedUserInfo, // 加入使用者資訊
           medication: window.lastInterceptedMedicationData,
           lab: window.lastInterceptedLabData,
           chinesemed: window.lastInterceptedChineseMedData,
@@ -296,6 +303,7 @@ export function clearLocalData() {
   try {
     // 定義需要清除的全局變數映射
     const globalVarsToReset = new Map([
+      ['lastInterceptedUserInfo', null],
       ['lastInterceptedMedicationData', null],
       ['lastInterceptedLabData', null],
       ['lastInterceptedChineseMedData', null],

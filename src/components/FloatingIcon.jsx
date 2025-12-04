@@ -386,10 +386,24 @@ const FloatingIcon = () => {
   // Extract user information when the dialog opens or data changes
   useEffect(() => {
     if (open) {
-      const info = extractUserInfoFromToken();
+      // First try to get from JWT token (for cloud data)
+      let info = extractUserInfoFromToken();
+
+      // If no info from token, try to get from local data
+      if (!info && window.lastInterceptedUserInfo) {
+        info = window.lastInterceptedUserInfo;
+      }
+
       setUserInfo(info);
     }
   }, [open]);
+
+  // Update user info when local data is loaded
+  useEffect(() => {
+    if (window.lastInterceptedUserInfo) {
+      setUserInfo(window.lastInterceptedUserInfo);
+    }
+  }, [groupedMedications, groupedLabs]); // Trigger when data changes
 
   const handleClick = () => {
     setOpen(true);
@@ -507,30 +521,6 @@ const FloatingIcon = () => {
                 alignItems: "center",
               }}
             >
-              {/* User Info Display - shown before tabs, not selectable */}
-              {userInfo && formatUserInfoDisplay(userInfo) && (
-                <Box
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    px: 2,
-                    py: 0.75,
-                    fontWeight: "bold",
-                    color: "#1976d2",
-                    fontSize:
-                      (generalDisplaySettings &&
-                        generalDisplaySettings.contentTextSize &&
-                        CONTENT_TEXT_SIZES[
-                        generalDisplaySettings.contentTextSize
-                        ]) ||
-                      CONTENT_TEXT_SIZES["medium"],
-                    borderRight: "1px solid #e0e0e0",
-                    flexShrink: 0,
-                  }}
-                >
-                  {formatUserInfoDisplay(userInfo)}
-                </Box>
-              )}
               <Tabs
                 value={tabValue}
                 onChange={handleTabChange}
@@ -569,7 +559,7 @@ const FloatingIcon = () => {
                 }}
               >
                 <Tab
-                  label="總覽"
+                  label={userInfo && formatUserInfoDisplay(userInfo) ? formatUserInfoDisplay(userInfo) : "總覽"}
                   icon={<HomeIcon sx={{ fontSize: "1rem" }} />}
                   iconPosition="start"
                   sx={{

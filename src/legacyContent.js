@@ -1,4 +1,6 @@
 // content.js - Modified to handle user sessions
+import { extractUserInfoFromToken } from './utils/userInfoUtils.js';
+
 console.log("Content script loaded for NHI data extractor (Automated Version)");
 
 let currentPatientId = null; // 新增追踪當前病人
@@ -724,8 +726,12 @@ const DataProcessor = {
   // 保存數據到 localStorage
   saveDataToLocalStorage() {
     try {
+      // 提取使用者資訊
+      const userInfo = extractUserInfoFromToken();
+
       // 使用 dataVarMap 遍历获取所有数据，減少重複代碼和硬編碼
       const dataToShare = {
+        userInfo: userInfo, // 加入使用者資訊
         timestamp: Date.now() // 添加时间戳以识别数据新鲜度
       };
 
@@ -1990,8 +1996,13 @@ function triggerExtraction() {
 chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
   if (request.action === "getPatientData") {
     try {
+      // 提取使用者資訊
+      const userInfo = extractUserInfoFromToken();
+
       // 收集所有病人資料
       const patientData = {
+        userInfo: userInfo, // 加入使用者資訊
+        timestamp: Date.now(), // 加入時間戳
         medication: window.lastInterceptedMedicationData,
         lab: window.lastInterceptedLabData,
         labdraw: window.lastInterceptedLabDrawData,
@@ -2031,7 +2042,9 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
       if (hasAnyData) {
         // 實現直接在 content script 觸發下載
         const date = new Date();
-        const fileName = `patient_data_${date.getFullYear()}${(
+        // 使用 userID 作為檔案名稱，如果沒有則使用 "unknown"
+        const userIdPrefix = userInfo?.userId || "unknown";
+        const fileName = `${userIdPrefix}_${date.getFullYear()}${(
           date.getMonth() + 1
         )
           .toString()
