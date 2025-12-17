@@ -106,7 +106,7 @@ import StatusIndicator from "./indicators/StatusIndicator";
 import KidneyStatusIndicator from "./indicators/KidneyStatusIndicator";
 
 // Import new settings
-import { DEFAULT_SETTINGS } from "../config/defaultSettings";
+import { DEFAULT_SETTINGS, DEFAULT_GAI_PROMPT } from "../config/defaultSettings";
 import { DEFAULT_ATC5_GROUPS } from "../config/medicationGroups";
 
 // Import user info utilities
@@ -163,6 +163,8 @@ const FloatingIcon = () => {
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [patientSummaryData, setPatientSummaryData] = useState([]);
   const [enableGAICopyFormat, setEnableGAICopyFormat] = useState(false);
+  const [enableGAIPrompt, setEnableGAIPrompt] = useState(false);
+  const [gaiPrompt, setGaiPrompt] = useState("");
 
   // 新增響應式布局檢測
   const theme = useTheme();
@@ -331,16 +333,33 @@ const FloatingIcon = () => {
 
   // Load GAI copy format setting
   useEffect(() => {
-    chrome.storage.sync.get({ enableGAICopyFormat: false }, (items) => {
+    chrome.storage.sync.get({
+      enableGAICopyFormat: false,
+      enableGAIPrompt: false,
+      gaiPrompt: DEFAULT_GAI_PROMPT
+    }, (items) => {
       setEnableGAICopyFormat(items.enableGAICopyFormat);
+      setEnableGAIPrompt(items.enableGAIPrompt);
+      setGaiPrompt(items.gaiPrompt || DEFAULT_GAI_PROMPT);
       console.log('GAI Copy Format enabled:', items.enableGAICopyFormat);
+      console.log('GAI Prompt enabled:', items.enableGAIPrompt);
     });
 
     // Listen for setting changes
     const handleStorageChange = (changes, area) => {
-      if (area === 'sync' && changes.enableGAICopyFormat) {
-        setEnableGAICopyFormat(changes.enableGAICopyFormat.newValue);
-        console.log('GAI Copy Format setting changed:', changes.enableGAICopyFormat.newValue);
+      if (area === 'sync') {
+        if (changes.enableGAICopyFormat) {
+          setEnableGAICopyFormat(changes.enableGAICopyFormat.newValue);
+          console.log('GAI Copy Format setting changed:', changes.enableGAICopyFormat.newValue);
+        }
+        if (changes.enableGAIPrompt) {
+          setEnableGAIPrompt(changes.enableGAIPrompt.newValue);
+          console.log('GAI Prompt setting changed:', changes.enableGAIPrompt.newValue);
+        }
+        if (changes.gaiPrompt) {
+          setGaiPrompt(changes.gaiPrompt.newValue || DEFAULT_GAI_PROMPT);
+          console.log('GAI Prompt text changed');
+        }
       }
     };
 
@@ -470,12 +489,15 @@ const FloatingIcon = () => {
     // Build the GAI format text
     let gaiText = `這是一位 ${age} 歲的 ${gender} 性病人，以下是病歷資料\n\n`;
 
-    // Patient Summary - use 'text' field
+    // Patient Summary - use 'text' field and filter out dental image sentence
     gaiText += `<patientSummary>\n雲端註記資料:\n`;
     if (patientSummaryData && patientSummaryData.length > 0) {
       patientSummaryData.forEach(item => {
-        // Use 'text' field instead of 'content'
-        gaiText += `${item.text || ''}\n`;
+        const text = item.text || '';
+        // Filter out the dental image sentence
+        if (text && !text.includes('此病人於牙科處置紀錄有影像上傳資料')) {
+          gaiText += `${text}\n`;
+        }
       });
     }
     gaiText += `</patientSummary>\n\n`;
@@ -625,6 +647,181 @@ const FloatingIcon = () => {
       })
       .catch((err) => {
         console.error("Failed to copy GAI format: ", err);
+        setSnackbarMessage("複製失敗，請重試");
+        setSnackbarOpen(true);
+      });
+  };
+
+  // Handle copying GAI format with prompt
+  const handleCopyGAIWithPrompt = () => {
+    console.log('handleCopyGAIWithPrompt called');
+
+    // First generate the GAI data (reuse the logic from handleCopyGAIFormat)
+    const age = userInfo?.age || '未知';
+    const gender = userInfo?.gender === 'M' ? 'male' : userInfo?.gender === 'F' ? 'female' : '未知';
+
+    let gaiText = `這是一位 ${age} 歲的 ${gender} 性病人，以下是病歷資料\n\n`;
+
+    // Patient Summary - filter out dental image sentence
+    gaiText += `<patientSummary>\n雲端註記資料:\n`;
+    if (patientSummaryData && patientSummaryData.length > 0) {
+      patientSummaryData.forEach(item => {
+        const text = item.text || '';
+        // Filter out the dental image sentence
+        if (text && !text.includes('此病人於牙科處置紀錄有影像上傳資料')) {
+          gaiText += `${text}\n`;
+        }
+      });
+    }
+    gaiText += `</patientSummary>\n\n`;
+
+    // Allergy
+    gaiText += `<allergy>\n過敏史:\n`;
+    if (allergyData && allergyData.length > 0) {
+      allergyData.forEach(item => {
+        gaiText += `${item.drugName || ''} - ${item.symptoms || ''}\n`;
+      });
+    }
+    gaiText += `</allergy>\n\n`;
+
+    // Surgery
+    gaiText += `<surgery>\n開刀史:\n`;
+    if (surgeryData && surgeryData.length > 0) {
+      surgeryData.forEach(item => {
+        gaiText += `${item.date || ''} - ${item.hospital || ''} - ${item.diagnosis || ''}\n`;
+      });
+    }
+    gaiText += `</surgery>\n\n`;
+
+    // Discharge
+    gaiText += `<discharge>\n住院史:\n`;
+    if (dischargeData && dischargeData.length > 0) {
+      dischargeData.forEach(item => {
+        const inDate = item.in_date ? new Date(item.in_date).toLocaleDateString('zh-TW') : '';
+        const outDate = item.out_date ? new Date(item.out_date).toLocaleDateString('zh-TW') : '';
+        const hospital = item.hospital || (item.hosp ? item.hosp.split(';')[0] : '');
+        gaiText += `${inDate} - ${outDate} - ${hospital} - ${item.icd_code || ''} ${item.icd_cname || ''}\n`;
+      });
+    }
+    gaiText += `</discharge>\n\n`;
+
+    // HBCV Data
+    gaiText += `<hbcvdata>\nB、C肝炎資料:\n`;
+    if (hbcvData && hbcvData.rObject && hbcvData.rObject.length > 0) {
+      const actualData = hbcvData.rObject[0];
+      if (actualData.result_data && actualData.result_data.length > 0) {
+        actualData.result_data.forEach(item => {
+          gaiText += `${item.real_inspect_date || ''} - ${item.assay_item_name || ''}: ${item.assay_value || ''}\n`;
+        });
+      }
+      if (actualData.med_data && actualData.med_data.length > 0) {
+        actualData.med_data.forEach(item => {
+          gaiText += `${item.func_date || ''} - ${item.drug_ing_name || ''}\n`;
+        });
+      }
+    }
+    gaiText += `</hbcvdata>\n\n`;
+
+    // Medications
+    gaiText += `<medication>\n近期用藥記錄:\n`;
+    if (groupedMedications && groupedMedications.length > 0) {
+      groupedMedications.forEach(group => {
+        gaiText += `${group.date || ''} - ${group.hosp || ''}\n`;
+        if (group.icd_code || group.icd_name) {
+          gaiText += `診斷: ${group.icd_code || ''} ${group.icd_name || ''}\n`;
+        }
+        if (group.medications && group.medications.length > 0) {
+          group.medications.forEach(med => {
+            const dosageInfo = med.perDosage !== "SPECIAL"
+              ? `${med.perDosage}#`
+              : `總量${med.dosage}`;
+            let medLine = `  ${med.name || ''} ${dosageInfo} ${med.frequency || ''} ${med.days || ''}天`;
+            if (med.ingredient) {
+              medLine += ` (${med.ingredient})`;
+            }
+            gaiText += `${medLine}\n`;
+          });
+        }
+        gaiText += `\n`;
+      });
+    }
+    gaiText += `</medication>\n\n`;
+
+    // Lab Data
+    gaiText += `<lab>\n近期檢驗記錄:\n`;
+    if (groupedLabs && groupedLabs.length > 0) {
+      groupedLabs.forEach(group => {
+        gaiText += `${group.date || ''} - ${group.hosp || ''}\n`;
+        if (group.labs && group.labs.length > 0) {
+          group.labs.forEach(lab => {
+            const value = lab.value || '';
+            const unit = lab.unit || '';
+            const reference = lab.reference || '';
+            gaiText += `  ${lab.itemName || ''}: ${value} ${unit}`;
+            if (reference) {
+              gaiText += ` (參考值: ${reference})`;
+            }
+            gaiText += `\n`;
+          });
+        }
+        gaiText += `\n`;
+      });
+    }
+    gaiText += `</lab>\n\n`;
+
+    // Chinese Medicine
+    gaiText += `<chinesemed>\n近期中藥記錄:\n`;
+    if (groupedChineseMeds && groupedChineseMeds.length > 0) {
+      groupedChineseMeds.forEach(group => {
+        gaiText += `${group.date || ''} - ${group.hosp || ''}\n`;
+        if (group.medications && group.medications.length > 0) {
+          group.medications.forEach(med => {
+            gaiText += `  ${med.drug_name || ''} ${med.dose || ''} ${med.freq_name || ''} ${med.days || ''}天\n`;
+          });
+        }
+        gaiText += `\n`;
+      });
+    }
+    gaiText += `</chinesemed>\n\n`;
+
+    // Imaging
+    gaiText += `<imaging>\n近期影像學報告:\n`;
+    if (imagingData) {
+      if (imagingData.withReport && imagingData.withReport.length > 0) {
+        imagingData.withReport.forEach(item => {
+          gaiText += `${item.date || ''} - ${item.hosp || ''} - ${item.orderName || ''}\n`;
+          if (item.inspectResult) {
+            let reportResult = item.inspectResult;
+            const markers = ["Imaging findings:", "Imaging findings", "Sonographic Findings:", "Sonographic Findings", "報告內容:", "報告內容：", "報告內容"];
+            for (const marker of markers) {
+              if (reportResult.includes(marker)) {
+                reportResult = reportResult.split(marker)[1];
+                break;
+              }
+            }
+            gaiText += `  報告: ${reportResult.trim()}\n`;
+          }
+          gaiText += `\n`;
+        });
+      }
+    }
+    gaiText += `</imaging>\n`;
+
+    // Combine prompt + GAI data with ### markers
+    const combinedText = gaiPrompt + '\n###\n' + gaiText + '\n###';
+
+    console.log('Generated combined GAI text with prompt');
+
+    // Copy to clipboard
+    navigator.clipboard
+      .writeText(combinedText)
+      .then(() => {
+        setSnackbarMessage("GAI提示詞+資料已複製到剪貼簿");
+        setSnackbarOpen(true);
+        console.log('GAI format with prompt copied successfully');
+      })
+      .catch((err) => {
+        console.error("Failed to copy GAI format with prompt: ", err);
         setSnackbarMessage("複製失敗，請重試");
         setSnackbarOpen(true);
       });
@@ -890,7 +1087,7 @@ const FloatingIcon = () => {
                   }}
                 />
                 {enableGAICopyFormat && (
-                  <Tooltip title="複製GAI格式資料">
+                  <Tooltip title="複製XML格式資料">
                     <IconButton
                       onClick={(e) => {
                         e.stopPropagation();
@@ -905,6 +1102,42 @@ const FloatingIcon = () => {
                       }}
                     >
                       <ContentCopyIcon sx={{ fontSize: "1rem" }} />
+                    </IconButton>
+                  </Tooltip>
+                )}
+                {enableGAIPrompt && (
+                  <Tooltip title="複製GAI提示詞+資料">
+                    <IconButton
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleCopyGAIWithPrompt();
+                      }}
+                      sx={{
+                        padding: "6px 10px",
+                        color: getTabColor(generalDisplaySettings, "help"),
+                        "&:hover": {
+                          color: getTabSelectedColor(generalDisplaySettings, "help"),
+                        },
+                        position: "relative",
+                      }}
+                    >
+                      <ContentCopyIcon sx={{ fontSize: "1rem" }} />
+                      <Box
+                        sx={{
+                          position: "absolute",
+                          top: 2,
+                          right: 2,
+                          backgroundColor: "primary.main",
+                          color: "white",
+                          borderRadius: "4px",
+                          padding: "0px 3px",
+                          fontSize: "0.6rem",
+                          fontWeight: "bold",
+                          lineHeight: 1.2,
+                        }}
+                      >
+                        AI
+                      </Box>
                     </IconButton>
                   </Tooltip>
                 )}

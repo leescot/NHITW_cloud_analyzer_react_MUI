@@ -8,10 +8,18 @@ import {
   FormControlLabel,
   Button,
   Box,
+  Dialog,
+  DialogTitle,
+  DialogContent,
+  DialogActions,
+  TextField,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import TuneIcon from "@mui/icons-material/Tune";
+import EditIcon from "@mui/icons-material/Edit";
+import RestartAltIcon from "@mui/icons-material/RestartAlt";
 import { handleSettingChange } from "../../utils/settingsHelper";
+import { DEFAULT_GAI_PROMPT } from "../../config/defaultSettings";
 
 const AdvancedSettings = () => {
   const [settings, setSettings] = useState({
@@ -20,7 +28,11 @@ const AdvancedSettings = () => {
     enableLabCustomCopyFormat: false,
     enableLabCopyAll: false,
     enableGAICopyFormat: false,
+    enableGAIPrompt: false,
   });
+
+  const [promptDialogOpen, setPromptDialogOpen] = useState(false);
+  const [gaiPrompt, setGaiPrompt] = useState(DEFAULT_GAI_PROMPT);
 
   useEffect(() => {
     // Load advanced settings
@@ -31,6 +43,8 @@ const AdvancedSettings = () => {
         enableLabCustomCopyFormat: false,
         enableLabCopyAll: false,
         enableGAICopyFormat: false,
+        enableGAIPrompt: false,
+        gaiPrompt: DEFAULT_GAI_PROMPT,
       },
       (items) => {
         setSettings({
@@ -39,7 +53,9 @@ const AdvancedSettings = () => {
           enableLabCustomCopyFormat: items.enableLabCustomCopyFormat,
           enableLabCopyAll: items.enableLabCopyAll,
           enableGAICopyFormat: items.enableGAICopyFormat,
+          enableGAIPrompt: items.enableGAIPrompt,
         });
+        setGaiPrompt(items.gaiPrompt || DEFAULT_GAI_PROMPT);
       }
     );
   }, []);
@@ -221,9 +237,85 @@ const AdvancedSettings = () => {
               }}
             />
           }
-          label="開啟複製GAI資料格式"
+          label="開啟複製XML資料格式"
         />
+
+        <FormControlLabel
+          control={
+            <Switch
+              checked={settings.enableGAIPrompt}
+              onChange={(e) => {
+                handleLocalSettingChange(
+                  "enableGAIPrompt",
+                  e.target.checked
+                );
+              }}
+            />
+          }
+          label="開啟包含提示詞資料格式"
+        />
+
+        {settings.enableGAIPrompt && (
+          <Box sx={{ mt: 1, mb: 2, ml: 4, display: 'flex', gap: 1 }}>
+            <Button
+              variant="outlined"
+              size="small"
+              startIcon={<EditIcon />}
+              onClick={() => setPromptDialogOpen(true)}
+            >
+              編輯提示詞
+            </Button>
+            <Button
+              variant="outlined"
+              size="small"
+              startIcon={<RestartAltIcon />}
+              onClick={() => {
+                setGaiPrompt(DEFAULT_GAI_PROMPT);
+                chrome.storage.sync.set({ gaiPrompt: DEFAULT_GAI_PROMPT }, () => {
+                  console.log('GAI prompt reset to default');
+                });
+              }}
+            >
+              重置
+            </Button>
+          </Box>
+        )}
       </AccordionDetails>
+
+      {/* GAI Prompt Edit Dialog */}
+      <Dialog
+        open={promptDialogOpen}
+        onClose={() => setPromptDialogOpen(false)}
+        maxWidth="md"
+        fullWidth
+      >
+        <DialogTitle>編輯 GAI 提示詞</DialogTitle>
+        <DialogContent>
+          <TextField
+            multiline
+            rows={20}
+            fullWidth
+            value={gaiPrompt}
+            onChange={(e) => setGaiPrompt(e.target.value)}
+            variant="outlined"
+            sx={{ mt: 1 }}
+          />
+        </DialogContent>
+        <DialogActions>
+          <Button onClick={() => setPromptDialogOpen(false)}>取消</Button>
+          <Button
+            onClick={() => {
+              chrome.storage.sync.set({ gaiPrompt }, () => {
+                console.log('GAI prompt saved');
+                setPromptDialogOpen(false);
+              });
+            }}
+            variant="contained"
+          >
+            儲存
+          </Button>
+        </DialogActions>
+      </Dialog>
     </Accordion>
   );
 };
