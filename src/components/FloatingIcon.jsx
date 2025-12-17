@@ -480,39 +480,50 @@ const FloatingIcon = () => {
     }
     gaiText += `</patientSummary>\n\n`;
 
-    // Allergy
+    // Allergy - use correct field names: drugName, symptoms
     gaiText += `<allergy>\n過敏史:\n`;
     if (allergyData && allergyData.length > 0) {
       allergyData.forEach(item => {
-        gaiText += `${item.drug_name || ''} - ${item.allergy_desc || ''}\n`;
+        gaiText += `${item.drugName || ''} - ${item.symptoms || ''}\n`;
       });
     }
     gaiText += `</allergy>\n\n`;
 
-    // Surgery
+    // Surgery - use correct field names: date, hospital, diagnosis
     gaiText += `<surgery>\n開刀史:\n`;
     if (surgeryData && surgeryData.length > 0) {
       surgeryData.forEach(item => {
-        gaiText += `${item.func_date || ''} - ${item.hosp_name || ''} - ${item.icd_op_code || ''} ${item.icd_op_name || ''}\n`;
+        gaiText += `${item.date || ''} - ${item.hospital || ''} - ${item.diagnosis || ''}\n`;
       });
     }
     gaiText += `</surgery>\n\n`;
 
-    // Discharge
+    // Discharge - use correct field names: in_date, out_date, hospital/hosp, icd_code, icd_cname
     gaiText += `<discharge>\n住院史:\n`;
     if (dischargeData && dischargeData.length > 0) {
       dischargeData.forEach(item => {
-        gaiText += `${item.in_date || ''} - ${item.out_date || ''} - ${item.hosp_name || ''} - ${item.icd_cm_code || ''} ${item.icd_cm_name || ''}\n`;
+        const inDate = item.in_date ? new Date(item.in_date).toLocaleDateString('zh-TW') : '';
+        const outDate = item.out_date ? new Date(item.out_date).toLocaleDateString('zh-TW') : '';
+        const hospital = item.hospital || (item.hosp ? item.hosp.split(';')[0] : '');
+        gaiText += `${inDate} - ${outDate} - ${hospital} - ${item.icd_code || ''} ${item.icd_cname || ''}\n`;
       });
     }
     gaiText += `</discharge>\n\n`;
 
-    // HBCV Data
+    // HBCV Data - use correct structure: rObject[0].result_data
     gaiText += `<hbcvdata>\nB、C肝炎資料:\n`;
     if (hbcvData && hbcvData.rObject && hbcvData.rObject.length > 0) {
-      hbcvData.rObject.forEach(item => {
-        gaiText += `${item.exam_date || ''} - ${item.exam_name || ''}: ${item.assay_value || ''}\n`;
-      });
+      const actualData = hbcvData.rObject[0];
+      if (actualData.result_data && actualData.result_data.length > 0) {
+        actualData.result_data.forEach(item => {
+          gaiText += `${item.real_inspect_date || ''} - ${item.assay_item_name || ''}: ${item.assay_value || ''}\n`;
+        });
+      }
+      if (actualData.med_data && actualData.med_data.length > 0) {
+        actualData.med_data.forEach(item => {
+          gaiText += `${item.func_date || ''} - ${item.drug_ing_name || ''}\n`;
+        });
+      }
     }
     gaiText += `</hbcvdata>\n\n`;
 
@@ -529,7 +540,11 @@ const FloatingIcon = () => {
             const dosageInfo = med.perDosage !== "SPECIAL"
               ? `${med.perDosage}#`
               : `總量${med.dosage}`;
-            gaiText += `  ${med.name || ''} ${dosageInfo} ${med.frequency || ''} ${med.days || ''}天\n`;
+            let medLine = `  ${med.name || ''} ${dosageInfo} ${med.frequency || ''} ${med.days || ''}天`;
+            if (med.ingredient) {
+              medLine += ` (${med.ingredient})`;
+            }
+            gaiText += `${medLine}\n`;
           });
         }
         gaiText += `\n`;
