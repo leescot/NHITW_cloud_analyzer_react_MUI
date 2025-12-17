@@ -788,61 +788,6 @@ const FloatingIcon = () => {
                     },
                   }}
                 />
-                {enableGAICopyFormat && (
-                  <Tooltip title="複製XML格式資料">
-                    <IconButton
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleCopyGAIFormat();
-                      }}
-                      sx={{
-                        padding: "6px 10px",
-                        color: getTabColor(generalDisplaySettings, "help"),
-                        "&:hover": {
-                          color: getTabSelectedColor(generalDisplaySettings, "help"),
-                        },
-                      }}
-                    >
-                      <ContentCopyIcon sx={{ fontSize: "1rem" }} />
-                    </IconButton>
-                  </Tooltip>
-                )}
-                {enableGAIPrompt && (
-                  <Tooltip title="複製GAI提示詞+資料">
-                    <IconButton
-                      onClick={(e) => {
-                        e.stopPropagation();
-                        handleCopyGAIWithPrompt();
-                      }}
-                      sx={{
-                        padding: "6px 10px",
-                        color: getTabColor(generalDisplaySettings, "help"),
-                        "&:hover": {
-                          color: getTabSelectedColor(generalDisplaySettings, "help"),
-                        },
-                        position: "relative",
-                      }}
-                    >
-                      <ContentCopyIcon sx={{ fontSize: "1rem" }} />
-                      <Box
-                        sx={{
-                          position: "absolute",
-                          top: 2,
-                          right: 2,
-                          backgroundColor: "primary.main",
-                          color: "white",
-                          borderRadius: "4px",
-                          padding: "0px 3px",
-                          fontSize: "0.6rem",
-                          fontWeight: "bold",
-                          lineHeight: 1.2,
-                        }}
-                      >
-                        AI
-                      </Box>
-                    </IconButton>
-                  </Tooltip>
-                )}
                 {(appSettings.western.enableMedicationCustomCopyFormat || appSettings.lab.enableLabCustomCopyFormat) && (
                   <Tab
                     label="進階"
@@ -860,7 +805,7 @@ const FloatingIcon = () => {
               </Tabs>
             </Paper>
 
-            {/* 狀態指示器區域 - 使用導入的指示器組件 */}
+            {/* GAI 複製按鈕與狀態指示器區域 */}
             <Box
               sx={{
                 display: "flex",
@@ -868,8 +813,68 @@ const FloatingIcon = () => {
                 ml: isNarrowScreen ? 0 : 2,
                 justifyContent: isNarrowScreen ? "flex-end" : "flex-start",
                 flexWrap: "wrap",
+                alignItems: "center",
+                gap: 0.5,
               }}
             >
+              {/* GAI 複製按鈕 */}
+              {enableGAICopyFormat && (
+                <Tooltip title="複製XML格式資料">
+                  <IconButton
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleCopyGAIFormat();
+                    }}
+                    size="small"
+                    sx={{
+                      color: "primary.main",
+                      "&:hover": {
+                        backgroundColor: "primary.light",
+                        color: "primary.dark",
+                      },
+                    }}
+                  >
+                    <ContentCopyIcon sx={{ fontSize: "1.1rem" }} />
+                  </IconButton>
+                </Tooltip>
+              )}
+              {enableGAIPrompt && (
+                <Tooltip title="複製GAI提示詞+資料">
+                  <IconButton
+                    onClick={(e) => {
+                      e.stopPropagation();
+                      handleCopyGAIWithPrompt();
+                    }}
+                    size="small"
+                    sx={{
+                      position: "relative",
+                      color: "primary.main",
+                      "&:hover": {
+                        backgroundColor: "primary.light",
+                        color: "primary.dark",
+                      },
+                    }}
+                  >
+                    <ContentCopyIcon sx={{ fontSize: "1.1rem" }} />
+                    <Box
+                      sx={{
+                        position: "absolute",
+                        top: 2,
+                        right: 2,
+                        backgroundColor: "primary.main",
+                        color: "white",
+                        borderRadius: "4px",
+                        padding: "0px 3px",
+                        fontSize: "0.55rem",
+                        fontWeight: "bold",
+                        lineHeight: 1.2,
+                      }}
+                    >
+                      AI
+                    </Box>
+                  </IconButton>
+                </Tooltip>
+              )}
               {ckdStage && (
                 <KidneyStatusIndicator
                   stage={ckdStage}
