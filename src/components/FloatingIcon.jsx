@@ -35,6 +35,7 @@ import GrassIcon from "@mui/icons-material/Grass";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import SettingsIcon from "@mui/icons-material/Settings";
 import FormatListBulletedIcon from "@mui/icons-material/FormatListBulleted";
+import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 
 // Import cloud icon
 import { cloud_icon } from "../assets/pic_cloud_icon.js";
@@ -161,6 +162,7 @@ const FloatingIcon = () => {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [patientSummaryData, setPatientSummaryData] = useState([]);
+  const [enableGAICopyFormat, setEnableGAICopyFormat] = useState(false);
 
   // 新增響應式布局檢測
   const theme = useTheme();
@@ -327,6 +329,28 @@ const FloatingIcon = () => {
     };
   }, []);
 
+  // Load GAI copy format setting
+  useEffect(() => {
+    chrome.storage.sync.get({ enableGAICopyFormat: false }, (items) => {
+      setEnableGAICopyFormat(items.enableGAICopyFormat);
+      console.log('GAI Copy Format enabled:', items.enableGAICopyFormat);
+    });
+
+    // Listen for setting changes
+    const handleStorageChange = (changes, area) => {
+      if (area === 'sync' && changes.enableGAICopyFormat) {
+        setEnableGAICopyFormat(changes.enableGAICopyFormat.newValue);
+        console.log('GAI Copy Format setting changed:', changes.enableGAICopyFormat.newValue);
+      }
+    };
+
+    chrome.storage.onChanged.addListener(handleStorageChange);
+
+    return () => {
+      chrome.storage.onChanged.removeListener(handleStorageChange);
+    };
+  }, []);
+
   // 在組件載入時處理資料
   const handleData = async () => {
     // 使用dataManager收集資料來源
@@ -423,6 +447,172 @@ const FloatingIcon = () => {
 
   const handleSnackbarClose = () => {
     setSnackbarOpen(false);
+  };
+
+  // Handle copying GAI format data
+  const handleCopyGAIFormat = () => {
+    console.log('handleCopyGAIFormat called');
+    console.log('userInfo:', userInfo);
+    console.log('patientSummaryData:', patientSummaryData);
+    console.log('allergyData:', allergyData);
+    console.log('surgeryData:', surgeryData);
+    console.log('dischargeData:', dischargeData);
+    console.log('hbcvData:', hbcvData);
+    console.log('groupedMedications:', groupedMedications);
+    console.log('groupedLabs:', groupedLabs);
+    console.log('groupedChineseMeds:', groupedChineseMeds);
+    console.log('imagingData:', imagingData);
+
+    // Get user info
+    const age = userInfo?.age || '未知';
+    const gender = userInfo?.gender === 'M' ? 'male' : userInfo?.gender === 'F' ? 'female' : '未知';
+
+    // Build the GAI format text
+    let gaiText = `這是一位 ${age} 歲的 ${gender} 性病人，以下是病歷資料\n\n`;
+
+    // Patient Summary - use 'text' field
+    gaiText += `<patientSummary>\n雲端註記資料:\n`;
+    if (patientSummaryData && patientSummaryData.length > 0) {
+      patientSummaryData.forEach(item => {
+        // Use 'text' field instead of 'content'
+        gaiText += `${item.text || ''}\n`;
+      });
+    }
+    gaiText += `</patientSummary>\n\n`;
+
+    // Allergy
+    gaiText += `<allergy>\n過敏史:\n`;
+    if (allergyData && allergyData.length > 0) {
+      allergyData.forEach(item => {
+        gaiText += `${item.drug_name || ''} - ${item.allergy_desc || ''}\n`;
+      });
+    }
+    gaiText += `</allergy>\n\n`;
+
+    // Surgery
+    gaiText += `<surgery>\n開刀史:\n`;
+    if (surgeryData && surgeryData.length > 0) {
+      surgeryData.forEach(item => {
+        gaiText += `${item.func_date || ''} - ${item.hosp_name || ''} - ${item.icd_op_code || ''} ${item.icd_op_name || ''}\n`;
+      });
+    }
+    gaiText += `</surgery>\n\n`;
+
+    // Discharge
+    gaiText += `<discharge>\n住院史:\n`;
+    if (dischargeData && dischargeData.length > 0) {
+      dischargeData.forEach(item => {
+        gaiText += `${item.in_date || ''} - ${item.out_date || ''} - ${item.hosp_name || ''} - ${item.icd_cm_code || ''} ${item.icd_cm_name || ''}\n`;
+      });
+    }
+    gaiText += `</discharge>\n\n`;
+
+    // HBCV Data
+    gaiText += `<hbcvdata>\nB、C肝炎資料:\n`;
+    if (hbcvData && hbcvData.rObject && hbcvData.rObject.length > 0) {
+      hbcvData.rObject.forEach(item => {
+        gaiText += `${item.exam_date || ''} - ${item.exam_name || ''}: ${item.assay_value || ''}\n`;
+      });
+    }
+    gaiText += `</hbcvdata>\n\n`;
+
+    // Medications - use correct field names: name, perDosage, dosage, frequency, days
+    gaiText += `<medication>\n近期用藥記錄:\n`;
+    if (groupedMedications && groupedMedications.length > 0) {
+      groupedMedications.forEach(group => {
+        gaiText += `${group.date || ''} - ${group.hosp || ''}\n`;
+        if (group.icd_code || group.icd_name) {
+          gaiText += `診斷: ${group.icd_code || ''} ${group.icd_name || ''}\n`;
+        }
+        if (group.medications && group.medications.length > 0) {
+          group.medications.forEach(med => {
+            const dosageInfo = med.perDosage !== "SPECIAL"
+              ? `${med.perDosage}#`
+              : `總量${med.dosage}`;
+            gaiText += `  ${med.name || ''} ${dosageInfo} ${med.frequency || ''} ${med.days || ''}天\n`;
+          });
+        }
+        gaiText += `\n`;
+      });
+    }
+    gaiText += `</medication>\n\n`;
+
+    // Lab Data - use correct field names: itemName, value, unit, reference
+    gaiText += `<lab>\n近期檢驗記錄:\n`;
+    if (groupedLabs && groupedLabs.length > 0) {
+      groupedLabs.forEach(group => {
+        gaiText += `${group.date || ''} - ${group.hosp || ''}\n`;
+        if (group.labs && group.labs.length > 0) {
+          group.labs.forEach(lab => {
+            const value = lab.value || '';
+            const unit = lab.unit || '';
+            const reference = lab.reference || '';
+            gaiText += `  ${lab.itemName || ''}: ${value} ${unit}`;
+            if (reference) {
+              gaiText += ` (參考值: ${reference})`;
+            }
+            gaiText += `\n`;
+          });
+        }
+        gaiText += `\n`;
+      });
+    }
+    gaiText += `</lab>\n\n`;
+
+    // Chinese Medicine
+    gaiText += `<chinesemed>\n近期中藥記錄:\n`;
+    if (groupedChineseMeds && groupedChineseMeds.length > 0) {
+      groupedChineseMeds.forEach(group => {
+        gaiText += `${group.date || ''} - ${group.hosp || ''}\n`;
+        if (group.medications && group.medications.length > 0) {
+          group.medications.forEach(med => {
+            gaiText += `  ${med.drug_name || ''} ${med.dose || ''} ${med.freq_name || ''} ${med.days || ''}天\n`;
+          });
+        }
+        gaiText += `\n`;
+      });
+    }
+    gaiText += `</chinesemed>\n\n`;
+
+    // Imaging - use correct fields and only include items with reports
+    gaiText += `<imaging>\n近期影像學報告:\n`;
+    if (imagingData) {
+      if (imagingData.withReport && imagingData.withReport.length > 0) {
+        imagingData.withReport.forEach(item => {
+          gaiText += `${item.date || ''} - ${item.hosp || ''} - ${item.orderName || ''}\n`;
+          if (item.inspectResult) {
+            // Clean up the report result
+            let reportResult = item.inspectResult;
+            const markers = ["Imaging findings:", "Imaging findings", "Sonographic Findings:", "Sonographic Findings", "報告內容:", "報告內容：", "報告內容"];
+            for (const marker of markers) {
+              if (reportResult.includes(marker)) {
+                reportResult = reportResult.split(marker)[1];
+                break;
+              }
+            }
+            gaiText += `  報告: ${reportResult.trim()}\n`;
+          }
+          gaiText += `\n`;
+        });
+      }
+    }
+    gaiText += `</imaging>\n`;
+
+    console.log('Generated GAI text:', gaiText);
+
+    // Copy to clipboard
+    navigator.clipboard
+      .writeText(gaiText)
+      .then(() => {
+        setSnackbarMessage("GAI格式資料已複製到剪貼簿");
+        setSnackbarOpen(true);
+        console.log('GAI format copied successfully');
+      })
+      .catch((err) => {
+        console.error("Failed to copy GAI format: ", err);
+        setSnackbarMessage("複製失敗，請重試");
+        setSnackbarOpen(true);
+      });
   };
 
   // Calculate CKD stage
@@ -684,6 +874,25 @@ const FloatingIcon = () => {
                     },
                   }}
                 />
+                {enableGAICopyFormat && (
+                  <Tooltip title="複製GAI格式資料">
+                    <IconButton
+                      onClick={(e) => {
+                        e.stopPropagation();
+                        handleCopyGAIFormat();
+                      }}
+                      sx={{
+                        padding: "6px 10px",
+                        color: getTabColor(generalDisplaySettings, "help"),
+                        "&:hover": {
+                          color: getTabSelectedColor(generalDisplaySettings, "help"),
+                        },
+                      }}
+                    >
+                      <ContentCopyIcon sx={{ fontSize: "1rem" }} />
+                    </IconButton>
+                  </Tooltip>
+                )}
                 {(appSettings.western.enableMedicationCustomCopyFormat || appSettings.lab.enableLabCustomCopyFormat) && (
                   <Tab
                     label="進階"
