@@ -113,13 +113,17 @@ const Sidebar = ({
         setHasAnalyzed(true);
         const xmlString = generateGAIFormatXML(patientData);
 
-        // Trigger all analyses in parallel but handle independent responses
-        Object.keys(GAI_CONFIG).forEach(key => {
-            runAnalysisForKey(key, xmlString);
+        // Read provider setting first
+        chrome.storage.sync.get(['gaiProvider'], (result) => {
+            const provider = result.gaiProvider || 'openai';
+            // Trigger all analyses in parallel but handle independent responses
+            Object.keys(GAI_CONFIG).forEach(key => {
+                runAnalysisForKey(key, xmlString, provider);
+            });
         });
     };
 
-    const runAnalysisForKey = (key, xmlString) => {
+    const runAnalysisForKey = (key, xmlString, provider = 'openai') => {
         const config = GAI_CONFIG[key];
 
         // Update loading state
@@ -127,11 +131,11 @@ const Sidebar = ({
         setErrorStates(prev => ({ ...prev, [key]: null }));
 
         chrome.runtime.sendMessage({
-            action: 'callOpenAI',
+            action: provider === 'gemini' ? 'callGemini' : 'callOpenAI',
             systemPrompt: config.systemPrompt,
             userPrompt: xmlString,
             jsonSchema: config.schema,
-            model: "gpt-5-nano"
+            model: "gpt-5-nano" // This will be ignored/overridden in background for Gemini
         }, (response) => {
             setLoadingStates(prev => ({ ...prev, [key]: false }));
 
@@ -140,15 +144,24 @@ const Sidebar = ({
             } else if (!response || !response.success) {
                 setErrorStates(prev => ({ ...prev, [key]: response?.error || "Unknown error" }));
             } else {
+                console.log(`[GAI Analysis - ${key}] Response:`, response.data);
                 try {
                     const content = response.data.choices[0].message.content;
                     const parsed = JSON.parse(content);
-                    // The result should have the key we requested (e.g., { critical_alerts: [...] })
-                    // We merge it into our results
-                    setAnalysisResults(prev => ({
-                        ...prev,
-                        ...parsed
-                    }));
+
+                    setAnalysisResults(prev => {
+                        // Merge results and append metrics if available
+                        const mergedResults = { ...prev, ...parsed };
+
+                        // Append metrics to the specific key's array if usage/duration data exists
+                        if (mergedResults[key] && Array.isArray(mergedResults[key]) && response.data.usage) {
+                            const totalTokens = response.data.usage.total_tokens || response.data.usage.totalTokenCount || 0;
+                            const durationSec = ((response.data.duration || 0) / 1000).toFixed(2);
+                            mergedResults[key].push(`(Total_tokens: ${totalTokens}, 執行時間: ${durationSec}s)`);
+                        }
+
+                        return mergedResults;
+                    });
                 } catch (e) {
                     setErrorStates(prev => ({ ...prev, [key]: "Parse error: " + e.message }));
                 }
@@ -236,7 +249,11 @@ const Sidebar = ({
             return (
                 <Paper variant="outlined" sx={{ p: 2, bgcolor: '#fff3e0', borderColor: '#ffcc80' }}>
                     <Typography color="error" variant="caption">{error}</Typography>
-                    <IconButton size="small" onClick={() => runAnalysisForKey(dataKey, generateGAIFormatXML(patientData))}>
+                    <IconButton size="small" onClick={() => {
+                        chrome.storage.sync.get(['gaiProvider'], (result) => {
+                            runAnalysisForKey(dataKey, generateGAIFormatXML(patientData), result.gaiProvider || 'openai');
+                        });
+                    }}>
                         <RefreshIcon fontSize="small" />
                     </IconButton>
                 </Paper>

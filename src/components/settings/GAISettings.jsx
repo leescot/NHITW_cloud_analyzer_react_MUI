@@ -14,6 +14,10 @@ import {
     DialogActions,
     TextField,
     Chip,
+    Select,
+    MenuItem,
+    FormControl,
+    InputLabel,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import SmartToyIcon from "@mui/icons-material/SmartToy";
@@ -35,6 +39,8 @@ const GAISettings = () => {
     const [promptDialogOpen, setPromptDialogOpen] = useState(false);
     const [gaiPrompt, setGaiPrompt] = useState(DEFAULT_GAI_PROMPT);
     const [openaiApiKey, setOpenaiApiKey] = useState("");
+    const [geminiApiKey, setGeminiApiKey] = useState("");
+    const [gaiProvider, setGaiProvider] = useState("openai");
     const [showApiKey, setShowApiKey] = useState(false);
     const [apiKeySaved, setApiKeySaved] = useState(false);
 
@@ -45,8 +51,11 @@ const GAISettings = () => {
                 enableGAICopyFormat: false,
                 enableGAIPrompt: false,
                 enableGAISidebar: false,
+                // gaiPrompt: DEFAULT_GAI_PROMPT,
                 gaiPrompt: DEFAULT_GAI_PROMPT,
-                openaiApiKey: "",
+                // openaiApiKey: "",
+                geminiApiKey: "",
+                gaiProvider: "openai",
             },
             (items) => {
                 setSettings({
@@ -55,7 +64,10 @@ const GAISettings = () => {
                     enableGAISidebar: items.enableGAISidebar,
                 });
                 setGaiPrompt(items.gaiPrompt || DEFAULT_GAI_PROMPT);
+                setGaiPrompt(items.gaiPrompt || DEFAULT_GAI_PROMPT);
                 setOpenaiApiKey(items.openaiApiKey || "");
+                setGeminiApiKey(items.geminiApiKey || "");
+                setGaiProvider(items.gaiProvider || "openai");
             }
         );
     }, []);
@@ -191,49 +203,81 @@ const GAISettings = () => {
 
                     {settings.enableGAISidebar && (
                         <Box sx={{ mt: 2, mb: 1, ml: 4 }}>
-                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                                <TextField
-                                    label="OpenAI API Key"
-                                    type={showApiKey ? "text" : "password"}
-                                    value={openaiApiKey}
-                                    onChange={(e) => {
-                                        setOpenaiApiKey(e.target.value);
-                                        setApiKeySaved(false);
-                                    }}
-                                    fullWidth
-                                    size="small"
-                                    variant="outlined"
-                                    InputProps={{
-                                        endAdornment: (
-                                            <InputAdornment position="end">
-                                                <IconButton
-                                                    aria-label="toggle password visibility"
-                                                    onClick={() => setShowApiKey(!showApiKey)}
-                                                    edge="end"
-                                                >
-                                                    {showApiKey ? <VisibilityOff /> : <Visibility />}
-                                                </IconButton>
-                                            </InputAdornment>
-                                        ),
-                                    }}
-                                />
-                                <Button
-                                    variant="contained"
-                                    color={apiKeySaved ? "success" : "primary"}
-                                    startIcon={<SaveIcon />}
-                                    onClick={() => {
-                                        chrome.storage.sync.set({ openaiApiKey }, () => {
-                                            setApiKeySaved(true);
-                                            setTimeout(() => setApiKeySaved(false), 2000);
-                                        });
-                                    }}
-                                    sx={{ minWidth: '100px' }}
-                                >
-                                    {apiKeySaved ? "已儲存" : "儲存"}
-                                </Button>
+                            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+                                <FormControl fullWidth size="small">
+                                    <InputLabel id="gai-provider-label">AI 模型提供者</InputLabel>
+                                    <Select
+                                        labelId="gai-provider-label"
+                                        value={gaiProvider}
+                                        label="AI 模型提供者"
+                                        onChange={(e) => {
+                                            const newVal = e.target.value;
+                                            setGaiProvider(newVal);
+                                            chrome.storage.sync.set({ gaiProvider: newVal });
+                                        }}
+                                    >
+                                        <MenuItem value="openai">OpenAI</MenuItem>
+                                        <MenuItem value="gemini">Google Gemini</MenuItem>
+                                    </Select>
+                                </FormControl>
+
+                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                    <TextField
+                                        label={gaiProvider === 'openai' ? "OpenAI API Key" : "Gemini API Key"}
+                                        type={showApiKey ? "text" : "password"}
+                                        value={gaiProvider === 'openai' ? openaiApiKey : geminiApiKey}
+                                        onChange={(e) => {
+                                            if (gaiProvider === 'openai') {
+                                                setOpenaiApiKey(e.target.value);
+                                            } else {
+                                                setGeminiApiKey(e.target.value);
+                                            }
+                                            setApiKeySaved(false);
+                                        }}
+                                        fullWidth
+                                        size="small"
+                                        variant="outlined"
+                                        InputProps={{
+                                            endAdornment: (
+                                                <InputAdornment position="end">
+                                                    <IconButton
+                                                        aria-label="toggle password visibility"
+                                                        onClick={() => setShowApiKey(!showApiKey)}
+                                                        edge="end"
+                                                    >
+                                                        {showApiKey ? <VisibilityOff /> : <Visibility />}
+                                                    </IconButton>
+                                                </InputAdornment>
+                                            ),
+                                        }}
+                                    />
+                                    <Button
+                                        variant="contained"
+                                        color={apiKeySaved ? "success" : "primary"}
+                                        startIcon={<SaveIcon />}
+                                        onClick={() => {
+                                            if (gaiProvider === 'openai') {
+                                                chrome.storage.sync.set({ openaiApiKey }, () => {
+                                                    setApiKeySaved(true);
+                                                    setTimeout(() => setApiKeySaved(false), 2000);
+                                                });
+                                            } else {
+                                                chrome.storage.sync.set({ geminiApiKey }, () => {
+                                                    setApiKeySaved(true);
+                                                    setTimeout(() => setApiKeySaved(false), 2000);
+                                                });
+                                            }
+                                        }}
+                                        sx={{ minWidth: '100px' }}
+                                    >
+                                        {apiKeySaved ? "已儲存" : "儲存"}
+                                    </Button>
+                                </Box>
                             </Box>
                             <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>
-                                請輸入您的 OpenAI API Key，金鑰僅儲存在您的瀏覽器中。
+                                {gaiProvider === 'openai'
+                                    ? "請輸入您的 OpenAI API Key，金鑰僅儲存在您的瀏覽器中。"
+                                    : "請輸入您的 Gemini API Key，使用的是 gemini-3-flash-preview 模型。"}
                             </Typography>
                         </Box>
                     )}

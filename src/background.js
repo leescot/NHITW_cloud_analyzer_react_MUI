@@ -191,6 +191,7 @@ const ACTION_HANDLERS = new Map([
       }
 
       try {
+        const startTime = Date.now();
         const response = await fetch('https://api.openai.com/v1/chat/completions', {
           method: 'POST',
           headers: {
@@ -222,10 +223,97 @@ const ACTION_HANDLERS = new Map([
         }
 
         const data = await response.json();
+        const endTime = Date.now();
+        const duration = endTime - startTime;
+
+        console.groupCollapsed(`OpenAI API Call (${duration}ms)`);
+        console.log("Model:", message.model);
+        console.log("Token Usage:", data.usage);
+        console.log("Full Response:", data);
+        console.groupEnd();
+
+        data.duration = duration;
         sendResponse({ success: true, data: data });
 
       } catch (error) {
         console.error("OpenAI API call failed:", error);
+        sendResponse({ success: false, error: error.message });
+      }
+    });
+    return true; // Keep channel open for async response
+  }],
+
+  ['callGemini', (message, sender, sendResponse) => {
+    chrome.storage.sync.get(['geminiApiKey'], async (result) => {
+      const apiKey = result.geminiApiKey;
+      if (!apiKey) {
+        sendResponse({ success: false, error: "Gemini API Key not found. Please set it in Options." });
+        return;
+      }
+
+      try {
+        const startTime = Date.now();
+        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`, {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json'
+          },
+          body: JSON.stringify({
+            systemInstruction: {
+              parts: [
+                { text: message.systemPrompt }
+              ]
+            },
+            contents: [{
+              parts: [
+                { text: message.userPrompt }
+              ]
+            }],
+            generationConfig: {
+              responseMimeType: "application/json",
+              responseJsonSchema: message.jsonSchema.schema
+            }
+          })
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error?.message || `HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        const endTime = Date.now();
+        const duration = endTime - startTime;
+
+        console.groupCollapsed(`Gemini API Call (${duration}ms)`);
+        console.log("Model: gemini-3-flash-preview");
+        console.log("Token Usage:", data.usageMetadata);
+        console.log("Full Response:", data);
+        console.groupEnd();
+
+        // Transform Gemini response to match the expected format for the frontend
+        // Gemini returns the text in candidates[0].content.parts[0].text
+        const contentText = data.candidates?.[0]?.content?.parts?.[0]?.text;
+
+        if (!contentText) {
+          throw new Error("Empty response from Gemini");
+        }
+
+        // Mocking the OpenAI response structure that Sidebar expects
+        const mockedResponse = {
+          choices: [{
+            message: {
+              content: contentText
+            }
+          }],
+          usage: data.usageMetadata,
+          duration: duration // in ms
+        };
+
+        sendResponse({ success: true, data: mockedResponse });
+
+      } catch (error) {
+        console.error("Gemini API call failed:", error);
         sendResponse({ success: false, error: error.message });
       }
     });
