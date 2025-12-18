@@ -32,7 +32,7 @@ const API_ENDPOINTS = {
 // Add listeners for all API endpoints
 Object.entries(API_ENDPOINTS).forEach(([type, endpoint]) => {
   chrome.webRequest.onBeforeRequest.addListener(
-    function(details) {
+    function (details) {
       if (details.method === "GET" && details.url.includes(endpoint)) {
         // console.log(`Detected ${type} API request:`, details.url);
         chrome.tabs.sendMessage(details.tabId, {
@@ -48,7 +48,7 @@ Object.entries(API_ENDPOINTS).forEach(([type, endpoint]) => {
   );
 
   chrome.webRequest.onCompleted.addListener(
-    function(details) {
+    function (details) {
       if (details.method === "GET" && details.url.includes(endpoint)) {
         // console.log(`Completed ${type} API request:`, details.url);
         chrome.tabs.sendMessage(details.tabId, {
@@ -83,7 +83,7 @@ const ACTION_HANDLERS = new Map([
     chrome.action.openPopup();
     sendResponse({ status: "received" });
   }],
-  
+
   ['userSessionChanged', (message, sender, sendResponse) => {
     // console.log("User session changed, resetting temporary data");
     // 重置當前會話數據
@@ -93,14 +93,14 @@ const ACTION_HANDLERS = new Map([
     currentSessionData.currentUserSession = message.userSession;
 
     // 從 storage 中移除數據
-    chrome.storage.local.remove(Object.values(DATA_TYPE_TO_STORAGE_KEY), function() {
+    chrome.storage.local.remove(Object.values(DATA_TYPE_TO_STORAGE_KEY), function () {
       // console.log("Storage data cleared due to user session change");
       chrome.action.setBadgeText({ text: "" });
     });
 
     sendResponse({ status: "session_reset" });
   }],
-  
+
   ['clearSessionData', (message, sender, sendResponse) => {
     // console.log("Clearing session data");
     // 重置當前會話數據
@@ -109,7 +109,7 @@ const ACTION_HANDLERS = new Map([
     });
     sendResponse({ status: "cleared" });
   }],
-  
+
   ['getSessionData', (message, sender, sendResponse) => {
     // console.log("Background script received request for session data");
     sendResponse({
@@ -117,7 +117,7 @@ const ACTION_HANDLERS = new Map([
       data: currentSessionData
     });
   }],
-  
+
   ['getDataStatus', (message, sender, sendResponse) => {
     // 獲取存儲的所有數據狀態
     chrome.storage.local.get(Object.values(DATA_TYPE_TO_STORAGE_KEY), (result) => {
@@ -129,7 +129,7 @@ const ACTION_HANDLERS = new Map([
         const dataObj = result[storageKey];
         // 處理大小寫不一致的情況
         const records = dataObj?.rObject || dataObj?.robject;
-        
+
         if (records && Array.isArray(records)) {
           dataStatus[typeKey] = {
             status: 'fetched',
@@ -163,7 +163,7 @@ const ACTION_HANDLERS = new Map([
     });
     return true; // 保持消息通道開放以進行異步響應
   }],
-  
+
   // 使用通用處理函數處理所有數據保存操作
   ['saveMedicationData', saveDataHandler('medication')],
   ['saveLabData', saveDataHandler('labdata')],
@@ -174,18 +174,98 @@ const ACTION_HANDLERS = new Map([
   ['saveDischargeData', saveDataHandler('discharge')],
   ['saveMedDaysData', saveDataHandler('medDays')],
   ['savePatientSummaryData', saveDataHandler('patientSummary')],
-  
+
   ['saveToken', (message, sender, sendResponse) => {
     // console.log("Background script received token to save");
     currentSessionData.token = message.token;
     currentSessionData.currentUserSession = message.userSession || currentSessionData.currentUserSession;
     sendResponse({ status: "token_saved" });
+  }],
+
+  ['callOpenAI', (message, sender, sendResponse) => {
+    chrome.storage.sync.get(['openaiApiKey'], async (result) => {
+      const apiKey = result.openaiApiKey;
+      if (!apiKey) {
+        sendResponse({ success: false, error: "OpenAI API Key not found. Please set it in Options." });
+        return;
+      }
+
+      try {
+        const response = await fetch('https://api.openai.com/v1/chat/completions', {
+          method: 'POST',
+          headers: {
+            'Content-Type': 'application/json',
+            'Authorization': `Bearer ${apiKey}`
+          },
+          body: JSON.stringify({
+            model: "gpt-5-mini", // User explicitly requested gpt-5-mini
+            messages: [
+              {
+                role: "system",
+                content: message.systemPrompt
+              },
+              {
+                role: "user",
+                content: message.userPrompt
+              }
+            ],
+            response_format: {
+              type: "json_schema",
+              json_schema: {
+                name: "medical_record_summary",
+                strict: true,
+                schema: {
+                  type: "object",
+                  properties: {
+                    critical_alerts: {
+                      type: "array",
+                      items: { type: "string" },
+                      description: "最危險/最需要注意的點 (Most dangerous/urgent items)"
+                    },
+                    medication_risks: {
+                      type: "array",
+                      items: { type: "string" },
+                      description: "用藥雷點 (Medication risks/contraindications)"
+                    },
+                    abnormal_labs: {
+                      type: "array",
+                      items: { type: "string" },
+                      description: "近期異常檢驗 (Recent abnormal lab results)"
+                    },
+                    imaging_findings: {
+                      type: "array",
+                      items: { type: "string" },
+                      description: "重要影像異常 (Important imaging findings)"
+                    }
+                  },
+                  required: ["critical_alerts", "medication_risks", "abnormal_labs", "imaging_findings"],
+                  additionalProperties: false
+                }
+              }
+            }
+          })
+        });
+
+        if (!response.ok) {
+          const errorData = await response.json();
+          throw new Error(errorData.error?.message || `HTTP error! status: ${response.status}`);
+        }
+
+        const data = await response.json();
+        sendResponse({ success: true, data: data });
+
+      } catch (error) {
+        console.error("OpenAI API call failed:", error);
+        sendResponse({ success: false, error: error.message });
+      }
+    });
+    return true; // Keep channel open for async response
   }]
 ]);
 
 // 通用數據保存處理函數
 function saveDataHandler(type) {
-  return function(message, sender, sendResponse) {
+  return function (message, sender, sendResponse) {
     const storageKey = DATA_TYPE_TO_STORAGE_KEY[type];
     if (!storageKey) {
       sendResponse({
@@ -196,7 +276,7 @@ function saveDataHandler(type) {
     }
 
     // console.log(`Background script received ${type} data to save`);
-    
+
     // 更新當前會話數據
     currentSessionData[storageKey] = message.data;
     currentSessionData.currentUserSession = message.userSession || currentSessionData.currentUserSession;
@@ -207,7 +287,7 @@ function saveDataHandler(type) {
       currentUserSession: message.userSession || currentSessionData.currentUserSession
     };
 
-    chrome.storage.local.set(storageObj, function() {
+    chrome.storage.local.set(storageObj, function () {
       // console.log(`${type} data saved to storage`);
       chrome.action.setBadgeText({ text: "✓" });
       chrome.action.setBadgeBackgroundColor({ color: "#4CAF50" });
@@ -254,8 +334,8 @@ chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
 // 監聽登出事件（例如通過偵測特定頁面變化）
 chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
   if (changeInfo.url && (
-      changeInfo.url.includes('medcloud2.nhi.gov.tw/imu/login') ||
-      changeInfo.url.includes('medcloud2.nhi.gov.tw/imu/IMUE1000/IMUE0001'))) {
+    changeInfo.url.includes('medcloud2.nhi.gov.tw/imu/login') ||
+    changeInfo.url.includes('medcloud2.nhi.gov.tw/imu/IMUE1000/IMUE0001'))) {
     console.log("Detected navigation to login page, clearing session data");
 
     // 重置當前會話數據
@@ -264,7 +344,7 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo, tab) => {
     });
 
     // 從 storage 中移除數據
-    chrome.storage.local.remove(['medicationData', 'labData', 'currentUserSession'], function() {
+    chrome.storage.local.remove(['medicationData', 'labData', 'currentUserSession'], function () {
       console.log("Storage data cleared due to logout");
       chrome.action.setBadgeText({ text: "" });
     });
@@ -289,7 +369,7 @@ function saveDataToStorage(type, data, userSession) {
   //   data?.rObject ? `${data.rObject.length} records` : 'No records or invalid format');
 
   return new Promise((resolve) => {
-    chrome.storage.local.set(storageObj, function() {
+    chrome.storage.local.set(storageObj, function () {
       // console.log(`${type} data saved to storage with key ${storageKey}`);
       chrome.action.setBadgeText({ text: "✓" });
       chrome.action.setBadgeBackgroundColor({ color: "#4CAF50" });

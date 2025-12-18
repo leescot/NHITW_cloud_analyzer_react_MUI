@@ -12,7 +12,8 @@
   ],
   "host_permissions": [
     "https://medcloud2.nhi.gov.tw/*",
-    "https://drugtw.com/*"
+    "https://drugtw.com/*",
+    "https://api.openai.com/*"
   ],
   "background": {
     "service_worker": "background.js"

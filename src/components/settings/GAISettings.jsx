@@ -19,6 +19,10 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import SmartToyIcon from "@mui/icons-material/SmartToy";
 import EditIcon from "@mui/icons-material/Edit";
 import RestartAltIcon from "@mui/icons-material/RestartAlt";
+import Visibility from "@mui/icons-material/Visibility";
+import VisibilityOff from "@mui/icons-material/VisibilityOff";
+import SaveIcon from "@mui/icons-material/Save";
+import { IconButton, InputAdornment } from "@mui/material";
 import { DEFAULT_GAI_PROMPT } from "../../config/defaultSettings";
 
 const GAISettings = () => {
@@ -30,6 +34,9 @@ const GAISettings = () => {
 
     const [promptDialogOpen, setPromptDialogOpen] = useState(false);
     const [gaiPrompt, setGaiPrompt] = useState(DEFAULT_GAI_PROMPT);
+    const [openaiApiKey, setOpenaiApiKey] = useState("");
+    const [showApiKey, setShowApiKey] = useState(false);
+    const [apiKeySaved, setApiKeySaved] = useState(false);
 
     useEffect(() => {
         // Load GAI settings
@@ -39,6 +46,7 @@ const GAISettings = () => {
                 enableGAIPrompt: false,
                 enableGAISidebar: false,
                 gaiPrompt: DEFAULT_GAI_PROMPT,
+                openaiApiKey: "",
             },
             (items) => {
                 setSettings({
@@ -47,6 +55,7 @@ const GAISettings = () => {
                     enableGAISidebar: items.enableGAISidebar,
                 });
                 setGaiPrompt(items.gaiPrompt || DEFAULT_GAI_PROMPT);
+                setOpenaiApiKey(items.openaiApiKey || "");
             }
         );
     }, []);
@@ -139,21 +148,6 @@ const GAISettings = () => {
                         label="開啟包含提示詞資料格式"
                     />
 
-                    <FormControlLabel
-                        control={
-                            <Switch
-                                checked={settings.enableGAISidebar}
-                                onChange={(e) => {
-                                    handleLocalSettingChange(
-                                        "enableGAISidebar",
-                                        e.target.checked
-                                    );
-                                }}
-                            />
-                        }
-                        label="開啟 GAI 側邊欄顯示"
-                    />
-
                     {settings.enableGAIPrompt && (
                         <Box sx={{ mt: 1, mb: 2, ml: 4, display: 'flex', gap: 1 }}>
                             <Button
@@ -177,6 +171,70 @@ const GAISettings = () => {
                             >
                                 重置
                             </Button>
+                        </Box>
+                    )}
+
+                    <FormControlLabel
+                        control={
+                            <Switch
+                                checked={settings.enableGAISidebar}
+                                onChange={(e) => {
+                                    handleLocalSettingChange(
+                                        "enableGAISidebar",
+                                        e.target.checked
+                                    );
+                                }}
+                            />
+                        }
+                        label="開啟 GAI 側邊欄顯示"
+                    />
+
+                    {settings.enableGAISidebar && (
+                        <Box sx={{ mt: 2, mb: 1, ml: 4 }}>
+                            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+                                <TextField
+                                    label="OpenAI API Key"
+                                    type={showApiKey ? "text" : "password"}
+                                    value={openaiApiKey}
+                                    onChange={(e) => {
+                                        setOpenaiApiKey(e.target.value);
+                                        setApiKeySaved(false);
+                                    }}
+                                    fullWidth
+                                    size="small"
+                                    variant="outlined"
+                                    InputProps={{
+                                        endAdornment: (
+                                            <InputAdornment position="end">
+                                                <IconButton
+                                                    aria-label="toggle password visibility"
+                                                    onClick={() => setShowApiKey(!showApiKey)}
+                                                    edge="end"
+                                                >
+                                                    {showApiKey ? <VisibilityOff /> : <Visibility />}
+                                                </IconButton>
+                                            </InputAdornment>
+                                        ),
+                                    }}
+                                />
+                                <Button
+                                    variant="contained"
+                                    color={apiKeySaved ? "success" : "primary"}
+                                    startIcon={<SaveIcon />}
+                                    onClick={() => {
+                                        chrome.storage.sync.set({ openaiApiKey }, () => {
+                                            setApiKeySaved(true);
+                                            setTimeout(() => setApiKeySaved(false), 2000);
+                                        });
+                                    }}
+                                    sx={{ minWidth: '100px' }}
+                                >
+                                    {apiKeySaved ? "已儲存" : "儲存"}
+                                </Button>
+                            </Box>
+                            <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>
+                                請輸入您的 OpenAI API Key，金鑰僅儲存在您的瀏覽器中。
+                            </Typography>
                         </Box>
                     )}
                 </AccordionDetails>

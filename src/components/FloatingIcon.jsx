@@ -175,6 +175,21 @@ const FloatingIcon = () => {
   const [sidebarWidth, setSidebarWidth] = useState(350);
   const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [gaiPrompt, setGaiPrompt] = useState("");
+  const [isDataLoaded, setIsDataLoaded] = useState(false);
+
+  // Construct patientData object for Sidebar and GAI functions
+  const patientData = {
+    userInfo,
+    patientSummaryData,
+    allergyData,
+    surgeryData,
+    dischargeData,
+    hbcvData,
+    groupedMedications,
+    groupedLabs,
+    groupedChineseMeds,
+    imagingData
+  };
 
   // 新增響應式布局檢測
   const theme = useTheme();
@@ -328,6 +343,7 @@ const FloatingIcon = () => {
           );
         } else {
           // 非設置相關事件，重新處理所有數據
+          setIsDataLoaded(false);
           handleData();
         }
       }
@@ -419,6 +435,7 @@ const FloatingIcon = () => {
 
     // 使用dataManager處理所有資料
     await handleAllData(dataSources, appSettings, setters);
+    setIsDataLoaded(true);
   };
 
   // 初始數據加載
@@ -612,6 +629,8 @@ const FloatingIcon = () => {
         setWidth={setSidebarWidth}
         isCollapsed={isSidebarCollapsed}
         setIsCollapsed={setIsSidebarCollapsed}
+        patientData={patientData}
+        isDataLoaded={isDataLoaded}
       />
 
       <Dialog
