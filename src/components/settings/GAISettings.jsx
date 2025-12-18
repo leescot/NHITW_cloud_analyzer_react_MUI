@@ -13,6 +13,7 @@ import {
     DialogContent,
     DialogActions,
     TextField,
+    Chip,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import SmartToyIcon from "@mui/icons-material/SmartToy";
@@ -90,6 +91,19 @@ const GAISettings = () => {
                 >
                     <SmartToyIcon sx={{ mr: 1, color: 'primary.main' }} />
                     <Typography>GAI相關設定</Typography>
+                    <Chip
+                        label="beta"
+                        size="small"
+                        color="primary"
+                        variant="outlined"
+                        sx={{
+                            ml: 1,
+                            height: '20px',
+                            fontSize: '0.65rem',
+                            fontWeight: 'bold',
+                            textTransform: 'uppercase'
+                        }}
+                    />
                 </AccordionSummary>
                 <AccordionDetails>
                     <FormControlLabel

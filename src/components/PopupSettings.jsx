@@ -31,7 +31,7 @@ import ChineseMedicationSettings from './settings/ChineseMedicationSettings';
 import LabSettings from './settings/LabSettings';
 import OverviewSettings from './settings/OverviewSettings';
 import AboutTab from './settings/AboutTab';
-import AdvancedSettings from './settings/AdvancedSettings';
+import GAISettings from './settings/GAISettings';
 import CloudDataSettings from './settings/CloudDataSettings';
 import { updateDataStatus } from '../utils/settingsHelper';
 import LoadDataTab from './settings/LoadDataTab';
@@ -94,7 +94,7 @@ const PopupSettings = () => {
         <MedicationSettings />
         <ChineseMedicationSettings />
         <LabSettings />
-        <AdvancedSettings />
+        <GAISettings />
       </Box>
     )],
     [1, (
@@ -110,20 +110,20 @@ const PopupSettings = () => {
     [3, (
       <Box>
         <Typography variant="h6" align="center" gutterBottom>贊助我們</Typography>
-        <Typography paragraph  align="center">
+        <Typography paragraph align="center">
           感謝您使用「更好的健保雲端2.0」</Typography><Typography paragraph align="center">
           如果您覺得這個工具對您醫療上有所幫助，您可以考慮贊助我們，幫助我們持續改進和維護這個專案。
         </Typography>
         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mt: 2 }}>
           <Box sx={{ mb: 2, maxWidth: '200px', maxHeight: '200px' }}>
-            <img 
-              src="/images/buymeacoffee_qr.png" 
+            <img
+              src="/images/buymeacoffee_qr.png"
               alt="Buy Me A Coffee QR Code"
               style={{ width: '100%', height: 'auto', borderRadius: '8px' }}
             />
           </Box>
-          <Button 
-            variant="contained" 
+          <Button
+            variant="contained"
             color="primary"
             startIcon={<VolunteerActivismIcon />}
             onClick={() => chrome.tabs.create({ url: 'https://buymeacoffee.com/leescot' })}
@@ -151,7 +151,7 @@ const PopupSettings = () => {
       openNHIMedCloud();
       return;
     }
-    
+
     // 正常切換標籤
     setActiveTab(newValue);
   };
@@ -166,15 +166,15 @@ const PopupSettings = () => {
       action: (currentMode) => {
         const newMode = !currentMode;
         setDeveloperMode(newMode);
-        
+
         // 儲存開發者模式狀態
         chrome.storage.local.set({ developerMode: newMode });
-        
+
         // 如果關閉開發者模式，且當前在開發模式頁面，切換回設定頁面
         if (!newMode && activeTab === 4) {
           setActiveTab(0);
         }
-        
+
         return {
           message: newMode ? '開發者模式已啟用' : '開發者模式已關閉',
           severity: newMode ? 'success' : 'info'
@@ -193,7 +193,7 @@ const PopupSettings = () => {
     const actionConfig = handleDeveloperModeActions.get(newCount);
     if (actionConfig) {
       const { message, severity } = actionConfig.action(developerMode);
-      
+
       // 顯示通知
       setSnackbar({
         open: true,
@@ -463,6 +463,10 @@ const PopupSettings = () => {
         onClose={handleCloseSnackbar}
         anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
         sx={{
+          top: '50% !important',
+          left: '50% !important',
+          transform: 'translate(-50%, -50%)',
+          bottom: 'auto !important',
           '& .MuiAlert-root': {
             minWidth: '200px',
             maxWidth: '90%'

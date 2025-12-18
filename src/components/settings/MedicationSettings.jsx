@@ -80,7 +80,7 @@ const MedicationSettings = () => {
 
   // 统一的 ATC5 分组对话框
   const [atc5GroupsDialogOpen, setAtc5GroupsDialogOpen] = useState(false);
-  
+
   // ATC5 Group 编辑状态
   const [editingGroup, setEditingGroup] = useState(null);
   const [newGroupName, setNewGroupName] = useState("");
@@ -191,7 +191,7 @@ const MedicationSettings = () => {
       [settings.atc5ColorGroups.orange.includes(groupName), "orange"],
       [settings.atc5ColorGroups.green.includes(groupName), "green"]
     ]);
-    
+
     // 找出第一個符合條件的顏色，或返回 "none"
     return colorMap.get(true) || "none";
   };
@@ -321,7 +321,7 @@ const MedicationSettings = () => {
     const rows = [];
     for (let i = 0; i < codes.length; i += 2) {
       // # zh-TW: 使用條件運算符替代 if-else 邏輯，更簡潔
-      const pair = i + 1 < codes.length 
+      const pair = i + 1 < codes.length
         ? [codes[i], codes[i + 1]]  // 如果有一對
         : [codes[i]];               // 如果最後有奇數
       rows.push(pair);
@@ -364,7 +364,7 @@ const MedicationSettings = () => {
     const groupColor = getGroupColor(groupName);
     // 如果顏色是 none 則不顯示芯片
     if (groupColor === "none") return null;
-    
+
     const { color, label } = colorMap.get(groupColor);
 
     return (
@@ -396,7 +396,7 @@ const MedicationSettings = () => {
       ["orange", { ...baseStyle, bgcolor: '#fff3e0', color: 'warning.main', border: '1px solid', borderColor: 'warning.light' }],
       ["green", { ...baseStyle, bgcolor: '#e8f5e9', color: 'success.main', border: '1px solid', borderColor: 'success.light' }]
     ]);
-    
+
     // 返回對應顏色的樣式，如果找不到則返回預設樣式
     return styleMap.get(color) || { ...baseStyle, bgcolor: 'grey.100', color: 'text.secondary', border: '1px solid', borderColor: 'grey.300' };
   };
@@ -405,21 +405,21 @@ const MedicationSettings = () => {
   const openCustomFormatEditor = () => {
     // Only proceed if enableMedicationCustomCopyFormat is true
     if (!settings.enableMedicationCustomCopyFormat) return;
-    
+
     // 发送消息给 background script 或直接调用 FloatingIcon 的方法
     if (window.openFloatingIconDialog) {
       window.openFloatingIconDialog();
       // 等对话框打开后，切换到自訂設定标签（索引为9）
       setTimeout(() => {
-        chrome.runtime.sendMessage({ 
+        chrome.runtime.sendMessage({
           action: 'switchToCustomFormatTab',
           tabIndex: 9
         });
       }, 100);
     } else {
       // 如果全局方法不可用，则发送消息给背景脚本处理
-      chrome.runtime.sendMessage({ 
-        action: 'openCustomFormatEditor' 
+      chrome.runtime.sendMessage({
+        action: 'openCustomFormatEditor'
       });
     }
   };
@@ -434,7 +434,7 @@ const MedicationSettings = () => {
         aria-controls="medication-settings-content"
         id="medication-settings-header"
       >
-        <MedicationIcon sx={{ mr: 1, color: 'primary.main' }}/>
+        <MedicationIcon sx={{ mr: 1, color: 'primary.main' }} />
         <Typography>西藥顯示設定</Typography>
       </AccordionSummary>
       <AccordionDetails>
@@ -536,13 +536,43 @@ const MedicationSettings = () => {
         )}
 
         {/* Remove the duplicate switch for enableMedicationCustomCopyFormat since it's now in AdvancedSettings */}
+        <FormControlLabel
+          control={
+            <Switch
+              checked={settings.enableMedicationCustomCopyFormat}
+              onChange={(e) => {
+                handleLocalSettingChange(
+                  "enableMedicationCustomCopyFormat",
+                  e.target.checked
+                );
+              }}
+            />
+          }
+          label="開啟西藥自訂複製格式"
+        />
+
         {settings.enableMedicationCustomCopyFormat && (
           <Box sx={{ mt: 1, mb: 2, ml: 4 }}>
-            <Typography variant="body2" color="text.secondary">
-              請在「進階設定」中設置自訂格式。
+            <Typography variant="body2" color="text.secondary" sx={{ mt: 1 }}>
+              需於程式主頁面「進階設定」來設定格式
             </Typography>
           </Box>
         )}
+
+        <FormControlLabel
+          control={
+            <Switch
+              checked={settings.enableMedicationCopyAll}
+              onChange={(e) => {
+                handleLocalSettingChange(
+                  "enableMedicationCopyAll",
+                  e.target.checked
+                );
+              }}
+            />
+          }
+          label="開啟西藥全部資料複製功能"
+        />
 
         <FormControl fullWidth sx={{ mt: 2 }}>
           <InputLabel id="medication-copy-format-label">
@@ -567,14 +597,14 @@ const MedicationSettings = () => {
             <MenuItem value="nameWithDosageHorizontal">
               複製商品名+使用量(橫式)
             </MenuItem>
-            <MenuItem 
-              value="customVertical" 
+            <MenuItem
+              value="customVertical"
               disabled={!settings.enableMedicationCustomCopyFormat}
             >
               自訂西藥複製格式(直式)
             </MenuItem>
-            <MenuItem 
-              value="customHorizontal" 
+            <MenuItem
+              value="customHorizontal"
               disabled={!settings.enableMedicationCustomCopyFormat}
             >
               自訂西藥複製格式(橫式)
