@@ -4,53 +4,74 @@ import {
     Paper,
     Typography,
     IconButton,
-    Select,
-    MenuItem,
-    FormControl,
     Fab,
-    Tooltip
+    Tooltip,
+    Tabs,
+    Tab,
+    CircularProgress,
+    Badge
 } from '@mui/material';
-// import CloseIcon from '@mui/icons-material/Close';
 import SettingsIcon from '@mui/icons-material/Settings';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
-import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import KeyboardDoubleArrowRightIcon from '@mui/icons-material/KeyboardDoubleArrowRight';
+import WarningIcon from '@mui/icons-material/Warning';
+import MedicationIcon from '@mui/icons-material/Medication';
+import ScienceIcon from '@mui/icons-material/Science';
+import ImageSearchIcon from '@mui/icons-material/ImageSearch';
+
+import { GAI_CONFIG } from '../config/gaiConfig';
+import { generateGAIFormatXML } from '../utils/gaiCopyFormatter';
 
 const Sidebar = ({
     open,
     onClose,
     width = 350,
-    setWidth, // Function to update width in parent
+    setWidth,
     isCollapsed = false,
-    setIsCollapsed, // Function to update collapse state in parent
+    setIsCollapsed,
     patientData = {},
     isDataLoaded = false
 }) => {
-    // 拖曳狀態
+    // UI State
     const [isResizing, setIsResizing] = useState(false);
-    const [analysisResult, setAnalysisResult] = useState(null);
-    const [isAnalyzing, setIsAnalyzing] = useState(false);
-    const [error, setError] = useState(null);
+    const [tabValue, setTabValue] = useState(0);
+
+    // Analysis State
+    const [analysisResults, setAnalysisResults] = useState({
+        critical_alerts: [],
+        medication_risks: [],
+        abnormal_labs: [],
+        imaging_findings: []
+    });
+
+    // Granular Loading States
+    const [loadingStates, setLoadingStates] = useState({
+        critical_alerts: false,
+        medication_risks: false,
+        abnormal_labs: false,
+        imaging_findings: false
+    });
+
+    // Error States
+    const [errorStates, setErrorStates] = useState({
+        critical_alerts: null,
+        medication_risks: null,
+        abnormal_labs: null,
+        imaging_findings: null
+    });
+
     const [hasAnalyzed, setHasAnalyzed] = useState(false);
-    const [gaiPrompt, setGaiPrompt] = useState("");
-
-    // Refs for resizing
     const isResizingRef = useRef(false);
+    const newWidthRef = useRef(width);
 
-    // Load GAI Prompt
-    useEffect(() => {
-        chrome.storage.sync.get({ gaiPrompt: "You are a helpful assistant." }, (items) => {
-            setGaiPrompt(items.gaiPrompt);
-        });
-    }, []);
+    // Track if any analysis is running
+    const isAnalyzing = Object.values(loadingStates).some(state => state);
 
     // Auto Analyze Logic
     useEffect(() => {
         const hasValidData = () => {
             if (!patientData) return false;
-
-            // Check if any major data category has content
             return (
                 (patientData.groupedMedications && patientData.groupedMedications.length > 0) ||
                 (patientData.groupedLabs && patientData.groupedLabs.length > 0) ||
@@ -59,104 +80,87 @@ const Sidebar = ({
                 (patientData.surgeryData && patientData.surgeryData.length > 0) ||
                 (patientData.dischargeData && patientData.dischargeData.length > 0) ||
                 (patientData.imagingData && (patientData.imagingData.withReport?.length > 0 || patientData.imagingData.withoutReport?.length > 0)) ||
-                // Check HBVC or other specific data if necessary
                 (patientData.hbcvData && Object.keys(patientData.hbcvData).length > 0)
             );
         };
 
-        // Only trigger if:
-        // 1. Sidebar is open
-        // 2. Data is loaded and valid
-        // 3. Not currently analyzing
-        // 4. Has NOT analyzed this data session yet
-        // 5. Data actually contains records (not just empty arrays initialized)
-
         if (open && isDataLoaded && !isAnalyzing && !hasAnalyzed && hasValidData()) {
             console.log('Sidebar: Auto-analyzing valid patient data...');
             handleAnalyze();
-        } else if (open && isDataLoaded && !hasValidData()) {
-            console.log('Sidebar: Data loaded but no records found. Skipping auto-analysis.');
         }
-    }, [open, isDataLoaded, isAnalyzing, hasAnalyzed, patientData]);
+    }, [open, isDataLoaded, hasAnalyzed, patientData]);
 
-    // Reset analysis when data reloads (isDataLoaded goes false then true? Or if patientData changes?)
-    // Let's reset hasAnalyzed when isDataLoaded becomes false to allow re-trigger.
+    // Reset when data reloads
     useEffect(() => {
         if (!isDataLoaded) {
             setHasAnalyzed(false);
-            setAnalysisResult(null);
-            setError(null);
+            setAnalysisResults({
+                critical_alerts: [],
+                medication_risks: [],
+                abnormal_labs: [],
+                imaging_findings: []
+            });
+            setErrorStates({
+                critical_alerts: null,
+                medication_risks: null,
+                abnormal_labs: null,
+                imaging_findings: null
+            });
         }
     }, [isDataLoaded]);
 
+    const handleAnalyze = () => {
+        setHasAnalyzed(true);
+        const xmlString = generateGAIFormatXML(patientData);
 
-    const handleAnalyze = async () => {
-        setIsAnalyzing(true);
-        setError(null);
-
-        try {
-            // Import dynamically or assume it is passed/available? It was not passed.
-            // I need to import generateGAIFormatXML. It is an export from utils.
-            // Since this is a .jsx file, I should have added the import at the top. I will add it in a separate block or include it here if I rewrite imports?
-            // Wait, I can't easily add import at top with this tool call unless I replace the whole file or use multi_replace properly. 
-            // I will assume I need to fix imports later or do it now.
-            // Let's use dynamic import if possible? No, standard import is better. 
-            // I'll skip import here and add it in a separate tool call to be safe, OR I can trust the build system? 
-            // React best practice: just import it.
-            // I will use another tool call to add the import.
-            // For now, assume generateGAIFormatXML is available or I will fail.
-            // Let's postpone the execution of this logic until I add the import. 
-            // Actually, I am replacing the whole component logic basically. 
-
-            // Wait, I can add imports via ReplaceFileContent at the top.
-            // I will continue this logic assuming import exists, and I will add import in next step.
-
-            const { generateGAIFormatXML } = await import('../utils/gaiCopyFormatter');
-
-            const xmlString = generateGAIFormatXML(patientData);
-
-            // Retrieve latest prompt if needed or use state
-            // chrome.storage.sync.get... logic is async.
-
-            chrome.runtime.sendMessage({
-                action: 'callOpenAI',
-                systemPrompt: gaiPrompt,
-                userPrompt: xmlString
-            }, (response) => {
-                if (chrome.runtime.lastError) {
-                    setError(chrome.runtime.lastError.message);
-                } else if (!response || !response.success) {
-                    setError(response?.error || "Unknown error");
-                } else {
-                    // Success
-                    // Parse if it's string, but background sends JSON object "data" which contains the choices etc?
-                    // Background sends: { success: true, data: openaiResponse }
-                    // OpenAI response structure for structured output:
-                    // choices[0].message.content (string representation of JSON) OR if parsed_output is supported?
-                    // With response_format json_schema, content IS a JSON string.
-
-                    try {
-                        const content = response.data.choices[0].message.content;
-                        const parsed = JSON.parse(content);
-                        setAnalysisResult(parsed);
-                        setHasAnalyzed(true);
-                    } catch (e) {
-                        setError("Failed to parse AI response: " + e.message);
-                    }
-                }
-                setIsAnalyzing(false);
-            });
-
-        } catch (e) {
-            setError(e.message);
-            setIsAnalyzing(false);
-        }
+        // Trigger all analyses in parallel but handle independent responses
+        Object.keys(GAI_CONFIG).forEach(key => {
+            runAnalysisForKey(key, xmlString);
+        });
     };
 
+    const runAnalysisForKey = (key, xmlString) => {
+        const config = GAI_CONFIG[key];
 
-    // Initial width load is now handled by parent (FloatingIcon)
+        // Update loading state
+        setLoadingStates(prev => ({ ...prev, [key]: true }));
+        setErrorStates(prev => ({ ...prev, [key]: null }));
 
-    // Handle body margin for content shifting
+        chrome.runtime.sendMessage({
+            action: 'callOpenAI',
+            systemPrompt: config.systemPrompt,
+            userPrompt: xmlString,
+            jsonSchema: config.schema,
+            model: "gpt-5-nano"
+        }, (response) => {
+            setLoadingStates(prev => ({ ...prev, [key]: false }));
+
+            if (chrome.runtime.lastError) {
+                setErrorStates(prev => ({ ...prev, [key]: chrome.runtime.lastError.message }));
+            } else if (!response || !response.success) {
+                setErrorStates(prev => ({ ...prev, [key]: response?.error || "Unknown error" }));
+            } else {
+                try {
+                    const content = response.data.choices[0].message.content;
+                    const parsed = JSON.parse(content);
+                    // The result should have the key we requested (e.g., { critical_alerts: [...] })
+                    // We merge it into our results
+                    setAnalysisResults(prev => ({
+                        ...prev,
+                        ...parsed
+                    }));
+                } catch (e) {
+                    setErrorStates(prev => ({ ...prev, [key]: "Parse error: " + e.message }));
+                }
+            }
+        });
+    };
+
+    const handleTabChange = (event, newValue) => {
+        setTabValue(newValue);
+    };
+
+    // Body margin handling
     useEffect(() => {
         if (open && !isCollapsed) {
             document.body.style.transition = 'margin-right 0.3s ease-in-out';
@@ -164,84 +168,99 @@ const Sidebar = ({
         } else {
             document.body.style.marginRight = '0px';
         }
-
-        // Cleanup
-        return () => {
-            document.body.style.marginRight = '0px';
-        };
+        return () => { document.body.style.marginRight = '0px'; };
     }, [open, isCollapsed, width]);
 
-    // Resize handlers
-    // Define handleMouseMove FIRST because it is used by others
+    // Resizing logic
     const handleMouseMove = useCallback((e) => {
         if (!isResizingRef.current) return;
-
-        // Calculate new width (Window width - Mouse X)
         const newWidth = window.innerWidth - e.clientX;
-
-        // Constraints
         if (newWidth > 250 && newWidth < 800) {
             setWidth(newWidth);
         }
     }, [setWidth]);
 
-    // Define stopResizing SECOND because it uses handleMouseMove
     const stopResizing = useCallback(() => {
         isResizingRef.current = false;
         setIsResizing(false);
         document.removeEventListener('mousemove', handleMouseMove);
         document.removeEventListener('mouseup', stopResizing);
         document.body.style.cursor = 'default';
-
         chrome.storage.local.set({ gaiSidebarWidth: newWidthRef.current });
-
     }, [handleMouseMove]);
 
-    // We need to track the latest width for saving in stopResize without dependency issues
-    const newWidthRef = useRef(width);
     useEffect(() => { newWidthRef.current = width; }, [width]);
 
-
-    // Define startResizing LAST because it uses handleMouseMove and stopResizing
     const startResizing = useCallback((e) => {
         isResizingRef.current = true;
         setIsResizing(true);
-        e.preventDefault(); // Prevent text selection
+        e.preventDefault();
         document.addEventListener('mousemove', handleMouseMove);
         document.addEventListener('mouseup', stopResizing);
         document.body.style.cursor = 'w-resize';
     }, [handleMouseMove, stopResizing]);
 
-    // Handle Collapse
-    const handleCollapse = () => {
-        setIsCollapsed(true);
-    };
-
-    // Handle Restore
-    const handleRestore = () => {
-        setIsCollapsed(false);
-    };
+    const handleCollapse = () => setIsCollapsed(true);
+    const handleRestore = () => setIsCollapsed(false);
 
     if (!open) return null;
 
-    // Render Collapsed State (Floating Button)
     if (isCollapsed) {
         return (
             <Fab
                 color="primary"
-                aria-label="restore sidebar"
                 onClick={handleRestore}
-                sx={{
-                    position: 'fixed',
-                    top: 80,
-                    right: 20,
-                    zIndex: 2147483647,
-                }}
+                sx={{ position: 'fixed', top: 80, right: 20, zIndex: 2147483647 }}
             >
                 <SmartToyIcon />
             </Fab>
         );
     }
+
+    // Helper to render content list
+    const renderContentList = (dataKey, color, emptyMsg) => {
+        const isLoading = loadingStates[dataKey];
+        const error = errorStates[dataKey];
+        const items = analysisResults[dataKey] || [];
+
+        if (isLoading) {
+            return (
+                <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', py: 4, gap: 2 }}>
+                    <CircularProgress size={30} color={color} />
+                    <Typography variant="body2" color="text.secondary">正在分析...</Typography>
+                </Box>
+            );
+        }
+
+        if (error) {
+            return (
+                <Paper variant="outlined" sx={{ p: 2, bgcolor: '#fff3e0', borderColor: '#ffcc80' }}>
+                    <Typography color="error" variant="caption">{error}</Typography>
+                    <IconButton size="small" onClick={() => runAnalysisForKey(dataKey, generateGAIFormatXML(patientData))}>
+                        <RefreshIcon fontSize="small" />
+                    </IconButton>
+                </Paper>
+            );
+        }
+
+        if (items.length === 0) {
+            return (
+                <Box sx={{ textAlign: 'center', py: 4, color: 'text.secondary', opacity: 0.7 }}>
+                    <Typography variant="body2">{emptyMsg}</Typography>
+                </Box>
+            );
+        }
+
+        return (
+            <Box component="ul" sx={{ m: 0, pl: 2 }}>
+                {items.map((item, index) => (
+                    <Box component="li" key={index} sx={{ mb: 1.5 }}>
+                        <Typography variant="body2" sx={{ lineHeight: 1.6 }}>{item}</Typography>
+                    </Box>
+                ))}
+            </Box>
+        );
+    };
 
     return (
         <>
@@ -251,15 +270,13 @@ const Sidebar = ({
                 sx={{
                     position: 'fixed',
                     top: 0,
-                    right: width, // Position at the left edge of sidebar
-                    width: '10px', // Hit area width
+                    right: width,
+                    width: '10px',
                     height: '100vh',
-                    zIndex: 2147483648, // Above sidebar
+                    zIndex: 2147483648,
                     cursor: 'w-resize',
                     backgroundColor: 'transparent',
-                    '&:hover': {
-                        backgroundColor: 'rgba(25, 118, 210, 0.1)', // Visual feedback
-                    }
+                    '&:hover': { backgroundColor: 'rgba(25, 118, 210, 0.1)' }
                 }}
             />
 
@@ -276,199 +293,104 @@ const Sidebar = ({
                     flexDirection: 'column',
                     backgroundColor: '#ffffff',
                     borderLeft: '1px solid #e0e0e0',
-                    transition: isResizing ? 'none' : 'width 0.1s ease-out, transform 0.3s ease-in-out', // Disable transition during resize for performance
-                    boxShadow: '-4px 0 8px rgba(0,0,0,0.1)'
+                    transition: isResizing ? 'none' : 'width 0.1s ease-out, transform 0.3s ease-in-out',
                 }}
             >
                 {/* Header */}
-                <Box
-                    sx={{
-                        p: 1.5,
-                        display: 'flex',
-                        alignItems: 'center',
-                        justifyContent: 'space-between',
-                        borderBottom: '1px solid #f0f0f0',
-                        backgroundColor: '#fff'
-                    }}
-                >
+                <Box sx={{ p: 1.5, display: 'flex', alignItems: 'center', justifyContent: 'space-between', borderBottom: '1px solid #f0f0f0' }}>
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                         <SmartToyIcon color="primary" />
-                        <Typography variant="subtitle1" fontWeight="bold" color="text.primary">
-                            GAI 助手
-                        </Typography>
+                        <Typography variant="subtitle1" fontWeight="bold">GAI 助手</Typography>
                     </Box>
                     <Box>
-                        <Tooltip title="重新分析">
+                        <Tooltip title="全部重新分析">
                             <IconButton onClick={handleAnalyze} size="small" disabled={isAnalyzing}>
                                 <RefreshIcon fontSize="small" />
                             </IconButton>
                         </Tooltip>
-                        <Tooltip title="縮小至圖示">
-                            <IconButton onClick={handleCollapse} size="small" aria-label="minimize sidebar">
+                        <Tooltip title="縮小">
+                            <IconButton onClick={handleCollapse} size="small">
                                 <KeyboardDoubleArrowRightIcon fontSize="small" />
                             </IconButton>
                         </Tooltip>
                     </Box>
                 </Box>
 
-                {/* Content Area */}
-                <Box
-                    sx={{
-                        flex: 1,
-                        overflowY: 'auto',
-                        p: 2,
-                        backgroundColor: '#f8f9fa',
-                        display: 'flex',
-                        flexDirection: 'column',
-                        gap: 2
-                    }}
+                {/* Tabs */}
+                <Tabs
+                    value={tabValue}
+                    onChange={handleTabChange}
+                    variant="fullWidth"
+                    textColor="primary"
+                    indicatorColor="primary"
+                    sx={{ borderBottom: 1, borderColor: 'divider', minHeight: 48 }}
                 >
-                    {isAnalyzing && (
-                        <Paper
-                            variant="outlined"
-                            sx={{
-                                p: 3,
-                                display: 'flex',
-                                alignItems: 'center',
-                                gap: 2,
-                                backgroundColor: '#f5f5f5',
-                                border: 'none',
-                                borderRadius: 2
-                            }}
-                        >
-                            <Box className="loader" sx={{
-                                width: 20,
-                                height: 20,
-                                border: '2px solid #ccc',
-                                borderBottomColor: 'primary.main',
-                                borderRadius: '50%',
-                                animation: 'spin 1s linear infinite',
-                                '@keyframes spin': {
-                                    '0%': { transform: 'rotate(0deg)' },
-                                    '100%': { transform: 'rotate(360deg)' },
-                                }
-                            }} />
-                            <Typography color="text.secondary" fontWeight="medium">
-                                正在分析病歷資料...
-                            </Typography>
-                        </Paper>
-                    )}
+                    <Tab
+                        icon={<Badge color="error" variant="dot" invisible={!analysisResults.critical_alerts.length}><WarningIcon fontSize="small" /></Badge>}
+                        label="注意"
+                        sx={{ minWidth: 0, p: 1, fontSize: '0.8rem' }}
+                    />
+                    <Tab
+                        icon={<Badge color="warning" variant="dot" invisible={!analysisResults.medication_risks.length}><MedicationIcon fontSize="small" /></Badge>}
+                        label="用藥"
+                        sx={{ minWidth: 0, p: 1, fontSize: '0.8rem' }}
+                    />
+                    <Tab
+                        icon={<Badge color="info" variant="dot" invisible={!analysisResults.abnormal_labs.length}><ScienceIcon fontSize="small" /></Badge>}
+                        label="檢驗"
+                        sx={{ minWidth: 0, p: 1, fontSize: '0.8rem' }}
+                    />
+                    <Tab
+                        icon={<Badge color="error" variant="dot" invisible={!analysisResults.imaging_findings.length}><ImageSearchIcon fontSize="small" /></Badge>}
+                        label="影像"
+                        sx={{ minWidth: 0, p: 1, fontSize: '0.8rem' }}
+                    />
+                </Tabs>
 
-                    {error && (
-                        <Paper
-                            variant="outlined"
-                            sx={{
-                                p: 2,
-                                backgroundColor: '#fff3e0',
-                                border: '1px solid #ffcc80',
-                                borderRadius: 2
-                            }}
-                        >
-                            <Typography variant="subtitle2" color="error">
-                                分析失敗:
-                            </Typography>
-                            <Typography variant="body2" color="text.secondary">
-                                {error}
-                            </Typography>
-                            {!gaiPrompt && (
-                                <Typography variant="caption" display="block" sx={{ mt: 1 }}>
-                                    請檢查是否已設定 API Key。
-                                </Typography>
-                            )}
-                        </Paper>
-                    )}
-
-                    {!isAnalyzing && !analysisResult && !error && (
-                        <Box sx={{ textAlign: 'center', mt: 4, color: 'text.secondary' }}>
-                            <SmartToyIcon sx={{ fontSize: 40, mb: 1, opacity: 0.5 }} />
-                            <Typography variant="body2">
-                                等待資料載入後自動分析...
-                            </Typography>
+                {/* Content Area - Scrollable */}
+                <Box sx={{ flex: 1, overflowY: 'auto', p: 2, bgcolor: '#f8f9fa' }}>
+                    {/* Critical Alerts Tab */}
+                    {tabValue === 0 && (
+                        <Box>
+                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, color: 'error.main' }}>
+                                <WarningIcon sx={{ mr: 1 }} />
+                                <Typography variant="subtitle2" fontWeight="bold">危險 / 注意事項</Typography>
+                            </Box>
+                            {renderContentList('critical_alerts', 'error', '無重大危險警示')}
                         </Box>
                     )}
 
-                    {analysisResult && (
-                        <>
-                            {/* Critical Alerts */}
-                            {analysisResult.critical_alerts && analysisResult.critical_alerts.length > 0 && (
-                                <Paper sx={{ p: 0, overflow: 'hidden', border: '1px solid #ffcdd2' }}>
-                                    <Box sx={{ bgcolor: '#ffebee', px: 2, py: 1, borderBottom: '1px solid #ffcdd2' }}>
-                                        <Typography variant="subtitle2" color="error.main" fontWeight="bold">
-                                            🔴 危險 / 注意
-                                        </Typography>
-                                    </Box>
-                                    <Box sx={{ p: 2 }}>
-                                        <ul style={{ margin: 0, paddingLeft: 20 }}>
-                                            {analysisResult.critical_alerts.map((item, index) => (
-                                                <li key={index}>
-                                                    <Typography variant="body2">{item}</Typography>
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </Box>
-                                </Paper>
-                            )}
+                    {/* Medication Risks Tab */}
+                    {tabValue === 1 && (
+                        <Box>
+                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, color: 'warning.dark' }}>
+                                <MedicationIcon sx={{ mr: 1 }} />
+                                <Typography variant="subtitle2" fontWeight="bold">用藥雷點 / 注意</Typography>
+                            </Box>
+                            {renderContentList('medication_risks', 'warning', '無發現顯著用藥風險')}
+                        </Box>
+                    )}
 
-                            {/* Medication Risks */}
-                            {analysisResult.medication_risks && analysisResult.medication_risks.length > 0 && (
-                                <Paper sx={{ p: 0, overflow: 'hidden', border: '1px solid #ffe0b2' }}>
-                                    <Box sx={{ bgcolor: '#fff3e0', px: 2, py: 1, borderBottom: '1px solid #ffe0b2' }}>
-                                        <Typography variant="subtitle2" color="warning.dark" fontWeight="bold">
-                                            💊 用藥雷點
-                                        </Typography>
-                                    </Box>
-                                    <Box sx={{ p: 2 }}>
-                                        <ul style={{ margin: 0, paddingLeft: 20 }}>
-                                            {analysisResult.medication_risks.map((item, index) => (
-                                                <li key={index}>
-                                                    <Typography variant="body2">{item}</Typography>
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </Box>
-                                </Paper>
-                            )}
+                    {/* Abnormal Labs Tab */}
+                    {tabValue === 2 && (
+                        <Box>
+                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, color: 'info.main' }}>
+                                <ScienceIcon sx={{ mr: 1 }} />
+                                <Typography variant="subtitle2" fontWeight="bold">異常檢驗數值</Typography>
+                            </Box>
+                            {renderContentList('abnormal_labs', 'info', '近期無顯著異常檢驗')}
+                        </Box>
+                    )}
 
-                            {/* Abnormal Labs */}
-                            {analysisResult.abnormal_labs && analysisResult.abnormal_labs.length > 0 && (
-                                <Paper sx={{ p: 0, overflow: 'hidden', border: '1px solid #b3e5fc' }}>
-                                    <Box sx={{ bgcolor: '#e1f5fe', px: 2, py: 1, borderBottom: '1px solid #b3e5fc' }}>
-                                        <Typography variant="subtitle2" color="info.main" fontWeight="bold">
-                                            🧪 異常檢驗
-                                        </Typography>
-                                    </Box>
-                                    <Box sx={{ p: 2 }}>
-                                        <ul style={{ margin: 0, paddingLeft: 20 }}>
-                                            {analysisResult.abnormal_labs.map((item, index) => (
-                                                <li key={index}>
-                                                    <Typography variant="body2">{item}</Typography>
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </Box>
-                                </Paper>
-                            )}
-
-                            {/* Imaging Findings */}
-                            {analysisResult.imaging_findings && analysisResult.imaging_findings.length > 0 && (
-                                <Paper sx={{ p: 0, overflow: 'hidden', border: '1px solid #e0e0e0' }}>
-                                    <Box sx={{ bgcolor: '#f5f5f5', px: 2, py: 1, borderBottom: '1px solid #e0e0e0' }}>
-                                        <Typography variant="subtitle2" color="text.primary" fontWeight="bold">
-                                            📸 影像異常
-                                        </Typography>
-                                    </Box>
-                                    <Box sx={{ p: 2 }}>
-                                        <ul style={{ margin: 0, paddingLeft: 20 }}>
-                                            {analysisResult.imaging_findings.map((item, index) => (
-                                                <li key={index}>
-                                                    <Typography variant="body2">{item}</Typography>
-                                                </li>
-                                            ))}
-                                        </ul>
-                                    </Box>
-                                </Paper>
-                            )}
-                        </>
+                    {/* Imaging Findings Tab */}
+                    {tabValue === 3 && (
+                        <Box>
+                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, color: 'text.primary' }}>
+                                <ImageSearchIcon sx={{ mr: 1 }} />
+                                <Typography variant="subtitle2" fontWeight="bold">影像檢查發現</Typography>
+                            </Box>
+                            {renderContentList('imaging_findings', 'inherit', '無重要影像異常發現')}
+                        </Box>
                     )}
                 </Box>
             </Paper>

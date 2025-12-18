@@ -198,7 +198,7 @@ const ACTION_HANDLERS = new Map([
             'Authorization': `Bearer ${apiKey}`
           },
           body: JSON.stringify({
-            model: "gpt-5-mini", // User explicitly requested gpt-5-mini
+            model: message.model || "gpt-5-nano",
             messages: [
               {
                 role: "system",
@@ -211,37 +211,7 @@ const ACTION_HANDLERS = new Map([
             ],
             response_format: {
               type: "json_schema",
-              json_schema: {
-                name: "medical_record_summary",
-                strict: true,
-                schema: {
-                  type: "object",
-                  properties: {
-                    critical_alerts: {
-                      type: "array",
-                      items: { type: "string" },
-                      description: "最危險/最需要注意的點 (Most dangerous/urgent items)"
-                    },
-                    medication_risks: {
-                      type: "array",
-                      items: { type: "string" },
-                      description: "用藥雷點 (Medication risks/contraindications)"
-                    },
-                    abnormal_labs: {
-                      type: "array",
-                      items: { type: "string" },
-                      description: "近期異常檢驗 (Recent abnormal lab results)"
-                    },
-                    imaging_findings: {
-                      type: "array",
-                      items: { type: "string" },
-                      description: "重要影像異常 (Important imaging findings)"
-                    }
-                  },
-                  required: ["critical_alerts", "medication_risks", "abnormal_labs", "imaging_findings"],
-                  additionalProperties: false
-                }
-              }
+              json_schema: message.jsonSchema
             }
           })
         });
