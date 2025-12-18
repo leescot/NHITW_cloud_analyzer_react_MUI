@@ -109,6 +109,9 @@ import {
 import StatusIndicator from "./indicators/StatusIndicator";
 import KidneyStatusIndicator from "./indicators/KidneyStatusIndicator";
 
+// Import Sidebar
+import Sidebar from "./Sidebar";
+
 // Import new settings
 import { DEFAULT_SETTINGS, DEFAULT_GAI_PROMPT } from "../config/defaultSettings";
 import { DEFAULT_ATC5_GROUPS } from "../config/medicationGroups";
@@ -168,6 +171,9 @@ const FloatingIcon = () => {
   const [patientSummaryData, setPatientSummaryData] = useState([]);
   const [enableGAICopyFormat, setEnableGAICopyFormat] = useState(false);
   const [enableGAIPrompt, setEnableGAIPrompt] = useState(false);
+  const [enableGAISidebar, setEnableGAISidebar] = useState(false);
+  const [sidebarWidth, setSidebarWidth] = useState(350);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
   const [gaiPrompt, setGaiPrompt] = useState("");
 
   // 新增響應式布局檢測
@@ -344,9 +350,11 @@ const FloatingIcon = () => {
     }, (items) => {
       setEnableGAICopyFormat(items.enableGAICopyFormat);
       setEnableGAIPrompt(items.enableGAIPrompt);
+      setEnableGAISidebar(items.enableGAISidebar);
       setGaiPrompt(items.gaiPrompt || DEFAULT_GAI_PROMPT);
       console.log('GAI Copy Format enabled:', items.enableGAICopyFormat);
       console.log('GAI Prompt enabled:', items.enableGAIPrompt);
+      console.log('GAI Sidebar enabled:', items.enableGAISidebar);
     });
 
     // Listen for setting changes
@@ -360,6 +368,10 @@ const FloatingIcon = () => {
           setEnableGAIPrompt(changes.enableGAIPrompt.newValue);
           console.log('GAI Prompt setting changed:', changes.enableGAIPrompt.newValue);
         }
+        if (changes.enableGAISidebar) {
+          setEnableGAISidebar(changes.enableGAISidebar.newValue);
+          console.log('GAI Sidebar setting changed:', changes.enableGAISidebar.newValue);
+        }
         if (changes.gaiPrompt) {
           setGaiPrompt(changes.gaiPrompt.newValue || DEFAULT_GAI_PROMPT);
           console.log('GAI Prompt text changed');
@@ -372,6 +384,15 @@ const FloatingIcon = () => {
     return () => {
       chrome.storage.onChanged.removeListener(handleStorageChange);
     };
+  }, []);
+
+  // Load saved sidebar width
+  useEffect(() => {
+    chrome.storage.local.get(['gaiSidebarWidth'], (result) => {
+      if (result.gaiSidebarWidth) {
+        setSidebarWidth(result.gaiSidebarWidth);
+      }
+    });
   }, []);
 
   // 在組件載入時處理資料
@@ -464,6 +485,11 @@ const FloatingIcon = () => {
     setOpen(false);
   };
 
+  const handleSidebarClose = () => {
+    setEnableGAISidebar(false);
+    chrome.storage.sync.set({ enableGAISidebar: false });
+  };
+
   const handleTabChange = (event, newValue) => {
     setTabValue(newValue);
   };
@@ -544,13 +570,20 @@ const FloatingIcon = () => {
       justifyContent: "center",
       alignItems: "center",
       background: "transparent",
+      transition: "right 0.3s ease-in-out"
     };
+
+    // Calculate dynamic right position if sidebar is open
+    let dynamicRight = "20px";
+    if (enableGAISidebar && !isSidebarCollapsed) {
+      dynamicRight = `${20 + sidebarWidth}px`;
+    }
 
     // 使用 Map 來存儲不同位置的樣式
     const positionStyleMap = new Map([
-      ["top-right", { ...baseStyle, top: "20px" }],
-      ["middle-right", { ...baseStyle, top: "50%", transform: "translateY(-50%)" }],
-      ["bottom-right", { ...baseStyle, bottom: "20px" }]
+      ["top-right", { ...baseStyle, top: "20px", right: dynamicRight }],
+      ["middle-right", { ...baseStyle, top: "50%", transform: "translateY(-50%)", right: dynamicRight }],
+      ["bottom-right", { ...baseStyle, bottom: "20px", right: dynamicRight }]
     ]);
 
     // 返回匹配的樣式或默認值（底部右側）
@@ -572,11 +605,27 @@ const FloatingIcon = () => {
         />
       </IconButton>
 
+      <Sidebar
+        open={enableGAISidebar}
+        onClose={handleSidebarClose}
+        width={sidebarWidth}
+        setWidth={setSidebarWidth}
+        isCollapsed={isSidebarCollapsed}
+        setIsCollapsed={setIsSidebarCollapsed}
+      />
+
       <Dialog
         open={open}
         onClose={handleClose}
         maxWidth="xl"
         fullWidth
+        sx={{
+          zIndex: 1400, // Ensure it's below sidebar (sidebar is 2147483647)
+          '& .MuiDialog-container': {
+            transition: 'padding-right 0.3s ease-in-out',
+            paddingRight: (enableGAISidebar && !isSidebarCollapsed) ? `${sidebarWidth}px` : '0px'
+          }
+        }}
         PaperProps={{
           sx: {
             height: "90vh",

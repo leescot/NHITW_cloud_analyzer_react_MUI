@@ -25,6 +25,7 @@ const GAISettings = () => {
     const [settings, setSettings] = useState({
         enableGAICopyFormat: false,
         enableGAIPrompt: false,
+        enableGAISidebar: false,
     });
 
     const [promptDialogOpen, setPromptDialogOpen] = useState(false);
@@ -36,12 +37,14 @@ const GAISettings = () => {
             {
                 enableGAICopyFormat: false,
                 enableGAIPrompt: false,
+                enableGAISidebar: false,
                 gaiPrompt: DEFAULT_GAI_PROMPT,
             },
             (items) => {
                 setSettings({
                     enableGAICopyFormat: items.enableGAICopyFormat,
                     enableGAIPrompt: items.enableGAIPrompt,
+                    enableGAISidebar: items.enableGAISidebar,
                 });
                 setGaiPrompt(items.gaiPrompt || DEFAULT_GAI_PROMPT);
             }
@@ -90,7 +93,7 @@ const GAISettings = () => {
                     id="gai-settings-header"
                 >
                     <SmartToyIcon sx={{ mr: 1, color: 'primary.main' }} />
-                    <Typography>GAI相關設定</Typography>
+                    <Typography>GAI 相關設定</Typography>
                     <Chip
                         label="beta"
                         size="small"
@@ -134,6 +137,21 @@ const GAISettings = () => {
                             />
                         }
                         label="開啟包含提示詞資料格式"
+                    />
+
+                    <FormControlLabel
+                        control={
+                            <Switch
+                                checked={settings.enableGAISidebar}
+                                onChange={(e) => {
+                                    handleLocalSettingChange(
+                                        "enableGAISidebar",
+                                        e.target.checked
+                                    );
+                                }}
+                            />
+                        }
+                        label="開啟 GAI 側邊欄顯示"
                     />
 
                     {settings.enableGAIPrompt && (
