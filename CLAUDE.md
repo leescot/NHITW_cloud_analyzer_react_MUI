@@ -116,11 +116,32 @@ NHI Cloud API → Background Worker (intercepts) → Content Script → React Co
 
 ### AI Integration (GAI Feature)
 
-The extension supports dual AI providers with automatic schema adaptation:
+The extension uses a **modular architecture** for AI provider integration, making it easy to add new AI services.
 
-**Providers** (configured in `src/config/gaiConfig.js`):
-1. **OpenAI** - gpt-5-nano model with structured output (strict mode)
-2. **Google Gemini** - gemini-3-flash-preview model with JSON schema
+#### Modular Architecture (`src/services/gai/`)
+
+**Provider System** (`providers/`):
+- `BaseProvider.js` - Abstract base class defining unified API interface
+- `OpenAIProvider.js` - OpenAI implementation (gpt-5-nano, strict JSON schema)
+- `GeminiProvider.js` - Google Gemini implementation (gemini-3-flash-preview)
+- `providerRegistry.js` - Provider registration and management system
+- All providers implement the same `callAPI()` interface for consistency
+
+**Prompt Management** (`prompts/`):
+- `PromptManager.js` - Template management system
+- `templates/defaultAnalysis.js` - Default analysis template with 4 categories
+- Templates are versioned and can be extended independently
+
+**Analysis Engine**:
+- `AnalysisEngine.js` - Unified analysis execution with state tracking
+- Supports single and batch (parallel) analysis
+- Built-in performance monitoring and error handling
+
+**Key Benefits**:
+- **Easy extensibility**: Add new AI providers by extending `BaseProvider` (~80 lines)
+- **Provider-agnostic**: Frontend code works with any registered provider
+- **Backward compatible**: Existing code continues to work without changes
+- **Dynamic UI**: Settings automatically show all registered providers
 
 **Analysis Categories**:
 - Critical alerts (urgent medical warnings)
@@ -128,12 +149,30 @@ The extension supports dual AI providers with automatic schema adaptation:
 - Abnormal lab results
 - Imaging findings
 
-**Key Implementation Details**:
-- System prompts and schemas centralized in `gaiConfig.js`
-- Background worker handles provider-specific request formatting
-- Response normalization ensures frontend code is provider-agnostic
+**Implementation Details**:
+- System prompts and schemas in `prompts/templates/`
+- Background worker routes requests through provider registry
+- Automatic response format normalization (all providers return OpenAI-compatible format)
 - Metrics tracking (tokens, execution time) for cost/performance monitoring
 - XML generation via `gaiCopyFormatter.js` for structured AI input
+
+**Adding a New Provider** (example):
+```javascript
+// 1. Create provider class (e.g., ClaudeProvider.js)
+class ClaudeProvider extends BaseProvider {
+  constructor() {
+    super({ id: 'claude', name: 'Anthropic Claude', apiKeyStorageKey: 'claudeApiKey' });
+  }
+  async callAPI(systemPrompt, userPrompt, jsonSchema, options) {
+    // Claude API implementation
+  }
+}
+
+// 2. Register in providerRegistry.js
+registerProvider(new ClaudeProvider());
+
+// Done! UI and backend automatically support the new provider
+```
 
 ### Data Processing Pipeline
 
@@ -191,6 +230,7 @@ The extension requires:
 
 ## Key Files Reference
 
+### Core Extension Files
 - `manifest.json` - Extension manifest (copied from public/ during build)
 - `src/background.js` - Service worker with API interception logic
 - `src/contentScript.jsx` - Content script entry point
@@ -198,5 +238,17 @@ The extension requires:
 - `src/components/Sidebar.jsx` - AI analysis sidebar with resizing
 - `src/utils/dataManager.js` - Central data processing orchestrator
 - `src/utils/settingsManager.js` - Settings CRUD operations
-- `src/config/gaiConfig.js` - AI provider configurations and schemas
 - `scripts/build.js` - Custom build script for bundling and packaging
+
+### GAI Service Module (`src/services/gai/`)
+- `index.js` - Unified export interface for GAI services
+- `AnalysisEngine.js` - Analysis execution engine with state tracking
+- `providers/BaseProvider.js` - Abstract provider base class
+- `providers/OpenAIProvider.js` - OpenAI API implementation
+- `providers/GeminiProvider.js` - Gemini API implementation
+- `providers/providerRegistry.js` - Provider registration system
+- `prompts/PromptManager.js` - Template management system
+- `prompts/templates/defaultAnalysis.js` - Default 4-category analysis template
+
+### Legacy/Deprecated (for backward compatibility)
+- `src/config/gaiConfig.js` - Legacy config (migrated to `prompts/templates/`)

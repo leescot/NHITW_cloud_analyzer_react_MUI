@@ -1,6 +1,9 @@
 // background.js
 // 監聽藥歷 API 請求
 
+// ============ GAI Service Module Import ============
+import { getProvider, getProviderMetadata } from './services/gai/index.js';
+
 // Modify currentSessionData to include new data types
 let currentSessionData = {
   medicationData: null,
@@ -182,142 +185,56 @@ const ACTION_HANDLERS = new Map([
     sendResponse({ status: "token_saved" });
   }],
 
-  ['callOpenAI', (message, sender, sendResponse) => {
-    chrome.storage.sync.get(['openaiApiKey'], async (result) => {
-      const apiKey = result.openaiApiKey;
-      if (!apiKey) {
-        sendResponse({ success: false, error: "OpenAI API Key not found. Please set it in Options." });
-        return;
-      }
-
-      try {
-        const startTime = Date.now();
-        const response = await fetch('https://api.openai.com/v1/chat/completions', {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json',
-            'Authorization': `Bearer ${apiKey}`
-          },
-          body: JSON.stringify({
-            model: message.model || "gpt-5-nano",
-            messages: [
-              {
-                role: "system",
-                content: message.systemPrompt
-              },
-              {
-                role: "user",
-                content: message.userPrompt
-              }
-            ],
-            response_format: {
-              type: "json_schema",
-              json_schema: message.jsonSchema
-            }
-          })
-        });
-
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error?.message || `HTTP error! status: ${response.status}`);
-        }
-
-        const data = await response.json();
-        const endTime = Date.now();
-        const duration = endTime - startTime;
-
-        console.groupCollapsed(`OpenAI API Call (${duration}ms)`);
-        console.log("Model:", message.model);
-        console.log("Token Usage:", data.usage);
-        console.log("Full Response:", data);
-        console.groupEnd();
-
-        data.duration = duration;
-        sendResponse({ success: true, data: data });
-
-      } catch (error) {
-        console.error("OpenAI API call failed:", error);
-        sendResponse({ success: false, error: error.message });
-      }
-    });
-    return true; // Keep channel open for async response
+  // ============ GAI Provider 查詢 Handler ============
+  ['getGAIProviders', (message, sender, sendResponse) => {
+    try {
+      const providers = getProviderMetadata();
+      sendResponse({ success: true, providers });
+    } catch (error) {
+      console.error('[Background] Failed to get GAI providers:', error);
+      sendResponse({ success: false, error: error.message });
+    }
   }],
 
-  ['callGemini', (message, sender, sendResponse) => {
-    chrome.storage.sync.get(['geminiApiKey'], async (result) => {
-      const apiKey = result.geminiApiKey;
-      if (!apiKey) {
-        sendResponse({ success: false, error: "Gemini API Key not found. Please set it in Options." });
+  // ============ 新的統一 GAI Handler（使用模組化架構）============
+  ['callGAI', async (message, sender, sendResponse) => {
+    const { providerId, systemPrompt, userPrompt, jsonSchema, options = {} } = message;
+
+    console.log(`✨ [NEW ARCHITECTURE] callGAI handler invoked for provider: ${providerId}`);
+
+    try {
+      const provider = getProvider(providerId);
+      if (!provider) {
+        sendResponse({ success: false, error: `Provider not found: ${providerId}` });
         return;
       }
 
-      try {
-        const startTime = Date.now();
-        const response = await fetch(`https://generativelanguage.googleapis.com/v1beta/models/gemini-3-flash-preview:generateContent?key=${apiKey}`, {
-          method: 'POST',
-          headers: {
-            'Content-Type': 'application/json'
-          },
-          body: JSON.stringify({
-            systemInstruction: {
-              parts: [
-                { text: message.systemPrompt }
-              ]
-            },
-            contents: [{
-              parts: [
-                { text: message.userPrompt }
-              ]
-            }],
-            generationConfig: {
-              responseMimeType: "application/json",
-              responseJsonSchema: message.jsonSchema.schema
-            }
-          })
-        });
+      console.log(`✅ [NEW ARCHITECTURE] Provider found: ${provider.name}`);
+      const response = await provider.callAPI(systemPrompt, userPrompt, jsonSchema, options);
+      sendResponse({ success: true, data: response });
 
-        if (!response.ok) {
-          const errorData = await response.json();
-          throw new Error(errorData.error?.message || `HTTP error! status: ${response.status}`);
-        }
+    } catch (error) {
+      console.error(`❌ [NEW ARCHITECTURE] GAI API call failed (${providerId}):`, error);
+      sendResponse({ success: false, error: error.message });
+    }
+  }],
 
-        const data = await response.json();
-        const endTime = Date.now();
-        const duration = endTime - startTime;
+  // ============ 向後相容的 Handlers（保留現有功能）============
+  // 注意：這些 handler 現在使用新的模組化架構，但保持 API 相容性
+  ['callOpenAI', async (message, sender, sendResponse) => {
+    console.log('🔄 [BACKWARD COMPATIBLE] callOpenAI handler -> forwarding to callGAI (NEW ARCHITECTURE)');
+    // 轉發到新的統一 handler
+    message.providerId = 'openai';
+    await ACTION_HANDLERS.get('callGAI')(message, sender, sendResponse);
+    return true;
+  }],
 
-        console.groupCollapsed(`Gemini API Call (${duration}ms)`);
-        console.log("Model: gemini-3-flash-preview");
-        console.log("Token Usage:", data.usageMetadata);
-        console.log("Full Response:", data);
-        console.groupEnd();
-
-        // Transform Gemini response to match the expected format for the frontend
-        // Gemini returns the text in candidates[0].content.parts[0].text
-        const contentText = data.candidates?.[0]?.content?.parts?.[0]?.text;
-
-        if (!contentText) {
-          throw new Error("Empty response from Gemini");
-        }
-
-        // Mocking the OpenAI response structure that Sidebar expects
-        const mockedResponse = {
-          choices: [{
-            message: {
-              content: contentText
-            }
-          }],
-          usage: data.usageMetadata,
-          duration: duration // in ms
-        };
-
-        sendResponse({ success: true, data: mockedResponse });
-
-      } catch (error) {
-        console.error("Gemini API call failed:", error);
-        sendResponse({ success: false, error: error.message });
-      }
-    });
-    return true; // Keep channel open for async response
+  ['callGemini', async (message, sender, sendResponse) => {
+    console.log('🔄 [BACKWARD COMPATIBLE] callGemini handler -> forwarding to callGAI (NEW ARCHITECTURE)');
+    // 轉發到新的統一 handler
+    message.providerId = 'gemini';
+    await ACTION_HANDLERS.get('callGAI')(message, sender, sendResponse);
+    return true;
   }]
 ]);
 

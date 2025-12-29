@@ -113,10 +113,12 @@ const Sidebar = ({
         setHasAnalyzed(true);
         const xmlString = generateGAIFormatXML(patientData);
 
-        // Read provider setting first
+        // 讀取使用者選擇的 AI 提供者
+        // 注意：這裡使用的 callOpenAI/callGemini 現在由模組化的 Provider 架構處理
+        // background.js 會自動路由到對應的 Provider（OpenAIProvider 或 GeminiProvider）
         chrome.storage.sync.get(['gaiProvider'], (result) => {
             const provider = result.gaiProvider || 'openai';
-            // Trigger all analyses in parallel but handle independent responses
+            // 平行觸發所有分析，每個分析獨立處理回應
             Object.keys(GAI_CONFIG).forEach(key => {
                 runAnalysisForKey(key, xmlString, provider);
             });
@@ -126,16 +128,23 @@ const Sidebar = ({
     const runAnalysisForKey = (key, xmlString, provider = 'openai') => {
         const config = GAI_CONFIG[key];
 
-        // Update loading state
+        // 更新載入狀態
         setLoadingStates(prev => ({ ...prev, [key]: true }));
         setErrorStates(prev => ({ ...prev, [key]: null }));
 
+        const actionName = provider === 'gemini' ? 'callGemini' : 'callOpenAI';
+        console.log(`📤 [Sidebar] Sending ${actionName} request for ${key} (will use NEW ARCHITECTURE)`);
+
+        // 呼叫 background script 執行 AI 分析
+        // 注意：雖然這裡使用 callOpenAI/callGemini，但實際上由模組化架構處理
+        // background.js 會將請求轉發給對應的 Provider (OpenAIProvider/GeminiProvider)
+        // 這保持了向後相容性，同時享受模組化架構的好處
         chrome.runtime.sendMessage({
-            action: provider === 'gemini' ? 'callGemini' : 'callOpenAI',
+            action: actionName,
             systemPrompt: config.systemPrompt,
             userPrompt: xmlString,
             jsonSchema: config.schema,
-            model: "gpt-5-nano" // This will be ignored/overridden in background for Gemini
+            model: "gpt-5-nano" // Gemini 會忽略此參數
         }, (response) => {
             setLoadingStates(prev => ({ ...prev, [key]: false }));
 
