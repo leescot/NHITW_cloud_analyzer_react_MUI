@@ -173,7 +173,7 @@ const FloatingIcon = () => {
   const [enableGAIPrompt, setEnableGAIPrompt] = useState(false);
   const [enableGAISidebar, setEnableGAISidebar] = useState(false);
   const [sidebarWidth, setSidebarWidth] = useState(350);
-  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(false);
+  const [isSidebarCollapsed, setIsSidebarCollapsed] = useState(true);
   const [gaiPrompt, setGaiPrompt] = useState("");
   const [isDataLoaded, setIsDataLoaded] = useState(false);
 
@@ -362,6 +362,7 @@ const FloatingIcon = () => {
     chrome.storage.sync.get({
       enableGAICopyFormat: false,
       enableGAIPrompt: false,
+      enableGAISidebar: false,
       gaiPrompt: DEFAULT_GAI_PROMPT
     }, (items) => {
       setEnableGAICopyFormat(items.enableGAICopyFormat);
