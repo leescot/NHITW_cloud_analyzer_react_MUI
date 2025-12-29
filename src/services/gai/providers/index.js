@@ -10,6 +10,7 @@ export { default as BaseProvider } from './BaseProvider.js';
 // Built-in Providers
 export { default as OpenAIProvider } from './OpenAIProvider.js';
 export { default as GeminiProvider } from './GeminiProvider.js';
+export { default as GroqProvider } from './GroqProvider.js';
 
 // Provider Registry
 export {
