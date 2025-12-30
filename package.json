@@ -1,7 +1,7 @@
 {
   "name": "nhi-extractor",
   "private": true,
-  "version": "25.1229.2",
+  "version": "25.1230.1",
   "type": "module",
   "scripts": {
     "build": "vite build && node scripts/build.js",

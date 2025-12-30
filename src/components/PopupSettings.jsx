@@ -14,7 +14,6 @@ import {
   Tooltip
 } from '@mui/material';
 import SettingsIcon from '@mui/icons-material/Settings';
-import InfoIcon from '@mui/icons-material/Info';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import HelpIcon from '@mui/icons-material/Help';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
@@ -24,7 +23,6 @@ import VolunteerActivismIcon from '@mui/icons-material/VolunteerActivism';
 import { getTabColor, getTabSelectedColor } from '../utils/tabColorUtils';
 
 // 導入拆分出的組件
-import DataStatusTab from './settings/DataStatusTab';
 import GeneralDisplaySettings from './settings/GeneralDisplaySettings';
 import MedicationSettings from './settings/MedicationSettings';
 import ChineseMedicationSettings from './settings/ChineseMedicationSettings';
@@ -99,15 +97,10 @@ const PopupSettings = () => {
     )],
     [1, (
       <Box>
-        <DataStatusTab dataStatus={dataStatus} />
-      </Box>
-    )],
-    [2, (
-      <Box>
         <AboutTab />
       </Box>
     )],
-    [3, (
+    [2, (
       <Box>
         <Typography variant="h6" align="center" gutterBottom>贊助我們</Typography>
         <Typography paragraph align="center">
@@ -133,7 +126,7 @@ const PopupSettings = () => {
         </Box>
       </Box>
     )],
-    [4, (
+    [3, (
       <Box>
         <LoadDataTab
           localDataStatus={localDataStatus}
@@ -145,7 +138,7 @@ const PopupSettings = () => {
 
   const handleTabChange = (event, newValue) => {
     // 檢查是否點擊了"開啟雲端"標籤
-    const lastTabIndex = developerMode ? 5 : 4;
+    const lastTabIndex = developerMode ? 4 : 3;
     if (newValue === lastTabIndex) {
       // 開啟雲端連結而不切換標籤
       openNHIMedCloud();
@@ -358,17 +351,6 @@ const PopupSettings = () => {
             }}
           />
           <Tab
-            icon={<InfoIcon />}
-            label="資料"
-            sx={{
-              color: getTabColor(generalDisplaySettings, "dataStatus"),
-              "&.Mui-selected": {
-                color: getTabSelectedColor(generalDisplaySettings, "dataStatus"),
-              },
-              minHeight: '58px',
-            }}
-          />
-          <Tab
             icon={<HelpIcon />}
             label="關於"
             sx={{
@@ -424,8 +406,7 @@ const PopupSettings = () => {
         {/* 使用 Map 渲染其他標籤內容 */}
         {activeTab === 1 && tabContentMap.get(1)}
         {activeTab === 2 && tabContentMap.get(2)}
-        {activeTab === 3 && tabContentMap.get(3)}
-        {activeTab === 4 && developerMode && tabContentMap.get(4)}
+        {activeTab === 3 && developerMode && tabContentMap.get(3)}
       </Box>
 
       <Box
