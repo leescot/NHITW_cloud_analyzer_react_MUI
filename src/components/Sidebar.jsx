@@ -125,8 +125,9 @@ const Sidebar = ({
             //     runAnalysisForKey(key, xmlString, provider);
             // });
 
-            // 只執行影像分析
+            // 執行影像分析和檢驗分析（測試 API Key 輪流）
             runAnalysisForKey('imaging_findings', xmlString, provider);
+            runAnalysisForKey('abnormal_labs', xmlString, provider);
         });
     };
 
@@ -171,7 +172,8 @@ const Sidebar = ({
                         if (mergedResults[key] && Array.isArray(mergedResults[key]) && response.data.usage) {
                             const totalTokens = response.data.usage.total_tokens || response.data.usage.totalTokenCount || 0;
                             const durationSec = ((response.data.duration || 0) / 1000).toFixed(2);
-                            mergedResults[key].push(`(Total_tokens: ${totalTokens}, 執行時間: ${durationSec}s)`);
+                            const keyInfo = response.data.keyUsed ? ` [${response.data.keyUsed}]` : '';
+                            mergedResults[key].push(`(Total_tokens: ${totalTokens}, 執行時間: ${durationSec}s${keyInfo})`);
                         }
 
                         return mergedResults;

@@ -13,7 +13,7 @@ class CerebrasProvider extends BaseProvider {
             name: 'Cerebras',
             apiKeyStorageKey: 'cerebrasApiKey',
             defaultModel: 'gpt-oss-120b',
-            description: 'Cerebras - 超快速 LLM 推理引擎，基於專用硬體加速。建議模型：llama3.3-70b, gpt-oss-120b'
+            description: 'Cerebras - 目前呼叫模型：gpt-oss-120b'
         });
 
         this.apiEndpoint = 'https://api.cerebras.ai/v1/chat/completions';
@@ -28,7 +28,8 @@ class CerebrasProvider extends BaseProvider {
      * @returns {Promise<Object>} 標準化的回應格式
      */
     async callAPI(systemPrompt, userPrompt, jsonSchema, options = {}) {
-        const apiKey = await this.getApiKey();
+        // 使用新的 getNextApiKey() 支援雙 Key 輪流
+        const { key: apiKey, keyIndex, message } = await this.getNextApiKey();
 
         if (!apiKey) {
             throw new Error(`${this.name} API Key not found. Please set it in Options.`);
@@ -38,6 +39,7 @@ class CerebrasProvider extends BaseProvider {
 
         try {
             console.log(`🚀 [NEW ARCHITECTURE] Using ${this.name} Provider (Modular)`);
+            console.log(`🔑 [${this.name}] ${message}`);  // 顯示使用哪個 Key
 
             // Cerebras 不支援 OpenAI 的 response_format，需使用 JSON 模式
             // 如果提供了 jsonSchema，將 schema 資訊加入 system prompt 並要求 JSON 輸出
@@ -158,7 +160,7 @@ class CerebrasProvider extends BaseProvider {
             console.log("Full Response:", data);
             console.groupEnd();
 
-            return this.formatResponse(data, duration);
+            return this.formatResponse(data, duration, keyIndex);
 
         } catch (error) {
             const duration = Date.now() - startTime;
@@ -171,15 +173,17 @@ class CerebrasProvider extends BaseProvider {
      * 格式化回應（Cerebras 使用 OpenAI 相容格式）
      * @param {Object} rawResponse - Cerebras API 原始回應
      * @param {number} duration - 執行時間（毫秒）
+     * @param {number} keyIndex - 使用的 API Key 索引（0 或 1）
      * @returns {Object} 標準化格式
      */
-    formatResponse(rawResponse, duration) {
+    formatResponse(rawResponse, duration, keyIndex = 0) {
         return {
             choices: rawResponse.choices,
             usage: rawResponse.usage,
             duration: duration,
             model: rawResponse.model,
-            provider: this.id
+            provider: this.id,
+            keyUsed: `Key ${keyIndex + 1}`  // 新增：記錄使用的 API Key
         };
     }
 }

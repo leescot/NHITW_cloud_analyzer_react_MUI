@@ -12,7 +12,7 @@ class GeminiProvider extends BaseProvider {
             name: 'Google Gemini',
             apiKeyStorageKey: 'geminiApiKey',
             defaultModel: 'gemini-3-flash-preview',
-            description: 'Google Gemini models with fast inference'
+            description: 'Gemini - 目前呼叫模型：gemini-3-flash-preview'
         });
 
         this.apiEndpoint = 'https://generativelanguage.googleapis.com/v1beta/models';
@@ -27,7 +27,8 @@ class GeminiProvider extends BaseProvider {
      * @returns {Promise<Object>} 標準化的回應格式
      */
     async callAPI(systemPrompt, userPrompt, jsonSchema, options = {}) {
-        const apiKey = await this.getApiKey();
+        // 使用新的 getNextApiKey() 支援雙 Key 輪流
+        const { key: apiKey, keyIndex, message } = await this.getNextApiKey();
 
         if (!apiKey) {
             throw new Error(`${this.name} API Key not found. Please set it in Options.`);
@@ -38,6 +39,7 @@ class GeminiProvider extends BaseProvider {
 
         try {
             console.log(`🚀 [NEW ARCHITECTURE] Using ${this.name} Provider (Modular)`);
+            console.log(`🔑 [${this.name}] ${message}`);  // 顯示使用哪個 Key
 
             // 估算並記錄 Token 用量（在呼叫 API 前）
             this.logTokenEstimation(systemPrompt, userPrompt, {
@@ -93,7 +95,7 @@ class GeminiProvider extends BaseProvider {
             console.log("Full Response:", data);
             console.groupEnd();
 
-            return this.formatResponse(data, duration);
+            return this.formatResponse(data, duration, keyIndex);
 
         } catch (error) {
             const duration = Date.now() - startTime;
@@ -106,9 +108,10 @@ class GeminiProvider extends BaseProvider {
      * 格式化回應（轉換為 OpenAI 相容格式）
      * @param {Object} rawResponse - Gemini API 原始回應
      * @param {number} duration - 執行時間（毫秒）
+     * @param {number} keyIndex - 使用的 API Key 索引（0 或 1）
      * @returns {Object} 標準化格式
      */
-    formatResponse(rawResponse, duration) {
+    formatResponse(rawResponse, duration, keyIndex = 0) {
         // 提取 Gemini 回應文字
         const contentText = rawResponse.candidates?.[0]?.content?.parts?.[0]?.text;
 
@@ -136,7 +139,8 @@ class GeminiProvider extends BaseProvider {
             usage: usage,
             duration: duration,
             model: this.defaultModel,
-            provider: this.id
+            provider: this.id,
+            keyUsed: `Key ${keyIndex + 1}`  // 新增：記錄使用的 API Key
         };
     }
 }

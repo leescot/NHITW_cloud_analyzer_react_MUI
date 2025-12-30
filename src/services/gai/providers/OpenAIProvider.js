@@ -12,7 +12,7 @@ class OpenAIProvider extends BaseProvider {
             name: 'OpenAI',
             apiKeyStorageKey: 'openaiApiKey',
             defaultModel: 'gpt-5-nano',
-            description: 'OpenAI GPT models with structured output support'
+            description: 'OpenAI - 目前呼叫模型：gpt-5-nano'
         });
 
         this.apiEndpoint = 'https://api.openai.com/v1/chat/completions';
@@ -27,7 +27,8 @@ class OpenAIProvider extends BaseProvider {
      * @returns {Promise<Object>} 標準化的回應格式
      */
     async callAPI(systemPrompt, userPrompt, jsonSchema, options = {}) {
-        const apiKey = await this.getApiKey();
+        // 使用新的 getNextApiKey() 支援雙 Key 輪流
+        const { key: apiKey, keyIndex, message } = await this.getNextApiKey();
 
         if (!apiKey) {
             throw new Error(`${this.name} API Key not found. Please set it in Options.`);
@@ -37,6 +38,7 @@ class OpenAIProvider extends BaseProvider {
 
         try {
             console.log(`🚀 [NEW ARCHITECTURE] Using ${this.name} Provider (Modular)`);
+            console.log(`🔑 [${this.name}] ${message}`);  // 顯示使用哪個 Key
 
             // 估算並記錄 Token 用量（在呼叫 API 前）
             this.logTokenEstimation(systemPrompt, userPrompt, {
@@ -91,7 +93,7 @@ class OpenAIProvider extends BaseProvider {
             console.log("Full Response:", data);
             console.groupEnd();
 
-            return this.formatResponse(data, duration);
+            return this.formatResponse(data, duration, keyIndex);
 
         } catch (error) {
             const duration = Date.now() - startTime;
@@ -104,15 +106,17 @@ class OpenAIProvider extends BaseProvider {
      * 格式化回應（OpenAI 原生格式，無需轉換）
      * @param {Object} rawResponse - OpenAI API 原始回應
      * @param {number} duration - 執行時間（毫秒）
+     * @param {number} keyIndex - 使用的 API Key 索引（0 或 1）
      * @returns {Object} 標準化格式
      */
-    formatResponse(rawResponse, duration) {
+    formatResponse(rawResponse, duration, keyIndex = 0) {
         return {
             choices: rawResponse.choices,
             usage: rawResponse.usage,
             duration: duration,
             model: rawResponse.model,
-            provider: this.id
+            provider: this.id,
+            keyUsed: `Key ${keyIndex + 1}`  // 新增：記錄使用的 API Key
         };
     }
 }

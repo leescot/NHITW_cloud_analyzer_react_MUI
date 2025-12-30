@@ -46,6 +46,11 @@ const GAISettings = () => {
     const [availableProviders, setAvailableProviders] = useState([]);
     const [apiKeys, setApiKeys] = useState({}); // { providerId: apiKeyValue }
 
+    // ============ 雙 API Key 功能 ============
+    const [apiKeys2, setApiKeys2] = useState({});          // { providerId: apiKey2Value }
+    const [dualKeyEnabled, setDualKeyEnabled] = useState({}); // { providerId: boolean }
+    const [showApiKey2, setShowApiKey2] = useState({});    // { providerId: boolean }
+
     useEffect(() => {
         // 1. 查詢可用的提供者列表
         chrome.runtime.sendMessage({ action: 'getGAIProviders' }, (response) => {
@@ -53,9 +58,11 @@ const GAISettings = () => {
                 setAvailableProviders(response.providers);
                 console.log('[GAISettings] Loaded providers:', response.providers);
 
-                // 2. 載入所有提供者的 API Keys
+                // 2. 載入所有提供者的 API Keys（包含雙 Key 相關資料）
                 const storageKeys = response.providers.reduce((acc, provider) => {
                     acc[provider.apiKeyStorageKey] = "";
+                    acc[provider.apiKey2StorageKey] = "";             // 新增：第二個 API Key
+                    acc[provider.dualKeyEnabledStorageKey] = false;    // 新增：雙 Key 啟用狀態
                     return acc;
                 }, {});
 
@@ -79,10 +86,16 @@ const GAISettings = () => {
 
                         // 載入所有 API Keys
                         const loadedKeys = {};
+                        const loadedKeys2 = {};             // 新增：第二個 API Key
+                        const loadedDualEnabled = {};       // 新增：雙 Key 啟用狀態
                         response.providers.forEach(provider => {
                             loadedKeys[provider.id] = items[provider.apiKeyStorageKey] || "";
+                            loadedKeys2[provider.id] = items[provider.apiKey2StorageKey] || "";
+                            loadedDualEnabled[provider.id] = items[provider.dualKeyEnabledStorageKey] || false;
                         });
                         setApiKeys(loadedKeys);
+                        setApiKeys2(loadedKeys2);           // 新增：設置第二個 API Key
+                        setDualKeyEnabled(loadedDualEnabled); // 新增：設置雙 Key 啟用狀態
                     }
                 );
             } else {
@@ -288,6 +301,12 @@ const GAISettings = () => {
                                                         const saveData = {
                                                             [currentProvider.apiKeyStorageKey]: apiKeys[currentProvider.id]
                                                         };
+
+                                                        // 如果啟用雙 Key，同時儲存 Key2
+                                                        if (dualKeyEnabled[currentProvider.id]) {
+                                                            saveData[currentProvider.apiKey2StorageKey] = apiKeys2[currentProvider.id] || "";
+                                                        }
+
                                                         chrome.storage.sync.set(saveData, () => {
                                                             setApiKeySaved(true);
                                                             setTimeout(() => setApiKeySaved(false), 2000);
@@ -299,9 +318,88 @@ const GAISettings = () => {
                                                 </Button>
                                             </Box>
 
+                                            {/* 新增：雙 API Key checkbox */}
+                                            <FormControlLabel
+                                                control={
+                                                    <Switch
+                                                        checked={dualKeyEnabled[currentProvider.id] || false}
+                                                        onChange={(e) => {
+                                                            const newValue = e.target.checked;
+                                                            setDualKeyEnabled(prev => ({ ...prev, [currentProvider.id]: newValue }));
+                                                            // 立即儲存到 storage
+                                                            chrome.storage.sync.set({
+                                                                [currentProvider.dualKeyEnabledStorageKey]: newValue
+                                                            });
+                                                        }}
+                                                        size="small"
+                                                    />
+                                                }
+                                                label="啟用雙 API Key 輪流呼叫"
+                                                sx={{ mt: 1 }}
+                                            />
+
+                                            {/* 新增：第二個 API Key 輸入欄位（條件顯示）*/}
+                                            {dualKeyEnabled[currentProvider.id] && (
+                                                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mt: 1 }}>
+                                                    <TextField
+                                                        label={`${currentProvider.name} API Key 2`}
+                                                        type={showApiKey2[currentProvider.id] ? "text" : "password"}
+                                                        value={apiKeys2[currentProvider.id] || ""}
+                                                        onChange={(e) => {
+                                                            setApiKeys2(prev => ({ ...prev, [currentProvider.id]: e.target.value }));
+                                                            setApiKeySaved(false);
+                                                        }}
+                                                        fullWidth
+                                                        size="small"
+                                                        variant="outlined"
+                                                        placeholder="第二個 API Key（選填）"
+                                                        InputProps={{
+                                                            endAdornment: (
+                                                                <InputAdornment position="end">
+                                                                    <IconButton
+                                                                        aria-label="toggle password visibility"
+                                                                        onClick={() => setShowApiKey2(prev => ({
+                                                                            ...prev,
+                                                                            [currentProvider.id]: !prev[currentProvider.id]
+                                                                        }))}
+                                                                        edge="end"
+                                                                    >
+                                                                        {showApiKey2[currentProvider.id] ? <VisibilityOff /> : <Visibility />}
+                                                                    </IconButton>
+                                                                </InputAdornment>
+                                                            ),
+                                                        }}
+                                                    />
+                                                    <Button
+                                                        variant="contained"
+                                                        color={apiKeySaved ? "success" : "primary"}
+                                                        startIcon={<SaveIcon />}
+                                                        onClick={() => {
+                                                            const saveData = {
+                                                                [currentProvider.apiKeyStorageKey]: apiKeys[currentProvider.id],
+                                                                [currentProvider.apiKey2StorageKey]: apiKeys2[currentProvider.id] || ""
+                                                            };
+                                                            chrome.storage.sync.set(saveData, () => {
+                                                                setApiKeySaved(true);
+                                                                setTimeout(() => setApiKeySaved(false), 2000);
+                                                            });
+                                                        }}
+                                                        sx={{ minWidth: '100px' }}
+                                                    >
+                                                        {apiKeySaved ? "已儲存" : "儲存"}
+                                                    </Button>
+                                                </Box>
+                                            )}
+
                                             {/* 動態顯示提供者說明 */}
-                                            <Typography variant="caption" color="text.secondary" sx={{ display: 'block' }}>
+                                            <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
                                                 {currentProvider.description || `請輸入您的 ${currentProvider.name} API Key，金鑰僅儲存在您的瀏覽器中。`}
+                                                {dualKeyEnabled[currentProvider.id] && (
+                                                    <>
+                                                        <br />
+                                                        啟用雙 Key 模式後，每次 API 呼叫將自動切換使用不同的 Key。
+                                                    </>
+                                                )}
                                             </Typography>
                                         </>
                                     );

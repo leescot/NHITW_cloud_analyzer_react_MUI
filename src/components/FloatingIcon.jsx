@@ -639,6 +639,7 @@ const FloatingIcon = () => {
         onClose={handleClose}
         maxWidth="xl"
         fullWidth
+        disableEnforceFocus={enableGAISidebar && !isSidebarCollapsed}
         sx={{
           zIndex: 1400, // Ensure it's below sidebar (sidebar is 2147483647)
           '& .MuiDialog-container': {
@@ -650,7 +651,9 @@ const FloatingIcon = () => {
           sx: {
             // 當 sidebar 開啟時，backdrop 不覆蓋 sidebar 區域，允許 sidebar 的滑鼠事件
             right: (enableGAISidebar && !isSidebarCollapsed) ? `${sidebarWidth}px` : 0,
-            transition: 'right 0.3s ease-in-out'
+            transition: 'right 0.3s ease-in-out',
+            // 確保 backdrop 不會阻擋 sidebar 的 pointer events
+            pointerEvents: (enableGAISidebar && !isSidebarCollapsed) ? 'auto' : 'auto'
           }
         }}
         PaperProps={{

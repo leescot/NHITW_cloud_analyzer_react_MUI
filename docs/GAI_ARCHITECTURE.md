@@ -85,6 +85,94 @@ Sidebar.jsx (更新 analysisResults state)
 - 提供顯示/隱藏功能（VisibilityOff/Visibility icons）
 - 儲存後顯示 2 秒確認訊息
 
+#### 2.1.1 雙 API Key 輪流功能
+
+**功能目的**：
+為了分擔 API 呼叫流量、避免 Rate Limit，系統支援為每個 Provider 設定兩個 API Key，並在每次呼叫時自動輪流使用。
+
+**Storage 結構**（以 OpenAI 為例）：
+```javascript
+{
+  openaiApiKey: 'sk-xxx',              // 第一個 API Key
+  openaiApiKey2: 'sk-yyy',             // 第二個 API Key (選填)
+  openaiDualKeyEnabled: false,         // 是否啟用雙 Key 模式
+  openaiLastKeyIndex: 0                // 上次使用的 Key 索引 (0 或 1)
+}
+```
+
+**輪流邏輯**（BaseProvider.js）：
+```javascript
+async getNextApiKey() {
+    // 使用 Mutex 機制確保並發呼叫時的原子性
+    // 等待前一個 key rotation 操作完成
+    await previousQueue;
+
+    // 讀取 storage
+    const { key1, key2, dualEnabled, lastIndex } = await chrome.storage.sync.get(...);
+
+    // 情況 1：未啟用雙 Key → 使用 Key 1
+    if (!dualEnabled) return { key: key1, keyIndex: 0 };
+
+    // 情況 2：啟用但 Key 2 為空 → 使用 Key 1
+    if (!key2) return { key: key1, keyIndex: 0 };
+
+    // 情況 3：輪流使用
+    const nextIndex = lastIndex === 0 ? 1 : 0;
+    const nextKey = nextIndex === 0 ? key1 : key2;
+
+    // 先更新 storage，等待完成後才返回（確保原子性）
+    await chrome.storage.sync.set({ lastKeyIndex: nextIndex });
+
+    return { key: nextKey, keyIndex: nextIndex };
+}
+```
+
+**Mutex 機制**：
+為了解決並發呼叫時的競態條件（race condition），系統使用 Promise Queue 實作 mutex：
+
+```javascript
+// 在 BaseProvider constructor 中初始化
+this._keyRotationQueue = Promise.resolve();
+
+// 在 getNextApiKey() 中使用
+async getNextApiKey() {
+    const previousQueue = this._keyRotationQueue;
+    let unlockNext;
+    this._keyRotationQueue = new Promise(resolve => { unlockNext = resolve; });
+
+    try {
+        await previousQueue;  // 等待前一個操作完成
+        // ... 執行 key rotation ...
+        return result;
+    } finally {
+        unlockNext();  // 釋放鎖
+    }
+}
+```
+
+**執行流程範例**（4 個並發 API 呼叫）：
+```
+T1 (0ms):   危險警示 獲得鎖 → 讀取 lastIndex=0 → 計算 nextIndex=1
+T2 (5ms):   危險警示 完成，使用 Key 1，釋放鎖 → 開始 fetch()
+T3 (6ms):   用藥風險 獲得鎖 → 讀取 lastIndex=1 → 計算 nextIndex=0
+T4 (11ms):  用藥風險 完成，使用 Key 2，釋放鎖 → 開始 fetch()
+T5 (12ms):  異常檢驗 獲得鎖 → 讀取 lastIndex=0 → 計算 nextIndex=1
+T6 (17ms):  異常檢驗 完成，使用 Key 1，釋放鎖 → 開始 fetch()
+T7 (18ms):  影像發現 獲得鎖 → 讀取 lastIndex=1 → 計算 nextIndex=0
+T8 (23ms):  影像發現 完成，使用 Key 2，釋放鎖 → 開始 fetch()
+T9 (24ms):  四個 API 呼叫並行執行中...
+```
+
+**關鍵特性**：
+- ✅ **原子性**：Mutex 確保 Key 選擇操作不會衝突
+- ✅ **高效能**：只鎖定 Key 選擇（~5ms），API 呼叫仍並行
+- ✅ **完美輪流**：Key 1 → Key 2 → Key 1 → Key 2
+- ✅ **向後相容**：預設 `dualKeyEnabled: false`，現有用戶不受影響
+
+**UI 顯示**：
+- Console 顯示：`🔑 [Provider] 使用 API Key 1 (雙 Key 輪流)`
+- Sidebar 顯示：分析結果末尾附加 `[Key 1]` 或 `[Key 2]`
+
 ---
 
 ### 2.2 Sidebar.jsx - GAI 分析側邊欄
