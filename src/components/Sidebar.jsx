@@ -212,7 +212,8 @@ const Sidebar = ({
         setIsResizing(false);
         document.removeEventListener('mousemove', handleMouseMove);
         document.removeEventListener('mouseup', stopResizing);
-        document.body.style.cursor = 'default';
+        document.body.style.cursor = '';
+        document.body.style.userSelect = '';
         chrome.storage.local.set({ gaiSidebarWidth: newWidthRef.current });
     }, [handleMouseMove]);
 
@@ -225,6 +226,7 @@ const Sidebar = ({
         document.addEventListener('mousemove', handleMouseMove);
         document.addEventListener('mouseup', stopResizing);
         document.body.style.cursor = 'w-resize';
+        document.body.style.userSelect = 'none'; // 拖曳時禁用文字選取
     }, [handleMouseMove, stopResizing]);
 
     const handleCollapse = () => setIsCollapsed(true);
@@ -283,10 +285,10 @@ const Sidebar = ({
         }
 
         return (
-            <Box component="ul" sx={{ m: 0, pl: 2, userSelect: 'text', cursor: 'text' }}>
+            <Box component="ul" sx={{ m: 0, pl: 2 }}>
                 {items.map((item, index) => (
                     <Box component="li" key={index} sx={{ mb: 1.5 }}>
-                        <Typography variant="body2" sx={{ lineHeight: 1.6, userSelect: 'text' }}>{item}</Typography>
+                        <Typography variant="body2" sx={{ lineHeight: 1.6 }}>{item}</Typography>
                     </Box>
                 ))}
             </Box>
@@ -302,12 +304,17 @@ const Sidebar = ({
                     position: 'fixed',
                     top: 0,
                     right: width,
-                    width: '10px',
+                    width: '5px',
                     height: '100vh',
                     zIndex: 2147483648,
-                    cursor: 'w-resize',
-                    backgroundColor: 'transparent',
-                    '&:hover': { backgroundColor: 'rgba(25, 118, 210, 0.1)' }
+                    cursor: 'ew-resize',
+                    backgroundColor: 'rgba(25, 118, 210, 0.2)',
+                    userSelect: 'none',
+                    pointerEvents: 'auto',
+                    '&:hover': {
+                        backgroundColor: 'rgba(25, 118, 210, 0.4)',
+                        width: '8px'
+                    }
                 }}
             />
 
@@ -325,6 +332,8 @@ const Sidebar = ({
                     backgroundColor: '#ffffff',
                     borderLeft: '1px solid #e0e0e0',
                     transition: isResizing ? 'none' : 'width 0.1s ease-out, transform 0.3s ease-in-out',
+                    userSelect: isResizing ? 'none' : 'text',
+                    pointerEvents: 'auto'
                 }}
             >
                 {/* Header */}
@@ -379,7 +388,7 @@ const Sidebar = ({
                 </Tabs>
 
                 {/* Content Area - Scrollable */}
-                <Box sx={{ flex: 1, overflowY: 'auto', p: 2, bgcolor: '#f8f9fa', userSelect: 'text' }}>
+                <Box sx={{ flex: 1, overflowY: 'auto', p: 2, bgcolor: '#f8f9fa' }}>
                     {/* Critical Alerts Tab */}
                     {tabValue === 0 && (
                         <Box>

@@ -646,6 +646,13 @@ const FloatingIcon = () => {
             paddingRight: (enableGAISidebar && !isSidebarCollapsed) ? `${sidebarWidth}px` : '0px'
           }
         }}
+        BackdropProps={{
+          sx: {
+            // 當 sidebar 開啟時，backdrop 不覆蓋 sidebar 區域，允許 sidebar 的滑鼠事件
+            right: (enableGAISidebar && !isSidebarCollapsed) ? `${sidebarWidth}px` : 0,
+            transition: 'right 0.3s ease-in-out'
+          }
+        }}
         PaperProps={{
           sx: {
             height: "90vh",
