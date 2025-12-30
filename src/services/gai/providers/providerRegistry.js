@@ -7,6 +7,7 @@ import BaseProvider from './BaseProvider.js';
 import OpenAIProvider from './OpenAIProvider.js';
 import GeminiProvider from './GeminiProvider.js';
 import GroqProvider from './GroqProvider.js';
+import CerebrasProvider from './CerebrasProvider.js';
 
 // Provider 儲存 Map
 const providers = new Map();
@@ -38,6 +39,7 @@ export function registerBuiltInProviders() {
     registerProvider(new OpenAIProvider());
     registerProvider(new GeminiProvider());
     registerProvider(new GroqProvider());
+    registerProvider(new CerebrasProvider());
 
     console.log(`[Provider Registry] ${providers.size} providers registered`);
 }

@@ -37,6 +37,12 @@ class OpenAIProvider extends BaseProvider {
 
         try {
             console.log(`🚀 [NEW ARCHITECTURE] Using ${this.name} Provider (Modular)`);
+
+            // 估算並記錄 Token 用量（在呼叫 API 前）
+            this.logTokenEstimation(systemPrompt, userPrompt, {
+                model: options.model || this.defaultModel
+            });
+
             this.log('API Request', {
                 model: options.model || this.defaultModel,
                 systemPromptLength: systemPrompt.length,

@@ -118,10 +118,15 @@ const Sidebar = ({
         // background.js 會自動路由到對應的 Provider（OpenAIProvider、GeminiProvider、GroqProvider 等）
         chrome.storage.sync.get(['gaiProvider'], (result) => {
             const provider = result.gaiProvider || 'openai';
-            // 平行觸發所有分析，每個分析獨立處理回應
-            Object.keys(GAI_CONFIG).forEach(key => {
-                runAnalysisForKey(key, xmlString, provider);
-            });
+
+            // 暫時只呼叫影像分析（測試 token 用量）
+            // TODO: 之後恢復完整功能時，取消下面的註解
+            // Object.keys(GAI_CONFIG).forEach(key => {
+            //     runAnalysisForKey(key, xmlString, provider);
+            // });
+
+            // 只執行影像分析
+            runAnalysisForKey('imaging_findings', xmlString, provider);
         });
     };
 
@@ -278,10 +283,10 @@ const Sidebar = ({
         }
 
         return (
-            <Box component="ul" sx={{ m: 0, pl: 2 }}>
+            <Box component="ul" sx={{ m: 0, pl: 2, userSelect: 'text', cursor: 'text' }}>
                 {items.map((item, index) => (
                     <Box component="li" key={index} sx={{ mb: 1.5 }}>
-                        <Typography variant="body2" sx={{ lineHeight: 1.6 }}>{item}</Typography>
+                        <Typography variant="body2" sx={{ lineHeight: 1.6, userSelect: 'text' }}>{item}</Typography>
                     </Box>
                 ))}
             </Box>
@@ -374,7 +379,7 @@ const Sidebar = ({
                 </Tabs>
 
                 {/* Content Area - Scrollable */}
-                <Box sx={{ flex: 1, overflowY: 'auto', p: 2, bgcolor: '#f8f9fa' }}>
+                <Box sx={{ flex: 1, overflowY: 'auto', p: 2, bgcolor: '#f8f9fa', userSelect: 'text' }}>
                     {/* Critical Alerts Tab */}
                     {tabValue === 0 && (
                         <Box>

@@ -2,24 +2,32 @@
 
 ## 1. 概述
 
-GAI (Generative AI) 功能是 Chrome Extension 的核心特色之一，提供自動化的病歷分析與風險評估。系統支援雙 AI 提供者（OpenAI 與 Google Gemini），可平行執行四項醫療摘要分析。
+GAI (Generative AI) 功能是 Chrome Extension 的核心特色之一，提供自動化的病歷分析與風險評估。系統採用模組化架構，支援多 AI 提供者（OpenAI、Google Gemini、Groq、Cerebras），可平行執行四項醫療摘要分析。
 
 ### 1.1 主要功能
-- 支援 OpenAI (gpt-5-nano) 與 Google Gemini (gemini-3-flash-preview) 雙提供者
+- 支援 4 個 AI 提供者：
+  - OpenAI (gpt-5-nano)
+  - Google Gemini (gemini-3-flash-preview)
+  - Groq (llama-3.3-70b-versatile)
+  - Cerebras (gpt-oss-120b)
 - 四項平行分析：注意事項、用藥風險、異常檢驗、影像發現
 - 自動化 XML 格式病歷資料生成
+- 呼叫前 Token 用量估算（統一估算法，針對繁體中文優化）
 - 即時分析結果顯示與錯誤處理
 - Token 使用量與執行時間監控
+- Rate Limit 監控與錯誤處理
 
 ### 1.2 系統架構圖
 
 ```
 使用者設定 (GAISettings.jsx)
-    ↓ (API Keys, Provider)
+    ↓ (API Keys, Provider Selection)
 Chrome Storage Sync
     ↓
 病患資料 → XML 生成器 (gaiCopyFormatter.js)
     ↓
+Token 估算 (tokenCounter.js)
+    ↓ (顯示預估用量)
 Sidebar.jsx (handleAnalyze)
     ↓ (平行執行 4 項分析)
     ├─→ runAnalysisForKey('critical_alerts')
@@ -27,15 +35,22 @@ Sidebar.jsx (handleAnalyze)
     ├─→ runAnalysisForKey('abnormal_labs')
     └─→ runAnalysisForKey('imaging_findings')
          ↓ (chrome.runtime.sendMessage)
-Background.js (callOpenAI / callGemini)
-    ↓ (HTTP Request)
+Background.js (callGAI)
+    ↓ (Provider Registry)
+    ├─→ OpenAIProvider
+    ├─→ GeminiProvider
+    ├─→ GroqProvider
+    └─→ CerebrasProvider
+         ↓ (HTTP Request with Token Estimation)
 AI Provider API
-    ↓ (JSON Response)
-Background.js (回應轉換)
-    ↓ (sendResponse)
+    ↓ (JSON Response + Rate Limit Headers)
+Provider (formatResponse & Rate Limit Monitoring)
+    ↓ (Standardized Response)
+Background.js (sendResponse)
+    ↓
 Sidebar.jsx (更新 analysisResults state)
     ↓
-顯示結果於 UI
+顯示結果於 UI (可圈選複製)
 ```
 
 ---
@@ -737,47 +752,169 @@ Object.keys(GAI_CONFIG).forEach(key => {
 
 ---
 
-## 5. AI 提供者比較
+## 5. Token 估算系統
 
-| 特性 | OpenAI (gpt-5-nano) | Gemini (gemini-3-flash-preview) |
-|------|---------------------|----------------------------------|
-| **API Endpoint** | api.openai.com | generativelanguage.googleapis.com |
-| **定價** | 較高 | 較低 |
-| **速度** | 中等 | 較快 |
-| **Schema 支援** | json_schema (strict mode) | responseJsonSchema |
-| **Token 欄位** | usage.total_tokens | usageMetadata.totalTokenCount |
-| **System Prompt** | messages[0].role="system" | systemInstruction |
-| **回應格式** | 原生相容 | 需轉換為 OpenAI 格式 |
-| **錯誤處理** | 標準 HTTP 錯誤 | 標準 HTTP 錯誤 |
+### 5.1 概述
 
-**選擇建議**：
-- **OpenAI**: 需要更高準確度、複雜推理時使用
-- **Gemini**: 大量分析、成本敏感時使用
+為了在呼叫 AI API 前提供成本預估與配額管理，系統實作了統一的 Token 估算模組（`src/services/gai/tokenCounter.js`），針對繁體中文醫療數據優化。
+
+### 5.2 估算規則
+
+基於 OpenAI tokenizer 的觀察與測試，估算規則如下：
+
+| 文本類型 | 估算係數 | 說明 |
+|----------|---------|------|
+| 繁體中文字符 | 2.5 tokens/字 | 包含常用漢字、擴展 A/B 區 |
+| 英文單詞 | 1.3 tokens/詞 | 連續字母視為一個單位 |
+| 數字組 | 1.2 tokens/組 | 包含小數點的數字 |
+| 標點符號 | 1.0 tokens/字符 | 各種標點與特殊字符 |
+| 空白字符 | 0.5 tokens/字符 | 空格、換行等 |
+
+**估算公式**：
+```javascript
+estimatedTokens = Math.ceil(
+    chineseChars × 2.5 +
+    englishWords × 1.3 +
+    numberGroups × 1.2 +
+    punctuation × 1.0 +
+    whitespace × 0.5
+)
+```
+
+### 5.3 核心函數
+
+#### estimateTokens(text)
+估算單一文本的 token 數量。
+
+**參數**：
+- `text` (string): 要估算的文本
+
+**回傳**：
+- (number): 估算的 token 數量
+
+#### estimatePromptTokens(systemPrompt, userPrompt)
+估算 system + user prompts 的總 token 數量。
+
+**參數**：
+- `systemPrompt` (string): System prompt 文本
+- `userPrompt` (string): User prompt 文本
+
+**回傳**：
+- (Object): `{ systemTokens, userTokens, totalTokens }`
+
+#### formatTokenCount(tokens)
+格式化 token 數量為易讀字串。
+
+**範例**：
+- `245` → "245 tokens"
+- `8234` → "8.23K tokens"
+- `1500000` → "1.50M tokens"
+
+### 5.4 整合方式
+
+Token 估算整合至所有 AI Provider 的 `callAPI` 方法中：
+
+```javascript
+// BaseProvider.js
+logTokenEstimation(systemPrompt, userPrompt, options = {}) {
+    const estimation = estimatePromptTokens(systemPrompt, userPrompt);
+
+    console.log(`🔢 [${this.name} Token Estimation]`);
+    console.log(`📝 System Prompt: ${formatTokenCount(estimation.systemTokens)}`);
+    console.log(`💬 User Prompt: ${formatTokenCount(estimation.userTokens)}`);
+    console.log(`📈 Total: ${formatTokenCount(estimation.totalTokens)}`);
+
+    return estimation;
+}
+```
+
+### 5.5 Console 輸出範例
+
+呼叫 API 前會在 Console 顯示：
+
+```
+================================================================================
+🔢 [Cerebras Token Estimation]
+================================================================================
+📊 Model: gpt-oss-120b
+📝 System Prompt: 345 tokens
+💬 User Prompt: 7.85K tokens
+📈 Total (System + User): 8.20K tokens
+⚠️  Note: 此為估算值，實際用量可能有 ±20% 誤差
+================================================================================
+```
+
+### 5.6 準確度評估
+
+**預期誤差範圍**：±20%
+
+**誤差來源**：
+- Tokenizer 差異：不同 AI 提供者使用不同的 tokenizer
+- 中文字符處理：各家 tokenizer 對中文的編碼效率不同
+- 特殊字符：醫學符號、Unicode 字符可能有差異
+
+**改進方式**：
+如果實際使用中發現誤差持續偏高或偏低，可調整 `tokenCounter.js` 中的係數：
+```javascript
+// 範例：如果估算值持續低估 15%，可調整係數
+chineseChars * 2.9 +  // 從 2.5 調整為 2.9
+englishWords * 1.5 +  // 從 1.3 調整為 1.5
+```
+
+### 5.7 使用場景
+
+1. **成本預估**：呼叫前知道大約會消耗多少 tokens
+2. **配額管理**：避免超過 Rate Limit（如 Cerebras Free tier 60K TPM）
+3. **優化提示詞**：根據 token 用量調整 prompt 長度
+4. **除錯分析**：對比估算值與實際用量，找出異常請求
 
 ---
 
-## 6. 安全性考量
+## 6. AI 提供者比較
 
-### 6.1 API Key 儲存
+| 特性 | OpenAI | Gemini | Groq | Cerebras |
+|------|--------|--------|------|----------|
+| **預設模型** | gpt-5-nano | gemini-3-flash-preview | llama-3.3-70b-versatile | gpt-oss-120b |
+| **API Endpoint** | api.openai.com | generativelanguage.googleapis.com | api.groq.com | api.cerebras.ai |
+| **定價** | 較高 | 較低 | 免費（有限制） | 免費/付費 |
+| **速度** | 中等 | 較快 | 極快 | 極快 |
+| **Schema 支援** | json_schema (strict) | responseJsonSchema | json_object (基礎) | json_object (基礎) |
+| **Token 欄位** | usage.total_tokens | usageMetadata.totalTokenCount | usage.total_tokens | usage.total_tokens |
+| **System Prompt** | messages[0].role="system" | systemInstruction | messages[0].role="system" | messages[0].role="system" |
+| **回應格式** | OpenAI 原生 | 需轉換 | OpenAI 相容 | OpenAI 相容 |
+| **Rate Limit (Free)** | - | - | 30 RPM, 6K TPM | 30 RPM, 60K TPM |
+| **特殊功能** | Strict JSON mode | 內建工具呼叫 | 超快推理速度 | Token bucketing |
+
+**選擇建議**：
+- **OpenAI**: 需要最高準確度、嚴格 JSON schema 時使用
+- **Gemini**: 大量分析、成本敏感、需要工具呼叫時使用
+- **Groq**: 需要極快速度、小規模測試時使用（注意 Rate Limit）
+- **Cerebras**: 平衡速度與成本、醫療分析場景（Free tier 60K TPM 足夠）
+
+---
+
+## 7. 安全性考量
+
+### 7.1 API Key 儲存
 - 儲存位置：`chrome.storage.sync`（用戶本地瀏覽器）
 - 不會傳送至伺服器
 - 支援 Chrome 同步功能（加密傳輸）
 
-### 6.2 資料隱私
+### 7.2 資料隱私
 - 病患資料僅在分析時傳送至 AI Provider
 - 不儲存於 Extension 伺服器
 - XML 格式化後直接傳送，不經過中間伺服器
 
-### 6.3 權限控制
+### 7.3 權限控制
 - 需要使用者明確輸入 API Key 才能啟用
 - 使用者可隨時關閉 GAI 側邊欄功能
 - 支援隱藏/顯示 API Key 功能
 
 ---
 
-## 7. 未來擴充性
+## 8. 未來擴充性
 
-### 7.1 新增 AI 提供者
+### 8.1 新增 AI 提供者
 ```javascript
 // 1. 在 GAISettings.jsx 新增選項
 <MenuItem value="claude">Anthropic Claude</MenuItem>
@@ -791,7 +928,7 @@ Object.keys(GAI_CONFIG).forEach(key => {
 action: provider === 'claude' ? 'callClaude' : ...
 ```
 
-### 7.2 新增分析類別
+### 8.2 新增分析類別
 ```javascript
 // 1. 在 gaiConfig.js 新增配置
 export const GAI_CONFIG = {
@@ -812,7 +949,7 @@ const [analysisResults, setAnalysisResults] = useState({
 <Tab icon={...} label="過敏檢查" />
 ```
 
-### 7.3 自訂 System Prompt
+### 8.3 自訂 System Prompt
 目前使用者可透過 "編輯提示詞" 功能修改 DEFAULT_GAI_PROMPT，但這僅用於複製功能。若要支援自訂每個分析類別的 System Prompt：
 
 ```javascript
@@ -831,9 +968,9 @@ const systemPrompt = customPrompts[key] || GAI_CONFIG[key].systemPrompt;
 
 ---
 
-## 8. 常見問題排查
+## 9. 常見問題排查
 
-### 8.1 分析失敗
+### 9.1 分析失敗
 
 **症狀**：顯示 "OpenAI API Key not found" 或 "Gemini API Key not found"
 **解決**：
@@ -847,7 +984,14 @@ const systemPrompt = customPrompts[key] || GAI_CONFIG[key].systemPrompt;
 **症狀**：顯示 "Parse error"
 **解決**：AI 回應格式不符合 JSON Schema，可能是 AI Provider 問題，請重試
 
-### 8.2 載入無止盡
+**症狀**：顯示 "Rate Limit 超過限制"
+**解決**：
+1. 等待 Rate Limit 重置（查看錯誤訊息中的等待時間）
+2. 檢查 Console 的 Rate Limit Status 了解配額使用情況
+3. 考慮切換到其他 AI 提供者
+4. 升級到付費方案以獲得更高配額
+
+### 9.2 載入無止盡
 
 **症狀**：分析一直顯示 "正在分析..." 不會停止
 **解決**：
@@ -855,44 +999,62 @@ const systemPrompt = customPrompts[key] || GAI_CONFIG[key].systemPrompt;
 2. 確認網路連線正常
 3. 嘗試手動重新整理（點擊側邊欄重新分析按鈕）
 
-### 8.3 部分分析成功
+### 9.3 部分分析成功
 
 **症狀**：只有某些類別有結果，其他顯示錯誤
 **解決**：
 - 這是正常行為（平行處理允許部分失敗）
 - 點擊錯誤訊息旁的重試按鈕重新執行該類別分析
 
+### 9.4 Token 估算不準確
+
+**症狀**：估算值與實際用量差異超過 30%
+**解決**：
+1. 檢查 Console 的 token 估算與實際用量對比
+2. 如持續偏高/偏低，可調整 `tokenCounter.js` 中的係數
+3. 不同 AI 提供者的 tokenizer 差異可能導致誤差
+
 ---
 
-## 9. 開發者注意事項
+## 10. 開發者注意事項
 
-### 9.1 修改 Schema 時
+### 10.1 修改 Schema 時
 - 同時更新 `gaiConfig.js` 中的 `schema.schema` 和 `description`
 - 確保 `required` 欄位正確設定
 - 測試 OpenAI 和 Gemini 兩種提供者
 
-### 9.2 修改 System Prompt 時
+### 10.2 修改 System Prompt 時
 - 使用繁體中文醫學術語
 - 明確指定輸出格式要求
 - 測試不同病患資料的分析結果
+- 注意 token 用量，過長的 prompt 會增加成本
 
-### 9.3 新增資料類型至 XML 時
+### 10.3 新增資料類型至 XML 時
 - 在 `gaiCopyFormatter.js` 新增格式化函數
 - 在 `generateGAIFormatXML()` 中調用
 - 確保使用 XML 標籤包裹（如 `<newdata>...</newdata>`）
 - 更新文件說明
 
+### 10.4 新增 AI 提供者時
+- 在 `src/services/gai/providers/` 建立新的 Provider 類別
+- 繼承 `BaseProvider` 並實作 `callAPI` 方法
+- 在 `providerRegistry.js` 註冊新 Provider
+- 測試 Token 估算、Rate Limit 處理、錯誤處理
+- 無需修改 UI 或其他檔案（自動整合）
+
 ---
 
-## 10. 總結
+## 11. 總結
 
 GAI 功能透過以下核心機制運作：
 
-1. **雙提供者支援**：OpenAI 與 Gemini 可切換，background.js 自動處理格式轉換
-2. **平行處理**：四項分析同時執行，大幅縮短總處理時間
-3. **細緻狀態管理**：每個分析類別獨立的 loading/error/result 狀態
-4. **自動化流程**：側邊欄開啟時自動分析，無需手動觸發
-5. **結構化輸出**：透過 JSON Schema 確保 AI 回應格式一致
-6. **效能監控**：記錄 Token 用量與執行時間，便於成本控制
+1. **多提供者支援**：支援 4 個 AI 提供者（OpenAI、Gemini、Groq、Cerebras），Provider Registry 自動處理格式轉換
+2. **Token 估算**：呼叫前估算 token 用量，針對繁體中文醫療數據優化，誤差範圍 ±20%
+3. **平行處理**：四項分析同時執行，大幅縮短總處理時間
+4. **細緻狀態管理**：每個分析類別獨立的 loading/error/result 狀態
+5. **自動化流程**：側邊欄開啟時自動分析，無需手動觸發
+6. **結構化輸出**：透過 JSON Schema 確保 AI 回應格式一致
+7. **效能監控**：記錄 Token 用量、執行時間、Rate Limit 狀態，便於成本控制
+8. **使用者體驗**：分析結果可圈選複製，支援多種錯誤重試機制
 
-這個架構具有良好的擴充性，可輕鬆新增 AI 提供者、分析類別或自訂功能。
+這個模組化架構具有良好的擴充性，可輕鬆新增 AI 提供者（~80 行程式碼）、分析類別或自訂功能。

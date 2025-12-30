@@ -38,11 +38,6 @@ class GroqProvider extends BaseProvider {
 
         try {
             console.log(`🚀 [NEW ARCHITECTURE] Using ${this.name} Provider (Modular)`);
-            this.log('API Request', {
-                model: options.model || this.defaultModel,
-                systemPromptLength: systemPrompt.length,
-                userPromptLength: userPrompt.length
-            });
 
             // Groq 支援 OpenAI 相容的 response_format，但使用簡化版本
             // 如果提供了 jsonSchema，將 schema 資訊加入 system prompt 並啟用 JSON 模式
@@ -79,6 +74,17 @@ class GroqProvider extends BaseProvider {
             if (options.additionalParams) {
                 Object.assign(requestBody, options.additionalParams);
             }
+
+            // 估算並記錄 Token 用量（在呼叫 API 前，使用最終的 enhancedSystemPrompt）
+            this.logTokenEstimation(enhancedSystemPrompt, userPrompt, {
+                model: options.model || this.defaultModel
+            });
+
+            this.log('API Request', {
+                model: options.model || this.defaultModel,
+                systemPromptLength: enhancedSystemPrompt.length,
+                userPromptLength: userPrompt.length
+            });
 
             const response = await fetch(this.apiEndpoint, {
                 method: 'POST',

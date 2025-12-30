@@ -1,3 +1,5 @@
+import { estimatePromptTokens, formatTokenCount } from '../tokenCounter.js';
+
 /**
  * Base Provider Class
  *
@@ -107,6 +109,28 @@ class BaseProvider {
         }
 
         console.log(`[${this.name} Provider]`, logData);
+    }
+
+    /**
+     * 記錄 Token 估算資訊（在呼叫 API 前）
+     * @param {string} systemPrompt - System prompt
+     * @param {string} userPrompt - User prompt
+     * @param {Object} options - 額外選項（如 model）
+     */
+    logTokenEstimation(systemPrompt, userPrompt, options = {}) {
+        const estimation = estimatePromptTokens(systemPrompt, userPrompt);
+
+        console.log(`\n${'='.repeat(80)}`);
+        console.log(`🔢 [${this.name} Token Estimation]`);
+        console.log(`${'='.repeat(80)}`);
+        console.log(`📊 Model: ${options.model || this.defaultModel || 'default'}`);
+        console.log(`📝 System Prompt: ${formatTokenCount(estimation.systemTokens)}`);
+        console.log(`💬 User Prompt: ${formatTokenCount(estimation.userTokens)}`);
+        console.log(`📈 Total (System + User): ${formatTokenCount(estimation.totalTokens)}`);
+        console.log(`⚠️  Note: 此為估算值，實際用量可能有 ±20% 誤差`);
+        console.log(`${'='.repeat(80)}\n`);
+
+        return estimation;
     }
 
     /**

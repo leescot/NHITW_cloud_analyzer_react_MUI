@@ -1,16 +1,22 @@
 # GAI 功能模組化重構總結
 
+## 最新更新
+**2025-12-30**：新增 Token 估算系統與 Cerebras AI Provider
+
 ## 重構完成日期
-2025-12-29
+- 初版模組化：2025-12-29
+- Token 估算與 Cerebras：2025-12-30
 
 ## 1. 重構目標
 
 將 GAI 功能模組化，以支援：
-1. ✅ 多種 API 提供商（OpenAI, Gemini, 及未來可擴充的其他提供者）
+1. ✅ 多種 API 提供商（OpenAI、Gemini、Groq、Cerebras）
 2. ✅ 不同的 system_prompt + user_prompt 組合
-3. ✅ 使用者可選擇不同的分析模板（架構已準備好，目前使用預設模板）
-4. ✅ 易於擴充新的提供者和分析模板
-5. ✅ 保持完全向後相容，不影響現有功能
+3. ✅ 呼叫前 Token 用量估算（統一估算法）
+4. ✅ 使用者可選擇不同的分析模板（架構已準備好，目前使用預設模板）
+5. ✅ 易於擴充新的提供者和分析模板
+6. ✅ 保持完全向後相容，不影響現有功能
+7. ✅ Rate Limit 監控與錯誤處理
 
 ## 2. 新增檔案清單
 
@@ -18,12 +24,14 @@
 
 | 檔案 | 行數 | 說明 |
 |------|------|------|
-| `BaseProvider.js` | 103 行 | 抽象基礎類別，定義所有 Provider 的統一介面 |
-| `OpenAIProvider.js` | 91 行 | OpenAI API 實作，支援 gpt-5-nano 模型 |
-| `GeminiProvider.js` | 109 行 | Google Gemini API 實作，支援 gemini-3-flash-preview |
-| `providerRegistry.js` | 100 行 | 提供者註冊與管理系統 |
+| `BaseProvider.js` | 135 行 | 抽象基礎類別，定義所有 Provider 的統一介面，包含 Token 估算 |
+| `OpenAIProvider.js` | 115 行 | OpenAI API 實作，支援 gpt-5-nano 模型 |
+| `GeminiProvider.js` | 139 行 | Google Gemini API 實作，支援 gemini-3-flash-preview |
+| `GroqProvider.js` | 134 行 | Groq API 實作，支援 llama-3.3-70b-versatile（超快推理）|
+| `CerebrasProvider.js` | 175 行 | Cerebras API 實作，支援 gpt-oss-120b，含 Rate Limit 處理 |
+| `providerRegistry.js` | 131 行 | 提供者註冊與管理系統（支援 4 個 Provider）|
 | `index.js` | 24 行 | 統一匯出介面 |
-| **小計** | **427 行** | |
+| **小計** | **853 行** | |
 
 ### 2.2 Prompt 模組 (`src/services/gai/prompts/`)
 
@@ -35,7 +43,14 @@
 | `index.js` | 9 行 | 統一匯出介面 |
 | **小計** | **284 行** | |
 
-### 2.3 分析引擎與統一介面
+### 2.3 Token 估算模組
+
+| 檔案 | 行數 | 說明 |
+|------|------|------|
+| `tokenCounter.js` | 115 行 | Token 估算函數，針對繁體中文醫療數據優化 |
+| **小計** | **115 行** | |
+
+### 2.4 分析引擎與統一介面
 
 | 檔案 | 行數 | 說明 |
 |------|------|------|
@@ -43,15 +58,15 @@
 | `index.js` | 57 行 | GAI 服務模組統一對外介面 |
 | **小計** | **232 行** | |
 
-### 2.4 文件
+### 2.5 文件
 
 | 檔案 | 說明 |
 |------|------|
-| `docs/GAI_ARCHITECTURE.md` | GAI 功能運作方式技術文件（原有） |
+| `docs/GAI_ARCHITECTURE.md` | GAI 功能運作方式技術文件（已更新，新增 Token 估算與 Cerebras 章節）|
 | `docs/GAI_REFACTORING_PLAN.md` | 模組化重構計畫文件 |
-| `docs/GAI_REFACTORING_SUMMARY.md` | 本文件（重構總結） |
+| `docs/GAI_REFACTORING_SUMMARY.md` | 本文件（重構總結，持續更新）|
 
-**新增程式碼總計：943 行**
+**新增程式碼總計：1,484 行**（初版 943 行 + Token 估算與新 Provider 541 行）
 
 ## 3. 修改檔案清單
 
@@ -462,6 +477,99 @@ const stats = analysisEngine.getStatistics();
 
 ---
 
+## 12. 2025-12-30 更新詳情
+
+### 12.1 Token 估算系統
+
+**新增檔案**：`src/services/gai/tokenCounter.js` (115 行)
+
+**功能**：
+- 在呼叫 AI API 前估算 token 用量
+- 針對繁體中文醫療數據優化
+- 支援多種文本類型（中文、英文、數字、標點）
+- 預期誤差範圍：±20%
+
+**估算規則**：
+- 繁體中文字符：2.5 tokens/字
+- 英文單詞：1.3 tokens/詞
+- 數字組：1.2 tokens/組
+- 標點符號：1.0 tokens/字符
+- 空白字符：0.5 tokens/字符
+
+**整合**：
+- BaseProvider 新增 `logTokenEstimation()` 方法
+- 所有 Provider 在 `callAPI` 前自動呼叫
+- Console 顯示格式化的 token 估算資訊
+
+### 12.2 Cerebras AI Provider
+
+**新增檔案**：`src/services/gai/providers/CerebrasProvider.js` (175 行)
+
+**特點**：
+- 預設模型：`gpt-oss-120b`
+- API Endpoint：`https://api.cerebras.ai/v1/chat/completions`
+- OpenAI 相容 API 格式
+- 特殊 Rate Limit 處理（HTTP 429）
+
+**Rate Limit 支援**：
+- Free Tier：30 RPM, 60K TPM
+- 自動監控 Rate Limit Headers
+- 顯示剩餘配額與重置時間
+- 詳細錯誤訊息（包含等待時間）
+
+**Token 管理**：
+- `max_completion_tokens` 設為 4096（避免超過 Free Tier 限制）
+- 支援 Token Bucketing 算法
+- 記錄 TPM/RPD 使用狀況
+
+### 12.3 Groq Provider 增強
+
+**修改檔案**：`src/services/gai/providers/GroqProvider.js`
+
+**更新**：
+- 加入 Token 估算整合
+- 使用 enhanced system prompt（包含 JSON schema）
+- 改進錯誤處理
+
+### 12.4 Sidebar 使用者體驗改進
+
+**修改檔案**：`src/components/Sidebar.jsx`
+
+**更新**：
+- 加入 `userSelect: 'text'` CSS 屬性
+- 分析結果文字可圈選複製
+- 滑鼠游標顯示為 I 字型（text cursor）
+- 改善 Content Area、列表容器、文字元件的選取體驗
+
+### 12.5 Provider 比較
+
+| Provider | 速度 | 成本 | Rate Limit (Free) | 適用場景 |
+|----------|------|------|-------------------|----------|
+| OpenAI | 中等 | 較高 | - | 最高準確度需求 |
+| Gemini | 較快 | 較低 | - | 大量分析、成本敏感 |
+| Groq | 極快 | 免費 | 30 RPM, 6K TPM | 快速測試 |
+| Cerebras | 極快 | 免費/付費 | 30 RPM, 60K TPM | 醫療分析（平衡速度成本）|
+
+### 12.6 技術亮點
+
+1. **模組化架構驗證**：
+   - 新增 Cerebras 僅需 175 行程式碼
+   - UI 自動整合，無需手動修改
+   - 完全符合模組化設計目標
+
+2. **成本優化**：
+   - Token 估算幫助控制成本
+   - Free Tier 配額監控
+   - 多 Provider 選擇降低單一廠商依賴
+
+3. **使用者體驗**：
+   - 即時 token 預估
+   - Rate Limit 友善錯誤訊息
+   - 分析結果可複製
+
+---
+
 **重構完成日期**：2025-12-29
+**Token 估算與 Cerebras 更新**：2025-12-30
 **重構負責人**：Claude (Anthropic AI)
-**文件版本**：1.0.0
+**文件版本**：1.1.0

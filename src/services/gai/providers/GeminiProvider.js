@@ -38,6 +38,12 @@ class GeminiProvider extends BaseProvider {
 
         try {
             console.log(`🚀 [NEW ARCHITECTURE] Using ${this.name} Provider (Modular)`);
+
+            // 估算並記錄 Token 用量（在呼叫 API 前）
+            this.logTokenEstimation(systemPrompt, userPrompt, {
+                model: model
+            });
+
             this.log('API Request', {
                 model: model,
                 systemPromptLength: systemPrompt.length,
