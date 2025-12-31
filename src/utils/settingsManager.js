@@ -694,3 +694,337 @@ export const resetSidebarTabsToDefault = async () => {
 
   return saveSidebarTabs(defaultTabs);
 };
+
+// ==================== GAI Sidebar V2 Configuration ====================
+
+/**
+ * 載入自動分析配置（Tab 1）
+ * @returns {Promise<Object>} 自動分析配置
+ */
+export const loadAutoAnalysisConfig = async () => {
+  return new Promise((resolve) => {
+    chrome.storage.sync.get(['gaiAutoAnalysisConfig'], async (result) => {
+      if (chrome.runtime.lastError) {
+        console.error('[SettingsManager] Error loading auto analysis config:', chrome.runtime.lastError);
+        // 錯誤時返回預設值
+        const { DEFAULT_AUTO_ANALYSIS_CONFIG } = await import('../config/sidebarV2Defaults.js');
+        resolve(DEFAULT_AUTO_ANALYSIS_CONFIG);
+        return;
+      }
+
+      // 如果沒有配置，自動建立並儲存預設值
+      if (!result.gaiAutoAnalysisConfig) {
+        console.log('[SettingsManager] No auto analysis config found, creating default...');
+        const { DEFAULT_AUTO_ANALYSIS_CONFIG } = await import('../config/sidebarV2Defaults.js');
+        await saveAutoAnalysisConfig(DEFAULT_AUTO_ANALYSIS_CONFIG);
+        resolve(DEFAULT_AUTO_ANALYSIS_CONFIG);
+        return;
+      }
+
+      resolve(result.gaiAutoAnalysisConfig);
+    });
+  });
+};
+
+/**
+ * 儲存自動分析配置（Tab 1）
+ * @param {Object} config - 自動分析配置
+ * @returns {Promise<boolean>} 是否儲存成功
+ */
+export const saveAutoAnalysisConfig = async (config) => {
+  return new Promise((resolve) => {
+    chrome.storage.sync.set({ gaiAutoAnalysisConfig: config }, () => {
+      if (chrome.runtime.lastError) {
+        console.error('[SettingsManager] Error saving auto analysis config:', chrome.runtime.lastError);
+        resolve(false);
+        return;
+      }
+      console.log('[SettingsManager] Auto analysis config saved successfully');
+      resolve(true);
+    });
+  });
+};
+
+/**
+ * 載入快速按鈕配置（Tab 2）
+ * @returns {Promise<Array>} 快速按鈕配置陣列
+ */
+export const loadQuickButtonsConfig = async () => {
+  return new Promise((resolve) => {
+    chrome.storage.sync.get(['gaiQuickButtonsConfig'], async (result) => {
+      if (chrome.runtime.lastError) {
+        console.error('[SettingsManager] Error loading quick buttons config:', chrome.runtime.lastError);
+        // 錯誤時返回預設值
+        const { DEFAULT_QUICK_BUTTONS_CONFIG } = await import('../config/sidebarV2Defaults.js');
+        resolve(DEFAULT_QUICK_BUTTONS_CONFIG);
+        return;
+      }
+
+      // 如果沒有配置，自動建立並儲存預設值
+      if (!result.gaiQuickButtonsConfig) {
+        console.log('[SettingsManager] No quick buttons config found, creating default...');
+        const { DEFAULT_QUICK_BUTTONS_CONFIG } = await import('../config/sidebarV2Defaults.js');
+        await saveQuickButtonsConfig(DEFAULT_QUICK_BUTTONS_CONFIG);
+        resolve(DEFAULT_QUICK_BUTTONS_CONFIG);
+        return;
+      }
+
+      resolve(result.gaiQuickButtonsConfig);
+    });
+  });
+};
+
+/**
+ * 儲存快速按鈕配置（Tab 2）
+ * @param {Array} config - 快速按鈕配置陣列
+ * @returns {Promise<boolean>} 是否儲存成功
+ */
+export const saveQuickButtonsConfig = async (config) => {
+  return new Promise((resolve) => {
+    chrome.storage.sync.set({ gaiQuickButtonsConfig: config }, () => {
+      if (chrome.runtime.lastError) {
+        console.error('[SettingsManager] Error saving quick buttons config:', chrome.runtime.lastError);
+        resolve(false);
+        return;
+      }
+      console.log('[SettingsManager] Quick buttons config saved successfully');
+      resolve(true);
+    });
+  });
+};
+
+/**
+ * 載入 Chat 配置（Tab 3）
+ * @returns {Promise<Object>} Chat 配置
+ */
+export const loadChatConfig = async () => {
+  return new Promise((resolve) => {
+    chrome.storage.sync.get(['gaiChatConfig'], async (result) => {
+      if (chrome.runtime.lastError) {
+        console.error('[SettingsManager] Error loading chat config:', chrome.runtime.lastError);
+        // 錯誤時返回預設值
+        const { DEFAULT_CHAT_CONFIG } = await import('../config/sidebarV2Defaults.js');
+        resolve(DEFAULT_CHAT_CONFIG);
+        return;
+      }
+
+      // 如果沒有配置，自動建立並儲存預設值
+      if (!result.gaiChatConfig) {
+        console.log('[SettingsManager] No chat config found, creating default...');
+        const { DEFAULT_CHAT_CONFIG } = await import('../config/sidebarV2Defaults.js');
+        await saveChatConfig(DEFAULT_CHAT_CONFIG);
+        resolve(DEFAULT_CHAT_CONFIG);
+        return;
+      }
+
+      resolve(result.gaiChatConfig);
+    });
+  });
+};
+
+/**
+ * 儲存 Chat 配置（Tab 3）
+ * @param {Object} config - Chat 配置
+ * @returns {Promise<boolean>} 是否儲存成功
+ */
+export const saveChatConfig = async (config) => {
+  return new Promise((resolve) => {
+    chrome.storage.sync.set({ gaiChatConfig: config }, () => {
+      if (chrome.runtime.lastError) {
+        console.error('[SettingsManager] Error saving chat config:', chrome.runtime.lastError);
+        resolve(false);
+        return;
+      }
+      console.log('[SettingsManager] Chat config saved successfully');
+      resolve(true);
+    });
+  });
+};
+
+/**
+ * 載入 Chat 歷史記錄（使用 chrome.storage.local，不同步）
+ * @returns {Promise<Array>} Chat 歷史記錄陣列
+ */
+export const loadChatHistory = async () => {
+  return new Promise((resolve) => {
+    chrome.storage.local.get(['gaiChatHistory'], (result) => {
+      if (chrome.runtime.lastError) {
+        console.error('[SettingsManager] Error loading chat history:', chrome.runtime.lastError);
+        resolve([]);
+        return;
+      }
+
+      resolve(result.gaiChatHistory || []);
+    });
+  });
+};
+
+/**
+ * 儲存 Chat 歷史記錄（使用 chrome.storage.local，不同步）
+ * @param {Array} history - Chat 歷史記錄陣列
+ * @returns {Promise<boolean>} 是否儲存成功
+ */
+export const saveChatHistory = async (history) => {
+  return new Promise((resolve) => {
+    chrome.storage.local.set({ gaiChatHistory: history }, () => {
+      if (chrome.runtime.lastError) {
+        console.error('[SettingsManager] Error saving chat history:', chrome.runtime.lastError);
+        resolve(false);
+        return;
+      }
+      console.log('[SettingsManager] Chat history saved successfully');
+      resolve(true);
+    });
+  });
+};
+
+/**
+ * 資料遷移：從 V1（4 tabs）遷移到 V2（3 tabs）
+ * @returns {Promise<Object>} 遷移結果
+ */
+export const migrateSidebarConfigToV2 = async () => {
+  return new Promise(async (resolve) => {
+    try {
+      // 檢查是否已遷移
+      const versionCheck = await new Promise((resolveVersion) => {
+        chrome.storage.sync.get(['gaiSidebarConfigVersion'], (result) => {
+          resolveVersion(result.gaiSidebarConfigVersion);
+        });
+      });
+
+      if (versionCheck === 2) {
+        console.log('[Migration] Already migrated to V2');
+        resolve({ migrated: false, reason: 'already_v2' });
+        return;
+      }
+
+      // 載入舊配置
+      const oldTabs = await loadSidebarTabs();
+      const oldCustomConfig = await loadCustomTabConfig();
+
+      // 檢查是否有有效的舊配置
+      if (!oldTabs || oldTabs.length !== 4) {
+        console.log('[Migration] No valid V1 config found, using defaults');
+        // 標記為 V2 並使用預設配置
+        chrome.storage.sync.set({ gaiSidebarConfigVersion: 2 });
+        resolve({ migrated: false, reason: 'no_v1_config' });
+        return;
+      }
+
+      console.log('[Migration] Migrating from V1 to V2...');
+
+      // 遷移邏輯
+      // Tab 0 → 自動分析
+      const autoAnalysisConfig = {
+        templateId: oldTabs[0].templateId,
+        enabled: true
+      };
+
+      // Tab 1-3 → 快速按鈕（slot 0-2）
+      const { DEFAULT_QUICK_BUTTONS_CONFIG } = await import('../config/sidebarV2Defaults.js');
+      const quickButtonsConfig = [...DEFAULT_QUICK_BUTTONS_CONFIG];
+
+      // 遷移 Tab 1
+      if (oldTabs[1]) {
+        quickButtonsConfig[0] = {
+          slotIndex: 0,
+          type: oldTabs[1].type,
+          templateId: oldTabs[1].type === 'preset' ? oldTabs[1].templateId : null,
+          customConfig: oldTabs[1].type === 'custom' ? oldCustomConfig : null,
+          label: getTemplateName(oldTabs[1], oldCustomConfig),
+          icon: getTemplateIcon(oldTabs[1], oldCustomConfig),
+          enabled: true
+        };
+      }
+
+      // 遷移 Tab 2
+      if (oldTabs[2]) {
+        quickButtonsConfig[1] = {
+          slotIndex: 1,
+          type: oldTabs[2].type,
+          templateId: oldTabs[2].type === 'preset' ? oldTabs[2].templateId : null,
+          customConfig: oldTabs[2].type === 'custom' ? oldCustomConfig : null,
+          label: getTemplateName(oldTabs[2], oldCustomConfig),
+          icon: getTemplateIcon(oldTabs[2], oldCustomConfig),
+          enabled: true
+        };
+      }
+
+      // 遷移 Tab 3
+      if (oldTabs[3]) {
+        quickButtonsConfig[2] = {
+          slotIndex: 2,
+          type: oldTabs[3].type,
+          templateId: oldTabs[3].type === 'preset' ? oldTabs[3].templateId : null,
+          customConfig: oldTabs[3].type === 'custom' ? oldCustomConfig : null,
+          label: getTemplateName(oldTabs[3], oldCustomConfig),
+          icon: getTemplateIcon(oldTabs[3], oldCustomConfig),
+          enabled: true
+        };
+      }
+
+      // Chat 配置使用預設值
+      const { DEFAULT_CHAT_CONFIG } = await import('../config/sidebarV2Defaults.js');
+      const chatConfig = DEFAULT_CHAT_CONFIG;
+
+      // 儲存新配置
+      await saveAutoAnalysisConfig(autoAnalysisConfig);
+      await saveQuickButtonsConfig(quickButtonsConfig);
+      await saveChatConfig(chatConfig);
+
+      // 備份舊配置並標記版本
+      await new Promise((resolveBackup) => {
+        chrome.storage.sync.set({
+          gaiSidebarTabs_backup: oldTabs,
+          gaiCustomTabConfig_backup: oldCustomConfig,
+          gaiSidebarConfigVersion: 2
+        }, () => resolveBackup());
+      });
+
+      console.log('[Migration] Migration complete');
+      resolve({
+        migrated: true,
+        oldTabs,
+        newConfigs: { autoAnalysisConfig, quickButtonsConfig, chatConfig }
+      });
+    } catch (error) {
+      console.error('[Migration] Migration failed:', error);
+      resolve({ migrated: false, reason: 'error', error });
+    }
+  });
+};
+
+// Helper functions for migration
+const getTemplateName = (tabConfig, customConfig) => {
+  if (tabConfig.type === 'custom') {
+    return customConfig?.name || '自訂';
+  }
+  // 從 templateId 推斷名稱（簡化版）
+  const nameMap = {
+    'critical_alerts': '危險警示',
+    'medication_risks': '用藥風險',
+    'abnormal_labs': '檢驗異常',
+    'imaging_findings': '影像重點',
+    'renal_medication': '腎功能',
+    'diabetes_management': '糖尿病',
+    'comprehensive_summary': '綜合摘要'
+  };
+  return nameMap[tabConfig.templateId] || '分析';
+};
+
+const getTemplateIcon = (tabConfig, customConfig) => {
+  if (tabConfig.type === 'custom') {
+    return customConfig?.icon || 'Star';
+  }
+  // 從 templateId 推斷圖示（簡化版）
+  const iconMap = {
+    'critical_alerts': 'Warning',
+    'medication_risks': 'Medication',
+    'abnormal_labs': 'Science',
+    'imaging_findings': 'ImageSearch',
+    'renal_medication': 'Vaccines',
+    'diabetes_management': 'MonitorHeart',
+    'comprehensive_summary': 'Summarize'
+  };
+  return iconMap[tabConfig.templateId] || 'Star';
+};
