@@ -506,3 +506,191 @@ export const handleDataFetchCompletedSettingsChange = (event, currentSettings, u
     }
   }
 };
+
+// ==================== GAI Sidebar Tab Configuration ====================
+
+/**
+ * 載入 Sidebar Tab 配置
+ * @returns {Promise<Array>} Tab 配置陣列
+ */
+export const loadSidebarTabs = async () => {
+  return new Promise((resolve) => {
+    chrome.storage.sync.get(['gaiSidebarTabs'], async (result) => {
+      if (chrome.runtime.lastError) {
+        console.error('[SettingsManager] Error loading sidebar tabs:', chrome.runtime.lastError);
+        // 錯誤時返回預設值
+        const defaultTabs = [
+          { slotIndex: 0, templateId: 'critical_alerts', type: 'preset' },
+          { slotIndex: 1, templateId: 'medication_risks', type: 'preset' },
+          { slotIndex: 2, templateId: 'abnormal_labs', type: 'preset' },
+          { slotIndex: 3, templateId: 'imaging_findings', type: 'preset' }
+        ];
+        resolve(defaultTabs);
+        return;
+      }
+
+      // 如果沒有配置，自動建立並儲存預設值
+      if (!result.gaiSidebarTabs) {
+        console.log('[SettingsManager] No sidebar tabs config found, creating default...');
+        const defaultTabs = [
+          { slotIndex: 0, templateId: 'critical_alerts', type: 'preset' },
+          { slotIndex: 1, templateId: 'medication_risks', type: 'preset' },
+          { slotIndex: 2, templateId: 'abnormal_labs', type: 'preset' },
+          { slotIndex: 3, templateId: 'imaging_findings', type: 'preset' }
+        ];
+        await saveSidebarTabs(defaultTabs);
+        resolve(defaultTabs);
+        return;
+      }
+
+      resolve(result.gaiSidebarTabs);
+    });
+  });
+};
+
+/**
+ * 儲存 Sidebar Tab 配置
+ * @param {Array} tabs - Tab 配置陣列
+ * @returns {Promise<boolean>} 是否儲存成功
+ */
+export const saveSidebarTabs = async (tabs) => {
+  return new Promise((resolve) => {
+    chrome.storage.sync.set({ gaiSidebarTabs: tabs }, () => {
+      if (chrome.runtime.lastError) {
+        console.error('[SettingsManager] Error saving sidebar tabs:', chrome.runtime.lastError);
+        resolve(false);
+        return;
+      }
+      console.log('[SettingsManager] Sidebar tabs saved successfully');
+      resolve(true);
+    });
+  });
+};
+
+/**
+ * 載入自訂 Tab 配置
+ * @returns {Promise<Object>} 自訂 Tab 配置
+ */
+export const loadCustomTabConfig = async () => {
+  return new Promise((resolve) => {
+    chrome.storage.sync.get(['gaiCustomTabConfig'], async (result) => {
+      if (chrome.runtime.lastError) {
+        console.error('[SettingsManager] Error loading custom tab config:', chrome.runtime.lastError);
+        // 錯誤時返回預設值
+        const defaultCustomConfig = {
+          name: '自訂分析',
+          icon: 'Star',
+          description: '我的自訂分析',
+          category: 'custom',
+          dataTypes: ['medication', 'lab'],
+          systemPrompt: '你是專業的醫療AI助理。請分析以下病歷資料，提供有用的臨床見解。使用台灣醫師常用的繁體中文醫學術語。',
+          quickQuestions: [
+            '摘要重點',
+            '列出異常項目',
+            '分析用藥安全'
+          ],
+          schema: {
+            name: 'custom_analysis_response',
+            strict: true,
+            schema: {
+              type: 'object',
+              properties: {
+                analysis_results: {
+                  type: 'array',
+                  items: { type: 'string' },
+                  description: 'List of analysis results'
+                }
+              },
+              required: ['analysis_results'],
+              additionalProperties: false
+            }
+          },
+          version: '1.0.0'
+        };
+        resolve(defaultCustomConfig);
+        return;
+      }
+
+      // 如果沒有配置，自動建立並儲存預設值
+      if (!result.gaiCustomTabConfig) {
+        console.log('[SettingsManager] No custom tab config found, creating default...');
+        const defaultCustomConfig = {
+          name: '自訂分析',
+          icon: 'Star',
+          description: '我的自訂分析',
+          category: 'custom',
+          dataTypes: ['medication', 'lab'],
+          systemPrompt: '你是專業的醫療AI助理。請分析以下病歷資料，提供有用的臨床見解。使用台灣醫師常用的繁體中文醫學術語。',
+          quickQuestions: [
+            '摘要重點',
+            '列出異常項目',
+            '分析用藥安全'
+          ],
+          schema: {
+            name: 'custom_analysis_response',
+            strict: true,
+            schema: {
+              type: 'object',
+              properties: {
+                analysis_results: {
+                  type: 'array',
+                  items: { type: 'string' },
+                  description: 'List of analysis results'
+                }
+              },
+              required: ['analysis_results'],
+              additionalProperties: false
+            }
+          },
+          version: '1.0.0'
+        };
+        await saveCustomTabConfig(defaultCustomConfig);
+        resolve(defaultCustomConfig);
+        return;
+      }
+
+      resolve(result.gaiCustomTabConfig);
+    });
+  });
+};
+
+/**
+ * 儲存自訂 Tab 配置
+ * @param {Object} config - 自訂 Tab 配置
+ * @returns {Promise<boolean>} 是否儲存成功
+ */
+export const saveCustomTabConfig = async (config) => {
+  return new Promise((resolve) => {
+    // 加入最後修改時間戳記
+    const configWithTimestamp = {
+      ...config,
+      lastModified: new Date().toISOString()
+    };
+
+    chrome.storage.sync.set({ gaiCustomTabConfig: configWithTimestamp }, () => {
+      if (chrome.runtime.lastError) {
+        console.error('[SettingsManager] Error saving custom tab config:', chrome.runtime.lastError);
+        resolve(false);
+        return;
+      }
+      console.log('[SettingsManager] Custom tab config saved successfully');
+      resolve(true);
+    });
+  });
+};
+
+/**
+ * 重置 Sidebar Tabs 為預設值
+ * @returns {Promise<boolean>} 是否重置成功
+ */
+export const resetSidebarTabsToDefault = async () => {
+  // 預設值會在需要時從 sidebarTabDefaults.js 導入
+  const defaultTabs = [
+    { slotIndex: 0, templateId: 'critical_alerts', type: 'preset' },
+    { slotIndex: 1, templateId: 'medication_risks', type: 'preset' },
+    { slotIndex: 2, templateId: 'abnormal_labs', type: 'preset' },
+    { slotIndex: 3, templateId: 'imaging_findings', type: 'preset' }
+  ];
+
+  return saveSidebarTabs(defaultTabs);
+};

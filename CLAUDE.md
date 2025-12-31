@@ -103,7 +103,19 @@ NHI Cloud API → Background Worker (intercepts) → Content Script → React Co
 **Main Components** (`src/components/`):
 - `FloatingIcon.jsx` - Main entry point, floating button overlay on NHI pages
 - `Sidebar.jsx` - Resizable sidebar with AI analysis (GAI Sidebar feature)
+  - Dynamically renders 4 configurable tabs based on user settings
+  - Supports 7 preset templates + 1 custom template
+  - Selective data transmission (choose from 9 medical data types)
+  - Auto-analysis on data load with granular loading states
+  - Built-in tab configuration dialog (accessible via settings icon)
 - `PopupSettings.jsx` - Settings modal accessible from floating icon
+
+**Sidebar Components** (`src/components/sidebar/`):
+- `TabConfigDialog.jsx` - Tab configuration interface
+  - Allows users to configure 4 sidebar tabs (slots 0-3)
+  - Tabs 0-2: Select from 7 preset templates via dropdown
+  - Tab 3: Custom tab with edit button (future: opens CustomTabEditor)
+  - Real-time validation and save/reset functionality
 
 **Tab Components** (`src/components/tabs/`):
 - Each medical data category (medications, labs, imaging, etc.) has dedicated tab components
@@ -116,7 +128,7 @@ NHI Cloud API → Background Worker (intercepts) → Content Script → React Co
 
 ### AI Integration (GAI Feature)
 
-The extension uses a **modular architecture** for AI provider integration, making it easy to add new AI services.
+The extension uses a **modular architecture** for both AI provider integration and analysis template management, making it easy to add new AI services and customize analysis workflows.
 
 #### Modular Architecture (`src/services/gai/`)
 
@@ -137,24 +149,30 @@ The extension uses a **modular architecture** for AI provider integration, makin
 - Supports single and batch (parallel) analysis
 - Built-in performance monitoring and error handling
 
+**Sidebar Tab System** (`tabs/`) - NEW:
+- `TabTemplateManager.js` - Manages all sidebar analysis templates (preset + custom)
+- `presetTemplates.js` - 7 preset templates across 3 categories:
+  - **Basic** (4): Critical Alerts, Medication Risks, Abnormal Labs, Imaging Findings
+  - **Specialized** (2): Renal Medication, Diabetes Management
+  - **Advanced** (1): Comprehensive Summary
+- `index.js` - Unified export interface for tab services
+- Templates define: system prompts, JSON schemas, required data types, UI metadata
+
 **Key Benefits**:
 - **Easy extensibility**: Add new AI providers by extending `BaseProvider` (~80 lines)
 - **Provider-agnostic**: Frontend code works with any registered provider
 - **Backward compatible**: Existing code continues to work without changes
 - **Dynamic UI**: Settings automatically show all registered providers
-
-**Analysis Categories**:
-- Critical alerts (urgent medical warnings)
-- Medication risks (drug interactions, contraindications)
-- Abnormal lab results
-- Imaging findings
+- **User customization**: 4 configurable sidebar tabs (3 from presets + 1 custom)
+- **Selective data**: Choose which medical data types to send per analysis
+- **Template-driven**: Each tab uses structured templates with validation
 
 **Implementation Details**:
-- System prompts and schemas in `prompts/templates/`
+- System prompts and schemas in `prompts/templates/` and `tabs/presetTemplates.js`
 - Background worker routes requests through provider registry
 - Automatic response format normalization (all providers return OpenAI-compatible format)
 - Metrics tracking (tokens, execution time) for cost/performance monitoring
-- XML generation via `gaiCopyFormatter.js` for structured AI input
+- Selective XML generation via `dataSelector.js` (9 data types: patient summary, allergy, surgery, discharge, HBCV, medication, lab, Chinese med, imaging)
 
 **Adding a New Provider** (example):
 ```javascript
@@ -174,6 +192,71 @@ registerProvider(new ClaudeProvider());
 // Done! UI and backend automatically support the new provider
 ```
 
+**Adding a New Template** (example):
+```javascript
+// Add to presetTemplates.js
+export const PRESET_TEMPLATES = {
+  my_template: {
+    id: 'my_template',
+    name: '我的分析',
+    icon: 'AutoAwesome',
+    category: 'specialized',
+    description: '自訂分析描述',
+    dataTypes: ['medication', 'lab'],  // Choose from 9 types
+    systemPrompt: '你的 AI 指令...',
+    schema: { /* JSON schema definition */ }
+  }
+};
+// Done! Template automatically appears in tab configuration UI
+```
+
+### GAI Sidebar Modular Architecture (NEW)
+
+**Overview**: The GAI Sidebar now uses a fully modular, template-driven architecture that allows users to customize their analysis workflow.
+
+**Key Features**:
+1. **7 Preset Templates** across 3 categories:
+   - Basic (4): Critical Alerts, Medication Risks, Abnormal Labs, Imaging Findings
+   - Specialized (2): Renal Medication Analysis, Diabetes Management
+   - Advanced (1): Comprehensive Pre-Visit Summary
+2. **4 Configurable Tabs**: Users can assign any preset template to tabs 0-2, with tab 3 reserved for custom configuration
+3. **9 Medical Data Types**: Selective transmission of patient summary, allergy, surgery, discharge, HBCV, medication, lab, Chinese medicine, imaging
+4. **Dynamic Tab Rendering**: Sidebar automatically adapts UI based on selected templates (icons, labels, analysis logic)
+
+**Data Flow**:
+```
+User Opens Sidebar
+  ↓
+Load Tab Config (chrome.storage.sync → gaiSidebarTabs, gaiCustomTabConfig)
+  ↓
+Render 4 Tabs dynamically (TabTemplateManager provides metadata)
+  ↓
+User Clicks Analyze (or Auto-Analyze on data load)
+  ↓
+For Each Tab:
+  - Get Template (preset or custom)
+  - Select Data Types (dataSelector.js → generateSelectiveXML)
+  - Build Prompt (template.systemPrompt + template.schema)
+  - Call AI Provider (background.js routes to OpenAI/Gemini/etc)
+  - Display Results (granular loading states per tab)
+```
+
+**Configuration Storage**:
+- `gaiSidebarTabs`: Array of 4 tab configs (e.g., `[{slotIndex: 0, templateId: 'critical_alerts', type: 'preset'}, ...]`)
+- `gaiCustomTabConfig`: Detailed config for custom tab (name, icon, dataTypes, systemPrompt, quickQuestions, schema)
+
+**Template Structure**:
+Each template includes:
+- `id`, `name`, `icon`, `category`, `description` (UI metadata)
+- `dataTypes` (array of required data types from 9 available)
+- `systemPrompt` (AI instruction in Traditional Chinese)
+- `schema` (JSON Schema for structured output validation)
+
+**Extensibility**:
+- Add new preset: Edit `tabs/presetTemplates.js` (automatically appears in tab config UI)
+- Add new data type: Update `dataTypeMetadata.js` + add formatter to `gaiCopyFormatter.js`
+- Validation: `TabTemplateManager.validateTemplate()` ensures template integrity
+
 ### Data Processing Pipeline
 
 1. **Interception**: Background worker detects API calls via chrome.webRequest
@@ -181,6 +264,9 @@ registerProvider(new ClaudeProvider());
 3. **Storage**: Session data cached in background worker memory
 4. **Rendering**: Components consume processed data from React state/props
 5. **AI Analysis**: Optional parallel processing of patient data through AI APIs
+   - Selective data transmission based on template requirements
+   - Granular loading states per analysis tab
+   - Dynamic template-driven prompt generation
 
 ### CSS & Theming
 
@@ -208,7 +294,8 @@ export const {dataType}Processor = (rawData, settings) => {
 Custom copy formats are handled by dedicated formatter utilities:
 - `medicationCopyFormatter.js` for medications
 - `labCopyFormatter.js` for lab results
-- `gaiCopyFormatter.js` for AI analysis XML
+- `gaiCopyFormatter.js` for AI analysis XML (exports individual format functions)
+- `dataSelector.js` for selective XML generation based on data type selection
 
 ### Chrome Extension Permissions
 The extension requires:
@@ -228,6 +315,23 @@ The extension requires:
   - Flexible on quotes, indentation, brace styles
   - Max 2 consecutive empty lines
 
+### Important Technical Notes
+
+**React 19 Import Pattern**:
+- Use `import { useState } from 'react'` NOT `import React from 'react'`
+- React 19's automatic JSX transform doesn't require React import
+- Importing React can cause "React is not defined" errors in content scripts
+
+**Z-Index Management**:
+- Sidebar uses maximum z-index (2147483648) to ensure visibility above all page elements
+- Floating button uses 2147483647
+- These values override any conflicting page styles on medcloud2.nhi.gov.tw
+
+**Storage Sync Pattern**:
+- Always provide default values when reading from chrome.storage.sync
+- Use async/await pattern with proper error handling
+- New settings automatically initialize with defaults on first load (see `settingsManager.js`)
+
 ## Key Files Reference
 
 ### Core Extension Files
@@ -235,20 +339,49 @@ The extension requires:
 - `src/background.js` - Service worker with API interception logic
 - `src/contentScript.jsx` - Content script entry point
 - `src/components/FloatingIcon.jsx` - Main UI entry (38KB, complex state management)
-- `src/components/Sidebar.jsx` - AI analysis sidebar with resizing
+- `src/components/Sidebar.jsx` - AI analysis sidebar with resizing and dynamic tab rendering
 - `src/utils/dataManager.js` - Central data processing orchestrator
-- `src/utils/settingsManager.js` - Settings CRUD operations
+- `src/utils/settingsManager.js` - Settings CRUD operations (includes sidebar tab config management)
 - `scripts/build.js` - Custom build script for bundling and packaging
 
 ### GAI Service Module (`src/services/gai/`)
+
+**Core Services:**
 - `index.js` - Unified export interface for GAI services
 - `AnalysisEngine.js` - Analysis execution engine with state tracking
+
+**Provider System:**
 - `providers/BaseProvider.js` - Abstract provider base class
 - `providers/OpenAIProvider.js` - OpenAI API implementation
 - `providers/GeminiProvider.js` - Gemini API implementation
 - `providers/providerRegistry.js` - Provider registration system
+
+**Prompt System:**
 - `prompts/PromptManager.js` - Template management system
 - `prompts/templates/defaultAnalysis.js` - Default 4-category analysis template
+
+**Tab Template System (NEW):**
+- `tabs/TabTemplateManager.js` - Sidebar template manager with validation
+- `tabs/presetTemplates.js` - 7 preset analysis templates (basic/specialized/advanced)
+- `tabs/index.js` - Unified export for tab services
+
+### Configuration Files
+
+**GAI Configuration:**
+- `src/config/dataTypeMetadata.js` - 9 medical data type definitions with UI metadata
+- `src/config/sidebarTabDefaults.js` - Default sidebar tab configuration (4 slots)
+
+**Utility Modules:**
+- `src/utils/dataSelector.js` - Selective XML generator for flexible data transmission
+- `src/utils/gaiCopyFormatter.js` - Medical data XML formatters (9 export functions)
+
+### UI Components
+
+**Sidebar Components:**
+- `src/components/sidebar/TabConfigDialog.jsx` - Tab configuration dialog with template selection
+
+### Documentation
+- `docs/GAI_MODULARIZATION_PLAN.md` - GAI modularization architecture and implementation plan
 
 ### Legacy/Deprecated (for backward compatibility)
 - `src/config/gaiConfig.js` - Legacy config (migrated to `prompts/templates/`)

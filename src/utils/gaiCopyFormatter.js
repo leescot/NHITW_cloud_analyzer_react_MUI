@@ -12,7 +12,7 @@
  * @param {Array} patientSummaryData - Patient summary data array
  * @returns {string} Formatted patient summary text
  */
-const formatPatientSummary = (patientSummaryData) => {
+export const formatPatientSummary = (patientSummaryData) => {
     let text = '<patientSummary>\n雲端註記資料:\n';
 
     if (patientSummaryData && patientSummaryData.length > 0) {
@@ -34,7 +34,7 @@ const formatPatientSummary = (patientSummaryData) => {
  * @param {Array} allergyData - Allergy data array
  * @returns {string} Formatted allergy text
  */
-const formatAllergy = (allergyData) => {
+export const formatAllergy = (allergyData) => {
     let text = '<allergy>\n過敏史:\n';
 
     if (allergyData && allergyData.length > 0) {
@@ -52,7 +52,7 @@ const formatAllergy = (allergyData) => {
  * @param {Array} surgeryData - Surgery data array
  * @returns {string} Formatted surgery text
  */
-const formatSurgery = (surgeryData) => {
+export const formatSurgery = (surgeryData) => {
     let text = '<surgery>\n開刀史:\n';
 
     if (surgeryData && surgeryData.length > 0) {
@@ -70,7 +70,7 @@ const formatSurgery = (surgeryData) => {
  * @param {Array} dischargeData - Discharge data array
  * @returns {string} Formatted discharge text
  */
-const formatDischarge = (dischargeData) => {
+export const formatDischarge = (dischargeData) => {
     let text = '<discharge>\n住院史:\n';
 
     if (dischargeData && dischargeData.length > 0) {
@@ -91,7 +91,7 @@ const formatDischarge = (dischargeData) => {
  * @param {Object} hbcvData - HBCV data object
  * @returns {string} Formatted HBCV text
  */
-const formatHBCV = (hbcvData) => {
+export const formatHBCV = (hbcvData) => {
     let text = '<hbcvdata>\nB、C肝炎資料:\n';
 
     if (hbcvData && hbcvData.rObject && hbcvData.rObject.length > 0) {
@@ -119,7 +119,7 @@ const formatHBCV = (hbcvData) => {
  * @param {Array} groupedMedications - Grouped medications array
  * @returns {string} Formatted medication text
  */
-const formatMedication = (groupedMedications) => {
+export const formatMedication = (groupedMedications) => {
     let text = '<medication>\n近期用藥記錄:\n';
 
     if (groupedMedications && groupedMedications.length > 0) {
@@ -156,7 +156,7 @@ const formatMedication = (groupedMedications) => {
  * @param {Array} groupedLabs - Grouped labs array
  * @returns {string} Formatted lab text
  */
-const formatLab = (groupedLabs) => {
+export const formatLab = (groupedLabs) => {
     let text = '<lab>\n近期檢驗記錄:\n';
 
     if (groupedLabs && groupedLabs.length > 0) {
@@ -189,7 +189,7 @@ const formatLab = (groupedLabs) => {
  * @param {Array} groupedChineseMeds - Grouped Chinese meds array
  * @returns {string} Formatted Chinese medicine text
  */
-const formatChineseMed = (groupedChineseMeds) => {
+export const formatChineseMed = (groupedChineseMeds) => {
     let text = '<chinesemed>\n近期中藥記錄:\n';
 
     if (groupedChineseMeds && groupedChineseMeds.length > 0) {
@@ -215,7 +215,7 @@ const formatChineseMed = (groupedChineseMeds) => {
  * @param {Object} imagingData - Imaging data object with withReport and withoutReport arrays
  * @returns {string} Formatted imaging text
  */
-const formatImaging = (imagingData) => {
+export const formatImaging = (imagingData) => {
     let text = '<imaging>\n近期影像學報告:\n';
 
     if (imagingData && imagingData.withReport && imagingData.withReport.length > 0) {

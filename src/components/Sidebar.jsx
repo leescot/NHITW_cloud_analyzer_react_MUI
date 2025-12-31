@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useCallback } from 'react';
+import { useState, useEffect, useRef, useCallback } from 'react';
 import {
     Box,
     Paper,
@@ -15,13 +15,12 @@ import SettingsIcon from '@mui/icons-material/Settings';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
 import KeyboardDoubleArrowRightIcon from '@mui/icons-material/KeyboardDoubleArrowRight';
-import WarningIcon from '@mui/icons-material/Warning';
-import MedicationIcon from '@mui/icons-material/Medication';
-import ScienceIcon from '@mui/icons-material/Science';
-import ImageSearchIcon from '@mui/icons-material/ImageSearch';
 
-import { GAI_CONFIG } from '../config/gaiConfig';
-import { generateGAIFormatXML } from '../utils/gaiCopyFormatter';
+import { generateSelectiveXML } from '../utils/dataSelector';
+import tabTemplateManager from '../services/gai/tabs';
+import { loadSidebarTabs, loadCustomTabConfig } from '../utils/settingsManager';
+import * as MuiIcons from '@mui/icons-material';
+import TabConfigDialog from './sidebar/TabConfigDialog';
 
 const Sidebar = ({
     open,
@@ -37,29 +36,15 @@ const Sidebar = ({
     const [isResizing, setIsResizing] = useState(false);
     const [tabValue, setTabValue] = useState(0);
 
-    // Analysis State
-    const [analysisResults, setAnalysisResults] = useState({
-        critical_alerts: [],
-        medication_risks: [],
-        abnormal_labs: [],
-        imaging_findings: []
-    });
+    // Tab Configuration State
+    const [tabConfigs, setTabConfigs] = useState([]);
+    const [customTabConfig, setCustomTabConfig] = useState(null);
+    const [configDialogOpen, setConfigDialogOpen] = useState(false);
 
-    // Granular Loading States
-    const [loadingStates, setLoadingStates] = useState({
-        critical_alerts: false,
-        medication_risks: false,
-        abnormal_labs: false,
-        imaging_findings: false
-    });
-
-    // Error States
-    const [errorStates, setErrorStates] = useState({
-        critical_alerts: null,
-        medication_risks: null,
-        abnormal_labs: null,
-        imaging_findings: null
-    });
+    // Dynamic Analysis State (using Maps for flexibility)
+    const [analysisResults, setAnalysisResults] = useState({});
+    const [loadingStates, setLoadingStates] = useState({});
+    const [errorStates, setErrorStates] = useState({});
 
     const [hasAnalyzed, setHasAnalyzed] = useState(false);
     const isResizingRef = useRef(false);
@@ -67,6 +52,42 @@ const Sidebar = ({
 
     // Track if any analysis is running
     const isAnalyzing = Object.values(loadingStates).some(state => state);
+
+    // Load Tab Configurations
+    useEffect(() => {
+        const loadConfigs = async () => {
+            try {
+                const tabs = await loadSidebarTabs();
+                const customConfig = await loadCustomTabConfig();
+
+                console.log('[Sidebar] Loaded tab configs:', tabs);
+                console.log('[Sidebar] Loaded custom config:', customConfig);
+
+                setTabConfigs(tabs);
+                setCustomTabConfig(customConfig);
+
+                // Initialize dynamic states based on loaded tabs
+                const initialResults = {};
+                const initialLoadingStates = {};
+                const initialErrorStates = {};
+
+                tabs.forEach(tab => {
+                    const key = tab.type === 'custom' ? 'custom' : tab.templateId;
+                    initialResults[key] = [];
+                    initialLoadingStates[key] = false;
+                    initialErrorStates[key] = null;
+                });
+
+                setAnalysisResults(initialResults);
+                setLoadingStates(initialLoadingStates);
+                setErrorStates(initialErrorStates);
+            } catch (error) {
+                console.error('[Sidebar] Failed to load tab configs:', error);
+            }
+        };
+
+        loadConfigs();
+    }, []);
 
     // Auto Analyze Logic
     useEffect(() => {
@@ -92,62 +113,106 @@ const Sidebar = ({
 
     // Reset when data reloads
     useEffect(() => {
-        if (!isDataLoaded) {
+        if (!isDataLoaded && tabConfigs.length > 0) {
             setHasAnalyzed(false);
-            setAnalysisResults({
-                critical_alerts: [],
-                medication_risks: [],
-                abnormal_labs: [],
-                imaging_findings: []
+
+            // Reset dynamic states based on current tab configs
+            const resetResults = {};
+            const resetErrors = {};
+
+            tabConfigs.forEach(tab => {
+                const key = tab.type === 'custom' ? 'custom' : tab.templateId;
+                resetResults[key] = [];
+                resetErrors[key] = null;
             });
-            setErrorStates({
-                critical_alerts: null,
-                medication_risks: null,
-                abnormal_labs: null,
-                imaging_findings: null
-            });
+
+            setAnalysisResults(resetResults);
+            setErrorStates(resetErrors);
         }
-    }, [isDataLoaded]);
+    }, [isDataLoaded, tabConfigs]);
 
-    const handleAnalyze = () => {
-        setHasAnalyzed(true);
-        const xmlString = generateGAIFormatXML(patientData);
+    // Helper: Get template for a tab config
+    const getTemplate = (tabConfig) => {
+        if (tabConfig.type === 'custom') {
+            return customTabConfig;
+        } else {
+            return tabTemplateManager.getTemplate(tabConfig.templateId);
+        }
+    };
 
-        // 讀取使用者選擇的 AI 提供者
-        // 使用新的統一 callGAI handler，支援所有已註冊的 Provider
-        // background.js 會自動路由到對應的 Provider（OpenAIProvider、GeminiProvider、GroqProvider 等）
+    // Helper: Get icon component from icon name
+    const getIconComponent = (iconName) => {
+        return MuiIcons[iconName] || MuiIcons.Star;
+    };
+
+    // Handle quick question (replacement style)
+    const handleQuickQuestion = (question, template) => {
+        console.log(`[Sidebar] Quick question clicked: "${question}"`);
+
+        // Create modified template with question as system prompt (replacement style)
+        const modifiedTemplate = {
+            ...template,
+            systemPrompt: question  // Replace system prompt with the question
+        };
+
+        // Generate XML with same data types
+        const xmlData = generateSelectiveXML(patientData, template.dataTypes);
+
+        // Run analysis with modified template
         chrome.storage.sync.get(['gaiProvider'], (result) => {
             const provider = result.gaiProvider || 'openai';
-
-            // 暫時只呼叫影像分析（測試 token 用量）
-            // TODO: 之後恢復完整功能時，取消下面的註解
-            // Object.keys(GAI_CONFIG).forEach(key => {
-            //     runAnalysisForKey(key, xmlString, provider);
-            // });
-
-            // 執行影像分析和檢驗分析（測試 API Key 輪流）
-            runAnalysisForKey('imaging_findings', xmlString, provider);
-            runAnalysisForKey('abnormal_labs', xmlString, provider);
+            runAnalysisForKey('custom', modifiedTemplate, xmlData, provider);
         });
     };
 
-    const runAnalysisForKey = (key, xmlString, provider = 'openai') => {
-        const config = GAI_CONFIG[key];
+    const handleAnalyze = () => {
+        if (tabConfigs.length === 0) {
+            console.warn('[Sidebar] Tab configs not loaded yet');
+            return;
+        }
 
+        setHasAnalyzed(true);
+
+        // 讀取使用者選擇的 AI 提供者
+        chrome.storage.sync.get(['gaiProvider'], (result) => {
+            const provider = result.gaiProvider || 'openai';
+
+            // 遍歷所有配置的 tab，執行分析
+            tabConfigs.forEach(tabConfig => {
+                const template = getTemplate(tabConfig);
+                if (!template) {
+                    console.warn(`[Sidebar] Template not found for tab:`, tabConfig);
+                    return;
+                }
+
+                // 使用 dataSelector 生成選擇性 XML
+                const xmlData = generateSelectiveXML(patientData, template.dataTypes);
+
+                // 確定分析結果的 key
+                const analysisKey = tabConfig.type === 'custom' ? 'custom' : tabConfig.templateId;
+
+                // 執行分析
+                runAnalysisForKey(analysisKey, template, xmlData, provider);
+            });
+        });
+    };
+
+    const runAnalysisForKey = (key, template, xmlData, provider = 'openai') => {
         // 更新載入狀態
         setLoadingStates(prev => ({ ...prev, [key]: true }));
         setErrorStates(prev => ({ ...prev, [key]: null }));
 
-        console.log(`📤 [Sidebar] Sending callGAI request for ${key} using provider: ${provider}`);
+        console.log(`📤 [Sidebar] Sending callGAI request for ${key} (${template.name}) using provider: ${provider}`);
+        console.log(`[Sidebar] Data types for this analysis:`, template.dataTypes);
 
         // 呼叫 background script 執行 AI 分析
         // 使用新的統一 callGAI handler，支援所有已註冊的 Provider
         chrome.runtime.sendMessage({
             action: 'callGAI',
             providerId: provider,
-            systemPrompt: config.systemPrompt,
-            userPrompt: xmlString,
-            jsonSchema: config.schema,
+            systemPrompt: template.systemPrompt,
+            userPrompt: xmlData,
+            jsonSchema: template.schema,
             options: {
                 model: provider === 'openai' ? 'gpt-5-nano' : undefined
             }
@@ -185,7 +250,7 @@ const Sidebar = ({
         });
     };
 
-    const handleTabChange = (event, newValue) => {
+    const handleTabChange = (_event, newValue) => {
         setTabValue(newValue);
     };
 
@@ -234,6 +299,45 @@ const Sidebar = ({
     const handleCollapse = () => setIsCollapsed(true);
     const handleRestore = () => setIsCollapsed(false);
 
+    // Handle config dialog save
+    const handleConfigSaved = async (_newTabs) => {
+        console.log('[Sidebar] Tab config saved, reloading...');
+
+        // Reload configurations
+        const tabs = await loadSidebarTabs();
+        const customConfig = await loadCustomTabConfig();
+
+        setTabConfigs(tabs);
+        setCustomTabConfig(customConfig);
+
+        // Reinitialize states
+        const initialResults = {};
+        const initialLoadingStates = {};
+        const initialErrorStates = {};
+
+        tabs.forEach(tab => {
+            const key = tab.type === 'custom' ? 'custom' : tab.templateId;
+            initialResults[key] = [];
+            initialLoadingStates[key] = false;
+            initialErrorStates[key] = null;
+        });
+
+        setAnalysisResults(initialResults);
+        setLoadingStates(initialLoadingStates);
+        setErrorStates(initialErrorStates);
+
+        // Reset analysis flag to trigger re-analysis
+        setHasAnalyzed(false);
+    };
+
+    // Handle edit custom tab (Stage 4 - placeholder for now)
+    const handleEditCustomTab = () => {
+        console.log('[Sidebar] Edit custom tab clicked - Stage 4 feature');
+        // TODO: Open CustomTabEditor dialog in Stage 4
+        alert('自訂 Tab 編輯器功能將在階段 4 實作');
+        setConfigDialogOpen(false);
+    };
+
     if (!open) return null;
 
     if (isCollapsed) {
@@ -268,9 +372,20 @@ const Sidebar = ({
                 <Paper variant="outlined" sx={{ p: 2, bgcolor: '#fff3e0', borderColor: '#ffcc80' }}>
                     <Typography color="error" variant="caption">{error}</Typography>
                     <IconButton size="small" onClick={() => {
-                        chrome.storage.sync.get(['gaiProvider'], (result) => {
-                            runAnalysisForKey(dataKey, generateGAIFormatXML(patientData), result.gaiProvider || 'openai');
+                        // Find the corresponding tab config
+                        const tabConfig = tabConfigs.find(tc => {
+                            const key = tc.type === 'custom' ? 'custom' : tc.templateId;
+                            return key === dataKey;
                         });
+
+                        if (tabConfig) {
+                            const template = getTemplate(tabConfig);
+                            const xmlData = generateSelectiveXML(patientData, template.dataTypes);
+
+                            chrome.storage.sync.get(['gaiProvider'], (result) => {
+                                runAnalysisForKey(dataKey, template, xmlData, result.gaiProvider || 'openai');
+                            });
+                        }
                     }}>
                         <RefreshIcon fontSize="small" />
                     </IconButton>
@@ -345,6 +460,11 @@ const Sidebar = ({
                         <Typography variant="subtitle1" fontWeight="bold">GAI 助手</Typography>
                     </Box>
                     <Box>
+                        <Tooltip title="設定分析項目">
+                            <IconButton onClick={() => setConfigDialogOpen(true)} size="small">
+                                <SettingsIcon fontSize="small" />
+                            </IconButton>
+                        </Tooltip>
                         <Tooltip title="全部重新分析">
                             <IconButton onClick={handleAnalyze} size="small" disabled={isAnalyzing}>
                                 <RefreshIcon fontSize="small" />
@@ -358,7 +478,7 @@ const Sidebar = ({
                     </Box>
                 </Box>
 
-                {/* Tabs */}
+                {/* Tabs - Dynamic Rendering */}
                 <Tabs
                     value={tabValue}
                     onChange={handleTabChange}
@@ -367,75 +487,110 @@ const Sidebar = ({
                     indicatorColor="primary"
                     sx={{ borderBottom: 1, borderColor: 'divider', minHeight: 48 }}
                 >
-                    <Tab
-                        icon={<Badge color="error" variant="dot" invisible={!analysisResults.critical_alerts.length}><WarningIcon fontSize="small" /></Badge>}
-                        label="注意"
-                        sx={{ minWidth: 0, p: 1, fontSize: '0.8rem' }}
-                    />
-                    <Tab
-                        icon={<Badge color="warning" variant="dot" invisible={!analysisResults.medication_risks.length}><MedicationIcon fontSize="small" /></Badge>}
-                        label="用藥"
-                        sx={{ minWidth: 0, p: 1, fontSize: '0.8rem' }}
-                    />
-                    <Tab
-                        icon={<Badge color="info" variant="dot" invisible={!analysisResults.abnormal_labs.length}><ScienceIcon fontSize="small" /></Badge>}
-                        label="檢驗"
-                        sx={{ minWidth: 0, p: 1, fontSize: '0.8rem' }}
-                    />
-                    <Tab
-                        icon={<Badge color="error" variant="dot" invisible={!analysisResults.imaging_findings.length}><ImageSearchIcon fontSize="small" /></Badge>}
-                        label="影像"
-                        sx={{ minWidth: 0, p: 1, fontSize: '0.8rem' }}
-                    />
+                    {tabConfigs && tabConfigs.length > 0 ? tabConfigs.map((tabConfig, index) => {
+                        const template = getTemplate(tabConfig);
+                        if (!template) return null;
+
+                        const IconComponent = getIconComponent(template.icon);
+                        const resultKey = tabConfig.type === 'custom' ? 'custom' : tabConfig.templateId;
+                        const hasResults = (analysisResults[resultKey] || []).length > 0;
+
+                        // Determine badge color based on template category
+                        const badgeColor = template.category === 'basic' ? 'error' :
+                                         template.category === 'specialized' ? 'warning' : 'info';
+
+                        return (
+                            <Tab
+                                key={index}
+                                icon={
+                                    <Badge color={badgeColor} variant="dot" invisible={!hasResults}>
+                                        <IconComponent fontSize="small" />
+                                    </Badge>
+                                }
+                                label={template.name.length > 4 ? template.name.substring(0, 4) : template.name}
+                                sx={{ minWidth: 0, p: 1, fontSize: '0.8rem' }}
+                            />
+                        );
+                    }) : (
+                        <Tab icon={<CircularProgress size={20} />} label="載入中..." disabled />
+                    )}
                 </Tabs>
 
-                {/* Content Area - Scrollable */}
+                {/* Content Area - Scrollable with Dynamic Tab Content */}
                 <Box sx={{ flex: 1, overflowY: 'auto', p: 2, bgcolor: '#f8f9fa' }}>
-                    {/* Critical Alerts Tab */}
-                    {tabValue === 0 && (
-                        <Box>
-                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, color: 'error.main' }}>
-                                <WarningIcon sx={{ mr: 1 }} />
-                                <Typography variant="subtitle2" fontWeight="bold">危險 / 注意事項</Typography>
-                            </Box>
-                            {renderContentList('critical_alerts', 'error', '無重大危險警示')}
-                        </Box>
-                    )}
+                    {tabConfigs && tabConfigs.length > 0 ? tabConfigs.map((tabConfig, index) => {
+                        if (tabValue !== index) return null;
 
-                    {/* Medication Risks Tab */}
-                    {tabValue === 1 && (
-                        <Box>
-                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, color: 'warning.dark' }}>
-                                <MedicationIcon sx={{ mr: 1 }} />
-                                <Typography variant="subtitle2" fontWeight="bold">用藥雷點 / 注意</Typography>
-                            </Box>
-                            {renderContentList('medication_risks', 'warning', '無發現顯著用藥風險')}
-                        </Box>
-                    )}
+                        const template = getTemplate(tabConfig);
+                        if (!template) return null;
 
-                    {/* Abnormal Labs Tab */}
-                    {tabValue === 2 && (
-                        <Box>
-                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, color: 'info.main' }}>
-                                <ScienceIcon sx={{ mr: 1 }} />
-                                <Typography variant="subtitle2" fontWeight="bold">異常檢驗數值</Typography>
-                            </Box>
-                            {renderContentList('abnormal_labs', 'info', '近期無顯著異常檢驗')}
-                        </Box>
-                    )}
+                        const IconComponent = getIconComponent(template.icon);
+                        const resultKey = tabConfig.type === 'custom' ? 'custom' : tabConfig.templateId;
 
-                    {/* Imaging Findings Tab */}
-                    {tabValue === 3 && (
-                        <Box>
-                            <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, color: 'text.primary' }}>
-                                <ImageSearchIcon sx={{ mr: 1 }} />
-                                <Typography variant="subtitle2" fontWeight="bold">影像檢查發現</Typography>
+                        // Determine color based on category
+                        const headerColor = template.category === 'basic' ? 'error.main' :
+                                          template.category === 'specialized' ? 'warning.dark' : 'info.main';
+                        const listColor = template.category === 'basic' ? 'error' :
+                                        template.category === 'specialized' ? 'warning' : 'info';
+
+                        return (
+                            <Box key={index}>
+                                {/* Tab Header */}
+                                <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, color: headerColor }}>
+                                    <IconComponent sx={{ mr: 1 }} />
+                                    <Typography variant="subtitle2" fontWeight="bold">{template.name}</Typography>
+                                </Box>
+
+                                {/* Quick Questions for Custom Tab */}
+                                {tabConfig.type === 'custom' && customTabConfig?.quickQuestions && customTabConfig.quickQuestions.length > 0 && (
+                                    <Box sx={{ mb: 2, display: 'flex', flexWrap: 'wrap', gap: 1 }}>
+                                        {customTabConfig.quickQuestions.map((question, qIndex) => (
+                                            <Box
+                                                key={qIndex}
+                                                component="button"
+                                                onClick={() => handleQuickQuestion(question, template)}
+                                                sx={{
+                                                    px: 1.5,
+                                                    py: 0.5,
+                                                    fontSize: '0.75rem',
+                                                    borderRadius: 1,
+                                                    border: '1px solid #1976d2',
+                                                    bgcolor: '#e3f2fd',
+                                                    color: '#1976d2',
+                                                    cursor: 'pointer',
+                                                    '&:hover': {
+                                                        bgcolor: '#bbdefb'
+                                                    },
+                                                    transition: 'background-color 0.2s'
+                                                }}
+                                            >
+                                                {question}
+                                            </Box>
+                                        ))}
+                                    </Box>
+                                )}
+
+                                {/* Content List */}
+                                {renderContentList(resultKey, listColor, `無${template.name}項目`)}
                             </Box>
-                            {renderContentList('imaging_findings', 'inherit', '無重要影像異常發現')}
+                        );
+                    }) : (
+                        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', py: 4, gap: 2 }}>
+                            <CircularProgress size={40} />
+                            <Typography variant="body2" color="text.secondary">正在載入配置...</Typography>
                         </Box>
                     )}
                 </Box>
             </Paper>
+
+            {/* Tab Configuration Dialog */}
+            <TabConfigDialog
+                open={configDialogOpen}
+                onClose={() => setConfigDialogOpen(false)}
+                currentTabs={tabConfigs}
+                onConfigSaved={handleConfigSaved}
+                onEditCustomTab={handleEditCustomTab}
+            />
         </>
     );
 };

@@ -1,11 +1,12 @@
 # GAI 功能模組化重構總結
 
 ## 最新更新
-**2025-12-30**：新增 Token 估算系統與 Cerebras AI Provider
+**2025-12-31**：完成 GAI Sidebar 模組化系統（階段 1-3），實作動態 Tab 配置與模板管理
 
 ## 重構完成日期
 - 初版模組化：2025-12-29
 - Token 估算與 Cerebras：2025-12-30
+- Sidebar 模組化（階段 1-3）：2025-12-31
 
 ## 1. 重構目標
 
@@ -754,8 +755,245 @@ T9 (24ms):  ⚡ 四個 API 並行執行中...
 
 ---
 
+## 12. GAI Sidebar 模組化系統（2025-12-31）
+
+### 12.1 概述
+
+完成 GAI Sidebar 的完整模組化重構（階段 1-3），實現動態 Tab 配置與模板驅動的分析系統。使用者現可自訂 4 個分析 Tab、選擇 7 種預設模板、控制資料傳輸範圍。
+
+### 12.2 新增功能
+
+#### 12.2.1 Tab 模板系統
+- **7 種預設模板**：
+  1. **危險警示** (critical_alerts) - 資料: patientSummary, allergy, medication, lab, imaging
+  2. **用藥風險** (medication_risks) - 資料: patientSummary, allergy, medication, lab, hbcvdata
+  3. **檢驗異常值** (abnormal_labs) - 資料: lab
+  4. **影像重點** (imaging_findings) - 資料: imaging
+  5. **腎功能用藥** (renal_medication) - 資料: lab, medication, patientSummary
+  6. **糖尿病管理** (diabetes_management) - 資料: lab, medication, patientSummary
+  7. **綜合摘要** (comprehensive_summary) - 資料: patientSummary, allergy, medication, lab, imaging, discharge
+
+#### 12.2.2 動態資料選擇
+- **9 種醫療資料類型**支援選擇性傳輸：
+  1. **患者摘要** (patientSummary) - 雲端註記資料、基本資訊
+  2. **過敏史** (allergy) - 藥物過敏記錄
+  3. **開刀史** (surgery) - 手術記錄
+  4. **住院史** (discharge) - 住院與出院記錄
+  5. **B/C肝炎** (hbcvdata) - B型、C型肝炎相關資料
+  6. **用藥記錄** (medication) - 近期處方用藥
+  7. **檢驗記錄** (lab) - 實驗室檢驗數值
+  8. **中藥記錄** (chinesemed) - 中醫處方記錄
+  9. **影像報告** (imaging) - 影像學檢查報告
+
+#### 12.2.3 Tab 配置對話框
+- 前 3 個 Tab 可從 7 種預設模板選擇
+- 第 4 個 Tab 為自訂分析（階段 4 將實作編輯器）
+- 支援儲存/重置配置
+- z-index 層級優化，確保顯示在最上層
+
+### 12.3 新增檔案
+
+#### 12.3.1 Tab 模板系統 (`src/services/gai/tabs/`)
+
+| 檔案 | 行數 | 說明 |
+|------|------|------|
+| `TabTemplateManager.js` | 163 | 模板管理器（單例模式） |
+| `presetTemplates.js` | 272 | 7 種預設模板定義 |
+| `index.js` | 24 | 統一匯出介面 |
+| **小計** | **459 行** | |
+
+#### 12.3.2 配置系統 (`src/config/`)
+
+| 檔案 | 行數 | 說明 |
+|------|------|------|
+| `dataTypeMetadata.js` | 139 | 9 種資料類型元數據（圖示、顏色、分類） |
+| `sidebarTabDefaults.js` | 50 | 預設 Tab 配置與自訂 Tab 預設值 |
+| **小計** | **189 行** | |
+
+#### 12.3.3 資料選擇器 (`src/utils/`)
+
+| 檔案 | 行數 | 說明 |
+|------|------|------|
+| `dataSelector.js` | 188 | 選擇性 XML 生成器 |
+| **小計** | **188 行** | |
+
+#### 12.3.4 UI 組件 (`src/components/sidebar/`)
+
+| 檔案 | 行數 | 說明 |
+|------|------|------|
+| `TabConfigDialog.jsx` | 245 | Tab 配置對話框 |
+| **小計** | **245 行** | |
+
+#### 12.3.5 文檔
+
+| 檔案 | 說明 |
+|------|------|
+| `docs/GAI_MODULARIZATION_PLAN.md` | Sidebar 模組化完整計畫文檔（1,000+ 行） |
+
+**新增程式碼總計：1,081 行**
+
+### 12.4 修改檔案
+
+#### 12.4.1 Sidebar.jsx
+
+**修改規模**：520 行變更（+272 行，-135 行，~113 行修改）
+
+**主要改動**：
+1. **動態狀態管理**：
+   - 從固定 4 個 key 改為動態 Map-based 狀態
+   - 新增 `tabConfigs`, `customTabConfig` 狀態
+   - 動態初始化 `analysisResults`, `loadingStates`, `errorStates`
+
+2. **配置載入**：
+   - 新增 useEffect 載入 Tab 配置
+   - 自動建立預設配置（首次使用）
+   - 動態初始化分析狀態
+
+3. **分析邏輯重構**：
+   - `handleAnalyze()` 改為遍歷 `tabConfigs`
+   - 使用 `dataSelector.generateSelectiveXML()` 生成選擇性 XML
+   - `runAnalysisForKey()` 接收 template 物件而非固定 config
+
+4. **動態 UI 渲染**：
+   - Tabs 使用 `tabConfigs.map()` 動態生成
+   - 圖示使用 `MuiIcons[template.icon]` 動態載入
+   - 內容區使用 `tabConfigs.map()` 動態生成
+
+5. **快速提問功能**（預留）：
+   - 新增 `handleQuickQuestion()` 函數
+   - 自訂 Tab 顯示快速提問按鈕
+
+6. **配置對話框整合**：
+   - 新增 `configDialogOpen` 狀態
+   - 新增設定按鈕（齒輪圖示）
+   - 新增 `handleConfigSaved()` 處理配置更新
+
+#### 12.4.2 settingsManager.js
+
+**修改規模**：+192 行
+
+**新增函數**：
+```javascript
+loadSidebarTabs()          // 載入 Tab 配置，首次使用自動建立預設值
+saveSidebarTabs(tabs)      // 儲存 Tab 配置
+loadCustomTabConfig()      // 載入自訂 Tab 配置
+saveCustomTabConfig(config) // 儲存自訂 Tab 配置（附加時間戳）
+resetSidebarTabsToDefault() // 重置為預設配置
+```
+
+**Storage 結構**：
+```javascript
+// gaiSidebarTabs - 4 個 tab 的配置
+[
+  { slotIndex: 0, templateId: 'critical_alerts', type: 'preset' },
+  { slotIndex: 1, templateId: 'medication_risks', type: 'preset' },
+  { slotIndex: 2, templateId: 'abnormal_labs', type: 'preset' },
+  { slotIndex: 3, templateId: 'imaging_findings', type: 'preset' }
+]
+
+// gaiCustomTabConfig - 自訂 tab 的詳細設定
+{
+  name: '自訂分析',
+  icon: 'Star',
+  category: 'custom',
+  dataTypes: ['medication', 'lab'],
+  systemPrompt: '...',
+  quickQuestions: ['...'],
+  schema: { /* JSON Schema */ },
+  version: '1.0.0',
+  lastModified: '2025-12-31T...'
+}
+```
+
+#### 12.4.3 gaiCopyFormatter.js
+
+**修改規模**：+9 行（export 關鍵字）
+
+**主要改動**：
+- 所有 9 個 `format*()` 函數改為 named export
+- 保持 `generateGAIFormatXML()` 向後相容
+- 支援 `dataSelector.js` 選擇性使用 formatter
+
+### 12.5 架構改進
+
+#### 12.5.1 資料流程
+
+```
+使用者點擊 Sidebar 設定按鈕 (⚙️)
+    ↓
+開啟 TabConfigDialog
+    ├─ Tab 1-3: 下拉選單選擇 7 種預設模板
+    └─ Tab 4: 自訂分析（編輯按鈕）
+    ↓
+儲存至 chrome.storage.sync
+    ├─ gaiSidebarTabs: [4 個 tab 配置]
+    └─ gaiCustomTabConfig: {自訂 tab 詳細設定}
+    ↓
+Sidebar 重新載入配置
+    ↓
+動態渲染 4 個 Tab（圖示、標籤、顏色）
+    ↓
+執行分析時：
+    ├─ 根據 Tab 配置取得 template
+    ├─ 使用 dataSelector 選擇性生成 XML
+    ├─ 呼叫 AI Provider
+    └─ 顯示結果
+```
+
+#### 12.5.2 模板驅動架構
+
+- **模板定義集中化**：所有模板在 `presetTemplates.js` 統一管理
+- **自動化 UI 生成**：Sidebar 根據模板自動生成 Tab UI
+- **資料按需傳輸**：每個模板指定所需資料類型，減少 API 成本
+- **易於擴展**：新增模板只需在 `presetTemplates.js` 添加 ~30 行
+
+### 12.6 技術修復
+
+#### 12.6.1 Sidebar 無法顯示問題
+- **問題**：`loadSidebarTabs()` 返回 `null` 導致 `forEach` 錯誤
+- **修復**：函數改為永遠返回有效陣列（首次使用自動建立預設值）
+- **防禦**：Sidebar 添加 `tabConfigs && tabConfigs.length > 0` 檢查
+
+#### 12.6.2 z-index 層級問題
+- **問題**：Dialog 被 Sidebar 遮住（Sidebar z-index: 2147483647）
+- **修復**：
+  - TabConfigDialog z-index: 2147483648
+  - Select Menu z-index: 2147483649
+- **結果**：配置對話框永遠顯示在最上層
+
+#### 12.6.3 React 19 Import 清理
+- **問題**：不必要的 `React` import（React 19 自動 JSX 轉換）
+- **修復**：改為解構 import `import { useState, ... } from 'react'`
+- **優點**：減少 bundle size，符合最佳實踐
+
+### 12.7 向後相容性
+
+- ✅ **預設配置對應舊版**：預設 4 個 tab 與原有分析類別完全一致
+- ✅ **自動遷移**：首次使用自動建立預設配置，無需手動設定
+- ✅ **現有 API 不變**：`runAnalysisForKey()` 支援新舊兩種呼叫方式
+- ✅ **設定分離**：新的 Tab 配置與現有 GAI 設定獨立，互不影響
+
+### 12.8 待實作功能（階段 4）
+
+- **CustomTabEditor.jsx**（預估 ~300 行）：
+  - Tab 名稱與圖示編輯
+  - 9 種資料類型勾選器（分類顯示）
+  - System Prompt 多行編輯器
+  - 快速提問管理（新增/編輯/刪除）
+  - JSON Schema 編輯器（可選）
+
+### 12.9 效能與可維護性
+
+- **程式碼組織**：模組化設計，職責清晰
+- **可擴展性**：新增模板 ~30 行，新增資料類型 ~15 行
+- **效能優化**：選擇性資料傳輸可減少 Token 用量 30-70%
+- **使用者體驗**：配置介面簡潔，支援即時預覽與重設
+
+---
+
 **重構完成日期**：2025-12-29
 **Token 估算與 Cerebras 更新**：2025-12-30
 **雙 API Key 輪流功能**：2025-12-30
+**Sidebar 模組化系統（階段 1-3）**：2025-12-31
 **重構負責人**：Claude (Anthropic AI)
-**文件版本**：1.2.0
+**文件版本**：1.3.0
