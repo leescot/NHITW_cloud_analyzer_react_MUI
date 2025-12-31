@@ -8,6 +8,7 @@ import { Box, Typography, CircularProgress, IconButton, Paper } from '@mui/mater
 import RefreshIcon from '@mui/icons-material/Refresh';
 import WarningIcon from '@mui/icons-material/Warning';
 import tabTemplateManager from '../../services/gai/tabs';
+import MarkdownRenderer from './MarkdownRenderer';
 
 const Tab1AutoAnalysis = ({ config, result, loading, error, onRetry }) => {
   // 取得模板資訊
@@ -100,7 +101,7 @@ const Tab1AutoAnalysis = ({ config, result, loading, error, onRetry }) => {
       )}
 
       {/* 結果列表 */}
-      <Box component="ul" sx={{ m: 0, pl: 2 }}>
+      <Box>
         {result.map((item, index) => {
           // 過濾掉 token 和時間統計資訊
           if (typeof item === 'string' && (
@@ -112,10 +113,8 @@ const Tab1AutoAnalysis = ({ config, result, loading, error, onRetry }) => {
           }
 
           return (
-            <Box component="li" key={index} sx={{ mb: 1.5 }}>
-              <Typography variant="body2" sx={{ lineHeight: 1.6 }}>
-                {item}
-              </Typography>
+            <Box key={index}>
+              <MarkdownRenderer content={item} variant="body2" />
             </Box>
           );
         })}

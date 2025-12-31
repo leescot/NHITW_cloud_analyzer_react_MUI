@@ -481,6 +481,45 @@ gaiSidebarConfigVersion: 2
      - 清除時同時重置 chatHistory、chatError、userInput 狀態
      - 清除操作保存至 chrome.storage.local
 
+5. **Config 對話框下拉選單無法展開問題** (2025-12-31)
+   - 問題：「自動分析」和「快速按鈕」設定中的下拉選單無法展開選擇
+   - 根本原因：MUI Select 的下拉選單（Menu）使用 Portal 渲染到 body 層級，預設 z-index 低於對話框的 z-index (2147483649)，導致被遮擋
+   - 解決方案：為所有 Select 組件添加 `MenuProps={{ sx: { zIndex: 2147483650 } }}`
+   - 修改位置：
+     - `SidebarV2ConfigDialog.jsx:162-164` - 自動分析模板選擇
+     - `SidebarV2ConfigDialog.jsx:237-239` - 快速按鈕類型選擇
+     - `SidebarV2ConfigDialog.jsx:261-263` - 快速按鈕模板選擇
+   - 結果：所有下拉選單可正常展開並選擇選項
+
+6. **快速按鈕 JSON 解析錯誤問題** (2025-12-31)
+   - 問題：快速按鈕執行後出現空白或 JSON 解析錯誤 "No number after minus sign in JSON at position 1"
+   - 根本原因：
+     - Schema property key 不一致：部分模板（renal_medication、diabetes_management、comprehensive_summary）的 schema property key 與 template.id 不同
+     - 自訂按鈕沒有 schema，導致 API 回傳純文字而非 JSON
+   - 解決方案：
+     - 修改解析邏輯為動態提取：`const firstKey = Object.keys(parsed)[0]` 取代硬編碼的 `parsed[template.id]`
+     - 為自訂按鈕提供預設 schema（使用 `analysis_results` 作為 property key）
+   - 修改位置：
+     - `Sidebar.jsx:383-386` - Auto-analysis 動態 key 提取
+     - `Sidebar.jsx:480-483` - Button analysis 動態 key 提取
+     - `Sidebar.jsx:432-456` - 自訂按鈕預設 schema
+   - 結果：所有模板和自訂按鈕都能正確解析 JSON 回應
+
+7. **Markdown 格式排版改善與 Table 支援** (2025-12-31)
+   - 需求：改善分析結果的 markdown 格式排版，支援表格顯示
+   - 實作內容：
+     - 安裝 `react-markdown` 和 `remark-gfm` 依賴
+     - 建立 `MarkdownRenderer.jsx` 通用組件，支援完整 markdown 語法
+     - 整合 MUI 組件：Table、Typography、Link 等
+     - 更新 `Tab1AutoAnalysis.jsx` 和 `Tab2QuickButtons.jsx` 使用 MarkdownRenderer
+   - 支援的 markdown 語法：
+     - 表格 (Table) - 使用 MUI Table 組件美化顯示
+     - 標題 (H1-H4)、列表、粗體、斜體、連結
+     - 程式碼 (inline/block)、引用 (blockquote)
+     - 自動換行和長詞斷行
+   - 新增檔案：`src/components/sidebar/MarkdownRenderer.jsx`
+   - 結果：分析結果支援豐富的 markdown 格式，表格以專業樣式顯示
+
 **測試狀態**：
 - ✅ 3 個 Tab 可正常切換
 - ✅ Tab icon 選擇狀態樣式正確
@@ -492,6 +531,10 @@ gaiSidebarConfigVersion: 2
 - ✅ 配置儲存/載入正常
 - ✅ V1 到 V2 資料遷移正常
 - ✅ Chat 歷史清除機制正常（待實測驗證）
+- ✅ Config 對話框下拉選單正常展開
+- ✅ 所有模板（包括 renal、diabetes、comprehensive）JSON 解析正常
+- ✅ 自訂按鈕 JSON 解析正常
+- ✅ Markdown 格式排版正常（列表、表格、粗體等）
 
 **待辦事項**：
 - [ ] 移除 debug console.log 語句
@@ -499,6 +542,7 @@ gaiSidebarConfigVersion: 2
 - [ ] 實際使用環境測試（切換病人、上傳 JSON、session 變化）
 - [ ] 效能測試（多個按鈕同時執行）
 - [ ] 文件更新（CLAUDE.md）
+- [ ] 測試 AI 回應包含 markdown table 的情況
 
 ---
 

@@ -20,6 +20,7 @@ import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import RefreshIcon from '@mui/icons-material/Refresh';
 import * as MuiIcons from '@mui/icons-material';
 import tabTemplateManager from '../../services/gai/tabs';
+import MarkdownRenderer from './MarkdownRenderer';
 
 const Tab2QuickButtons = ({ buttons, results, loadings, errors, onButtonClick }) => {
   console.log('[Tab2QuickButtons] Rendering with buttons:', buttons);
@@ -124,9 +125,9 @@ const Tab2QuickButtons = ({ buttons, results, loadings, errors, onButtonClick })
                   }
 
                   return (
-                    <Typography key={index} variant="body2" sx={{ mb: 1, lineHeight: 1.6 }}>
-                      • {item}
-                    </Typography>
+                    <Box key={index}>
+                      <MarkdownRenderer content={item} variant="body2" />
+                    </Box>
                   );
                 })}
               </Box>

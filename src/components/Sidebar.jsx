@@ -380,8 +380,10 @@ const Sidebar = ({
                         const content = response.data.choices[0].message.content;
                         const parsed = JSON.parse(content);
 
-                        // Extract the result array (template.id is the key in response)
-                        let resultArray = parsed[template.id] || [];
+                        // Dynamically extract the result array (use first property key)
+                        // This handles schemas where property key != template.id
+                        const firstKey = Object.keys(parsed)[0];
+                        let resultArray = parsed[firstKey] || [];
 
                         // Append metrics if available
                         if (Array.isArray(resultArray) && response.data.usage) {
@@ -426,12 +428,31 @@ const Sidebar = ({
                 setButtonErrors(prev => ({ ...prev, [slotIndex]: '自訂配置未找到' }));
                 return;
             }
+
+            // Provide default schema if custom config doesn't have one
+            const defaultSchema = {
+                name: 'custom_analysis_response',
+                strict: true,
+                schema: {
+                    type: 'object',
+                    properties: {
+                        analysis_results: {
+                            type: 'array',
+                            items: { type: 'string' },
+                            description: 'Analysis results from custom prompt'
+                        }
+                    },
+                    required: ['analysis_results'],
+                    additionalProperties: false
+                }
+            };
+
             template = {
                 id: `custom_button_${slotIndex}`,
                 name: buttonConfig.label || '自訂按鈕',
                 dataTypes: customConfig.dataTypes || [],
                 systemPrompt: customConfig.systemPrompt || '',
-                schema: customConfig.schema || null
+                schema: customConfig.schema || defaultSchema
             };
         } else {
             console.warn('[Sidebar V2] Unknown button type:', type);
@@ -475,8 +496,10 @@ const Sidebar = ({
                         const content = response.data.choices[0].message.content;
                         const parsed = JSON.parse(content);
 
-                        // Extract the result array (template.id is the key in response)
-                        let resultArray = parsed[template.id] || [];
+                        // Dynamically extract the result array (use first property key)
+                        // This handles schemas where property key != template.id
+                        const firstKey = Object.keys(parsed)[0];
+                        let resultArray = parsed[firstKey] || [];
 
                         // Append metrics if available
                         if (Array.isArray(resultArray) && response.data.usage) {

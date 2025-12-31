@@ -148,7 +148,7 @@ const SidebarV2ConfigDialog = ({
                   onChange={(e) => setLocalAutoConfig({ ...localAutoConfig, enabled: e.target.checked })}
                 />
               }
-              label="啟用自動分析"
+              label="啟用自動分析(載入病歷時自動執行GAI分析)"
               sx={{ mb: 3 }}
             />
 
@@ -159,6 +159,9 @@ const SidebarV2ConfigDialog = ({
                 label="選擇分析模板"
                 onChange={(e) => setLocalAutoConfig({ ...localAutoConfig, templateId: e.target.value })}
                 disabled={!localAutoConfig?.enabled}
+                MenuProps={{
+                  sx: { zIndex: 2147483650 }
+                }}
               >
                 {presetOptions.map(template => (
                   <MenuItem key={template.id} value={template.id}>
@@ -231,6 +234,9 @@ const SidebarV2ConfigDialog = ({
                           value={button.type}
                           label="類型"
                           onChange={(e) => handleButtonConfigChange(button.slotIndex, 'type', e.target.value)}
+                          MenuProps={{
+                            sx: { zIndex: 2147483650 }
+                          }}
                         >
                           <MenuItem value="preset">預設模板</MenuItem>
                           <MenuItem value="custom">自訂分析</MenuItem>
@@ -251,6 +257,9 @@ const SidebarV2ConfigDialog = ({
                                 handleButtonConfigChange(button.slotIndex, 'label', template.name);
                                 handleButtonConfigChange(button.slotIndex, 'icon', template.icon);
                               }
+                            }}
+                            MenuProps={{
+                              sx: { zIndex: 2147483650 }
                             }}
                           >
                             {presetOptions.map(template => (
