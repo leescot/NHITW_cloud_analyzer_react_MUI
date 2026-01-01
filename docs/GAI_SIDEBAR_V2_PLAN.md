@@ -23,7 +23,7 @@
 
 ### Tab 3 - Chat 對話
 - **功能**：與醫療資料進行多輪對話
-- **配置**：固定傳送全部 9 種醫療資料
+- **配置**：固定傳送全部 10 種醫療資料
 - **特性**：快速提問按鈕 + 對話歷史保存（session 內）
 
 ---
@@ -72,7 +72,7 @@ gaiQuickButtonsConfig: [
 // Tab 3 配置（Chat）
 gaiChatConfig: {
   systemPrompt: '你是專業的醫療AI助理...',
-  dataTypes: ['patientSummary', 'allergy', 'surgery', ...],  // 全部 9 種
+  dataTypes: ['diagnosis', 'patientSummary', 'allergy', 'surgery', ...],  // 全部 10 種
   quickQuestions: ['請摘要重點', '有哪些異常需要注意？', ...],
   enableHistory: true,
   maxHistoryLength: 10
@@ -147,9 +147,8 @@ gaiSidebarConfigVersion: 2
 - Tab 3：System Prompt 編輯 + 快速提問管理
 
 #### src/components/sidebar/CustomButtonEditor.jsx (~150 行)
-- 編輯自訂按鈕配置
 - 按鈕名稱輸入
-- 資料類型選擇（9 種，Chip 顯示）
+- 資料類型選擇（10 種，使用 Chip）
 - System Prompt 編輯
 
 ### 4. 新增配置檔案
@@ -672,5 +671,20 @@ gaiSidebarConfigVersion: 2
       - 修改 `src/components/sidebar/SidebarV2ConfigDialog.jsx`：在「自動分析」Tab 整合中文標籤顯示
       - 更新 `src/config/sidebarV2Defaults.js` 的註解以保持同步
     - 結果：GAI Sidebar 所有介面（設定、自訂按鈕、顯示區域）均呈現一致的繁體中文標籤與正確排序
+
+17. **新增 診斷/收案 (diagnosis) 資料類型與邏輯重構** (2026-01-01)
+    - 需求：新增第 10 種資料類型 `diagnosis` (診斷/收案)，並供 GAI 分析使用，同時優化其顯示順序。
+    - 實作內容：
+      - 新增 `src/utils/diagnosisProcessor.js`：獨立處理邏輯，從西藥、中藥、備註資料中提取診斷、疫苗及收案資訊。
+      - 更新 `src/config/dataTypeMetadata.js`：新增 `diagnosis` 元數據，並將其移動到第一個位置，使其在 UI 選擇 (Chip) 中顯示在最前面。
+      - 更新 `src/config/sidebarV2Defaults.js`：將 `diagnosis` 加入 `DEFAULT_CHAT_CONFIG` 的預設資料類型。
+      - 更新 `src/utils/gaiCopyFormatter.js`：實作 `formatDiagnosis` XML 格式化函數，並整合至 `generateGAIFormatXML`。
+      - 更新 `src/utils/dataSelector.js`：註冊新資料類型與格式化對應。
+      - 修改 `src/components/FloatingIcon.jsx`：在資料掛載點實作 `diagnosisData` 的即時計算與傳遞。
+      - 修改 `src/components/Sidebar.jsx`：在 Chat 功能中自動包含第 10 種資料類型。
+    - 結果：
+      - GAI 現在可以分析患者的就醫診斷、專科收案與疫苗記錄。
+      - 在所有配置介面中，「診斷/收案」標籤正確顯示在首位。
+      - 程式碼結構更加模組化，診斷提取邏輯與 UI 邏輯分離。
 
 **最後更新**: 2026-01-01

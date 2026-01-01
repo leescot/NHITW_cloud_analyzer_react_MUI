@@ -250,6 +250,57 @@ export const formatImaging = (imagingData) => {
 };
 
 /**
+ * Format diagnosis and enrollment data
+ * @param {Object} diagnosisData - Processed diagnosis data
+ * @returns {string} Formatted diagnosis text
+ */
+export const formatDiagnosis = (diagnosisData) => {
+    let text = '<diagnosis>\n診斷與收案資訊:\n';
+
+    if (!diagnosisData) return text + '</diagnosis>\n\n';
+
+    const { outpatient = [], emergency = [], inpatient = [], vaccines = [], enrollment = [] } = diagnosisData;
+
+    if (enrollment.length > 0) {
+        text += '收案資訊:\n';
+        enrollment.forEach(item => {
+            text += `  - ${item.programName} (${item.hospital}收案)\n`;
+        });
+    }
+
+    if (outpatient.length > 0) {
+        text += '門診診斷 (按頻率排序):\n';
+        outpatient.forEach(item => {
+            text += `  - ${item.code} ${item.name}${item.count > 1 ? ` (${item.count}次)` : ''}${item.isChineseMed ? ' [中醫]' : ''}\n`;
+        });
+    }
+
+    if (emergency.length > 0) {
+        text += '急診診斷:\n';
+        emergency.forEach(item => {
+            text += `  - ${item.date} ${item.hospital}: ${item.code} ${item.name}${item.isChineseMed ? ' [中醫]' : ''}\n`;
+        });
+    }
+
+    if (inpatient.length > 0) {
+        text += '住院診斷:\n';
+        inpatient.forEach(item => {
+            text += `  - ${item.date} ${item.hospital}: ${item.code} ${item.name}${item.isChineseMed ? ' [中醫]' : ''}\n`;
+        });
+    }
+
+    if (vaccines.length > 0) {
+        text += '疫苗記錄:\n';
+        vaccines.forEach(item => {
+            text += `  - ${item.date} ${item.hospital}: ${item.medications.join(', ')}\n`;
+        });
+    }
+
+    text += '</diagnosis>\n\n';
+    return text;
+};
+
+/**
  * Generate complete GAI format XML data
  * @param {Object} data - All patient data
  * @param {Object} data.userInfo - User information (age, gender)
@@ -295,6 +346,9 @@ export const generateGAIFormatXML = (data) => {
     gaiText += formatLab(groupedLabs);
     gaiText += formatChineseMed(groupedChineseMeds);
     gaiText += formatImaging(imagingData);
+    const diagnosisText = formatDiagnosis(data.diagnosisData);
+    console.log('[gaiCopyFormatter] Formatted diagnosis section:', diagnosisText);
+    gaiText += diagnosisText;
 
     return gaiText;
 };

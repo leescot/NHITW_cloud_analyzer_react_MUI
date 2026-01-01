@@ -14,7 +14,8 @@ import {
   formatMedication,
   formatLab,
   formatChineseMed,
-  formatImaging
+  formatImaging,
+  formatDiagnosis
 } from './gaiCopyFormatter.js';
 
 /**
@@ -29,7 +30,8 @@ const DATA_KEY_MAP = {
   medication: 'groupedMedications',
   lab: 'groupedLabs',
   chinesemed: 'groupedChineseMeds',
-  imaging: 'imagingData'
+  imaging: 'imagingData',
+  diagnosis: 'diagnosisData'
 };
 
 /**
@@ -44,7 +46,8 @@ const FORMATTER_MAP = {
   medication: formatMedication,
   lab: formatLab,
   chinesemed: formatChineseMed,
-  imaging: formatImaging
+  imaging: formatImaging,
+  diagnosis: formatDiagnosis
 };
 
 /**
@@ -73,7 +76,7 @@ export const generateSelectiveXML = (patientData, selectedDataTypes) => {
   // 建立基本資訊
   const age = userInfo?.age || '未知';
   const gender = userInfo?.gender === 'M' ? 'male' :
-                 userInfo?.gender === 'F' ? 'female' : '未知';
+    userInfo?.gender === 'F' ? 'female' : '未知';
 
   let xmlText = `這是一位 ${age} 歲的 ${gender} 性病人，以下是病歷資料\n\n`;
 

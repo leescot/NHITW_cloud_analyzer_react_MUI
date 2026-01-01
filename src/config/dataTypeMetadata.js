@@ -6,6 +6,14 @@
  */
 
 export const DATA_TYPE_METADATA = {
+  diagnosis: {
+    id: 'diagnosis',
+    label: '診斷/收案',
+    icon: 'Assignment',
+    description: '就醫診斷與各項收案資訊',
+    color: '#7b1fa2',
+    category: 'history'
+  },
   medication: {
     id: 'medication',
     label: '西藥',
@@ -40,7 +48,7 @@ export const DATA_TYPE_METADATA = {
   },
   surgery: {
     id: 'surgery',
-    label: '手術',
+    label: '手術史',
     icon: 'LocalHospital',
     description: '手術記錄',
     color: '#7b1fa2',
@@ -48,7 +56,7 @@ export const DATA_TYPE_METADATA = {
   },
   discharge: {
     id: 'discharge',
-    label: '住院',
+    label: '住院史',
     icon: 'Hotel',
     description: '住院與出院記錄',
     color: '#0288d1',

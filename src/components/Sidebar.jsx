@@ -394,8 +394,8 @@ const Sidebar = ({
         setChatLoading(true);
         setChatError(null);
 
-        // Generate XML with all 9 data types
-        const allDataTypes = ['patientSummary', 'allergy', 'surgery', 'discharge', 'hbcv', 'medication', 'lab', 'chineseMed', 'imaging'];
+        // Generate XML with all 10 data types
+        const allDataTypes = ['patientSummary', 'diagnosis', 'allergy', 'surgery', 'discharge', 'hbcvdata', 'medication', 'lab', 'chinesemed', 'imaging'];
         const xmlData = generateSelectiveXML(patientData, allDataTypes);
 
         // Build multi-turn conversation prompt

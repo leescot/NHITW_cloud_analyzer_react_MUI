@@ -103,7 +103,10 @@ import {
 import {
   handleCopyGAIFormat as copyGAIFormat,
   handleCopyGAIWithPrompt as copyGAIWithPrompt,
+  formatDiagnosis,
 } from "../utils/gaiCopyFormatter";
+
+import { processDiagnosisData } from "../utils/diagnosisProcessor";
 
 // Import new indicators
 import StatusIndicator from "./indicators/StatusIndicator";
@@ -177,6 +180,16 @@ const FloatingIcon = () => {
   const [gaiPrompt, setGaiPrompt] = useState("");
   const [isDataLoaded, setIsDataLoaded] = useState(false);
 
+  // Compute diagnosis data
+  const diagnosisData = processDiagnosisData({
+    groupedMedications,
+    groupedChineseMeds,
+    patientSummaryData,
+    trackingDays: 180
+  });
+
+  console.log('[FloatingIcon] Computed diagnosisData:', diagnosisData);
+
   // Construct patientData object for Sidebar and GAI functions
   const patientData = {
     userInfo,
@@ -188,7 +201,8 @@ const FloatingIcon = () => {
     groupedMedications,
     groupedLabs,
     groupedChineseMeds,
-    imagingData
+    imagingData,
+    diagnosisData
   };
 
   // 新增響應式布局檢測

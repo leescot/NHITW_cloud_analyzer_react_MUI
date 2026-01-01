@@ -118,6 +118,7 @@ export const DEFAULT_CHAT_CONFIG = {
   // 固定傳送全部 9 種醫療資料
   dataTypes: [
     'patientSummary',  // 備註資料
+    'diagnosis',       // 診斷/收案
     'allergy',         // 過敏史
     'surgery',         // 手術
     'discharge',       // 住院
