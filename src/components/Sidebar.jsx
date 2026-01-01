@@ -7,7 +7,8 @@ import {
     Fab,
     Tooltip,
     Tabs,
-    Tab
+    Tab,
+    Chip
 } from '@mui/material';
 import SettingsIcon from '@mui/icons-material/Settings';
 import SmartToyIcon from '@mui/icons-material/SmartToy';
@@ -469,10 +470,18 @@ const Sidebar = ({
                         };
 
                         const updatedHistory = [...newHistory, assistantMessage];
-                        setChatHistory(updatedHistory);
+
+                        // Apply history length limit (rounds * 2)
+                        let prunedHistory = updatedHistory;
+                        const maxRounds = chatConfig?.maxHistoryLength || 5;
+                        if (prunedHistory.length > maxRounds * 2) {
+                            prunedHistory = prunedHistory.slice(prunedHistory.length - maxRounds * 2);
+                        }
+
+                        setChatHistory(prunedHistory);
 
                         // Save to chrome.storage.local
-                        await saveChatHistory(updatedHistory);
+                        await saveChatHistory(prunedHistory);
 
                         console.log('[Sidebar V2] Chat message completed');
                     } catch (e) {
@@ -617,6 +626,7 @@ const Sidebar = ({
                     <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                         <SmartToyIcon color="primary" />
                         <Typography variant="subtitle1" fontWeight="bold">GAI 助手</Typography>
+                        <Chip label="BETA" size="small" sx={{ height: 16, fontSize: '0.65rem', fontWeight: 'bold', bgcolor: 'primary.main', color: 'white' }} />
                     </Box>
                     <Box>
                         <Tooltip title="設定分析項目">
@@ -642,41 +652,51 @@ const Sidebar = ({
                     sx={{
                         borderBottom: 1,
                         borderColor: 'divider',
-                        minHeight: 48,
+                        minHeight: 40,
                         pointerEvents: 'auto',
                         position: 'relative',
-                        zIndex: 1
+                        zIndex: 1,
+                        '& .MuiTab-root': {
+                            minHeight: 40,
+                            py: 0.5,
+                            fontSize: '0.85rem',
+                            flexDirection: 'row',
+                            gap: 0.5
+                        }
                     }}
                 >
                     <Tab
                         value={0}
-                        icon={<WarningIcon fontSize="small" />}
+                        icon={<WarningIcon sx={{ fontSize: '1rem !important' }} />}
                         label="自動分析"
+                        iconPosition="start"
                         onClick={() => {
                             console.log('[Tab] Direct onClick triggered for Tab 0');
                             handleTabChange(null, 0);
                         }}
-                        sx={{ minWidth: 0, p: 1, fontSize: '0.8rem', pointerEvents: 'auto', cursor: 'pointer' }}
+                        sx={{ minWidth: 0, p: 0.5, pointerEvents: 'auto', cursor: 'pointer' }}
                     />
                     <Tab
                         value={1}
-                        icon={<TouchAppIcon fontSize="small" />}
+                        icon={<TouchAppIcon sx={{ fontSize: '1rem !important' }} />}
                         label="快速按鈕"
+                        iconPosition="start"
                         onClick={() => {
                             console.log('[Tab] Direct onClick triggered for Tab 1');
                             handleTabChange(null, 1);
                         }}
-                        sx={{ minWidth: 0, p: 1, fontSize: '0.8rem', pointerEvents: 'auto', cursor: 'pointer' }}
+                        sx={{ minWidth: 0, p: 0.5, pointerEvents: 'auto', cursor: 'pointer' }}
                     />
                     <Tab
                         value={2}
-                        icon={<ChatIcon fontSize="small" />}
+                        icon={<ChatIcon sx={{ fontSize: '1rem !important' }} />}
                         label="對話"
+                        iconPosition="start"
                         onClick={() => {
                             console.log('[Tab] Direct onClick triggered for Tab 2');
                             handleTabChange(null, 2);
                         }}
-                        sx={{ minWidth: 0, p: 1, fontSize: '0.8rem', pointerEvents: 'auto', cursor: 'pointer' }}
+                        sx={{ minWidth: 0, p: 0.5, pointerEvents: 'auto', cursor: 'pointer' }}
                     />
                 </Tabs>
 
@@ -711,6 +731,7 @@ const Sidebar = ({
                             onInputChange={setUserInput}
                             onSendMessage={sendChatMessage}
                             onQuickQuestion={handleChatQuickQuestion}
+                            onClearHistory={clearChatHistory}
                         />
                     )}
                 </Box>

@@ -113,7 +113,7 @@ export const DEFAULT_CHAT_CONFIG = {
   enabled: true,  // 預設啟用 Chat 功能
 
   // System Prompt（繁體中文醫療助理）
-  systemPrompt: '你是專業的醫療AI助理。請用台灣醫師常用的繁體中文醫學術語回答問題。提供準確、有用的臨床見解，但提醒使用者最終決策應由醫師判斷。',
+  systemPrompt: '你是專業的醫療AI助理。請用台灣醫師常用的繁體中文醫學術語回答問題。提供準確且精簡的臨床見解。',
 
   // 固定傳送全部 9 種醫療資料
   dataTypes: [
@@ -131,15 +131,14 @@ export const DEFAULT_CHAT_CONFIG = {
 
   // 快速提問按鈕（預設 4 個）
   quickQuestions: [
-    '請摘要重點',
-    '有哪些異常需要注意？',
-    '用藥有無交互作用？',
-    '建議追蹤哪些檢驗？'
+    '一段話精簡病史：',
+    '用一句話形容這位病人：',
+    '列出「三高」相關資料'
   ],
 
   // 對話歷史設定
   enableHistory: true,      // 啟用對話歷史
-  maxHistoryLength: 10      // 最多保存 10 輪對話
+  maxHistoryLength: 5       // 最多保存 5 輪對話
 };
 
 // ==================== 工具函數 ====================

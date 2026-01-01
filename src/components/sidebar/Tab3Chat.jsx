@@ -14,11 +14,12 @@ import {
   CircularProgress,
   Chip,
   Divider,
-  Avatar
+  Alert,
+  Tooltip
 } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
 import ChatIcon from '@mui/icons-material/Chat';
-import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import DeleteSweepIcon from '@mui/icons-material/DeleteSweep';
 import PsychologyIcon from '@mui/icons-material/Psychology';
 import MarkdownRenderer from './MarkdownRenderer';
 
@@ -30,7 +31,8 @@ const Tab3Chat = ({
   userInput,
   onInputChange,
   onSendMessage,
-  onQuickQuestion
+  onQuickQuestion,
+  onClearHistory
 }) => {
   const messagesEndRef = useRef(null);
 
@@ -68,12 +70,23 @@ const Tab3Chat = ({
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', gap: 2 }}>
       {/* Session Header */}
-      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-        <ChatIcon color="primary" fontSize="small" />
-        <Box>
-          <Typography variant="subtitle2" fontWeight="bold">AI 智慧對答</Typography>
-          <Typography variant="caption" color="text.secondary">基於病歷資料進行自由對話</Typography>
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between', px: 0.5 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <ChatIcon color="primary" sx={{ fontSize: '1rem' }} />
+          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 'medium' }}>
+            AI 智慧對答：基於病歷資料進行自由對話
+          </Typography>
         </Box>
+        <Tooltip title="清空對話">
+          <IconButton
+            size="small"
+            onClick={onClearHistory}
+            disabled={history.length === 0 || loading}
+            sx={{ p: 0.5, color: 'text.disabled', '&:hover': { color: 'error.main' } }}
+          >
+            <DeleteSweepIcon fontSize="small" />
+          </IconButton>
+        </Tooltip>
       </Box>
 
       <Divider />
@@ -113,19 +126,15 @@ const Tab3Chat = ({
                 width: '100%'
               }}
             >
-              <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, maxWidth: '90%' }}>
-                {!isUser && (
-                  <Avatar sx={{ width: 24, height: 24, bgcolor: 'error.light' }}>
-                    <PsychologyIcon sx={{ fontSize: 16 }} />
-                  </Avatar>
-                )}
+              <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, width: '100%' }}>
                 <Paper
                   elevation={0}
                   sx={{
                     p: 1.5,
+                    width: '100%',
                     bgcolor: isUser ? 'primary.main' : '#f0f2f5',
                     color: isUser ? 'primary.contrastText' : 'text.primary',
-                    borderRadius: isUser ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
+                    borderRadius: 2,
                     border: isUser ? 'none' : '1px solid #e0e0e0'
                   }}
                 >
@@ -137,15 +146,10 @@ const Tab3Chat = ({
                     <MarkdownRenderer content={message.content} variant="body2" />
                   )}
                 </Paper>
-                {isUser && (
-                  <Avatar sx={{ width: 24, height: 24, bgcolor: 'primary.light' }}>
-                    <AccountCircleIcon sx={{ fontSize: 16 }} />
-                  </Avatar>
-                )}
               </Box>
 
               {message.metadata && !isUser && (
-                <Typography variant="caption" color="text.disabled" sx={{ ml: 4, mt: 0.5 }}>
+                <Typography variant="caption" color="text.disabled" sx={{ mt: 0.5 }}>
                   {message.metadata.tokens && `${message.metadata.tokens} tokens`}
                   {message.metadata.duration && ` • ${message.metadata.duration}s`}
                 </Typography>

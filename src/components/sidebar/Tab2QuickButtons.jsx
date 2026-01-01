@@ -59,9 +59,7 @@ const Tab2QuickButtons = ({ buttons, results, loadings, errors, onButtonClick })
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', gap: 2 }}>
       {/* Top Buttons Grid */}
       <Box>
-        <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: 'block', fontWeight: 'bold' }}>
-          快速分析工具
-        </Typography>
+
         <Grid container spacing={1}>
           {enabledButtons.map((buttonConfig) => {
             const { slotIndex, type, templateId, label, icon } = buttonConfig;

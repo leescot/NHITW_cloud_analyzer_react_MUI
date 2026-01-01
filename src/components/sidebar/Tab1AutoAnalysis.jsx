@@ -42,14 +42,9 @@ const Tab1AutoAnalysis = ({ config, result, loading, error, onRetry }) => {
       <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <AutoAwesomeIcon color="error" fontSize="small" />
-          <Box>
-            <Typography variant="subtitle2" fontWeight="bold">
-              {template?.name || '自動分析'}
-            </Typography>
-            <Typography variant="caption" color="text.secondary">
-              載入病歷時自動產生的 AI 摘要
-            </Typography>
-          </Box>
+          <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 'medium' }}>
+            {template?.name || '自動分析'}：載入病歷時自動產生的 AI 摘要
+          </Typography>
         </Box>
         <IconButton size="small" onClick={onRetry} disabled={loading} color="primary">
           <RefreshIcon fontSize="small" />

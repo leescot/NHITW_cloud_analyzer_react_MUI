@@ -41,10 +41,12 @@ import SettingsSuggestIcon from '@mui/icons-material/SettingsSuggest';
 import ChatIcon from '@mui/icons-material/Chat';
 import HistoryIcon from '@mui/icons-material/History';
 import PsychologyIcon from '@mui/icons-material/Psychology';
+import RestoreIcon from '@mui/icons-material/Restore';
 import * as MuiIcons from '@mui/icons-material';
 import { DATA_TYPE_METADATA } from '../../config/dataTypeMetadata';
 import tabTemplateManager from '../../services/gai/tabs';
 import { PRESET_TEMPLATES } from '../../services/gai/tabs/presetTemplates';
+import { getAllDefaults } from '../../config/sidebarV2Defaults';
 import {
   saveAutoAnalysisConfig,
   saveQuickButtonsConfig,
@@ -137,6 +139,16 @@ const SidebarV2ConfigDialog = ({
     setExpandedSlot(expandedSlot === slotIndex ? null : slotIndex);
   };
 
+  const handleResetDefaults = () => {
+    if (window.confirm('確定要將所有 Sidebar 設定重置回系統預設值嗎？')) {
+      const defaults = getAllDefaults();
+      setLocalAutoConfig(defaults.autoAnalysis);
+      setLocalButtonsConfig(defaults.quickButtons);
+      setLocalChatConfig(defaults.chat);
+      setExpandedSlot(null);
+    }
+  };
+
   // Get MuiIcon from name
   const getIcon = (iconName) => {
     const IconComponent = MuiIcons[iconName] || MuiIcons.Help;
@@ -161,7 +173,18 @@ const SidebarV2ConfigDialog = ({
       fullWidth
       sx={{ zIndex: 2147483649 }}
     >
-      <DialogTitle>GAI Sidebar 設定</DialogTitle>
+      <DialogTitle sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <Typography variant="h6" fontWeight="bold">GAI Sidebar 設定</Typography>
+        <Button
+          size="small"
+          color="warning"
+          startIcon={<RestoreIcon />}
+          onClick={handleResetDefaults}
+          sx={{ textTransform: 'none' }}
+        >
+          重置原設定
+        </Button>
+      </DialogTitle>
 
       <Tabs value={tabValue} onChange={handleTabChange} sx={{ borderBottom: 1, borderColor: 'divider', px: 3 }}>
         <Tab label="自動分析" />
@@ -566,13 +589,18 @@ const SidebarV2ConfigDialog = ({
                     <Collapse in={localChatConfig?.enableHistory}>
                       <Box sx={{ mt: 1, display: 'flex', alignItems: 'center', gap: 2 }}>
                         <TextField
-                          label="最大保存輪數"
+                          label="最大保存輪數(最多 5 輪)"
                           type="number"
-                          value={localChatConfig?.maxHistoryLength || 10}
-                          onChange={(e) => setLocalChatConfig({ ...localChatConfig, maxHistoryLength: parseInt(e.target.value) || 10 })}
+                          value={localChatConfig?.maxHistoryLength || 5}
+                          onChange={(e) => {
+                            let val = parseInt(e.target.value) || 1;
+                            if (val > 5) val = 5;
+                            if (val < 1) val = 1;
+                            setLocalChatConfig({ ...localChatConfig, maxHistoryLength: val });
+                          }}
                           size="small"
                           sx={{ maxWidth: 120, bgcolor: 'white' }}
-                          inputProps={{ min: 1, max: 20 }}
+                          inputProps={{ min: 1, max: 5 }}
                         />
                         <Typography variant="caption" color="text.secondary">
                           紀錄超過此數量後，將自動移除最舊的對話
