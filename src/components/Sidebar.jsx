@@ -201,12 +201,13 @@ const Sidebar = ({
     const cleanMarkdownContent = (content) => {
         if (!content) return content;
         return content
-            .replace(/\s+$/gm, '')                              // Remove trailing spaces (including markdown hard breaks)
+            .replace(/\s+$/gm, '')                              // Remove trailing spaces
             .replace(/\n{3,}/g, '\n\n')                         // Compress 3+ consecutive newlines to 2
             .replace(/^(\s*[-*+]\s+.+)\n+(?=\s*[-*+])/gm, '$1\n')  // Remove extra blank lines between list items
             .replace(/(^\s*\|.*)\n\s*\n(?=\s*\|)/gm, '$1\n')    // Remove blank lines inside tables
             .replace(/^([^|\n\s].*)\n(\s*\|)/gm, '$1\n\n$2')    // Ensure blank line before table
-            .replace(/^(\s*\|.*)\n([^|\n\s].*)/gm, '$1\n\n$2'); // Ensure blank line after table
+            .replace(/^(\s*\|.*)\n([^|\n\s].*)/gm, '$1\n\n$2')  // Ensure blank line after table
+            .replace(/<think>[\s\S]*?<\/think>/g, '');          // Remove thinking/reasoning tags if mixed in content
     };
 
     // V2: Run auto-analysis (Tab 1)
@@ -256,19 +257,27 @@ const Sidebar = ({
                     setAutoAnalysisError(response?.error || '未知錯誤');
                 } else {
                     try {
-                        const rawContent = response.data.choices[0].message.content;
+                        const rawMessage = response.data.choices[0].message;
+                        const rawContent = rawMessage.content || '';
                         const content = cleanMarkdownContent(rawContent);
+                        const isTruncated = response.data.choices[0].finish_reason === 'length';
 
                         // AI can return any format (markdown, plain text, etc.)
                         // Wrap in array for consistent display
                         let resultArray = [content];
+
+                        // If truncated, add a warning
+                        if (isTruncated) {
+                            resultArray.push('⚠️ [警告：此分析因超過 Token 限制而被截斷，結果可能不完整。建議嘗試更精簡的模板或減少資料量。]');
+                        }
 
                         // Append metrics if available
                         if (response.data.usage) {
                             const totalTokens = response.data.usage.total_tokens || response.data.usage.totalTokenCount || 0;
                             const durationSec = ((response.data.duration || 0) / 1000).toFixed(2);
                             const keyInfo = response.data.keyUsed ? ` [${response.data.keyUsed}]` : '';
-                            resultArray.push(`(Total_tokens: ${totalTokens}, 執行時間: ${durationSec}s${keyInfo})`);
+                            const reasoningMark = rawMessage.isReasoning ? ' (Reasoning Output)' : '';
+                            resultArray.push(`(Total_tokens: ${totalTokens}${reasoningMark}, 執行時間: ${durationSec}s${keyInfo})`);
                         }
 
                         setAutoAnalysisResult(resultArray);
@@ -352,19 +361,27 @@ const Sidebar = ({
                     setButtonErrors(prev => ({ ...prev, [slotIndex]: response?.error || '未知錯誤' }));
                 } else {
                     try {
-                        const rawContent = response.data.choices[0].message.content;
+                        const rawMessage = response.data.choices[0].message;
+                        const rawContent = rawMessage.content || '';
                         const content = cleanMarkdownContent(rawContent);
+                        const isTruncated = response.data.choices[0].finish_reason === 'length';
 
                         // AI can return any format (markdown, plain text, etc.)
                         // Wrap in array for consistent display
                         let resultArray = [content];
+
+                        // If truncated, add a warning
+                        if (isTruncated) {
+                            resultArray.push('⚠️ [警告：此分析因超過 Token 限制而被截斷，結果可能不完整。]');
+                        }
 
                         // Append metrics if available
                         if (response.data.usage) {
                             const totalTokens = response.data.usage.total_tokens || response.data.usage.totalTokenCount || 0;
                             const durationSec = ((response.data.duration || 0) / 1000).toFixed(2);
                             const keyInfo = response.data.keyUsed ? ` [${response.data.keyUsed}]` : '';
-                            resultArray.push(`(Total_tokens: ${totalTokens}, 執行時間: ${durationSec}s${keyInfo})`);
+                            const reasoningMark = rawMessage.isReasoning ? ' (Reasoning Output)' : '';
+                            resultArray.push(`(Total_tokens: ${totalTokens}${reasoningMark}, 執行時間: ${durationSec}s${keyInfo})`);
                         }
 
                         setButtonResults(prev => ({ ...prev, [slotIndex]: resultArray }));
@@ -434,17 +451,20 @@ const Sidebar = ({
                     setChatError(response?.error || '未知錯誤');
                 } else {
                     try {
-                        const rawContent = response.data.choices[0].message.content;
+                        const rawMessage = response.data.choices[0].message;
+                        const rawContent = rawMessage.content || '';
                         const content = cleanMarkdownContent(rawContent);
+                        const isTruncated = response.data.choices[0].finish_reason === 'length';
 
                         // Create assistant message
                         const assistantMessage = {
                             role: 'assistant',
-                            content: content,
+                            content: isTruncated ? content + '\n\n⚠️ [警告：此對話內容因超過 Token 限制而被截斷。]' : content,
                             timestamp: new Date().toISOString(),
                             metadata: {
                                 tokens: response.data.usage?.total_tokens || response.data.usage?.totalTokenCount || 0,
-                                duration: ((response.data.duration || 0) / 1000).toFixed(2)
+                                duration: ((response.data.duration || 0) / 1000).toFixed(2),
+                                isReasoning: rawMessage.isReasoning
                             }
                         };
 

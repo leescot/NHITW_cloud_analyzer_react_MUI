@@ -47,8 +47,9 @@ class CerebrasProvider extends BaseProvider {
 
             // 計算合理的 max_completion_tokens
             // Free tier 限制: 60K TPM，需考慮 input + output 總和
-            // 醫療分析通常輸出 500-2000 tokens，設定 4096 作為安全值
-            const defaultMaxTokens = 4096;
+            // 醫療分析通常輸出 500-2000 tokens，但推理模型 (Reasoning models) 
+            // 產生的推理過程非常長，若設太小會導致輸出被截斷而看不到結果。
+            const defaultMaxTokens = 16384;
 
             const requestBody = {
                 model: options.model || this.defaultModel,
@@ -177,13 +178,32 @@ class CerebrasProvider extends BaseProvider {
      * @returns {Object} 標準化格式
      */
     formatResponse(rawResponse, duration, keyIndex = 0) {
+        // 處理特定模型（如 gpt-oss-120b）可能將內容放在 reasoning 或 reasoning_content 的情況
+        const choices = rawResponse.choices?.map(choice => {
+            if (choice.message && !choice.message.content) {
+                // 如果 content 是空的或者 undefined，嘗試從 reasoning 或 reasoning_content 取得
+                const extractedContent = choice.message.reasoning || choice.message.reasoning_content;
+                if (extractedContent) {
+                    return {
+                        ...choice,
+                        message: {
+                            ...choice.message,
+                            content: extractedContent,
+                            isReasoning: true // 標記為推理內容
+                        }
+                    };
+                }
+            }
+            return choice;
+        });
+
         return {
-            choices: rawResponse.choices,
+            choices: choices || rawResponse.choices,
             usage: rawResponse.usage,
             duration: duration,
             model: rawResponse.model,
             provider: this.id,
-            keyUsed: `Key ${keyIndex + 1}`  // 新增：記錄使用的 API Key
+            keyUsed: `Key ${keyIndex + 1}`
         };
     }
 }

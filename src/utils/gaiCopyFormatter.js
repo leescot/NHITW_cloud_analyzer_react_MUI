@@ -139,6 +139,9 @@ export const formatMedication = (groupedMedications) => {
                     if (med.ingredient) {
                         medLine += ` (${med.ingredient})`;
                     }
+                    if (med.atc_code) {
+                        medLine += ` [${med.atc_code}]`;
+                    }
                     text += `${medLine}\n`;
                 });
             }

@@ -112,9 +112,9 @@ const SidebarV2ConfigDialog = ({
     });
   };
 
-  // Get preset template options (only basic and specialized categories)
+  // Get preset template options (basic, specialized, and advanced categories)
   const presetOptions = Object.values(PRESET_TEMPLATES).filter(
-    template => template.category === 'basic' || template.category === 'specialized'
+    template => template.category === 'basic' || template.category === 'specialized' || template.category === 'advanced'
   );
 
   // Get selected template info

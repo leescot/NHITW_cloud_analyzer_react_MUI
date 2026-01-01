@@ -10,24 +10,14 @@
 export const PRESET_TEMPLATES = {
   // ==================== 基礎分析類 ====================
 
-  critical_alerts: {
-    id: 'critical_alerts',
-    name: '危險警示',
-    icon: 'Warning',
-    category: 'basic',
-    description: '辨識需要立即注意的危險狀況與緊急警訊',
-    dataTypes: ['patientSummary', 'allergy', 'medication', 'lab', 'imaging'],
-    systemPrompt: 'You are an expert medical AI assistant. Analyze the provided medical record (XML format) and identify ONLY the most critical, dangerous, or urgent items that require immediate attention. Focus on severe conditions, active risks, and major warnings. Use Markdown LIST formatting for clarity. DO NOT USE TABLES. Please output in Traditional Chinese (zh-TW) using medical terminology commonly used by Taiwanese physicians.'
-  },
-
   medication_risks: {
     id: 'medication_risks',
-    name: '用藥風險',
+    name: '藥物交互作用',
     icon: 'Medication',
     category: 'basic',
-    description: '辨識用藥交互作用、禁忌與劑量問題',
-    dataTypes: ['patientSummary', 'allergy', 'medication', 'lab', 'hbcvdata'],
-    systemPrompt: 'You are an expert clinical pharmacist AI. Analyze the provided medical record (XML format) and identify potential medication risks, drug-drug interactions, contraindications, renal dose adjustments (based on eGFR), and other medication-related safety concerns. Use Markdown LIST formatting for clarity. DO NOT USE TABLES. Please output in Traditional Chinese (zh-TW) using medical terminology commonly used by Taiwanese physicians.'
+    description: '辨識藥物與藥物間的交互作用、禁忌與安全風險',
+    dataTypes: ['diagnosis', 'medication'],
+    systemPrompt: 'You are an expert clinical pharmacist AI. Analyze the provided medical record (XML format) and identify MAJOR drug-drug interactions, contraindications, and other medication-related safety concerns. Focus ONLY on interactions between the listed medications. Use Markdown LIST formatting for clarity. DO NOT USE TABLES. Please output in Traditional Chinese (zh-TW) using medical terminology commonly used by Taiwanese physicians.'
   },
 
   abnormal_labs: {
@@ -35,9 +25,9 @@ export const PRESET_TEMPLATES = {
     name: '檢驗異常值',
     icon: 'Science',
     category: 'basic',
-    description: '列出近期異常檢驗數值並提供解釋',
+    description: '列出近期異常檢驗數值並提供精簡解釋 (TL;DR)',
     dataTypes: ['lab'],
-    systemPrompt: 'You are an expert medical AI. Analyze the provided medical record (XML format) and extract RECENT abnormal laboratory results. Focus on values outside normal ranges, significant trends (e.g., rising Creatinine), and critical values. Provide a brief interpretation for each abnormality. Use Markdown LIST formatting for clarity. DO NOT USE TABLES. Please output in Traditional Chinese (zh-TW) using medical terminology commonly used by Taiwanese physicians.'
+    systemPrompt: 'You are an expert medical AI. Analyze the provided medical record (XML format) and extract RECENT abnormal laboratory results. Focus on values outside normal ranges and critical values. Provide a VERY CONCISE, TL;DR interpretation for each abnormality. Use Markdown LIST formatting for clarity. DO NOT USE TABLES. Please output in Traditional Chinese (zh-TW) using medical terminology commonly used by Taiwanese physicians.'
   },
 
   imaging_findings: {
@@ -107,7 +97,7 @@ export const PRESET_TEMPLATES = {
 2) 抓「特殊用藥/高風險用藥」：抗凝血/抗血小板、胰島素與降糖藥、鎮靜安眠、鴉片類止痛、免疫抑制、腎臟相關用藥等
 3) 抓「近期異常檢驗」：優先列出會改變處置的（K、Na、Hb、Cr/eGFR、Ca/P、血糖/HbA1c、感染指標等）
 4) 抓「影像/重要檢查異常」：只列 Impression/結論等級的重點
-5) 釐清「缺漏與矛盾」：年齡/過敏史空白、診斷與用藥不一致、同藥重複開立等
+5) 釐親「缺漏與矛盾」：年齡/過敏史空白、診斷與用藥不一致、同藥重複開立等
 
 【輸出格式】
 A. 一句話總覽（1 行）
@@ -118,6 +108,37 @@ E. 重要影像/檢查（最多 8 行）
 F. 待確認/缺資料（最多 6 點）
 
 以繁體中文輸出，使用台灣醫師常用術語。`
+  },
+
+  atc_classification: {
+    id: 'atc_classification',
+    name: '藥品ATC分類',
+    icon: 'LibraryBooks',
+    category: 'advanced',
+    description: '依 WHO ATC/DDD Index 將藥物進行系統化分類',
+    dataTypes: ['medication'],
+    systemPrompt: `你是一個協助醫療與藥學分類的 AI 助手，請依照 WHO ATC/DDD Index 2025 的規則，對我提供的「藥品商品名 (學名)(ATC code)」進行 ATC code 分類。
+
+請遵守以下原則進行判斷：
+A  Alimentary tract and metabolism（簡稱：消化/代謝）  
+B  Blood and blood forming organs（簡稱：血液）  
+C  Cardiovascular system（簡稱：心血管）  
+D  Dermatologicals（簡稱：皮膚）  
+G  Genito-urinary system and sex hormones（簡稱：泌尿生殖/性荷爾蒙）  
+H  Systemic hormonal preparations, excluding sex hormones and insulins（簡稱：荷爾蒙）  
+J  Antiinfectives for systemic use（簡稱：抗感染）  
+L  Antineoplastic and immunomodulating agents（簡稱：抗腫瘤）  
+M  Musculo-skeletal system（簡稱：肌肉骨骼）  
+N  Nervous system（簡稱：神經）  
+P  Antiparasitic products, insecticides and repellents（簡稱：抗寄生蟲）  
+R  Respiratory system（簡稱：呼吸系統）  
+S  Sensory organs（簡稱：感覺器官）  
+V  Various（簡稱：其他）
+
+輸出格式，請以table方式呈現按 ATC 字母排序的藥物分類，同一類藥物在同一起顯示。輸出要包含以下資訊：
+{ATC分類字母}({中文簡稱})|{藥名}({使用日期mm/dd,mm/dd (日期超過三個以上，只需列出三個日期後以"..."結尾)...})
+
+接下來我會提供藥品清單，請依上述規則完成 ATC 分類。`
   }
 };
 

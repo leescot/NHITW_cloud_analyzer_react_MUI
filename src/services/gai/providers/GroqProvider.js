@@ -57,7 +57,7 @@ class GroqProvider extends BaseProvider {
                     }
                 ],
                 temperature: options.temperature || 1,
-                max_completion_tokens: options.maxTokens || 4096,
+                max_completion_tokens: options.maxTokens || 16384,
                 top_p: options.topP || 1
             };
 
@@ -129,13 +129,31 @@ class GroqProvider extends BaseProvider {
      * @returns {Object} 標準化格式
      */
     formatResponse(rawResponse, duration, keyIndex = 0) {
+        // 處理推理模型可能將內容放在 reasoning 或 reasoning_content 的情況
+        const choices = rawResponse.choices?.map(choice => {
+            if (choice.message && !choice.message.content) {
+                const extractedContent = choice.message.reasoning || choice.message.reasoning_content;
+                if (extractedContent) {
+                    return {
+                        ...choice,
+                        message: {
+                            ...choice.message,
+                            content: extractedContent,
+                            isReasoning: true
+                        }
+                    };
+                }
+            }
+            return choice;
+        });
+
         return {
-            choices: rawResponse.choices,
+            choices: choices || rawResponse.choices,
             usage: rawResponse.usage,
             duration: duration,
             model: rawResponse.model,
             provider: this.id,
-            keyUsed: `Key ${keyIndex + 1}`  // 新增：記錄使用的 API Key
+            keyUsed: `Key ${keyIndex + 1}`
         };
     }
 }
