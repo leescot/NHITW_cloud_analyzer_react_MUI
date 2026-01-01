@@ -21,6 +21,11 @@ import {
 } from '@mui/material';
 
 const MarkdownRenderer = ({ content, variant = 'body2' }) => {
+  // Preprocess content to remove trailing spaces that cause unwanted line breaks
+  const processedContent = content
+    ? content.replace(/\s+$/gm, '') // Remove trailing spaces at end of each line
+    : '';
+
   // Custom components to use MUI styling
   const components = {
     // Table components
@@ -49,25 +54,25 @@ const MarkdownRenderer = ({ content, variant = 'body2' }) => {
     p: ({ node, ...props }) => (
       <Typography
         variant={variant}
-        sx={{ mb: 1.5, lineHeight: 1.7, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}
+        sx={{ mb: 0, lineHeight: 1.5, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}
         {...props}
       />
     ),
-    h1: ({ node, ...props }) => <Typography variant="h5" fontWeight="bold" sx={{ mt: 2, mb: 1 }} {...props} />,
-    h2: ({ node, ...props }) => <Typography variant="h6" fontWeight="bold" sx={{ mt: 2, mb: 1 }} {...props} />,
-    h3: ({ node, ...props }) => <Typography variant="subtitle1" fontWeight="bold" sx={{ mt: 1.5, mb: 0.5 }} {...props} />,
-    h4: ({ node, ...props }) => <Typography variant="subtitle2" fontWeight="bold" sx={{ mt: 1.5, mb: 0.5 }} {...props} />,
+    h1: ({ node, ...props }) => <Typography variant="h5" fontWeight="bold" sx={{ mt: 1.5, mb: 0.5 }} {...props} />,
+    h2: ({ node, ...props }) => <Typography variant="h6" fontWeight="bold" sx={{ mt: 1.5, mb: 0.5 }} {...props} />,
+    h3: ({ node, ...props }) => <Typography variant="subtitle1" fontWeight="bold" sx={{ mt: 1, mb: 0.3 }} {...props} />,
+    h4: ({ node, ...props }) => <Typography variant="subtitle2" fontWeight="bold" sx={{ mt: 1, mb: 0.3 }} {...props} />,
 
     // List components
     ul: ({ node, ...props }) => (
-      <Box component="ul" sx={{ m: 0, pl: 2, mb: 1 }} {...props} />
+      <Box component="ul" sx={{ m: 0, pl: 2, mb: 0 }} {...props} />
     ),
     ol: ({ node, ...props }) => (
-      <Box component="ol" sx={{ m: 0, pl: 2, mb: 1 }} {...props} />
+      <Box component="ol" sx={{ m: 0, pl: 2, mb: 0 }} {...props} />
     ),
     li: ({ node, ...props }) => (
-      <Box component="li" sx={{ mb: 0.5 }}>
-        <Typography variant={variant} component="span" sx={{ lineHeight: 1.7, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }} {...props} />
+      <Box component="li" sx={{ mb: 0, mt: 0 }}>
+        <Typography variant={variant} component="span" sx={{ lineHeight: 1.5, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }} {...props} />
       </Box>
     ),
 
@@ -141,7 +146,7 @@ const MarkdownRenderer = ({ content, variant = 'body2' }) => {
       remarkPlugins={[remarkGfm]}
       components={components}
     >
-      {content}
+      {processedContent}
     </ReactMarkdown>
   );
 };

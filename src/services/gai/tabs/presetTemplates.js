@@ -95,7 +95,10 @@ export const PRESET_TEMPLATES = {
     category: 'basic',
     description: '摘要影像學報告的重要發現',
     dataTypes: ['imaging'],
-    systemPrompt: 'You are an expert radiologist AI. Analyze the provided medical record (XML format), specifically the imaging reports. Extract and summarize important abnormal findings, diagnoses, and recommendations from the reports. Ignore normal findings unless relevant to a specific condition. Return the result in the specified JSON format. Please output in Traditional Chinese (zh-TW) using medical terminology commonly used by Taiwanese physicians.',
+    systemPrompt: `TL;DR of imaging test. Output format in zh-TW:
+- {image exam} 
+  - {Date 1}: {summary of report}
+  - {Date 2}: {summary of report}`,
     schema: {
       name: 'imaging_findings_response',
       strict: true,

@@ -211,12 +211,13 @@ const Sidebar = ({
             );
         };
 
+        // Only trigger once when conditions are met
         if (useV2 && open && isDataLoaded && !autoAnalysisLoading && !hasAnalyzed &&
             hasValidData() && autoAnalysisConfig?.enabled) {
             console.log('[Sidebar V2] Auto-analyzing with config:', autoAnalysisConfig);
             runAutoAnalysis();
         }
-    }, [useV2, open, isDataLoaded, hasAnalyzed, autoAnalysisConfig, patientData]);
+    }, [useV2, open, isDataLoaded, hasAnalyzed, autoAnalysisConfig?.enabled, autoAnalysisConfig?.templateId]);
 
     // Helper: Clear chat history
     const clearChatHistory = useCallback(async () => {
@@ -358,13 +359,13 @@ const Sidebar = ({
         chrome.storage.sync.get(['gaiProvider'], (result) => {
             const provider = result.gaiProvider || 'openai';
 
-            // Call GAI via background script
+            // Call GAI via background script (no JSON schema - let AI decide format)
             chrome.runtime.sendMessage({
                 action: 'callGAI',
                 providerId: provider,
                 systemPrompt: template.systemPrompt,
                 userPrompt: xmlData,
-                jsonSchema: template.schema,
+                jsonSchema: null,
                 options: {
                     model: provider === 'openai' ? 'gpt-5-nano' : undefined
                 }
@@ -378,15 +379,13 @@ const Sidebar = ({
                 } else {
                     try {
                         const content = response.data.choices[0].message.content;
-                        const parsed = JSON.parse(content);
 
-                        // Dynamically extract the result array (use first property key)
-                        // This handles schemas where property key != template.id
-                        const firstKey = Object.keys(parsed)[0];
-                        let resultArray = parsed[firstKey] || [];
+                        // AI can return any format (markdown, plain text, etc.)
+                        // Wrap in array for consistent display
+                        let resultArray = [content];
 
                         // Append metrics if available
-                        if (Array.isArray(resultArray) && response.data.usage) {
+                        if (response.data.usage) {
                             const totalTokens = response.data.usage.total_tokens || response.data.usage.totalTokenCount || 0;
                             const durationSec = ((response.data.duration || 0) / 1000).toFixed(2);
                             const keyInfo = response.data.keyUsed ? ` [${response.data.keyUsed}]` : '';
@@ -429,30 +428,11 @@ const Sidebar = ({
                 return;
             }
 
-            // Provide default schema if custom config doesn't have one
-            const defaultSchema = {
-                name: 'custom_analysis_response',
-                strict: true,
-                schema: {
-                    type: 'object',
-                    properties: {
-                        analysis_results: {
-                            type: 'array',
-                            items: { type: 'string' },
-                            description: 'Analysis results from custom prompt'
-                        }
-                    },
-                    required: ['analysis_results'],
-                    additionalProperties: false
-                }
-            };
-
             template = {
                 id: `custom_button_${slotIndex}`,
                 name: buttonConfig.label || '自訂按鈕',
                 dataTypes: customConfig.dataTypes || [],
-                systemPrompt: customConfig.systemPrompt || '',
-                schema: customConfig.schema || defaultSchema
+                systemPrompt: customConfig.systemPrompt || ''
             };
         } else {
             console.warn('[Sidebar V2] Unknown button type:', type);
@@ -474,13 +454,13 @@ const Sidebar = ({
         chrome.storage.sync.get(['gaiProvider'], (result) => {
             const provider = result.gaiProvider || 'openai';
 
-            // Call GAI via background script
+            // Call GAI via background script (no JSON schema - let AI decide format)
             chrome.runtime.sendMessage({
                 action: 'callGAI',
                 providerId: provider,
                 systemPrompt: template.systemPrompt,
                 userPrompt: xmlData,
-                jsonSchema: template.schema,
+                jsonSchema: null,
                 options: {
                     model: provider === 'openai' ? 'gpt-5-nano' : undefined
                 }
@@ -494,15 +474,13 @@ const Sidebar = ({
                 } else {
                     try {
                         const content = response.data.choices[0].message.content;
-                        const parsed = JSON.parse(content);
 
-                        // Dynamically extract the result array (use first property key)
-                        // This handles schemas where property key != template.id
-                        const firstKey = Object.keys(parsed)[0];
-                        let resultArray = parsed[firstKey] || [];
+                        // AI can return any format (markdown, plain text, etc.)
+                        // Wrap in array for consistent display
+                        let resultArray = [content];
 
                         // Append metrics if available
-                        if (Array.isArray(resultArray) && response.data.usage) {
+                        if (response.data.usage) {
                             const totalTokens = response.data.usage.total_tokens || response.data.usage.totalTokenCount || 0;
                             const durationSec = ((response.data.duration || 0) / 1000).toFixed(2);
                             const keyInfo = response.data.keyUsed ? ` [${response.data.keyUsed}]` : '';

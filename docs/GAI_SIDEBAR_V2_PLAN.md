@@ -520,10 +520,47 @@ gaiSidebarConfigVersion: 2
    - 新增檔案：`src/components/sidebar/MarkdownRenderer.jsx`
    - 結果：分析結果支援豐富的 markdown 格式，表格以專業樣式顯示
 
+8. **取消 JSON Schema 強制回傳格式** (2025-12-31)
+   - 需求：移除 API 呼叫時的 JSON Schema 限制，讓 AI 自由決定回傳格式
+   - 根本原因：強制 JSON 格式限制了 AI 的輸出靈活性，且容易產生解析錯誤
+   - 解決方案：
+     - 將所有 API 呼叫的 `jsonSchema` 參數設為 `null`
+     - 移除 `JSON.parse()` 邏輯，直接使用 AI 回傳的 content
+     - 移除自訂按鈕的 defaultSchema 定義（不再需要）
+   - 修改位置：
+     - `Sidebar.jsx:367` - Auto-analysis jsonSchema: null
+     - `Sidebar.jsx:481` - Button analysis jsonSchema: null
+     - `Sidebar.jsx:380-384` - 直接使用 content，不再 JSON.parse
+     - `Sidebar.jsx:494-498` - 直接使用 content，不再 JSON.parse
+     - `Sidebar.jsx:430-435` - 簡化 custom template 建構
+   - 結果：AI 可自由輸出任何格式（純文字、Markdown、表格等），MarkdownRenderer 自動處理顯示
+
+9. **Markdown 行距優化與尾隨空格修復** (2025-12-31)
+   - 問題：Tab1 顯示結果行距過寬，且 AI 回傳內容中的尾隨空格導致不必要的換行
+   - 解決方案：
+     - 大幅減少所有 Markdown 元素的邊距（`mb: 0`，`mt: 0`）
+     - 統一行高為 `lineHeight: 1.5`
+     - 在 MarkdownRenderer 中預處理內容，移除每行末尾的空格（`/\s+$/gm`）
+   - 修改位置：
+     - `MarkdownRenderer.jsx:24-27` - 預處理內容移除尾隨空格
+     - `MarkdownRenderer.jsx:49-71` - 減少所有元素邊距
+   - 結果：列表顯示更緊湊，標題和子項目之間無多餘空白
+
+10. **修復自動分析多次呼叫 API 問題** (2025-12-31)
+   - 問題：自動分析在資料載入時會呼叫多次 API（觀察到 5 次重複呼叫）
+   - 根本原因：useEffect 依賴陣列包含 `patientData` 和 `autoAnalysisConfig` 物件，每次渲染時物件引用改變導致重複觸發
+   - 解決方案：
+     - 修改依賴陣列，只依賴原始值而非物件
+     - 使用 `autoAnalysisConfig?.enabled` 和 `autoAnalysisConfig?.templateId` 取代整個物件
+     - 移除 `patientData` 依賴（在函數內部直接使用）
+   - 修改位置：
+     - `Sidebar.jsx:220` - 修改 useEffect 依賴陣列
+   - 結果：每次資料載入只執行一次自動分析，避免重複 API 呼叫
+
 **測試狀態**：
 - ✅ 3 個 Tab 可正常切換
 - ✅ Tab icon 選擇狀態樣式正確
-- ✅ 自動分析在 Sidebar 打開時執行
+- ✅ 自動分析在 Sidebar 打開時執行（只執行一次，無重複 API 呼叫）
 - ✅ 快速按鈕點擊執行分析
 - ✅ 按鈕結果展開/收合功能正常
 - ✅ Chat 對話多輪對話功能正常
@@ -532,9 +569,10 @@ gaiSidebarConfigVersion: 2
 - ✅ V1 到 V2 資料遷移正常
 - ✅ Chat 歷史清除機制正常（待實測驗證）
 - ✅ Config 對話框下拉選單正常展開
-- ✅ 所有模板（包括 renal、diabetes、comprehensive）JSON 解析正常
-- ✅ 自訂按鈕 JSON 解析正常
+- ✅ AI 自由格式回傳（不再強制 JSON Schema）
 - ✅ Markdown 格式排版正常（列表、表格、粗體等）
+- ✅ Markdown 行距緊湊，無多餘空白
+- ✅ 尾隨空格自動移除，嵌套列表正確顯示
 
 **待辦事項**：
 - [ ] 移除 debug console.log 語句
@@ -542,7 +580,7 @@ gaiSidebarConfigVersion: 2
 - [ ] 實際使用環境測試（切換病人、上傳 JSON、session 變化）
 - [ ] 效能測試（多個按鈕同時執行）
 - [ ] 文件更新（CLAUDE.md）
-- [ ] 測試 AI 回應包含 markdown table 的情況
+- [ ] 更新 preset templates 的 system prompts（移除 JSON 格式要求，改為 Markdown 格式指引）
 
 ---
 
