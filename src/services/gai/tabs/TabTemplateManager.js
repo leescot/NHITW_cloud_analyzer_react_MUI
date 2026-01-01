@@ -104,7 +104,6 @@ class TabTemplateManager {
     if (!template.id) errors.push('Missing template.id');
     if (!template.name) errors.push('Missing template.name');
     if (!template.systemPrompt) errors.push('Missing template.systemPrompt');
-    if (!template.schema) errors.push('Missing template.schema');
     if (!template.dataTypes || !Array.isArray(template.dataTypes)) {
       errors.push('Missing or invalid template.dataTypes');
     }

@@ -24,11 +24,12 @@ const MarkdownRenderer = ({ content, variant = 'body2' }) => {
   // Preprocess content to fix markdown formatting issues
   const processedContent = content
     ? content
-        .replace(/\s+$/gm, '')                              // Remove trailing spaces at end of each line
-        .replace(/\n{3,}/g, '\n\n')                         // Compress 3+ consecutive newlines to 2
-        .replace(/^(\s*[-*+]\s+.+)\n+(?=\s*[-*+])/gm, '$1\n')  // Remove extra blank lines between list items
-        .replace(/([^\n])\n(\|[^\n]+\|)/g, '$1\n\n$2')      // Ensure blank line before table
-        .replace(/(\|[^\n]+\|)\n([^\n|])/g, '$1\n\n$2')     // Ensure blank line after table
+      .replace(/\s+$/gm, '')                              // Remove trailing spaces at end of each line
+      .replace(/\n{3,}/g, '\n\n')                         // Compress 3+ consecutive newlines to 2
+      .replace(/^(\s*[-*+]\s+.+)\n+(?=\s*[-*+])/gm, '$1\n')  // Remove extra blank lines between list items
+      .replace(/(^\s*\|.*)\n\s*\n(?=\s*\|)/gm, '$1\n')    // Remove blank lines inside tables
+      .replace(/^([^|\n\s].*)\n(\s*\|)/gm, '$1\n\n$2')    // Ensure blank line before table
+      .replace(/^(\s*\|.*)\n([^|\n\s].*)/gm, '$1\n\n$2')  // Ensure blank line after table
     : '';
 
   // Custom components to use MUI styling

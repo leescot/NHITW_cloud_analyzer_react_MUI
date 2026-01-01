@@ -19,12 +19,12 @@ import ChatIcon from '@mui/icons-material/Chat';
 import { generateSelectiveXML } from '../utils/dataSelector';
 import tabTemplateManager from '../services/gai/tabs';
 import {
-  loadAutoAnalysisConfig,
-  loadQuickButtonsConfig,
-  loadChatConfig,
-  loadChatHistory,
-  saveChatHistory,
-  migrateSidebarConfigToV2
+    loadAutoAnalysisConfig,
+    loadQuickButtonsConfig,
+    loadChatConfig,
+    loadChatHistory,
+    saveChatHistory,
+    migrateSidebarConfigToV2
 } from '../utils/settingsManager';
 
 // V2 Components
@@ -165,7 +165,7 @@ const Sidebar = ({
 
         // Get current patient ID
         const currentPatientId = patientData?.patientSummaryData?.[0]?.['病歷號'] ||
-                                 patientData?.patientSummaryData?.[0]?.['身分證號'];
+            patientData?.patientSummaryData?.[0]?.['身分證號'];
 
         // Check if patient has changed (compare with previous ID)
         if (currentPatientId && previousPatientIdRef.current !== null &&
@@ -204,8 +204,9 @@ const Sidebar = ({
             .replace(/\s+$/gm, '')                              // Remove trailing spaces (including markdown hard breaks)
             .replace(/\n{3,}/g, '\n\n')                         // Compress 3+ consecutive newlines to 2
             .replace(/^(\s*[-*+]\s+.+)\n+(?=\s*[-*+])/gm, '$1\n')  // Remove extra blank lines between list items
-            .replace(/([^\n])\n(\|[^\n]+\|)/g, '$1\n\n$2')      // Ensure blank line before table
-            .replace(/(\|[^\n]+\|)\n([^\n|])/g, '$1\n\n$2');    // Ensure blank line after table
+            .replace(/(^\s*\|.*)\n\s*\n(?=\s*\|)/gm, '$1\n')    // Remove blank lines inside tables
+            .replace(/^([^|\n\s].*)\n(\s*\|)/gm, '$1\n\n$2')    // Ensure blank line before table
+            .replace(/^(\s*\|.*)\n([^|\n\s].*)/gm, '$1\n\n$2'); // Ensure blank line after table
     };
 
     // V2: Run auto-analysis (Tab 1)

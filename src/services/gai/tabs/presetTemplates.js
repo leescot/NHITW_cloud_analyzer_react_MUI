@@ -17,23 +17,7 @@ export const PRESET_TEMPLATES = {
     category: 'basic',
     description: '辨識需要立即注意的危險狀況與緊急警訊',
     dataTypes: ['patientSummary', 'allergy', 'medication', 'lab', 'imaging'],
-    systemPrompt: 'You are an expert medical AI assistant. Analyze the provided medical record (XML format) and identify ONLY the most critical, dangerous, or urgent items that require immediate attention. Focus on severe conditions, active risks, and major warnings. Return the result in the specified JSON format. Please output in Traditional Chinese (zh-TW) using medical terminology commonly used by Taiwanese physicians.',
-    schema: {
-      name: 'critical_alerts_response',
-      strict: true,
-      schema: {
-        type: 'object',
-        properties: {
-          critical_alerts: {
-            type: 'array',
-            items: { type: 'string' },
-            description: 'List of critical alerts, dangerous conditions, or urgent attention items'
-          }
-        },
-        required: ['critical_alerts'],
-        additionalProperties: false
-      }
-    }
+    systemPrompt: 'You are an expert medical AI assistant. Analyze the provided medical record (XML format) and identify ONLY the most critical, dangerous, or urgent items that require immediate attention. Focus on severe conditions, active risks, and major warnings. Use Markdown LIST formatting for clarity. DO NOT USE TABLES. Please output in Traditional Chinese (zh-TW) using medical terminology commonly used by Taiwanese physicians.'
   },
 
   medication_risks: {
@@ -43,23 +27,7 @@ export const PRESET_TEMPLATES = {
     category: 'basic',
     description: '辨識用藥交互作用、禁忌與劑量問題',
     dataTypes: ['patientSummary', 'allergy', 'medication', 'lab', 'hbcvdata'],
-    systemPrompt: 'You are an expert clinical pharmacist AI. Analyze the provided medical record (XML format) and identify potential medication risks, drug-drug interactions, contraindications, renal dose adjustments (based on eGFR), and other medication-related safety concerns. Return the result in the specified JSON format. Please output in Traditional Chinese (zh-TW) using medical terminology commonly used by Taiwanese physicians.',
-    schema: {
-      name: 'medication_risks_response',
-      strict: true,
-      schema: {
-        type: 'object',
-        properties: {
-          medication_risks: {
-            type: 'array',
-            items: { type: 'string' },
-            description: 'List of medication risks, contraindications, drug interactions, or dosage warnings'
-          }
-        },
-        required: ['medication_risks'],
-        additionalProperties: false
-      }
-    }
+    systemPrompt: 'You are an expert clinical pharmacist AI. Analyze the provided medical record (XML format) and identify potential medication risks, drug-drug interactions, contraindications, renal dose adjustments (based on eGFR), and other medication-related safety concerns. Use Markdown LIST formatting for clarity. DO NOT USE TABLES. Please output in Traditional Chinese (zh-TW) using medical terminology commonly used by Taiwanese physicians.'
   },
 
   abnormal_labs: {
@@ -69,23 +37,7 @@ export const PRESET_TEMPLATES = {
     category: 'basic',
     description: '列出近期異常檢驗數值並提供解釋',
     dataTypes: ['lab'],
-    systemPrompt: 'You are an expert medical AI. Analyze the provided medical record (XML format) and extract RECENT abnormal laboratory results. Focus on values outside normal ranges, significant trends (e.g., rising Creatinine), and critical values. Provide a brief interpretation for each abnormality. Return the result in the specified JSON format. Please output in Traditional Chinese (zh-TW) using medical terminology commonly used by Taiwanese physicians.',
-    schema: {
-      name: 'abnormal_labs_response',
-      strict: true,
-      schema: {
-        type: 'object',
-        properties: {
-          abnormal_labs: {
-            type: 'array',
-            items: { type: 'string' },
-            description: 'List of recent abnormal laboratory results with interpretation'
-          }
-        },
-        required: ['abnormal_labs'],
-        additionalProperties: false
-      }
-    }
+    systemPrompt: 'You are an expert medical AI. Analyze the provided medical record (XML format) and extract RECENT abnormal laboratory results. Focus on values outside normal ranges, significant trends (e.g., rising Creatinine), and critical values. Provide a brief interpretation for each abnormality. Use Markdown LIST formatting for clarity. DO NOT USE TABLES. Please output in Traditional Chinese (zh-TW) using medical terminology commonly used by Taiwanese physicians.'
   },
 
   imaging_findings: {
@@ -95,26 +47,10 @@ export const PRESET_TEMPLATES = {
     category: 'basic',
     description: '摘要影像學報告的重要發現',
     dataTypes: ['imaging'],
-    systemPrompt: `TL;DR of imaging test. Output format in zh-TW:
+    systemPrompt: `TL;DR of imaging report. Use Markdown LIST formatting. DO NOT USE TABLES. Output format in zh-TW:
 - {image exam} 
   - {Date 1}: {summary of report}
-  - {Date 2}: {summary of report}`,
-    schema: {
-      name: 'imaging_findings_response',
-      strict: true,
-      schema: {
-        type: 'object',
-        properties: {
-          imaging_findings: {
-            type: 'array',
-            items: { type: 'string' },
-            description: 'List of important findings from recent imaging reports'
-          }
-        },
-        required: ['imaging_findings'],
-        additionalProperties: false
-      }
-    }
+  - {Date 2}: {summary of report}`
   },
 
   // ==================== 專科分析類 ====================
@@ -134,23 +70,7 @@ export const PRESET_TEMPLATES = {
 5) 提供用藥建議（減量、停藥、替代）
 
 特別注意：Metformin、NSAID、ACEI/ARB、抗生素、顯影劑等。
-以繁體中文輸出，使用台灣醫師常用術語。`,
-    schema: {
-      name: 'renal_medication_response',
-      strict: true,
-      schema: {
-        type: 'object',
-        properties: {
-          renal_analysis: {
-            type: 'array',
-            items: { type: 'string' },
-            description: 'Renal function analysis and medication recommendations'
-          }
-        },
-        required: ['renal_analysis'],
-        additionalProperties: false
-      }
-    }
+請使用 Markdown 清單（List）格式輸出，且嚴禁使用表格（Table）。以繁體中文輸出，使用台灣醫師常用術語。`
   },
 
   diabetes_management: {
@@ -168,23 +88,7 @@ export const PRESET_TEMPLATES = {
 5) 提供治療建議
 
 特別注意：腎功能、肝功能、心血管用藥。
-以繁體中文輸出，使用台灣醫師常用術語。`,
-    schema: {
-      name: 'diabetes_management_response',
-      strict: true,
-      schema: {
-        type: 'object',
-        properties: {
-          diabetes_analysis: {
-            type: 'array',
-            items: { type: 'string' },
-            description: 'Diabetes management analysis and recommendations'
-          }
-        },
-        required: ['diabetes_analysis'],
-        additionalProperties: false
-      }
-    }
+請使用 Markdown 清單（List）格式輸出，且嚴禁使用表格（Table）。以繁體中文輸出，使用台灣醫師常用術語。`
   },
 
   // ==================== 進階分析類 ====================
@@ -213,23 +117,7 @@ D. 近期異常檢驗（最多 12 行）
 E. 重要影像/檢查（最多 8 行）
 F. 待確認/缺資料（最多 6 點）
 
-以繁體中文輸出，使用台灣醫師常用術語。`,
-    schema: {
-      name: 'comprehensive_summary_response',
-      strict: true,
-      schema: {
-        type: 'object',
-        properties: {
-          summary_sections: {
-            type: 'array',
-            items: { type: 'string' },
-            description: 'Comprehensive summary sections (A-F)'
-          }
-        },
-        required: ['summary_sections'],
-        additionalProperties: false
-      }
-    }
+以繁體中文輸出，使用台灣醫師常用術語。`
   }
 };
 
