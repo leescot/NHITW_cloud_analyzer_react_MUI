@@ -117,15 +117,15 @@ export const DEFAULT_CHAT_CONFIG = {
 
   // 固定傳送全部 9 種醫療資料
   dataTypes: [
-    'patientSummary',  // 患者摘要
+    'patientSummary',  // 備註資料
     'allergy',         // 過敏史
-    'surgery',         // 開刀史
-    'discharge',       // 住院史
-    'hbcvdata',        // B/C肝炎
-    'medication',      // 用藥記錄
-    'lab',             // 檢驗記錄
-    'chinesemed',      // 中藥記錄
-    'imaging'          // 影像報告
+    'surgery',         // 手術
+    'discharge',       // 住院
+    'hbcvdata',        // BC肝
+    'medication',      // 西藥
+    'lab',             // 檢驗
+    'chinesemed',      // 中藥
+    'imaging'          // 影像
   ],
 
   // 快速提問按鈕（預設 4 個）

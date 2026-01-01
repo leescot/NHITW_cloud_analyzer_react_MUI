@@ -103,7 +103,7 @@ const CustomButtonEditor = ({ open, buttonConfig, onClose, onSave }) => {
                 return (
                   <Chip
                     key={dataType}
-                    label={metadata?.displayName || dataType}
+                    label={metadata?.label || dataType}
                     onClick={() => handleDataTypeToggle(dataType)}
                     color={isSelected ? 'primary' : 'default'}
                     variant={isSelected ? 'filled' : 'outlined'}

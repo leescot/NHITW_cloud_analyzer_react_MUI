@@ -25,6 +25,7 @@ import {
   TextField,
   IconButton
 } from '@mui/material';
+import { DATA_TYPE_METADATA } from '../../config/dataTypeMetadata';
 import tabTemplateManager from '../../services/gai/tabs';
 import { PRESET_TEMPLATES } from '../../services/gai/tabs/presetTemplates';
 import {
@@ -177,9 +178,18 @@ const SidebarV2ConfigDialog = ({
                   此模板使用的資料類型：
                 </Typography>
                 <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 1 }}>
-                  {selectedTemplate.dataTypes.map(dataType => (
-                    <Chip key={dataType} label={dataType} size="small" color="primary" variant="outlined" />
-                  ))}
+                  {selectedTemplate.dataTypes.map(dataType => {
+                    const metadata = DATA_TYPE_METADATA[dataType];
+                    return (
+                      <Chip
+                        key={dataType}
+                        label={metadata?.label || dataType}
+                        size="small"
+                        color="primary"
+                        variant="outlined"
+                      />
+                    );
+                  })}
                 </Box>
 
                 <Typography variant="caption" color="text.secondary" sx={{ mt: 2, display: 'block' }}>

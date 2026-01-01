@@ -664,4 +664,13 @@ gaiSidebarConfigVersion: 2
 
 ---
 
+16. **GAI 資料標籤繁體中文化與重新排序** (2026-01-01)
+    - 需求：將 9 個資料標籤改為繁體中文，並按特定順序排列：西藥、中藥、檢驗、影像、手術、住院、過敏史、BC肝、備註資料
+    - 實作內容：
+      - 修改 `src/config/dataTypeMetadata.js`：更新 `label` 為繁體中文並重新排列物件順序
+      - 修改 `src/components/sidebar/CustomButtonEditor.jsx`：修復 bug，將錯誤的 `displayName` 改回 `label`
+      - 修改 `src/components/sidebar/SidebarV2ConfigDialog.jsx`：在「自動分析」Tab 整合中文標籤顯示
+      - 更新 `src/config/sidebarV2Defaults.js` 的註解以保持同步
+    - 結果：GAI Sidebar 所有介面（設定、自訂按鈕、顯示區域）均呈現一致的繁體中文標籤與正確排序
+
 **最後更新**: 2026-01-01

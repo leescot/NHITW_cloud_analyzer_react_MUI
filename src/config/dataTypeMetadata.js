@@ -6,13 +6,53 @@
  */
 
 export const DATA_TYPE_METADATA = {
-  patientSummary: {
-    id: 'patientSummary',
-    label: '患者摘要',
-    icon: 'Person',
-    description: '雲端註記資料、基本資訊',
-    color: '#1976d2',
-    category: 'basic'
+  medication: {
+    id: 'medication',
+    label: '西藥',
+    icon: 'Medication',
+    description: '近期處方用藥',
+    color: '#f57c00',
+    category: 'medication'
+  },
+  chinesemed: {
+    id: 'chinesemed',
+    label: '中藥',
+    icon: 'Spa',
+    description: '中醫處方記錄',
+    color: '#689f38',
+    category: 'medication'
+  },
+  lab: {
+    id: 'lab',
+    label: '檢驗',
+    icon: 'Science',
+    description: '實驗室檢驗數值',
+    color: '#0097a7',
+    category: 'lab'
+  },
+  imaging: {
+    id: 'imaging',
+    label: '影像',
+    icon: 'ImageSearch',
+    description: '影像學檢查報告',
+    color: '#5e35b1',
+    category: 'imaging'
+  },
+  surgery: {
+    id: 'surgery',
+    label: '手術',
+    icon: 'LocalHospital',
+    description: '手術記錄',
+    color: '#7b1fa2',
+    category: 'history'
+  },
+  discharge: {
+    id: 'discharge',
+    label: '住院',
+    icon: 'Hotel',
+    description: '住院與出院記錄',
+    color: '#0288d1',
+    category: 'history'
   },
   allergy: {
     id: 'allergy',
@@ -22,61 +62,21 @@ export const DATA_TYPE_METADATA = {
     color: '#d32f2f',
     category: 'basic'
   },
-  surgery: {
-    id: 'surgery',
-    label: '開刀史',
-    icon: 'LocalHospital',
-    description: '手術記錄',
-    color: '#7b1fa2',
-    category: 'history'
-  },
-  discharge: {
-    id: 'discharge',
-    label: '住院史',
-    icon: 'Hotel',
-    description: '住院與出院記錄',
-    color: '#0288d1',
-    category: 'history'
-  },
   hbcvdata: {
     id: 'hbcvdata',
-    label: 'B/C肝炎',
+    label: 'BC肝',
     icon: 'Biotech',
     description: 'B型、C型肝炎相關資料',
     color: '#388e3c',
     category: 'lab'
   },
-  medication: {
-    id: 'medication',
-    label: '用藥記錄',
-    icon: 'Medication',
-    description: '近期處方用藥',
-    color: '#f57c00',
-    category: 'medication'
-  },
-  lab: {
-    id: 'lab',
-    label: '檢驗記錄',
-    icon: 'Science',
-    description: '實驗室檢驗數值',
-    color: '#0097a7',
-    category: 'lab'
-  },
-  chinesemed: {
-    id: 'chinesemed',
-    label: '中藥記錄',
-    icon: 'Spa',
-    description: '中醫處方記錄',
-    color: '#689f38',
-    category: 'medication'
-  },
-  imaging: {
-    id: 'imaging',
-    label: '影像報告',
-    icon: 'ImageSearch',
-    description: '影像學檢查報告',
-    color: '#5e35b1',
-    category: 'imaging'
+  patientSummary: {
+    id: 'patientSummary',
+    label: '備註資料',
+    icon: 'Person',
+    description: '雲端註記資料、基本資訊',
+    color: '#1976d2',
+    category: 'basic'
   }
 };
 
