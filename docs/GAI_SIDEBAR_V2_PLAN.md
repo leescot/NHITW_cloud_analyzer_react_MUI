@@ -574,14 +574,94 @@ gaiSidebarConfigVersion: 2
 - ✅ Markdown 行距緊湊，無多餘空白
 - ✅ 尾隨空格自動移除，嵌套列表正確顯示
 
+11. **完全移除 V1 架構程式碼** (2026-01-01)
+   - 問題：V1 和 V2 的自動分析邏輯同時運行，導致 5 個 API 呼叫（4 個 V1 + 1 個 V2）
+   - 根本原因：V1 的 useEffect 未被停用，且 V1 相關程式碼仍存在
+   - 解決方案：完全移除所有 V1 相關程式碼
+   - 修改檔案：src/components/Sidebar.jsx
+   - 移除內容：
+     - V1 State：tabConfigs, customTabConfig, analysisResults, loadingStates, errorStates, useV2
+     - V1 Imports：loadSidebarTabs, loadCustomTabConfig, TabConfigDialog
+     - V1 函數：getTemplate, handleAnalyze, runAnalysisForKey, handleQuickQuestion, renderContentList
+     - V1 useEffect：自動分析邏輯
+     - V1 渲染：動態 4 Tab 渲染邏輯、配置對話框條件渲染
+     - V1 UI：Header 的「全部重新分析」按鈕
+   - 結果：只保留 V2 架構，自動分析只執行單一選定模板
+
+12. **Markdown 格式清理與優化** (2026-01-01)
+   - 問題：AI 回傳的 Markdown 包含兩個空格強制換行符（`  \n`）和多餘空行，導致列表顯示行距過寬
+   - 解決方案一：在 Sidebar.jsx 收到 API 回應時預處理內容
+     - 新增 cleanMarkdownContent() 函數
+     - 移除行尾空格（包括兩個空格強制換行）
+     - 壓縮 3+ 個連續空行為 2 個
+     - 移除列表項目之間的多餘空行
+     - 確保表格前後有空行（支援表格解析）
+     - 應用於 runAutoAnalysis, runButtonAnalysis, sendChatMessage
+   - 解決方案二：在 MarkdownRenderer.jsx 增強預處理邏輯
+     - 與 Sidebar.jsx 相同的清理邏輯
+     - 雙重保險確保格式正確
+   - 影響檔案：
+     - src/components/Sidebar.jsx (新增 cleanMarkdownContent 函數)
+     - src/components/sidebar/MarkdownRenderer.jsx (增強預處理邏輯)
+   - 結果：console.log 和顯示都不再有 `  \n` 格式，列表更緊湊
+
+13. **MarkdownRenderer 樣式優化** (2026-01-01)
+   - 問題：列表項目之間行距過寬，即使清理了格式仍有明顯間隔
+   - 解決方案：
+     - 減少行高：lineHeight 從 1.5 → 1.4 → 1.1（最終值）
+     - 移除列表項目邊距：li 的 mb 從 0.2 → 0
+     - 移除嵌套列表上邊距：'& > ul, & > ol': { mt: 0, mb: 0 }
+     - 段落邊距：p 標籤 m: 0（所有方向零邊距）
+     - Typography 內聯顯示：display: 'inline'
+     - 列表容器優化：添加 listStylePosition: 'outside'
+   - 修改檔案：src/components/sidebar/MarkdownRenderer.jsx
+   - 結果：列表顯示極度緊湊，行距最小化
+
+14. **Chat 對話 Tab 整合 Markdown 支援** (2026-01-01)
+   - 問題：Chat 對話中 AI 回應只顯示純文字，無法顯示 Markdown 格式和表格
+   - 解決方案一：整合 MarkdownRenderer
+     - Import MarkdownRenderer 組件
+     - 條件渲染：AI 訊息使用 MarkdownRenderer，使用者訊息保持純文字
+   - 解決方案二：改為統一左對齊區塊式設計
+     - 原因：傳統左右對話框模式寬度限制（maxWidth: 85%）導致表格無法完整顯示
+     - 新設計：所有訊息統一左對齊，全寬度顯示（width: 100%）
+     - 視覺區分：使用左側色條區分使用者（藍色）和 AI（灰色）訊息
+     - 標籤優化：顯示在訊息上方，附帶 metadata（tokens、執行時間）
+   - 修改檔案：src/components/sidebar/Tab3Chat.jsx
+   - 結果：
+     - AI 訊息支援完整 Markdown 格式（列表、表格、粗體、連結等）
+     - 表格有完整寬度可以正確顯示
+     - 區塊式設計更適合複雜內容展示
+
+15. **表格顯示優化** (2026-01-01)
+   - 問題：表格在對話框中可能因寬度限制無法正確顯示
+   - 解決方案：
+     - TableContainer 添加 overflowX: 'auto'（水平滾動）
+     - Table 設定 minWidth: 'auto'（自適應寬度）
+     - 預處理邏輯確保表格前後有空行（.replace 添加空行）
+   - 修改檔案：
+     - src/components/sidebar/MarkdownRenderer.jsx (表格組件優化)
+     - src/components/Sidebar.jsx (cleanMarkdownContent 添加表格處理)
+   - 結果：表格可以正確解析和顯示，過寬時可水平滾動
+
+**測試狀態**：
+- ✅ 自動分析只執行單一 API 呼叫（已修復 5 個呼叫問題）
+- ✅ Markdown 格式清理正確（無 `  \n` 和多餘空行）
+- ✅ 列表顯示緊湊（lineHeight: 1.1, mb: 0）
+- ✅ Chat 對話支援 Markdown 和表格顯示
+- ✅ 區塊式設計提供完整寬度給表格
+- ✅ 表格前後空行處理正確，可正常解析
+
 **待辦事項**：
+- [x] 移除 V1 架構程式碼
+- [x] Markdown 格式優化
+- [x] Chat Tab Markdown 支援
 - [ ] 移除 debug console.log 語句
 - [ ] Phase 5 整合測試和 UI 優化
 - [ ] 實際使用環境測試（切換病人、上傳 JSON、session 變化）
 - [ ] 效能測試（多個按鈕同時執行）
 - [ ] 文件更新（CLAUDE.md）
-- [ ] 更新 preset templates 的 system prompts（移除 JSON 格式要求，改為 Markdown 格式指引）
 
 ---
 
-**最後更新**: 2025-12-31
+**最後更新**: 2026-01-01

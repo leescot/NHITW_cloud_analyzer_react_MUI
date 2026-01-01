@@ -21,17 +21,30 @@ import {
 } from '@mui/material';
 
 const MarkdownRenderer = ({ content, variant = 'body2' }) => {
-  // Preprocess content to remove trailing spaces that cause unwanted line breaks
+  // Preprocess content to fix markdown formatting issues
   const processedContent = content
-    ? content.replace(/\s+$/gm, '') // Remove trailing spaces at end of each line
+    ? content
+        .replace(/\s+$/gm, '')                              // Remove trailing spaces at end of each line
+        .replace(/\n{3,}/g, '\n\n')                         // Compress 3+ consecutive newlines to 2
+        .replace(/^(\s*[-*+]\s+.+)\n+(?=\s*[-*+])/gm, '$1\n')  // Remove extra blank lines between list items
+        .replace(/([^\n])\n(\|[^\n]+\|)/g, '$1\n\n$2')      // Ensure blank line before table
+        .replace(/(\|[^\n]+\|)\n([^\n|])/g, '$1\n\n$2')     // Ensure blank line after table
     : '';
 
   // Custom components to use MUI styling
   const components = {
     // Table components
     table: ({ node, ...props }) => (
-      <TableContainer component={Paper} variant="outlined" sx={{ my: 2 }}>
-        <Table size="small" {...props} />
+      <TableContainer
+        component={Paper}
+        variant="outlined"
+        sx={{
+          my: 2,
+          maxWidth: '100%',
+          overflowX: 'auto'
+        }}
+      >
+        <Table size="small" sx={{ minWidth: 'auto' }} {...props} />
       </TableContainer>
     ),
     thead: ({ node, ...props }) => <TableHead {...props} />,
@@ -54,7 +67,7 @@ const MarkdownRenderer = ({ content, variant = 'body2' }) => {
     p: ({ node, ...props }) => (
       <Typography
         variant={variant}
-        sx={{ mb: 0, lineHeight: 1.5, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}
+        sx={{ m: 0, lineHeight: 1.1, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }}
         {...props}
       />
     ),
@@ -65,14 +78,55 @@ const MarkdownRenderer = ({ content, variant = 'body2' }) => {
 
     // List components
     ul: ({ node, ...props }) => (
-      <Box component="ul" sx={{ m: 0, pl: 2, mb: 0 }} {...props} />
+      <Box
+        component="ul"
+        sx={{
+          m: 0,
+          p: 0,
+          pl: 2.5,
+          listStylePosition: 'outside',
+          '& ul': { mt: 0, mb: 0, pt: 0 },
+          '& > li': { mb: 0 }
+        }}
+        {...props}
+      />
     ),
     ol: ({ node, ...props }) => (
-      <Box component="ol" sx={{ m: 0, pl: 2, mb: 0 }} {...props} />
+      <Box
+        component="ol"
+        sx={{
+          m: 0,
+          p: 0,
+          pl: 2.5,
+          listStylePosition: 'outside',
+          '& ol': { mt: 0, mb: 0, pt: 0 },
+          '& > li': { mb: 0 }
+        }}
+        {...props}
+      />
     ),
     li: ({ node, ...props }) => (
-      <Box component="li" sx={{ mb: 0, mt: 0 }}>
-        <Typography variant={variant} component="span" sx={{ lineHeight: 1.5, whiteSpace: 'pre-wrap', wordBreak: 'break-word' }} {...props} />
+      <Box
+        component="li"
+        sx={{
+          mb: 0,
+          mt: 0,
+          lineHeight: 1.1,
+          '& > p': { m: 0, display: 'inline', lineHeight: 1.1 },
+          '& > ul, & > ol': { mt: 0, mb: 0 }
+        }}
+      >
+        <Typography
+          variant={variant}
+          component="span"
+          sx={{
+            lineHeight: 1.1,
+            whiteSpace: 'pre-wrap',
+            wordBreak: 'break-word',
+            display: 'inline'
+          }}
+          {...props}
+        />
       </Box>
     ),
 

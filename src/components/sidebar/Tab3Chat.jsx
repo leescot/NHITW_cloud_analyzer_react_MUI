@@ -15,6 +15,7 @@ import {
   Chip
 } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
+import MarkdownRenderer from './MarkdownRenderer';
 
 const Tab3Chat = ({
   config,
@@ -108,35 +109,44 @@ const Tab3Chat = ({
         )}
 
         {history.map((message, index) => (
-          <Box
+          <Paper
             key={index}
             sx={{
-              display: 'flex',
-              justifyContent: message.role === 'user' ? 'flex-end' : 'flex-start'
+              p: 2,
+              width: '100%',
+              bgcolor: message.role === 'user' ? '#e3f2fd' : '#f9f9f9',
+              borderLeft: 4,
+              borderColor: message.role === 'user' ? 'primary.main' : 'grey.400',
+              borderRadius: 1
             }}
           >
-            <Paper
-              sx={{
-                p: 1.5,
-                maxWidth: '85%',
-                bgcolor: message.role === 'user' ? '#e3f2fd' : '#f5f5f5',
-                borderRadius: 2
-              }}
-            >
-              <Typography variant="caption" color="text.secondary" sx={{ mb: 0.5, display: 'block' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1, gap: 1 }}>
+              <Typography
+                variant="caption"
+                fontWeight="bold"
+                sx={{
+                  color: message.role === 'user' ? 'primary.main' : 'grey.700',
+                  textTransform: 'uppercase',
+                  letterSpacing: 0.5
+                }}
+              >
                 {message.role === 'user' ? '您' : 'AI 助手'}
               </Typography>
+              {message.metadata && (
+                <Typography variant="caption" color="text.secondary">
+                  {message.metadata.tokens && `• ${message.metadata.tokens} tokens`}
+                  {message.metadata.duration && ` • ${message.metadata.duration}s`}
+                </Typography>
+              )}
+            </Box>
+            {message.role === 'assistant' ? (
+              <MarkdownRenderer content={message.content} variant="body2" />
+            ) : (
               <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>
                 {message.content}
               </Typography>
-              {message.metadata && (
-                <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>
-                  {message.metadata.tokens && `Tokens: ${message.metadata.tokens} | `}
-                  {message.metadata.duration && `時間: ${message.metadata.duration}s`}
-                </Typography>
-              )}
-            </Paper>
-          </Box>
+            )}
+          </Paper>
         ))}
 
         {/* Loading indicator */}

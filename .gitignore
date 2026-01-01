@@ -71,3 +71,4 @@ zip/
 
 # Claude Code configuration
 # CLAUDE.md
+.claude/settings.local.json
