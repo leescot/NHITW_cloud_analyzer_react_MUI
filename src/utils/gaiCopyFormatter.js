@@ -7,6 +7,8 @@
  * 2. XML format with AI prompt
  */
 
+import { deidentify } from './piiUtils';
+
 /**
  * Format patient summary data
  * @param {Array} patientSummaryData - Patient summary data array
@@ -241,7 +243,8 @@ export const formatImaging = (imagingData) => {
                     }
                 }
 
-                text += `  報告: ${reportResult.trim()}\n`;
+                const cleanedReport = deidentify(reportResult.trim());
+                text += `  報告: ${cleanedReport}\n`;
             }
 
             text += '\n';

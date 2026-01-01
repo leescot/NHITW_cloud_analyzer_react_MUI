@@ -37,7 +37,7 @@ export const PRESET_TEMPLATES = {
     category: 'basic',
     description: '摘要影像學報告的重要發現',
     dataTypes: ['imaging'],
-    systemPrompt: `TL;DR of imaging report. Use Markdown LIST formatting. DO NOT USE TABLES. Output format in zh-TW:
+    systemPrompt: `TL;DR of imaging report. Use Markdown LIST formatting. 臨床有重要性的異常報告請用粗體標記。 Output format in zh-TW:
 - {image exam} 
   - {Date 1}: {summary of report}
   - {Date 2}: {summary of report}`

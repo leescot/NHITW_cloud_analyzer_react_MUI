@@ -49,7 +49,7 @@ class CerebrasProvider extends BaseProvider {
             // Free tier 限制: 60K TPM，需考慮 input + output 總和
             // 醫療分析通常輸出 500-2000 tokens，但推理模型 (Reasoning models) 
             // 產生的推理過程非常長，若設太小會導致輸出被截斷而看不到結果。
-            const defaultMaxTokens = 16384;
+            const defaultMaxTokens = 32768;
 
             const requestBody = {
                 model: options.model || this.defaultModel,

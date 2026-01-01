@@ -723,4 +723,13 @@ gaiSidebarConfigVersion: 2
         - 三個 Tab 的設定介面全面改為 Grid 與 Card 導向的設計。
         - 引入「點擊展開」的摺疊式槽位編輯，大幅縮短設定頁面的視覺長度。
 
+23. **影像報告去個資化 (PII De-identification) (2026-01-01)**
+    - 新增 `src/utils/piiUtils.js`：實作醫療報告去個資化正則表達式，涵蓋病患、醫護人員及系統編號。
+    - 更新 `src/utils/gaiCopyFormatter.js`：在 `formatImaging` 流程中整合去個資化，確保複製到 GAI 的報告內容已匿名化。
+    - **正則優化**：針對 `Radiologist` 欄位優化，支援英文點號及避免跨行誤刪。
+
+24. **模型與模板參數優化 (2026-01-01)**
+    - **Cerebras 限制提升**：將 `CerebrasProvider` 的 `defaultMaxTokens` 從 16,384 提升至 32,768，以完整顯示推理模型的長輸出。
+    - **影像摘要 Prompt 升級**：更新 `presetTemplates.js` 中的 `imaging_findings` 模板，要求輸出的臨床異常需以**粗體**標註，提升閱讀效率。
+
 **最後更新**: 2026-01-01
