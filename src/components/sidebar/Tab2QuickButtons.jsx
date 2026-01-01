@@ -4,44 +4,39 @@
  * 顯示 6 個可配置的分析按鈕，點擊執行分析，結果可展開/收合
  */
 
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Box,
   Typography,
   Button,
   CircularProgress,
-  Collapse,
   IconButton,
   Paper,
-  Alert
+  Alert,
+  Grid,
+  Tooltip,
+  Fade,
+  Divider
 } from '@mui/material';
-import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import RefreshIcon from '@mui/icons-material/Refresh';
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
+import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import * as MuiIcons from '@mui/icons-material';
 import tabTemplateManager from '../../services/gai/tabs';
 import MarkdownRenderer from './MarkdownRenderer';
 
 const Tab2QuickButtons = ({ buttons, results, loadings, errors, onButtonClick }) => {
-  console.log('[Tab2QuickButtons] Rendering with buttons:', buttons);
-
-  // Track which buttons are expanded
-  const [expandedButtons, setExpandedButtons] = useState({});
-
-  const toggleExpand = (slotIndex) => {
-    setExpandedButtons(prev => ({
-      ...prev,
-      [slotIndex]: !prev[slotIndex]
-    }));
-  };
-
-  // Get icon component from name
-  const getIconComponent = (iconName) => {
-    return MuiIcons[iconName] || MuiIcons.Help;
-  };
+  // Track selected button slot
+  const [selectedSlot, setSelectedSlot] = useState(null);
 
   // Filter enabled buttons
   const enabledButtons = buttons?.filter(btn => btn.enabled) || [];
+
+  // Get icon component from name
+  const getIconComponent = (iconName) => {
+    const Icon = MuiIcons[iconName] || MuiIcons.Help;
+    return <Icon fontSize="small" />;
+  };
 
   if (enabledButtons.length === 0) {
     return (
@@ -54,87 +49,159 @@ const Tab2QuickButtons = ({ buttons, results, loadings, errors, onButtonClick })
     );
   }
 
+  const activeBtn = selectedSlot !== null ? enabledButtons.find(b => b.slotIndex === selectedSlot) : null;
+  const isLoading = activeBtn ? loadings[activeBtn.slotIndex] : false;
+  const error = activeBtn ? errors[activeBtn.slotIndex] : null;
+  const result = activeBtn ? results[activeBtn.slotIndex] || [] : [];
+  const hasResult = result.length > 0;
+
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-      {enabledButtons.map((buttonConfig) => {
-        const { slotIndex, type, templateId, customConfig, label, icon } = buttonConfig;
-        const isLoading = loadings[slotIndex] || false;
-        const error = errors[slotIndex] || null;
-        const result = results[slotIndex] || [];
-        const isExpanded = expandedButtons[slotIndex] || false;
-        const hasResults = result.length > 0;
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', gap: 2 }}>
+      {/* Top Buttons Grid */}
+      <Box>
+        <Typography variant="caption" color="text.secondary" sx={{ mb: 1, display: 'block', fontWeight: 'bold' }}>
+          快速分析工具
+        </Typography>
+        <Grid container spacing={1}>
+          {enabledButtons.map((buttonConfig) => {
+            const { slotIndex, type, templateId, label, icon } = buttonConfig;
+            const isBtnLoading = loadings[slotIndex] || false;
+            const isSelected = selectedSlot === slotIndex;
+            const template = type === 'preset' ? tabTemplateManager.getTemplate(templateId) : null;
+            const displayLabel = label || template?.name || '未命名';
+            const iconName = icon || template?.icon || 'AutoAwesome';
 
-        // Get template info (for preset buttons)
-        const template = type === 'preset' ? tabTemplateManager.getTemplate(templateId) : null;
-        const displayLabel = label || template?.name || '未命名';
-        const IconComponent = getIconComponent(icon || template?.icon || 'Help');
+            return (
+              <Grid item xs={4} key={slotIndex}>
+                <Tooltip title={displayLabel} arrow>
+                  <Button
+                    variant={isSelected ? "outlined" : "outlined"}
+                    color={isSelected ? "primary" : "inherit"}
+                    fullWidth
+                    onClick={() => {
+                      setSelectedSlot(slotIndex);
+                      onButtonClick(buttonConfig);
+                    }}
+                    sx={{
+                      height: 52,
+                      display: 'flex',
+                      flexDirection: 'column',
+                      gap: 0.25,
+                      textTransform: 'none',
+                      minWidth: 0,
+                      borderWidth: isSelected ? 2 : 1,
+                      borderColor: isSelected ? 'primary.main' : 'divider',
+                      bgcolor: isSelected ? 'primary.50' : 'transparent',
+                      '&:hover': {
+                        borderWidth: isSelected ? 2 : 1,
+                        bgcolor: isSelected ? 'primary.100' : 'rgba(0,0,0,0.04)'
+                      },
+                      '& .MuiButton-startIcon': { m: 0 }
+                    }}
+                  >
+                    {isBtnLoading ? (
+                      <CircularProgress size={18} color="inherit" />
+                    ) : (
+                      getIconComponent(iconName)
+                    )}
+                    <Typography
+                      variant="caption"
+                      noWrap
+                      sx={{
+                        width: '100%',
+                        fontSize: '0.65rem',
+                        fontWeight: isSelected ? 'bold' : 'normal'
+                      }}
+                    >
+                      {displayLabel}
+                    </Typography>
+                  </Button>
+                </Tooltip>
+              </Grid>
+            );
+          })}
+        </Grid>
+      </Box>
 
-        return (
-          <Paper key={slotIndex} variant="outlined" sx={{ p: 2 }}>
-            {/* Button Header */}
-            <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: hasResults ? 1 : 0 }}>
-              <Button
-                variant="contained"
-                color="primary"
-                startIcon={isLoading ? <CircularProgress size={16} color="inherit" /> : <IconComponent />}
-                onClick={() => onButtonClick(buttonConfig)}
-                disabled={isLoading}
-                sx={{ flex: 1 }}
-              >
-                {displayLabel}
-              </Button>
+      <Divider />
 
-              {/* Expand/Collapse button (only show if has results) */}
-              {hasResults && (
-                <IconButton
-                  size="small"
-                  onClick={() => toggleExpand(slotIndex)}
-                  sx={{ transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)', transition: 'transform 0.2s' }}
-                >
-                  {isExpanded ? <ExpandLessIcon /> : <ExpandMoreIcon />}
-                </IconButton>
-              )}
+      {/* Shared Result Area */}
+      <Box sx={{ flex: 1, display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+            <AutoAwesomeIcon color="primary" fontSize="small" />
+            <Typography variant="subtitle2" fontWeight="bold">
+              {activeBtn ? (activeBtn.label || tabTemplateManager.getTemplate(activeBtn.templateId)?.name) : '分析結果'}
+            </Typography>
+          </Box>
+          <IconButton
+            size="small"
+            onClick={() => activeBtn && onButtonClick(activeBtn)}
+            disabled={isLoading || !activeBtn}
+            color="primary"
+          >
+            <RefreshIcon fontSize="small" />
+          </IconButton>
+        </Box>
+
+        <Box
+          sx={{
+            flex: 1,
+            overflowY: 'auto',
+            position: 'relative',
+            pr: 1
+          }}
+        >
+          {isLoading && !hasResult && (
+            <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: 2, py: 4 }}>
+              <CircularProgress size={30} />
+              <Typography variant="body2" color="text.secondary">正在產生分析結果...</Typography>
             </Box>
+          )}
 
-            {/* Error State */}
-            {error && (
-              <Alert
-                severity="error"
-                action={
-                  <IconButton size="small" onClick={() => onButtonClick(buttonConfig)} color="inherit">
-                    <RefreshIcon fontSize="small" />
-                  </IconButton>
+          {error && (
+            <Alert
+              severity="error"
+              sx={{ mb: 2 }}
+              action={
+                <Button color="inherit" size="small" onClick={() => activeBtn && onButtonClick(activeBtn)}>
+                  重試
+                </Button>
+              }
+            >
+              {error}
+            </Alert>
+          )}
+
+          {!isLoading && !hasResult && !error && (
+            <Box sx={{ textAlign: 'center', py: 6, color: 'text.disabled' }}>
+              <InfoOutlinedIcon sx={{ fontSize: 40, mb: 1, opacity: 0.5 }} />
+              <Typography variant="body2">尚無分析結果</Typography>
+              <Typography variant="caption">點擊上方按鈕開始分析</Typography>
+            </Box>
+          )}
+
+          <Fade in={hasResult}>
+            <Box>
+              {result.map((item, index) => {
+                if (typeof item === 'string' && (
+                  item.startsWith('(Total_tokens:') ||
+                  item.startsWith('Total_tokens:') ||
+                  item.includes('執行時間:')
+                )) {
+                  return null;
                 }
-                sx={{ mt: 1 }}
-              >
-                {error}
-              </Alert>
-            )}
 
-            {/* Results Collapse */}
-            <Collapse in={isExpanded}>
-              <Box sx={{ mt: 2, pl: 2, borderLeft: '3px solid #1976d2' }}>
-                {result.map((item, index) => {
-                  // Filter out token and time stats
-                  if (typeof item === 'string' && (
-                    item.startsWith('(Total_tokens:') ||
-                    item.startsWith('Total_tokens:') ||
-                    item.includes('執行時間:')
-                  )) {
-                    return null;
-                  }
-
-                  return (
-                    <Box key={index}>
-                      <MarkdownRenderer content={item} variant="body2" />
-                    </Box>
-                  );
-                })}
-              </Box>
-            </Collapse>
-          </Paper>
-        );
-      })}
+                return (
+                  <Box key={index} sx={{ mb: 1 }}>
+                    <MarkdownRenderer content={item} variant="body2" />
+                  </Box>
+                );
+              })}
+            </Box>
+          </Fade>
+        </Box>
+      </Box>
     </Box>
   );
 };

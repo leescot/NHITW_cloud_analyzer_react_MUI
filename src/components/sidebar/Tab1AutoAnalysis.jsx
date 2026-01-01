@@ -4,15 +4,25 @@
  * 顯示單一自動執行的分析結果
  */
 
-import { Box, Typography, CircularProgress, IconButton, Paper } from '@mui/material';
+import {
+  Box,
+  Typography,
+  CircularProgress,
+  IconButton,
+  Paper,
+  Alert,
+  Divider,
+  Fade
+} from '@mui/material';
 import RefreshIcon from '@mui/icons-material/Refresh';
-import WarningIcon from '@mui/icons-material/Warning';
+import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import tabTemplateManager from '../../services/gai/tabs';
 import MarkdownRenderer from './MarkdownRenderer';
 
 const Tab1AutoAnalysis = ({ config, result, loading, error, onRetry }) => {
   // 取得模板資訊
   const template = config ? tabTemplateManager.getTemplate(config.templateId) : null;
+  const hasResult = result && result.length > 0;
 
   // 停用狀態
   if (!config || !config.enabled) {
@@ -26,112 +36,107 @@ const Tab1AutoAnalysis = ({ config, result, loading, error, onRetry }) => {
     );
   }
 
-  // Loading 狀態
-  if (loading) {
-    return (
-      <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', py: 4, gap: 2 }}>
-        <CircularProgress size={30} color="error" />
-        <Typography variant="body2" color="text.secondary">
-          正在分析...
-        </Typography>
-        {template && (
-          <Typography variant="caption" color="text.secondary">
-            {template.name}
-          </Typography>
-        )}
-      </Box>
-    );
-  }
-
-  // 錯誤狀態
-  if (error) {
-    return (
-      <Paper
-        variant="outlined"
-        sx={{
-          p: 2,
-          bgcolor: '#fff3e0',
-          borderColor: '#ffcc80',
-          display: 'flex',
-          alignItems: 'center',
-          justifyContent: 'space-between',
-          gap: 2
-        }}
-      >
-        <Box sx={{ flex: 1 }}>
-          <Typography variant="body2" color="error" fontWeight="medium" gutterBottom>
-            分析失敗
-          </Typography>
-          <Typography variant="caption" color="text.secondary">
-            {error}
-          </Typography>
+  return (
+    <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', gap: 2 }}>
+      {/* Header Area */}
+      <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+          <AutoAwesomeIcon color="error" fontSize="small" />
+          <Box>
+            <Typography variant="subtitle2" fontWeight="bold">
+              {template?.name || '自動分析'}
+            </Typography>
+            <Typography variant="caption" color="text.secondary">
+              載入病歷時自動產生的 AI 摘要
+            </Typography>
+          </Box>
         </Box>
-        <IconButton size="small" onClick={onRetry} color="primary">
+        <IconButton size="small" onClick={onRetry} disabled={loading} color="primary">
           <RefreshIcon fontSize="small" />
         </IconButton>
-      </Paper>
-    );
-  }
+      </Box>
 
-  // 無結果狀態
-  if (!result || result.length === 0) {
-    return (
-      <Box sx={{ textAlign: 'center', py: 4, color: 'text.secondary', opacity: 0.7 }}>
-        <Typography variant="body2">無分析項目</Typography>
-        {template && (
-          <Typography variant="caption" display="block" sx={{ mt: 1 }}>
-            {template.description}
-          </Typography>
+      <Divider />
+
+      <Divider />
+
+      {/* Result Container */}
+      <Box
+        sx={{
+          flex: 1,
+          overflowY: 'auto',
+          position: 'relative',
+          pr: 1 // Add some padding for scrollbar
+        }}
+      >
+        {loading && !hasResult && (
+          <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', justifyContent: 'center', height: '100%', gap: 2, py: 4 }}>
+            <CircularProgress size={30} color="error" />
+            <Typography variant="body2" color="text.secondary">AI 正在自動分析病歷...</Typography>
+          </Box>
         )}
-      </Box>
-    );
-  }
 
-  // 顯示結果
-  return (
-    <Box>
-      {/* 標題區域 */}
-      {template && (
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2, color: 'error.main' }}>
-          <WarningIcon sx={{ mr: 1 }} />
-          <Typography variant="subtitle2" fontWeight="bold">
-            {template.name}
-          </Typography>
-        </Box>
-      )}
+        {error && (
+          <Alert
+            severity="error"
+            sx={{ mb: 2 }}
+            action={
+              <Button color="inherit" size="small" onClick={onRetry}>
+                重試
+              </Button>
+            }
+          >
+            {error}
+          </Alert>
+        )}
 
-      {/* 結果列表 */}
-      <Box>
-        {result.map((item, index) => {
-          // 過濾掉 token 和時間統計資訊
-          if (typeof item === 'string' && (
-            item.startsWith('(Total_tokens:') ||
-            item.startsWith('Total_tokens:') ||
-            item.includes('執行時間:')
-          )) {
-            return null;
-          }
-
-          return (
-            <Box key={index}>
-              <MarkdownRenderer content={item} variant="body2" />
-            </Box>
-          );
-        })}
-      </Box>
-
-      {/* 顯示統計資訊（如果有） */}
-      {result.some(item =>
-        typeof item === 'string' && item.startsWith('(Total_tokens:')
-      ) && (
-        <Box sx={{ mt: 2, pt: 2, borderTop: '1px solid #e0e0e0' }}>
-          <Typography variant="caption" color="text.secondary">
-            {result.find(item =>
-              typeof item === 'string' && item.startsWith('(Total_tokens:')
+        {!loading && !hasResult && !error && (
+          <Box sx={{ textAlign: 'center', py: 6, color: 'text.disabled' }}>
+            <Typography variant="body2">目前無自動分析內容</Typography>
+            {template && (
+              <Typography variant="caption" display="block" sx={{ mt: 1 }}>
+                {template.description}
+              </Typography>
             )}
-          </Typography>
-        </Box>
-      )}
+          </Box>
+        )}
+
+        <Fade in={hasResult}>
+          <Box>
+            {result.map((item, index) => {
+              // 過濾掉 token 和時間統計資訊
+              if (typeof item === 'string' && (
+                item.startsWith('(Total_tokens:') ||
+                item.startsWith('Total_tokens:') ||
+                item.includes('執行時間:')
+              )) {
+                return null;
+              }
+
+              return (
+                <Box key={index} sx={{ mb: 1 }}>
+                  <MarkdownRenderer content={item} variant="body2" />
+                </Box>
+              );
+            })}
+
+            {/* 統計資訊 */}
+            {result.some(item => typeof item === 'string' && item.startsWith('(Total_tokens:')) && (
+              <Box sx={{
+                mt: 1,
+                pt: 1,
+                borderTop: '1px dashed #eee',
+                textAlign: 'right',
+                opacity: 0.6
+              }}>
+                <Typography variant="caption" sx={{ fontSize: '0.65rem' }}>
+                  {result.find(item => typeof item === 'string' && item.startsWith('(Total_tokens:'))}
+                </Typography>
+              </Box>
+            )}
+          </Box>
+        </Fade>
+      </Box>
     </Box>
   );
 };

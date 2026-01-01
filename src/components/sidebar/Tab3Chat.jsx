@@ -12,9 +12,14 @@ import {
   IconButton,
   Paper,
   CircularProgress,
-  Chip
+  Chip,
+  Divider,
+  Avatar
 } from '@mui/material';
 import SendIcon from '@mui/icons-material/Send';
+import ChatIcon from '@mui/icons-material/Chat';
+import AccountCircleIcon from '@mui/icons-material/AccountCircle';
+import PsychologyIcon from '@mui/icons-material/Psychology';
 import MarkdownRenderer from './MarkdownRenderer';
 
 const Tab3Chat = ({
@@ -27,14 +32,12 @@ const Tab3Chat = ({
   onSendMessage,
   onQuickQuestion
 }) => {
-  console.log('[Tab3Chat] Rendering with config:', config);
-
   const messagesEndRef = useRef(null);
 
-  // Auto-scroll to bottom when new messages arrive
+  // Auto-scroll to bottom
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
-  }, [history]);
+  }, [history, loading]);
 
   const handleSend = () => {
     if (userInput.trim() && !loading) {
@@ -49,7 +52,6 @@ const Tab3Chat = ({
     }
   };
 
-  // Chat disabled state
   if (!config || !config.enabled) {
     return (
       <Box sx={{ textAlign: 'center', py: 4, color: 'text.secondary' }}>
@@ -65,132 +67,167 @@ const Tab3Chat = ({
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', gap: 2 }}>
-      {/* Quick Questions */}
-      {quickQuestions.length > 0 && (
+      {/* Session Header */}
+      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
+        <ChatIcon color="primary" fontSize="small" />
         <Box>
-          <Typography variant="caption" color="text.secondary" gutterBottom>
-            快速提問：
-          </Typography>
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 0.5 }}>
-            {quickQuestions.map((question, index) => (
-              <Chip
-                key={index}
-                label={question}
-                size="small"
-                onClick={() => onQuickQuestion(question)}
-                sx={{ cursor: 'pointer' }}
-                color="primary"
-                variant="outlined"
-              />
-            ))}
-          </Box>
+          <Typography variant="subtitle2" fontWeight="bold">AI 智慧對答</Typography>
+          <Typography variant="caption" color="text.secondary">基於病歷資料進行自由對話</Typography>
         </Box>
-      )}
+      </Box>
 
-      {/* Chat History */}
+      <Divider />
+
+      {/* Chat History Area */}
       <Box
         sx={{
           flex: 1,
           overflowY: 'auto',
           display: 'flex',
           flexDirection: 'column',
-          gap: 1.5,
-          minHeight: 300,
-          maxHeight: 500
+          gap: 2,
+          px: 0.5,
+          minHeight: 200,
+          maxHeight: 500,
+          '&::-webkit-scrollbar': { width: 4 },
+          '&::-webkit-scrollbar-thumb': { bgcolor: 'rgba(0,0,0,0.1)', borderRadius: 4 }
         }}
       >
         {history.length === 0 && !loading && (
-          <Box sx={{ textAlign: 'center', py: 4, color: 'text.secondary', opacity: 0.7 }}>
-            <Typography variant="body2">尚無對話</Typography>
-            <Typography variant="caption" display="block" sx={{ mt: 1 }}>
-              輸入問題或點擊快速提問開始對話
-            </Typography>
+          <Box sx={{ textAlign: 'center', py: 6, color: 'text.disabled', opacity: 0.7 }}>
+            <PsychologyIcon sx={{ fontSize: 40, mb: 1, opacity: 0.5 }} />
+            <Typography variant="body2">準備好開始對話了嗎？</Typography>
+            <Typography variant="caption">您可以詢問病歷細節、用藥建議或檢驗摘要</Typography>
           </Box>
         )}
 
-        {history.map((message, index) => (
-          <Paper
-            key={index}
-            sx={{
-              p: 2,
-              width: '100%',
-              bgcolor: message.role === 'user' ? '#e3f2fd' : '#f9f9f9',
-              borderLeft: 4,
-              borderColor: message.role === 'user' ? 'primary.main' : 'grey.400',
-              borderRadius: 1
-            }}
-          >
-            <Box sx={{ display: 'flex', alignItems: 'center', mb: 1, gap: 1 }}>
-              <Typography
-                variant="caption"
-                fontWeight="bold"
-                sx={{
-                  color: message.role === 'user' ? 'primary.main' : 'grey.700',
-                  textTransform: 'uppercase',
-                  letterSpacing: 0.5
-                }}
-              >
-                {message.role === 'user' ? '您' : 'AI 助手'}
-              </Typography>
-              {message.metadata && (
-                <Typography variant="caption" color="text.secondary">
-                  {message.metadata.tokens && `• ${message.metadata.tokens} tokens`}
+        {history.map((message, index) => {
+          const isUser = message.role === 'user';
+          return (
+            <Box
+              key={index}
+              sx={{
+                display: 'flex',
+                flexDirection: 'column',
+                alignItems: isUser ? 'flex-end' : 'flex-start',
+                width: '100%'
+              }}
+            >
+              <Box sx={{ display: 'flex', alignItems: 'flex-start', gap: 1, maxWidth: '90%' }}>
+                {!isUser && (
+                  <Avatar sx={{ width: 24, height: 24, bgcolor: 'error.light' }}>
+                    <PsychologyIcon sx={{ fontSize: 16 }} />
+                  </Avatar>
+                )}
+                <Paper
+                  elevation={0}
+                  sx={{
+                    p: 1.5,
+                    bgcolor: isUser ? 'primary.main' : '#f0f2f5',
+                    color: isUser ? 'primary.contrastText' : 'text.primary',
+                    borderRadius: isUser ? '16px 16px 4px 16px' : '16px 16px 16px 4px',
+                    border: isUser ? 'none' : '1px solid #e0e0e0'
+                  }}
+                >
+                  {isUser ? (
+                    <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap', lineHeight: 1.5 }}>
+                      {message.content}
+                    </Typography>
+                  ) : (
+                    <MarkdownRenderer content={message.content} variant="body2" />
+                  )}
+                </Paper>
+                {isUser && (
+                  <Avatar sx={{ width: 24, height: 24, bgcolor: 'primary.light' }}>
+                    <AccountCircleIcon sx={{ fontSize: 16 }} />
+                  </Avatar>
+                )}
+              </Box>
+
+              {message.metadata && !isUser && (
+                <Typography variant="caption" color="text.disabled" sx={{ ml: 4, mt: 0.5 }}>
+                  {message.metadata.tokens && `${message.metadata.tokens} tokens`}
                   {message.metadata.duration && ` • ${message.metadata.duration}s`}
                 </Typography>
               )}
             </Box>
-            {message.role === 'assistant' ? (
-              <MarkdownRenderer content={message.content} variant="body2" />
-            ) : (
-              <Typography variant="body2" sx={{ whiteSpace: 'pre-wrap', lineHeight: 1.6 }}>
-                {message.content}
-              </Typography>
-            )}
-          </Paper>
-        ))}
+          );
+        })}
 
-        {/* Loading indicator */}
         {loading && (
-          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-            <CircularProgress size={16} />
-            <Typography variant="caption" color="text.secondary">
-              AI 思考中...
-            </Typography>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, px: 1 }}>
+            <CircularProgress size={12} thickness={5} />
+            <Typography variant="caption" color="text.secondary">AI 正在思考...</Typography>
           </Box>
         )}
 
-        {/* Error message */}
         {error && (
-          <Paper sx={{ p: 1.5, bgcolor: '#ffebee', borderRadius: 2 }}>
-            <Typography variant="body2" color="error">
-              錯誤：{error}
-            </Typography>
-          </Paper>
+          <Alert severity="error" sx={{ py: 0, px: 2 }}>
+            {error}
+          </Alert>
         )}
-
         <div ref={messagesEndRef} />
       </Box>
 
-      {/* Input Box */}
-      <Box sx={{ display: 'flex', gap: 1, alignItems: 'flex-end' }}>
-        <TextField
-          fullWidth
-          multiline
-          maxRows={3}
-          placeholder="輸入您的問題..."
-          value={userInput}
-          onChange={(e) => onInputChange(e.target.value)}
-          onKeyPress={handleKeyPress}
-          disabled={loading}
-          size="small"
-        />
-        <IconButton
-          color="primary"
-          onClick={handleSend}
-          disabled={!userInput.trim() || loading}
+      {/* Bottom Controls */}
+      <Box sx={{ display: 'flex', flexDirection: 'column', gap: 1.5 }}>
+        {/* Quick Questions - WRAP layout */}
+        {quickQuestions.length > 0 && (
+          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+            {quickQuestions.map((question, index) => (
+              <Chip
+                key={index}
+                label={question}
+                size="small"
+                onClick={() => onQuickQuestion(question)}
+                sx={{
+                  cursor: 'pointer',
+                  bgcolor: 'white',
+                  height: 24,
+                  fontSize: '0.75rem',
+                  '& .MuiChip-label': { px: 1 }
+                }}
+                variant="outlined"
+              />
+            ))}
+          </Box>
+        )}
+
+        {/* Input Field */}
+        <Paper
+          variant="outlined"
+          sx={{
+            display: 'flex',
+            alignItems: 'flex-end',
+            p: 0.75,
+            borderRadius: 2,
+            bgcolor: '#fcfcfc',
+            '&:focus-within': { borderColor: 'primary.main', bgcolor: 'white' }
+          }}
         >
-          <SendIcon />
-        </IconButton>
+          <TextField
+            fullWidth
+            multiline
+            maxRows={4}
+            placeholder="請輸入醫療相關問題..."
+            value={userInput}
+            onChange={(e) => onInputChange(e.target.value)}
+            onKeyPress={handleKeyPress}
+            disabled={loading}
+            variant="standard"
+            InputProps={{ disableUnderline: true }}
+            sx={{ px: 1, py: 0.25 }}
+          />
+          <IconButton
+            color="primary"
+            onClick={handleSend}
+            disabled={!userInput.trim() || loading}
+            size="small"
+            sx={{ p: 0.5 }}
+          >
+            <SendIcon fontSize="small" />
+          </IconButton>
+        </Paper>
       </Box>
     </Box>
   );
