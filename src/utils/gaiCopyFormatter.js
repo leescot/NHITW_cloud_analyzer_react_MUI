@@ -101,7 +101,9 @@ export const formatHBCV = (hbcvData) => {
 
         if (actualData.result_data && actualData.result_data.length > 0) {
             actualData.result_data.forEach(item => {
-                text += `${item.real_inspect_date || ''} - ${item.assay_item_name || ''}: ${item.assay_value || ''}\n`;
+                const value = item.assay_value || '';
+                const range = item.consult_value ? ` (參考範圍: ${item.consult_value})` : '';
+                text += `${item.real_inspect_date || ''} - ${item.assay_item_name || ''}: ${value}${range}\n`;
             });
         }
 
@@ -344,6 +346,11 @@ export const generateGAIFormatXML = (data) => {
 
     // Add all sections
     gaiText += formatPatientSummary(patientSummaryData);
+
+    const diagnosisText = formatDiagnosis(data.diagnosisData);
+    console.log('[gaiCopyFormatter] Formatted diagnosis section:', diagnosisText);
+    gaiText += diagnosisText;
+
     gaiText += formatAllergy(allergyData);
     gaiText += formatSurgery(surgeryData);
     gaiText += formatDischarge(dischargeData);
@@ -352,9 +359,6 @@ export const generateGAIFormatXML = (data) => {
     gaiText += formatLab(groupedLabs);
     gaiText += formatChineseMed(groupedChineseMeds);
     gaiText += formatImaging(imagingData);
-    const diagnosisText = formatDiagnosis(data.diagnosisData);
-    console.log('[gaiCopyFormatter] Formatted diagnosis section:', diagnosisText);
-    gaiText += diagnosisText;
 
     return gaiText;
 };

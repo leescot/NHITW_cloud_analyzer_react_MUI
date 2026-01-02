@@ -532,21 +532,8 @@ const FloatingIcon = () => {
 
   // Handle copying GAI format data
   const handleCopyGAIFormat = () => {
-    const data = {
-      userInfo,
-      patientSummaryData,
-      allergyData,
-      surgeryData,
-      dischargeData,
-      hbcvData,
-      groupedMedications,
-      groupedLabs,
-      groupedChineseMeds,
-      imagingData
-    };
-
     copyGAIFormat(
-      data,
+      patientData,
       (message) => {
         setSnackbarMessage(message);
         setSnackbarOpen(true);
@@ -560,21 +547,8 @@ const FloatingIcon = () => {
 
   // Handle copying GAI format with prompt
   const handleCopyGAIWithPrompt = () => {
-    const data = {
-      userInfo,
-      patientSummaryData,
-      allergyData,
-      surgeryData,
-      dischargeData,
-      hbcvData,
-      groupedMedications,
-      groupedLabs,
-      groupedChineseMeds,
-      imagingData
-    };
-
     copyGAIWithPrompt(
-      data,
+      patientData,
       gaiPrompt,
       (message) => {
         setSnackbarMessage(message);

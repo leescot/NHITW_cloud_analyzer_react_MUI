@@ -23,6 +23,7 @@ import {
  */
 const DATA_KEY_MAP = {
   patientSummary: 'patientSummaryData',
+  diagnosis: 'diagnosisData',
   allergy: 'allergyData',
   surgery: 'surgeryData',
   discharge: 'dischargeData',
@@ -30,8 +31,7 @@ const DATA_KEY_MAP = {
   medication: 'groupedMedications',
   lab: 'groupedLabs',
   chinesemed: 'groupedChineseMeds',
-  imaging: 'imagingData',
-  diagnosis: 'diagnosisData'
+  imaging: 'imagingData'
 };
 
 /**
@@ -39,6 +39,7 @@ const DATA_KEY_MAP = {
  */
 const FORMATTER_MAP = {
   patientSummary: formatPatientSummary,
+  diagnosis: formatDiagnosis,
   allergy: formatAllergy,
   surgery: formatSurgery,
   discharge: formatDischarge,
@@ -46,8 +47,7 @@ const FORMATTER_MAP = {
   medication: formatMedication,
   lab: formatLab,
   chinesemed: formatChineseMed,
-  imaging: formatImaging,
-  diagnosis: formatDiagnosis
+  imaging: formatImaging
 };
 
 /**

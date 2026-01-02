@@ -1,6 +1,6 @@
 # GAI 系統完整技術文件
 
-**版本**: 2.0
+**版本**: 2.2
 **最後更新**: 2026-01-02
 **文件狀態**: 完整整合版本
 
@@ -38,6 +38,7 @@ GAI (Generative AI) 是 Chrome Extension 的核心特色之一，提供自動化
 - **Token 估算**: 呼叫前估算 token 用量（針對繁體中文優化）
 - **即時分析結果顯示**: 完整 Markdown 支援（列表、表格、粗體等）
 - **雙 API Key 輪流**: 分擔流量、避免 Rate Limit
+- **BETA 標記**: 介面顯示 BETA 標籤，提醒使用者功能仍持續優化中
 
 ### 1.3 系統架構圖
 
@@ -124,7 +125,7 @@ gaiChatConfig: {
   dataTypes: ['diagnosis', 'patientSummary', ...],  // 全部 10 種
   quickQuestions: ['請摘要重點', '有哪些異常需要注意？', ...],
   enableHistory: true,
-  maxHistoryLength: 10
+  maxHistoryLength: 5                // 已調校為 5 輪，兼顧脈絡與效能
 }
 
 // Chat 歷史（存在 chrome.storage.local，不同步）
@@ -425,9 +426,11 @@ src/components/Sidebar.jsx (主組件)
    - 支援藥理分類分析（新增「藥品 ATC 分類」模板）
 
 3. **影像報告去個資化**：
-   - `piiUtils.js` 實作正則表達式匿名化
-   - `formatImaging()` 自動去除病患、醫護人員、系統編號
-   - 確保複製到 GAI 的報告內容已匿名化
+   - `piiUtils.js` 實作進階正則表達式匿名化邏輯
+   - **全面遮罩**: 自動去除病患、醫護人員 (醫師、放射師、護理師)、系統編號及證照號碼
+   - **多醫院格式支援**: 針對 **臺北榮總 (VGH)**、**西園醫院** 提供深度優化，支援各類特定醫師稱謂與報告表頭
+   - **證照保護**: 偵測並遮罩各類醫字號、專科證照號碼 (如放診專字、**病解專醫字**) 及 No. 格式
+   - **分類處理**: `PiiPatterns` 類別支援按類別 (patient/staff/system) 取得特定模式
 
 ### 6.2 資料選擇器 (Data Selector)
 
@@ -885,7 +888,38 @@ useEffect(() => {
 
 ## 10. 變更歷史
 
-### V2.0 (2025-12-31 - 2026-01-02)
+### V2.2 (2026-01-02) - **最新版本**
+
+- **PII 系統深度升級**:
+  - 新增 **臺北榮總 (VGH)** 專屬過濾邏輯（含醫師、報告人、表頭等）。
+  - 新增 **病理報告 (Pathology)** 證照號碼過濾模式。
+  - 新增 **西園醫院** 特定姓名與醫師稱謂過濾。
+  - 優化 **Radiologist** 與醫師稱謂的各種邊際格式遮罩。
+- **資料處理與導出優化**:
+  - 修復 `diagnosis` 欄位在 XML 匯出時為空的問題。
+  - 調整 XML 輸出順序：`diagnosis` 現在緊接在 `patientSummary` 之後呈現，提升分析邏輯一致性。
+  - **HBCV 資料增強**: 匯出 XML 中新增檢驗值的原始正常範圍 (Ref: `consult_value`)。
+- **UI/UX 微調**:
+  - 確保 Sidebar 自動分析與手動複製使用相同的資料格式化邏輯。
+
+### V2.1 (2026-01-02)
+
+**PII 去個資化與 UI/UX 持續優化**：
+1. **PII 去個資化系統升級**: 
+   - 新增放射師、醫師多格式姓名、證照號碼 (放診專字、No. 等) 遮罩。
+   - `PiiPatterns` 重構為類別型式，支援分類篩選。
+2. **UI/UX 空間優化**:
+   - 移除對話頭像，擴大訊息顯示寬度。
+   - 壓縮 Header Tab 與模板描述文字，釋放更多垂直空間。
+   - 新增 **BETA** 標籤。
+3. **管理功能增強**:
+   - 新增 **「清除歷史」** (Clear History) 按鈕於 Chat 視窗。
+   - 新增 **「重設為預設值」** (Reset to Defaults) 按鈕於 GAI 設定。
+4. **效能調校**:
+   - 將對話歷史上限從 10 輪調整為 **5 輪**，維持反應速度並節省 Token。
+   - 更新預設快速提問 (Quick Questions) 內容。
+
+### V2.0 (2025-12-31 - 2026-01-01)
 
 **重大變更**：從動態 4 Tab 改為固定功能 3 Tab
 
@@ -1016,7 +1050,7 @@ useEffect(() => {
 - `src/utils/dataSelector.js` - 選擇性 XML 生成
 - `src/utils/gaiCopyFormatter.js` - 10 種格式化函數
 - `src/utils/diagnosisProcessor.js` - 診斷資料處理
-- `src/utils/piiUtils.js` - 去個資化工具
+- `src/utils/piiUtils.js` - 進階去個資化 (PII) 工具系統
 
 **Provider 系統**：
 - `src/services/gai/providers/BaseProvider.js` - 抽象基礎類別
