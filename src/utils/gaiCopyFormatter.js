@@ -102,7 +102,7 @@ export const formatHBCV = (hbcvData) => {
         if (actualData.result_data && actualData.result_data.length > 0) {
             actualData.result_data.forEach(item => {
                 const value = item.assay_value || '';
-                const range = item.consult_value ? ` (參考範圍: ${item.consult_value})` : '';
+                const range = item.consult_value ? ` (正常值範圍: ${item.consult_value})` : '';
                 text += `${item.real_inspect_date || ''} - ${item.assay_item_name || ''}: ${value}${range}\n`;
             });
         }

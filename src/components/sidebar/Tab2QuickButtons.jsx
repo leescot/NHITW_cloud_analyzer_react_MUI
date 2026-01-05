@@ -4,7 +4,7 @@
  * 顯示 6 個可配置的分析按鈕，點擊執行分析，結果可展開/收合
  */
 
-import { useState, useEffect } from 'react';
+import { useState } from 'react';
 import {
   Box,
   Typography,
@@ -19,6 +19,8 @@ import {
   Divider
 } from '@mui/material';
 import RefreshIcon from '@mui/icons-material/Refresh';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import CheckIcon from '@mui/icons-material/Check';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import InfoOutlinedIcon from '@mui/icons-material/InfoOutlined';
 import * as MuiIcons from '@mui/icons-material';
@@ -28,6 +30,7 @@ import MarkdownRenderer from './MarkdownRenderer';
 const Tab2QuickButtons = ({ buttons, results, loadings, errors, onButtonClick }) => {
   // Track selected button slot
   const [selectedSlot, setSelectedSlot] = useState(null);
+  const [copied, setCopied] = useState(false);
 
   // Filter enabled buttons
   const enabledButtons = buttons?.filter(btn => btn.enabled) || [];
@@ -54,6 +57,18 @@ const Tab2QuickButtons = ({ buttons, results, loadings, errors, onButtonClick })
   const error = activeBtn ? errors[activeBtn.slotIndex] : null;
   const result = activeBtn ? results[activeBtn.slotIndex] || [] : [];
   const hasResult = result.length > 0;
+
+  // 複製內容（排除統計資訊）
+  const handleCopy = () => {
+    if (!hasResult) return;
+    const contentToCopy = result
+      .filter(item => typeof item !== 'string' || !item.startsWith('[STATS]'))
+      .join('\n');
+    navigator.clipboard.writeText(contentToCopy).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', height: '100%', gap: 2 }}>
@@ -132,14 +147,27 @@ const Tab2QuickButtons = ({ buttons, results, loadings, errors, onButtonClick })
               {activeBtn ? (activeBtn.label || tabTemplateManager.getTemplate(activeBtn.templateId)?.name) : '分析結果'}
             </Typography>
           </Box>
-          <IconButton
-            size="small"
-            onClick={() => activeBtn && onButtonClick(activeBtn)}
-            disabled={isLoading || !activeBtn}
-            color="primary"
-          >
-            <RefreshIcon fontSize="small" />
-          </IconButton>
+          <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+            <Tooltip title={copied ? "已複製" : "複製內容"}>
+              <span>
+                <IconButton size="small" onClick={handleCopy} disabled={!hasResult || isLoading} color={copied ? "success" : "default"}>
+                  {copied ? <CheckIcon fontSize="small" /> : <ContentCopyIcon fontSize="small" />}
+                </IconButton>
+              </span>
+            </Tooltip>
+            <Tooltip title="重新分析">
+              <span>
+                <IconButton
+                  size="small"
+                  onClick={() => activeBtn && onButtonClick(activeBtn)}
+                  disabled={isLoading || !activeBtn}
+                  color="primary"
+                >
+                  <RefreshIcon fontSize="small" />
+                </IconButton>
+              </span>
+            </Tooltip>
+          </Box>
         </Box>
 
         <Box
@@ -182,11 +210,8 @@ const Tab2QuickButtons = ({ buttons, results, loadings, errors, onButtonClick })
           <Fade in={hasResult}>
             <Box>
               {result.map((item, index) => {
-                if (typeof item === 'string' && (
-                  item.startsWith('(Total_tokens:') ||
-                  item.startsWith('Total_tokens:') ||
-                  item.includes('執行時間:')
-                )) {
+                // 過濾掉統計資訊
+                if (typeof item === 'string' && item.startsWith('[STATS]')) {
                   return null;
                 }
 
@@ -196,6 +221,25 @@ const Tab2QuickButtons = ({ buttons, results, loadings, errors, onButtonClick })
                   </Box>
                 );
               })}
+
+              {/* 統計資訊 */}
+              {result.some(item => typeof item === 'string' && item.startsWith('[STATS]')) && (
+                <Box sx={{
+                  mt: 1,
+                  pt: 1,
+                  borderTop: '1px dashed #eee',
+                  textAlign: 'right',
+                  opacity: 0.6
+                }}>
+                  <Typography variant="caption" sx={{ fontSize: '0.6rem' }}>
+                    {(() => {
+                      const statsItem = result.find(item => typeof item === 'string' && item.startsWith('[STATS]'));
+                      const stats = statsItem ? statsItem.replace('[STATS]', '') : '';
+                      return `AI 可能出錯，請查核資訊 / ${stats}`;
+                    })()}
+                  </Typography>
+                </Box>
+              )}
             </Box>
           </Fade>
         </Box>

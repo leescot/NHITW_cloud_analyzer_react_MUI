@@ -12,7 +12,7 @@ class GeminiProvider extends BaseProvider {
             name: 'Google Gemini',
             apiKeyStorageKey: 'geminiApiKey',
             defaultModel: 'gemini-3-flash-preview',
-            description: 'Gemini - 目前呼叫模型：gemini-3-flash-preview'
+            description: '呼叫模型：gemini-3-flash-preview | 取得 API Key：https://aistudio.google.com/'
         });
 
         this.apiEndpoint = 'https://generativelanguage.googleapis.com/v1beta/models';

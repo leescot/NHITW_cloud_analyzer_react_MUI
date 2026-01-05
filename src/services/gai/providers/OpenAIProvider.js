@@ -12,7 +12,7 @@ class OpenAIProvider extends BaseProvider {
             name: 'OpenAI',
             apiKeyStorageKey: 'openaiApiKey',
             defaultModel: 'gpt-5-nano',
-            description: 'OpenAI - 目前呼叫模型：gpt-5-nano'
+            description: '呼叫模型：gpt-5-nano | 取得 API Key：https://openai.com/zh-Hant/api/'
         });
 
         this.apiEndpoint = 'https://api.openai.com/v1/chat/completions';

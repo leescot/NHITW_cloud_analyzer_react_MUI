@@ -36,10 +36,11 @@ export function registerProvider(provider) {
 export function registerBuiltInProviders() {
     console.log('[Provider Registry] Registering built-in providers...');
 
-    registerProvider(new OpenAIProvider());
-    registerProvider(new GeminiProvider());
-    registerProvider(new GroqProvider());
+    // Order: Cerebras > Groq > Gemini > OpenAI
     registerProvider(new CerebrasProvider());
+    registerProvider(new GroqProvider());
+    registerProvider(new GeminiProvider());
+    registerProvider(new OpenAIProvider());
 
     console.log(`[Provider Registry] ${providers.size} providers registered`);
 }

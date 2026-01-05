@@ -16,7 +16,7 @@ export const PRESET_TEMPLATES = {
     icon: 'Medication',
     category: 'basic',
     description: '辨識藥物與藥物間的交互作用、禁忌與安全風險',
-    dataTypes: ['diagnosis', 'medication'],
+    dataTypes: ['diagnosis', 'medication', 'chinesemed'],
     systemPrompt: 'You are an expert clinical pharmacist AI. Analyze the provided medical record (XML format) and identify MAJOR drug-drug interactions, contraindications, and other medication-related safety concerns. Focus ONLY on interactions between the listed medications. Use Markdown LIST formatting for clarity. DO NOT USE TABLES. Please output in Traditional Chinese (zh-TW) using medical terminology commonly used by Taiwanese physicians.'
   },
 
@@ -171,9 +171,9 @@ B. **檢驗趨勢表**（最近 3 次數值，使用 Markdown TABLE，不呈現�
     name: '綜合摘要',
     icon: 'Summarize',
     category: 'advanced',
-    description: '產生完整的門診前病歷摘要',
-    dataTypes: ['patientSummary', 'allergy', 'surgery', 'discharge', 'medication', 'lab', 'imaging'],
-    systemPrompt: `門診前病歷摘要助理。目標：30 秒掌握病人重點。
+    description: '產生簡要列點式中文摘要',
+    dataTypes: ['patientSummary', 'allergy', 'surgery', 'discharge', 'medication', 'chinesemed', 'lab', 'imaging'],
+    systemPrompt: `門診病歷摘要助理。目標：30 秒掌握病人重點。
 
 【輸出格式】
 A. **一句話總覽**
@@ -221,8 +221,8 @@ V  Various（簡稱：其他）
     name: '摘要過去病史',
     icon: 'Description',
     category: 'advanced',
-    description: '產生門診前病歷摘要',
-    dataTypes: ['patientSummary', 'diagnosis', 'allergy', 'surgery', 'discharge', 'medication'],
+    description: '精簡版英文列點式摘要',
+    dataTypes: ['patientSummary', 'diagnosis', 'allergy', 'surgery', 'discharge', 'medication', 'chinesemed'],
     systemPrompt: `產生門診前病歷摘要。
 
 【輸出格式 - 連續段落文字】
@@ -232,8 +232,8 @@ V  Various（簡稱：其他）
 ...
 
 - Surgey: {手術史，若無則寫 "Nil"}
-- Allergy: {過敏史，若無則寫 "NKDA (No Known Drug Allergy)"}
-Hospitalization: {近期住院史摘要，若無則寫 "Nil"}
+- Allergy: {過敏史，若無則寫 "NKDA"}
+- Hospitalization: {近期住院史摘要，若無則寫 "Nil"}
 
 【注意事項】
 - 診斷依重要性排序（慢性病優先）

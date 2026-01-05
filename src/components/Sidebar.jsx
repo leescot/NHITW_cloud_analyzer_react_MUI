@@ -275,10 +275,9 @@ const Sidebar = ({
                         // Append metrics if available
                         if (response.data.usage) {
                             const totalTokens = response.data.usage.total_tokens || response.data.usage.totalTokenCount || 0;
-                            const durationSec = ((response.data.duration || 0) / 1000).toFixed(2);
-                            const keyInfo = response.data.keyUsed ? ` [${response.data.keyUsed}]` : '';
-                            const reasoningMark = rawMessage.isReasoning ? ' (Reasoning Output)' : '';
-                            resultArray.push(`(Total_tokens: ${totalTokens}${reasoningMark}, 執行時間: ${durationSec}s${keyInfo})`);
+                            const durationSec = ((response.data.duration || 0) / 1000).toFixed(1);
+                            const keyInfo = response.data.keyUsed ? `/${response.data.keyUsed}` : '';
+                            resultArray.push(`[STATS]${totalTokens}tokens/${durationSec}s${keyInfo}`);
                         }
 
                         setAutoAnalysisResult(resultArray);
@@ -379,10 +378,9 @@ const Sidebar = ({
                         // Append metrics if available
                         if (response.data.usage) {
                             const totalTokens = response.data.usage.total_tokens || response.data.usage.totalTokenCount || 0;
-                            const durationSec = ((response.data.duration || 0) / 1000).toFixed(2);
-                            const keyInfo = response.data.keyUsed ? ` [${response.data.keyUsed}]` : '';
-                            const reasoningMark = rawMessage.isReasoning ? ' (Reasoning Output)' : '';
-                            resultArray.push(`(Total_tokens: ${totalTokens}${reasoningMark}, 執行時間: ${durationSec}s${keyInfo})`);
+                            const durationSec = ((response.data.duration || 0) / 1000).toFixed(1);
+                            const keyInfo = response.data.keyUsed ? `/${response.data.keyUsed}` : '';
+                            resultArray.push(`[STATS]${totalTokens}tokens/${durationSec}s${keyInfo}`);
                         }
 
                         setButtonResults(prev => ({ ...prev, [slotIndex]: resultArray }));
@@ -464,8 +462,8 @@ const Sidebar = ({
                             timestamp: new Date().toISOString(),
                             metadata: {
                                 tokens: response.data.usage?.total_tokens || response.data.usage?.totalTokenCount || 0,
-                                duration: ((response.data.duration || 0) / 1000).toFixed(2),
-                                isReasoning: rawMessage.isReasoning
+                                duration: ((response.data.duration || 0) / 1000).toFixed(1),
+                                keyUsed: response.data.keyUsed || ''
                             }
                         };
 
@@ -668,7 +666,7 @@ const Sidebar = ({
                     <Tab
                         value={0}
                         icon={<WarningIcon sx={{ fontSize: '1rem !important' }} />}
-                        label="自動分析"
+                        label="自動"
                         iconPosition="start"
                         onClick={() => {
                             console.log('[Tab] Direct onClick triggered for Tab 0');
@@ -679,7 +677,7 @@ const Sidebar = ({
                     <Tab
                         value={1}
                         icon={<TouchAppIcon sx={{ fontSize: '1rem !important' }} />}
-                        label="快速按鈕"
+                        label="快速"
                         iconPosition="start"
                         onClick={() => {
                             console.log('[Tab] Direct onClick triggered for Tab 1');

@@ -110,7 +110,7 @@ export const DEFAULT_QUICK_BUTTONS_CONFIG = [
 // ==================== Tab 3: Chat 對話配置 ====================
 
 export const DEFAULT_CHAT_CONFIG = {
-  enabled: false,  // 預設停用 Chat 功能（用戶可在設定中啟用）
+  enabled: true,  // 預設停用 Chat 功能（用戶可在設定中啟用）
 
   // System Prompt（繁體中文醫療助理）
   systemPrompt: '你是專業的醫療AI助理。請用台灣醫師常用的繁體中文醫學術語回答問題。提供準確且精簡的臨床見解。',
@@ -129,11 +129,10 @@ export const DEFAULT_CHAT_CONFIG = {
     'imaging'          // 影像
   ],
 
-  // 快速提問按鈕（預設 4 個）
+  // 快速提問按鈕（預設 2 個）
   quickQuestions: [
     '一段話精簡病史：',
-    '用一句話形容這位病人：',
-    '列出「三高」相關資料'
+    '一句話形容這位病人：'
   ],
 
   // 對話歷史設定

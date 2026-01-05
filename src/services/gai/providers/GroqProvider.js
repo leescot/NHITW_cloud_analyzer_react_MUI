@@ -13,7 +13,7 @@ class GroqProvider extends BaseProvider {
             name: 'Groq',
             apiKeyStorageKey: 'groqApiKey',
             defaultModel: 'llama-3.3-70b-versatile',
-            description: 'Groq - 目前呼叫模型：llama-3.3-70b-versatile'
+            description: '呼叫模型：llama-3.3-70b-versatile | 取得 API Key：https://console.groq.com/'
         });
 
         this.apiEndpoint = 'https://api.groq.com/openai/v1/chat/completions';

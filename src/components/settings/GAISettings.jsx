@@ -18,6 +18,7 @@ import {
     MenuItem,
     FormControl,
     InputLabel,
+    Link,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import SmartToyIcon from "@mui/icons-material/SmartToy";
@@ -29,7 +30,7 @@ import SaveIcon from "@mui/icons-material/Save";
 import { IconButton, InputAdornment } from "@mui/material";
 import { DEFAULT_GAI_PROMPT } from "../../config/defaultSettings";
 
-const GAISettings = () => {
+const GAISettings = ({ developerMode = false }) => {
     const [settings, setSettings] = useState({
         enableGAICopyFormat: false,
         enableGAIPrompt: false,
@@ -162,60 +163,65 @@ const GAISettings = () => {
                     />
                 </AccordionSummary>
                 <AccordionDetails>
-                    <FormControlLabel
-                        control={
-                            <Switch
-                                checked={settings.enableGAICopyFormat}
-                                onChange={(e) => {
-                                    handleLocalSettingChange(
-                                        "enableGAICopyFormat",
-                                        e.target.checked
-                                    );
-                                }}
+                    {/* 開發者模式專用設定 */}
+                    {developerMode && (
+                        <>
+                            <FormControlLabel
+                                control={
+                                    <Switch
+                                        checked={settings.enableGAICopyFormat}
+                                        onChange={(e) => {
+                                            handleLocalSettingChange(
+                                                "enableGAICopyFormat",
+                                                e.target.checked
+                                            );
+                                        }}
+                                    />
+                                }
+                                label="開啟複製XML資料格式"
                             />
-                        }
-                        label="開啟複製XML資料格式"
-                    />
 
-                    <FormControlLabel
-                        control={
-                            <Switch
-                                checked={settings.enableGAIPrompt}
-                                onChange={(e) => {
-                                    handleLocalSettingChange(
-                                        "enableGAIPrompt",
-                                        e.target.checked
-                                    );
-                                }}
+                            <FormControlLabel
+                                control={
+                                    <Switch
+                                        checked={settings.enableGAIPrompt}
+                                        onChange={(e) => {
+                                            handleLocalSettingChange(
+                                                "enableGAIPrompt",
+                                                e.target.checked
+                                            );
+                                        }}
+                                    />
+                                }
+                                label="開啟包含提示詞資料格式"
                             />
-                        }
-                        label="開啟包含提示詞資料格式"
-                    />
 
-                    {settings.enableGAIPrompt && (
-                        <Box sx={{ mt: 1, mb: 2, ml: 4, display: 'flex', gap: 1 }}>
-                            <Button
-                                variant="outlined"
-                                size="small"
-                                startIcon={<EditIcon />}
-                                onClick={() => setPromptDialogOpen(true)}
-                            >
-                                編輯提示詞
-                            </Button>
-                            <Button
-                                variant="outlined"
-                                size="small"
-                                startIcon={<RestartAltIcon />}
-                                onClick={() => {
-                                    setGaiPrompt(DEFAULT_GAI_PROMPT);
-                                    chrome.storage.sync.set({ gaiPrompt: DEFAULT_GAI_PROMPT }, () => {
-                                        console.log('GAI prompt reset to default');
-                                    });
-                                }}
-                            >
-                                重置
-                            </Button>
-                        </Box>
+                            {settings.enableGAIPrompt && (
+                                <Box sx={{ mt: 1, mb: 2, ml: 4, display: 'flex', gap: 1 }}>
+                                    <Button
+                                        variant="outlined"
+                                        size="small"
+                                        startIcon={<EditIcon />}
+                                        onClick={() => setPromptDialogOpen(true)}
+                                    >
+                                        編輯提示詞
+                                    </Button>
+                                    <Button
+                                        variant="outlined"
+                                        size="small"
+                                        startIcon={<RestartAltIcon />}
+                                        onClick={() => {
+                                            setGaiPrompt(DEFAULT_GAI_PROMPT);
+                                            chrome.storage.sync.set({ gaiPrompt: DEFAULT_GAI_PROMPT }, () => {
+                                                console.log('GAI prompt reset to default');
+                                            });
+                                        }}
+                                    >
+                                        重置
+                                    </Button>
+                                </Box>
+                            )}
+                        </>
                     )}
 
                     <FormControlLabel
@@ -393,7 +399,30 @@ const GAISettings = () => {
 
                                             {/* 動態顯示提供者說明 */}
                                             <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mt: 1 }}>
-                                                {currentProvider.description || `請輸入您的 ${currentProvider.name} API Key，金鑰僅儲存在您的瀏覽器中。`}
+                                                {(() => {
+                                                    const desc = currentProvider.description || `請輸入您的 ${currentProvider.name} API Key，金鑰僅儲存在您的瀏覽器中。`;
+                                                    // 解析 URL 並轉換為可點擊連結
+                                                    const urlMatch = desc.match(/(https?:\/\/[^\s]+)/);
+                                                    if (urlMatch) {
+                                                        const url = urlMatch[1];
+                                                        const parts = desc.split(url);
+                                                        return (
+                                                            <>
+                                                                {parts[0]}
+                                                                <Link
+                                                                    href={url}
+                                                                    target="_blank"
+                                                                    rel="noopener noreferrer"
+                                                                    sx={{ wordBreak: 'break-all' }}
+                                                                >
+                                                                    {url}
+                                                                </Link>
+                                                                {parts[1]}
+                                                            </>
+                                                        );
+                                                    }
+                                                    return desc;
+                                                })()}
                                                 {dualKeyEnabled[currentProvider.id] && (
                                                     <>
                                                         <br />

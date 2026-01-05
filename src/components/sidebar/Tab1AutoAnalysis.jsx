@@ -4,6 +4,7 @@
  * 顯示單一自動執行的分析結果
  */
 
+import { useState } from 'react';
 import {
   Box,
   Typography,
@@ -12,17 +13,34 @@ import {
   Paper,
   Alert,
   Divider,
-  Fade
+  Fade,
+  Tooltip
 } from '@mui/material';
 import RefreshIcon from '@mui/icons-material/Refresh';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import CheckIcon from '@mui/icons-material/Check';
 import AutoAwesomeIcon from '@mui/icons-material/AutoAwesome';
 import tabTemplateManager from '../../services/gai/tabs';
 import MarkdownRenderer from './MarkdownRenderer';
 
 const Tab1AutoAnalysis = ({ config, result, loading, error, onRetry }) => {
+  const [copied, setCopied] = useState(false);
+
   // 取得模板資訊
   const template = config ? tabTemplateManager.getTemplate(config.templateId) : null;
   const hasResult = result && result.length > 0;
+
+  // 複製內容（排除統計資訊）
+  const handleCopy = () => {
+    if (!hasResult) return;
+    const contentToCopy = result
+      .filter(item => typeof item !== 'string' || !item.startsWith('[STATS]'))
+      .join('\n');
+    navigator.clipboard.writeText(contentToCopy).then(() => {
+      setCopied(true);
+      setTimeout(() => setCopied(false), 2000);
+    });
+  };
 
   // 停用狀態
   if (!config || !config.enabled) {
@@ -43,15 +61,26 @@ const Tab1AutoAnalysis = ({ config, result, loading, error, onRetry }) => {
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <AutoAwesomeIcon color="error" fontSize="small" />
           <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 'medium' }}>
-            {template?.name || '自動分析'}：載入病歷時自動產生的 AI 摘要
+            {template?.name || '自動分析'}：載入時自動產生
           </Typography>
         </Box>
-        <IconButton size="small" onClick={onRetry} disabled={loading} color="primary">
-          <RefreshIcon fontSize="small" />
-        </IconButton>
+        <Box sx={{ display: 'flex', alignItems: 'center', gap: 0.5 }}>
+          <Tooltip title={copied ? "已複製" : "複製內容"}>
+            <span>
+              <IconButton size="small" onClick={handleCopy} disabled={!hasResult || loading} color={copied ? "success" : "default"}>
+                {copied ? <CheckIcon fontSize="small" /> : <ContentCopyIcon fontSize="small" />}
+              </IconButton>
+            </span>
+          </Tooltip>
+          <Tooltip title="重新分析">
+            <span>
+              <IconButton size="small" onClick={onRetry} disabled={loading} color="primary">
+                <RefreshIcon fontSize="small" />
+              </IconButton>
+            </span>
+          </Tooltip>
+        </Box>
       </Box>
-
-      <Divider />
 
       <Divider />
 
@@ -99,12 +128,8 @@ const Tab1AutoAnalysis = ({ config, result, loading, error, onRetry }) => {
         <Fade in={hasResult}>
           <Box>
             {result.map((item, index) => {
-              // 過濾掉 token 和時間統計資訊
-              if (typeof item === 'string' && (
-                item.startsWith('(Total_tokens:') ||
-                item.startsWith('Total_tokens:') ||
-                item.includes('執行時間:')
-              )) {
+              // 過濾掉統計資訊
+              if (typeof item === 'string' && item.startsWith('[STATS]')) {
                 return null;
               }
 
@@ -116,7 +141,7 @@ const Tab1AutoAnalysis = ({ config, result, loading, error, onRetry }) => {
             })}
 
             {/* 統計資訊 */}
-            {result.some(item => typeof item === 'string' && item.startsWith('(Total_tokens:')) && (
+            {result.some(item => typeof item === 'string' && item.startsWith('[STATS]')) && (
               <Box sx={{
                 mt: 1,
                 pt: 1,
@@ -124,8 +149,12 @@ const Tab1AutoAnalysis = ({ config, result, loading, error, onRetry }) => {
                 textAlign: 'right',
                 opacity: 0.6
               }}>
-                <Typography variant="caption" sx={{ fontSize: '0.65rem' }}>
-                  {result.find(item => typeof item === 'string' && item.startsWith('(Total_tokens:'))}
+                <Typography variant="caption" sx={{ fontSize: '0.6rem' }}>
+                  {(() => {
+                    const statsItem = result.find(item => typeof item === 'string' && item.startsWith('[STATS]'));
+                    const stats = statsItem ? statsItem.replace('[STATS]', '') : '';
+                    return `AI 可能出錯，請查核資訊 / ${stats}`;
+                  })()}
                 </Typography>
               </Box>
             )}

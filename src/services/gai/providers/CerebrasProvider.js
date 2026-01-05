@@ -10,10 +10,10 @@ class CerebrasProvider extends BaseProvider {
     constructor() {
         super({
             id: 'cerebras',
-            name: 'Cerebras',
+            name: 'Cerebras (推薦)',
             apiKeyStorageKey: 'cerebrasApiKey',
             defaultModel: 'gpt-oss-120b',
-            description: 'Cerebras - 目前呼叫模型：gpt-oss-120b'
+            description: '呼叫模型：gpt-oss-120b | 取得 API Key：https://cloud.cerebras.ai/'
         });
 
         this.apiEndpoint = 'https://api.cerebras.ai/v1/chat/completions';

@@ -1,7 +1,7 @@
 # GAI 系統完整技術文件
 
-**版本**: 2.2
-**最後更新**: 2026-01-02
+**版本**: 2.3
+**最後更新**: 2026-01-05
 **文件狀態**: 完整整合版本
 
 ---
@@ -888,7 +888,56 @@ useEffect(() => {
 
 ## 10. 變更歷史
 
-### V2.2 (2026-01-02) - **最新版本**
+### V2.3 (2026-01-05) - **最新版本**
+
+**UI/UX 精簡與統一優化**：
+
+1. **Tab 名稱精簡**：
+   - Tab 1: 「自動分析」→「自動」
+   - Tab 2: 「快速按鈕」→「快速」
+   - Tab 3: 「對話」維持不變
+
+2. **Tab 3 配置簡化**：
+   - 移除 Tab 3 的「啟用/停用」開關（Chat 功能預設啟用）
+   - 配置對話框 Tab 3 區域內容直接顯示，不再使用 Collapse 包裝
+
+3. **統計資訊格式統一**：
+   - 三個 Tab 統一顯示格式：`AI 可能出錯，請查核資訊 / {tokens}tokens/{duration}s/{keyUsed}`
+   - Tab 1 & Tab 2：使用 `[STATS]` 前綴區分統計資訊與內容
+   - Tab 3：metadata 物件儲存統計資訊
+
+4. **複製功能完善**：
+   - Tab 1 & Tab 2：Header 區域新增複製按鈕（僅複製內容，排除統計資訊）
+   - Tab 3：每則 AI 訊息右下角新增複製按鈕（使用者訊息不顯示）
+   - 複製成功後顯示綠色打勾圖示（2 秒後恢復）
+
+5. **AI 提供者優化**：
+   - 預設排序調整：Cerebras > Groq > Gemini > OpenAI
+   - Cerebras 名稱加上「(推薦)」標記
+   - 所有提供者描述中的 API Key 連結可直接點擊開啟
+
+6. **自訂按鈕設定統一**：
+   - 「自訂分析 Prompt」更名為「自訂分析指令」
+   - 自訂類型按鈕圖示統一使用「Star」（不可變更）
+
+7. **開發者模式功能**：
+   - 「開啟複製XML資料格式」和「開啟包含提示詞資料格式」選項移至開發者模式
+   - 一般使用者介面不顯示這兩個進階選項
+   - 這兩個選項預設值設為 `false`
+
+**程式碼變更摘要**：
+- `src/components/Sidebar.jsx` - 統計資訊格式變更、Tab 名稱更新
+- `src/components/sidebar/Tab1AutoAnalysis.jsx` - 新增複製功能、統計資訊解析
+- `src/components/sidebar/Tab2QuickButtons.jsx` - 新增複製功能、統計資訊顯示
+- `src/components/sidebar/Tab3Chat.jsx` - AI 訊息複製功能、格式統一
+- `src/components/sidebar/SidebarV2ConfigDialog.jsx` - Tab 3 配置簡化、Tab 名稱更新、自訂按鈕設定調整
+- `src/components/settings/GAISettings.jsx` - 開發者模式條件渲染、API Key 連結可點擊
+- `src/components/PopupSettings.jsx` - 傳遞 developerMode prop 至 GAISettings
+- `src/services/gai/providers/providerRegistry.js` - 提供者排序調整
+- `src/services/gai/providers/CerebrasProvider.js` - 名稱加上「(推薦)」
+- `src/services/gai/providers/*.js` - 各提供者新增 API Key 連結
+
+### V2.2 (2026-01-02)
 
 - **PII 系統深度升級**:
   - 新增 **臺北榮總 (VGH)** 專屬過濾邏輯（含醫師、報告人、表頭等）。

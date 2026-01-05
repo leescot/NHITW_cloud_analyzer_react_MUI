@@ -92,7 +92,7 @@ const PopupSettings = () => {
         <MedicationSettings />
         <ChineseMedicationSettings />
         <LabSettings />
-        <GAISettings />
+        <GAISettings developerMode={developerMode} />
       </Box>
     )],
     [1, (

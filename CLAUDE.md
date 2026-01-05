@@ -102,20 +102,21 @@ NHI Cloud API → Background Worker (intercepts) → Content Script → React Co
 
 **Main Components** (`src/components/`):
 - `FloatingIcon.jsx` - Main entry point, floating button overlay on NHI pages
-- `Sidebar.jsx` - Resizable sidebar with AI analysis (GAI Sidebar feature)
-  - Dynamically renders 4 configurable tabs based on user settings
-  - Supports 7 preset templates + 1 custom template
-  - Selective data transmission (choose from 9 medical data types)
+- `Sidebar.jsx` - Resizable sidebar with AI analysis (GAI Sidebar V2)
+  - Fixed 3-tab design: 自動 (Auto), 快速 (Quick), 對話 (Chat)
+  - Supports 7 preset templates + custom configurations
+  - Selective data transmission (choose from 10 medical data types)
   - Auto-analysis on data load with granular loading states
   - Built-in tab configuration dialog (accessible via settings icon)
-- `PopupSettings.jsx` - Settings modal accessible from floating icon
+- `PopupSettings.jsx` - Settings modal, passes developerMode prop to child components
 
 **Sidebar Components** (`src/components/sidebar/`):
-- `TabConfigDialog.jsx` - Tab configuration interface
-  - Allows users to configure 4 sidebar tabs (slots 0-3)
-  - Tabs 0-2: Select from 7 preset templates via dropdown
-  - Tab 3: Custom tab with edit button (future: opens CustomTabEditor)
-  - Real-time validation and save/reset functionality
+- `Tab1AutoAnalysis.jsx` - Auto-analysis tab with copy functionality
+- `Tab2QuickButtons.jsx` - 6-button grid with shared result area, copy functionality
+- `Tab3Chat.jsx` - Multi-turn chat with per-message copy buttons (AI messages only)
+- `SidebarV2ConfigDialog.jsx` - Configuration dialog for all 3 tabs
+- `CustomButtonEditor.jsx` - Editor for custom quick buttons
+- `MarkdownRenderer.jsx` - Full Markdown support (tables, lists, bold, links)
 
 **Tab Components** (`src/components/tabs/`):
 - Each medical data category (medications, labs, imaging, etc.) has dedicated tab components
@@ -134,9 +135,11 @@ The extension uses a **modular architecture** for both AI provider integration a
 
 **Provider System** (`providers/`):
 - `BaseProvider.js` - Abstract base class defining unified API interface
-- `OpenAIProvider.js` - OpenAI implementation (gpt-5-nano, strict JSON schema)
+- `CerebrasProvider.js` - Cerebras implementation (recommended, llama-3.3-70b-versatile)
+- `GroqProvider.js` - Groq implementation (llama-3.3-70b-versatile)
 - `GeminiProvider.js` - Google Gemini implementation (gemini-3-flash-preview)
-- `providerRegistry.js` - Provider registration and management system
+- `OpenAIProvider.js` - OpenAI implementation (gpt-5-nano, strict JSON schema)
+- `providerRegistry.js` - Provider registration and management system (order: Cerebras > Groq > Gemini > OpenAI)
 - All providers implement the same `callAPI()` interface for consistency
 
 **Prompt Management** (`prompts/`):
@@ -172,7 +175,7 @@ The extension uses a **modular architecture** for both AI provider integration a
 - Background worker routes requests through provider registry
 - Automatic response format normalization (all providers return OpenAI-compatible format)
 - Metrics tracking (tokens, execution time) for cost/performance monitoring
-- Selective XML generation via `dataSelector.js` (9 data types: patient summary, allergy, surgery, discharge, HBCV, medication, lab, Chinese med, imaging)
+- Selective XML generation via `dataSelector.js` (10 data types: diagnosis, patient summary, allergy, surgery, discharge, HBCV, medication, lab, Chinese med, imaging)
 
 **Adding a New Provider** (example):
 ```javascript
@@ -210,18 +213,22 @@ export const PRESET_TEMPLATES = {
 // Done! Template automatically appears in tab configuration UI
 ```
 
-### GAI Sidebar Modular Architecture (NEW)
+### GAI Sidebar V2 Architecture (Current)
 
-**Overview**: The GAI Sidebar now uses a fully modular, template-driven architecture that allows users to customize their analysis workflow.
+**Overview**: The GAI Sidebar uses a fixed 3-tab design with distinct functionalities for each tab.
 
 **Key Features**:
-1. **7 Preset Templates** across 3 categories:
-   - Basic (4): Critical Alerts, Medication Risks, Abnormal Labs, Imaging Findings
+1. **3 Fixed Tabs** (V2 Architecture):
+   - **Tab 1 - 自動 (Auto)**: Single auto-analysis on sidebar open (7 preset templates available)
+   - **Tab 2 - 快速 (Quick)**: 6 configurable quick buttons (preset or custom analysis)
+   - **Tab 3 - 對話 (Chat)**: Multi-turn conversation with medical data
+2. **7 Preset Templates** across 3 categories:
+   - Basic (4): Drug Interaction, Abnormal Labs, Imaging Findings, ATC Classification
    - Specialized (2): Renal Medication Analysis, Diabetes Management
    - Advanced (1): Comprehensive Pre-Visit Summary
-2. **4 Configurable Tabs**: Users can assign any preset template to tabs 0-2, with tab 3 reserved for custom configuration
-3. **9 Medical Data Types**: Selective transmission of patient summary, allergy, surgery, discharge, HBCV, medication, lab, Chinese medicine, imaging
-4. **Dynamic Tab Rendering**: Sidebar automatically adapts UI based on selected templates (icons, labels, analysis logic)
+3. **10 Medical Data Types**: Selective transmission of diagnosis, patient summary, allergy, surgery, discharge, HBCV, medication, lab, Chinese medicine, imaging
+4. **Copy Functionality**: All tabs support copying AI results (Tab 1/2: header button, Tab 3: per-message button)
+5. **Developer Mode**: Advanced settings (XML format, prompt inclusion) only visible in developer mode
 
 **Data Flow**:
 ```
@@ -352,9 +359,11 @@ The extension requires:
 
 **Provider System:**
 - `providers/BaseProvider.js` - Abstract provider base class
-- `providers/OpenAIProvider.js` - OpenAI API implementation
+- `providers/CerebrasProvider.js` - Cerebras API implementation (recommended)
+- `providers/GroqProvider.js` - Groq API implementation
 - `providers/GeminiProvider.js` - Gemini API implementation
-- `providers/providerRegistry.js` - Provider registration system
+- `providers/OpenAIProvider.js` - OpenAI API implementation
+- `providers/providerRegistry.js` - Provider registration system (Cerebras > Groq > Gemini > OpenAI)
 
 **Prompt System:**
 - `prompts/PromptManager.js` - Template management system
@@ -378,7 +387,12 @@ The extension requires:
 ### UI Components
 
 **Sidebar Components:**
-- `src/components/sidebar/TabConfigDialog.jsx` - Tab configuration dialog with template selection
+- `src/components/sidebar/Tab1AutoAnalysis.jsx` - Auto-analysis display with copy
+- `src/components/sidebar/Tab2QuickButtons.jsx` - Quick buttons grid with results
+- `src/components/sidebar/Tab3Chat.jsx` - Chat interface with per-message copy
+- `src/components/sidebar/SidebarV2ConfigDialog.jsx` - V2 configuration dialog
+- `src/components/sidebar/CustomButtonEditor.jsx` - Custom button editor
+- `src/components/sidebar/MarkdownRenderer.jsx` - Markdown rendering component
 
 ### Documentation
 - `docs/GAI_MODULARIZATION_PLAN.md` - GAI modularization architecture and implementation plan

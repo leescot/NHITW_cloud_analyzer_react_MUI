@@ -4,7 +4,7 @@
  * 多輪對話功能，與醫療資料互動
  */
 
-import { useRef, useEffect } from 'react';
+import { useRef, useEffect, useState } from 'react';
 import {
   Box,
   Typography,
@@ -21,6 +21,8 @@ import SendIcon from '@mui/icons-material/Send';
 import ChatIcon from '@mui/icons-material/Chat';
 import DeleteSweepIcon from '@mui/icons-material/DeleteSweep';
 import PsychologyIcon from '@mui/icons-material/Psychology';
+import ContentCopyIcon from '@mui/icons-material/ContentCopy';
+import CheckIcon from '@mui/icons-material/Check';
 import MarkdownRenderer from './MarkdownRenderer';
 
 const Tab3Chat = ({
@@ -35,11 +37,20 @@ const Tab3Chat = ({
   onClearHistory
 }) => {
   const messagesEndRef = useRef(null);
+  const [copiedIndex, setCopiedIndex] = useState(null);
 
   // Auto-scroll to bottom
   useEffect(() => {
     messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
   }, [history, loading]);
+
+  // 複製訊息內容
+  const handleCopyMessage = (content, index) => {
+    navigator.clipboard.writeText(content).then(() => {
+      setCopiedIndex(index);
+      setTimeout(() => setCopiedIndex(null), 2000);
+    });
+  };
 
   const handleSend = () => {
     if (userInput.trim() && !loading) {
@@ -74,7 +85,7 @@ const Tab3Chat = ({
         <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
           <ChatIcon color="primary" sx={{ fontSize: '1rem' }} />
           <Typography variant="caption" color="text.secondary" sx={{ fontWeight: 'medium' }}>
-            AI 智慧對答：基於病歷資料進行自由對話
+            AI 對答：基於資料進行對話
           </Typography>
         </Box>
         <Tooltip title="清空對話">
@@ -148,11 +159,24 @@ const Tab3Chat = ({
                 </Paper>
               </Box>
 
-              {message.metadata && !isUser && (
-                <Typography variant="caption" color="text.disabled" sx={{ mt: 0.5 }}>
-                  {message.metadata.tokens && `${message.metadata.tokens} tokens`}
-                  {message.metadata.duration && ` • ${message.metadata.duration}s`}
-                </Typography>
+              {/* 底部資訊列：複製按鈕 + 統計資訊（僅 AI 訊息） */}
+              {!isUser && (
+                <Box sx={{ mt: 0.5, display: 'flex', justifyContent: 'flex-end', alignItems: 'center', gap: 1, opacity: 0.6 }}>
+                  <Tooltip title={copiedIndex === index ? "已複製" : "複製"}>
+                    <IconButton
+                      size="small"
+                      onClick={() => handleCopyMessage(message.content, index)}
+                      sx={{ p: 0.25, color: copiedIndex === index ? 'success.main' : 'text.secondary' }}
+                    >
+                      {copiedIndex === index ? <CheckIcon sx={{ fontSize: '0.85rem' }} /> : <ContentCopyIcon sx={{ fontSize: '0.85rem' }} />}
+                    </IconButton>
+                  </Tooltip>
+                  {message.metadata && (
+                    <Typography variant="caption" sx={{ fontSize: '0.6rem' }}>
+                      {`AI 可能出錯，請查核資訊 / ${message.metadata.tokens}tokens/${message.metadata.duration}s${message.metadata.keyUsed ? `/${message.metadata.keyUsed}` : ''}`}
+                    </Typography>
+                  )}
+                </Box>
               )}
             </Box>
           );

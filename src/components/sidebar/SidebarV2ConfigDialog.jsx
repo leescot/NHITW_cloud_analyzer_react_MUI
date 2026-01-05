@@ -205,8 +205,8 @@ const SidebarV2ConfigDialog = ({
       </DialogTitle>
 
       <Tabs value={tabValue} onChange={handleTabChange} sx={{ borderBottom: 1, borderColor: 'divider', px: 3 }}>
-        <Tab label="自動分析" />
-        <Tab label="快速按鈕" />
+        <Tab label="自動" />
+        <Tab label="快速" />
         <Tab label="對話" />
       </Tabs>
 
@@ -235,7 +235,7 @@ const SidebarV2ConfigDialog = ({
                     <Box>
                       <Typography variant="subtitle1" fontWeight="bold">自動分析狀態</Typography>
                       <Typography variant="caption" color="text.secondary">
-                        當 Sidebar 開啟且病歷載入完成時，自動執行指定的 GAI 分析
+                        當側邊欄開啟且病歷載入完成時，自動執行指定的 GAI 分析
                       </Typography>
                     </Box>
                   </Box>
@@ -367,7 +367,7 @@ const SidebarV2ConfigDialog = ({
                 const isExpanded = expandedSlot === button.slotIndex;
                 const template = button.type === 'preset' ? tabTemplateManager.getTemplate(button.templateId) : null;
                 const displayLabel = button.label || template?.name || '未命名';
-                const iconName = button.icon || template?.icon || 'AutoAwesome';
+                const iconName = button.type === 'custom' ? 'Star' : (button.icon || template?.icon || 'AutoAwesome');
 
                 return (
                   <Grid item xs={12} sm={6} key={button.slotIndex}>
@@ -441,7 +441,7 @@ const SidebarV2ConfigDialog = ({
                               MenuProps={{ sx: { zIndex: 2147483650 } }}
                             >
                               <MenuItem value="preset">使用預設模板</MenuItem>
-                              <MenuItem value="custom">自訂分析 Prompt</MenuItem>
+                              <MenuItem value="custom">自訂分析指令</MenuItem>
                             </Select>
                           </FormControl>
 
@@ -491,7 +491,7 @@ const SidebarV2ConfigDialog = ({
                                 onClick={() => handleEditCustomButton(button)}
                                 fullWidth
                               >
-                                編輯自訂 Prompt 與資料
+                                編輯自訂分析指令
                               </Button>
                             </Box>
                           )}
@@ -508,174 +508,140 @@ const SidebarV2ConfigDialog = ({
         {/* Tab 3: 對話 */}
         {tabValue === 2 && (
           <Box sx={{ pt: 2, display: 'flex', flexDirection: 'column', gap: 3 }}>
-            {/* Main Toggle Section */}
+            {/* Header Section */}
             <Paper variant="outlined" sx={{ p: 2, bgcolor: '#f8f9fa' }}>
-              <FormControlLabel
-                control={
-                  <Switch
-                    checked={localChatConfig?.enabled ?? false}
-                    onChange={(e) => {
-                      console.log('[Config] Tab3 Switch onChange:', e.target.checked);
-                      setLocalChatConfig({
-                        ...DEFAULT_CHAT_CONFIG,
-                        ...localChatConfig,
-                        enabled: e.target.checked
-                      });
-                    }}
-                    color="primary"
-                  />
-                }
-                label={
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                    <ChatIcon color="primary" />
-                    <Box>
-                      <Typography variant="subtitle1" fontWeight="bold">Chat 功能</Typography>
-                      <Typography variant="caption" color="text.secondary">
-                        與 AI 進行自由對話，AI 將讀取完整的 10 種病歷資料
-                      </Typography>
-                    </Box>
-                  </Box>
-                }
-                labelPlacement="start"
-                sx={{
-                  margin: 0,
-                  width: '100%',
-                  display: 'flex',
-                  justifyContent: 'space-between',
-                  cursor: 'pointer'
-                }}
-              />
-            </Paper>
-
-            <Collapse in={localChatConfig?.enabled}>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, mt: 3 }}>
-
-                {/* Personality Section */}
+              <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                <ChatIcon color="primary" />
                 <Box>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
-                    <PsychologyIcon fontSize="small" color="action" />
-                    <Typography variant="subtitle2" fontWeight="bold">AI 專家設定 (System Prompt)</Typography>
-                  </Box>
-                  <TextField
-                    value={localChatConfig?.systemPrompt || ''}
-                    onChange={(e) => setLocalChatConfig({ ...localChatConfig, systemPrompt: e.target.value })}
-                    multiline
-                    rows={4}
-                    fullWidth
-                    variant="outlined"
-                    placeholder="例如：你是專業的醫療AI助理，請根據提供的病歷資料回答問題..."
-                    sx={{ bgcolor: 'white' }}
-                  />
-                  <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>
-                    設定 AI 的人格背景與回答風格
+                  <Typography variant="subtitle1" fontWeight="bold">Chat 功能設定</Typography>
+                  <Typography variant="caption" color="text.secondary">
+                    與 AI 進行自由對話，AI 將讀取完整的 10 種病歷資料
                   </Typography>
                 </Box>
+              </Box>
+            </Paper>
 
-                <Divider />
+            <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
 
-                {/* Interface Section */}
-                <Box>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
-                    <EditIcon fontSize="small" color="action" />
-                    <Typography variant="subtitle2" fontWeight="bold">快速提問按鈕 (最多 5 個)</Typography>
-                  </Box>
-                  <Grid container spacing={1.5}>
-                    {(localChatConfig?.quickQuestions || []).map((question, index) => (
-                      <Grid item xs={12} key={index}>
-                        <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
-                          <TextField
-                            value={question}
-                            onChange={(e) => {
-                              const newQuestions = [...(localChatConfig.quickQuestions || [])];
-                              newQuestions[index] = e.target.value;
-                              setLocalChatConfig({ ...localChatConfig, quickQuestions: newQuestions });
-                            }}
-                            size="small"
-                            fullWidth
-                            placeholder="輸入問題，例如：摘要此病歷重點"
-                            sx={{ bgcolor: 'white' }}
-                          />
-                          <IconButton
-                            size="small"
-                            color="error"
-                            onClick={() => {
-                              const newQuestions = (localChatConfig.quickQuestions || []).filter((_, i) => i !== index);
-                              setLocalChatConfig({ ...localChatConfig, quickQuestions: newQuestions });
-                            }}
-                          >
-                            <DeleteIcon fontSize="small" />
-                          </IconButton>
-                        </Box>
-                      </Grid>
-                    ))}
-                  </Grid>
-                  {(!localChatConfig?.quickQuestions || localChatConfig.quickQuestions.length < 5) && (
-                    <Button
-                      size="small"
-                      startIcon={<AddIcon />}
-                      onClick={() => {
-                        const newQuestions = [...(localChatConfig?.quickQuestions || []), ''];
-                        setLocalChatConfig({ ...localChatConfig, quickQuestions: newQuestions });
-                      }}
-                      sx={{ mt: 1 }}
-                    >
-                      新增快速提問
-                    </Button>
-                  )}
+              {/* Personality Section */}
+              <Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
+                  <PsychologyIcon fontSize="small" color="action" />
+                  <Typography variant="subtitle2" fontWeight="bold">AI 專家設定 (System Prompt)</Typography>
                 </Box>
+                <TextField
+                  value={localChatConfig?.systemPrompt || ''}
+                  onChange={(e) => setLocalChatConfig({ ...localChatConfig, systemPrompt: e.target.value })}
+                  multiline
+                  rows={4}
+                  fullWidth
+                  variant="outlined"
+                  placeholder="例如：你是專業的醫療AI助理，請根據提供的病歷資料回答問題..."
+                  sx={{ bgcolor: 'white' }}
+                />
+                <Typography variant="caption" color="text.secondary" sx={{ mt: 0.5, display: 'block' }}>
+                  設定 AI 的人格背景與回答風格
+                </Typography>
+              </Box>
 
-                <Divider />
+              <Divider />
 
-                {/* Session Section */}
-                <Box>
-                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
-                    <HistoryIcon fontSize="small" color="action" />
-                    <Typography variant="subtitle2" fontWeight="bold">對話紀錄管理</Typography>
-                  </Box>
-
-                  <Box sx={{ pl: 1 }}>
-                    <FormControlLabel
-                      control={
-                        <Switch
-                          checked={localChatConfig?.enableHistory || false}
-                          onChange={(e) => setLocalChatConfig({ ...localChatConfig, enableHistory: e.target.checked })}
-                          size="small"
-                        />
-                      }
-                      label={<Typography variant="body2">保存對話歷史</Typography>}
-                    />
-
-                    <Collapse in={localChatConfig?.enableHistory}>
-                      <Box sx={{ mt: 1, display: 'flex', alignItems: 'center', gap: 2 }}>
+              {/* Interface Section */}
+              <Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
+                  <EditIcon fontSize="small" color="action" />
+                  <Typography variant="subtitle2" fontWeight="bold">快速提問按鈕 (最多 5 個)</Typography>
+                </Box>
+                <Grid container spacing={1.5}>
+                  {(localChatConfig?.quickQuestions || []).map((question, index) => (
+                    <Grid item xs={12} key={index}>
+                      <Box sx={{ display: 'flex', alignItems: 'center', gap: 1 }}>
                         <TextField
-                          label="最大保存輪數(最多 5 輪)"
-                          type="number"
-                          value={localChatConfig?.maxHistoryLength || 5}
+                          value={question}
                           onChange={(e) => {
-                            let val = parseInt(e.target.value) || 1;
-                            if (val > 5) val = 5;
-                            if (val < 1) val = 1;
-                            setLocalChatConfig({ ...localChatConfig, maxHistoryLength: val });
+                            const newQuestions = [...(localChatConfig.quickQuestions || [])];
+                            newQuestions[index] = e.target.value;
+                            setLocalChatConfig({ ...localChatConfig, quickQuestions: newQuestions });
                           }}
                           size="small"
-                          sx={{ maxWidth: 120, bgcolor: 'white' }}
-                          inputProps={{ min: 1, max: 5 }}
+                          fullWidth
+                          placeholder="輸入問題，例如：摘要此病歷重點"
+                          sx={{ bgcolor: 'white' }}
                         />
-                        <Typography variant="caption" color="text.secondary">
-                          紀錄超過此數量後，將自動移除最舊的對話
-                        </Typography>
+                        <IconButton
+                          size="small"
+                          color="error"
+                          onClick={() => {
+                            const newQuestions = (localChatConfig.quickQuestions || []).filter((_, i) => i !== index);
+                            setLocalChatConfig({ ...localChatConfig, quickQuestions: newQuestions });
+                          }}
+                        >
+                          <DeleteIcon fontSize="small" />
+                        </IconButton>
                       </Box>
-                    </Collapse>
-                  </Box>
+                    </Grid>
+                  ))}
+                </Grid>
+                {(!localChatConfig?.quickQuestions || localChatConfig.quickQuestions.length < 5) && (
+                  <Button
+                    size="small"
+                    startIcon={<AddIcon />}
+                    onClick={() => {
+                      const newQuestions = [...(localChatConfig?.quickQuestions || []), ''];
+                      setLocalChatConfig({ ...localChatConfig, quickQuestions: newQuestions });
+                    }}
+                    sx={{ mt: 1 }}
+                  >
+                    新增快速提問
+                  </Button>
+                )}
+              </Box>
+
+              <Divider />
+
+              {/* Session Section */}
+              <Box>
+                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1, mb: 1.5 }}>
+                  <HistoryIcon fontSize="small" color="action" />
+                  <Typography variant="subtitle2" fontWeight="bold">對話紀錄管理</Typography>
+                </Box>
+
+                <Box sx={{ pl: 1 }}>
+                  <FormControlLabel
+                    control={
+                      <Switch
+                        checked={localChatConfig?.enableHistory || false}
+                        onChange={(e) => setLocalChatConfig({ ...localChatConfig, enableHistory: e.target.checked })}
+                        size="small"
+                      />
+                    }
+                    label={<Typography variant="body2">保存對話歷史</Typography>}
+                  />
+
+                  <Collapse in={localChatConfig?.enableHistory}>
+                    <Box sx={{ mt: 1, display: 'flex', alignItems: 'center', gap: 2 }}>
+                      <TextField
+                        label="最大保存輪數(最多 5 輪)"
+                        type="number"
+                        value={localChatConfig?.maxHistoryLength || 5}
+                        onChange={(e) => {
+                          let val = parseInt(e.target.value) || 1;
+                          if (val > 5) val = 5;
+                          if (val < 1) val = 1;
+                          setLocalChatConfig({ ...localChatConfig, maxHistoryLength: val });
+                        }}
+                        size="small"
+                        sx={{ maxWidth: 120, bgcolor: 'white' }}
+                        inputProps={{ min: 1, max: 5 }}
+                      />
+                      <Typography variant="caption" color="text.secondary">
+                        紀錄超過此數量後，將自動移除最舊的對話
+                      </Typography>
+                    </Box>
+                  </Collapse>
                 </Box>
               </Box>
-            </Collapse>
-
-            {!localChatConfig?.enabled && (
-              <Box sx={{ textAlign: 'center', py: 4, color: 'text.disabled', border: '1px dashed grey', borderRadius: 2 }}>
-                <Typography variant="body2">Chat 功能已停用</Typography>
-              </Box>
-            )}
+            </Box>
           </Box>
         )}
       </DialogContent>
