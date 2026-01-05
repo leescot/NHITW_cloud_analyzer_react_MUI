@@ -10,8 +10,8 @@
 // ==================== Tab 1: 自動分析配置 ====================
 
 export const DEFAULT_AUTO_ANALYSIS_CONFIG = {
-  templateId: 'critical_alerts',  // 預設使用「危險警示」模板
-  enabled: true                   // 預設啟用自動分析
+  templateId: 'comprehensive_summary',  // 預設使用「綜合摘要」模板
+  enabled: false                        // 預設停用自動分析（用戶可在設定中啟用）
 };
 
 // ==================== Tab 2: 快速按鈕配置 ====================
@@ -110,7 +110,7 @@ export const DEFAULT_QUICK_BUTTONS_CONFIG = [
 // ==================== Tab 3: Chat 對話配置 ====================
 
 export const DEFAULT_CHAT_CONFIG = {
-  enabled: true,  // 預設啟用 Chat 功能
+  enabled: false,  // 預設停用 Chat 功能（用戶可在設定中啟用）
 
   // System Prompt（繁體中文醫療助理）
   systemPrompt: '你是專業的醫療AI助理。請用台灣醫師常用的繁體中文醫學術語回答問題。提供準確且精簡的臨床見解。',

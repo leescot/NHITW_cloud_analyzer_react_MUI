@@ -46,7 +46,11 @@ import * as MuiIcons from '@mui/icons-material';
 import { DATA_TYPE_METADATA } from '../../config/dataTypeMetadata';
 import tabTemplateManager from '../../services/gai/tabs';
 import { PRESET_TEMPLATES } from '../../services/gai/tabs/presetTemplates';
-import { getAllDefaults } from '../../config/sidebarV2Defaults';
+import {
+  getAllDefaults,
+  DEFAULT_AUTO_ANALYSIS_CONFIG,
+  DEFAULT_CHAT_CONFIG
+} from '../../config/sidebarV2Defaults';
 import {
   saveAutoAnalysisConfig,
   saveQuickButtonsConfig,
@@ -85,7 +89,7 @@ const SidebarV2ConfigDialog = ({
       setTabValue(0); // Reset to first tab
       setExpandedSlot(null);
     }
-  }, [open, autoAnalysisConfig, quickButtonsConfig, chatConfig]);
+  }, [open]); // Only sync when dialog explicitly opens
 
   const handleSave = async () => {
     // Save all configs
@@ -171,7 +175,21 @@ const SidebarV2ConfigDialog = ({
       onClose={onClose}
       maxWidth="md"
       fullWidth
-      sx={{ zIndex: 2147483649 }}
+      sx={{
+        zIndex: 2147483649,
+        '& .MuiDialog-paper': {
+          zIndex: 2147483650,
+          pointerEvents: 'auto'
+        }
+      }}
+      slotProps={{
+        backdrop: {
+          sx: {
+            zIndex: 2147483648,
+            pointerEvents: 'none'
+          }
+        }
+      }}
     >
       <DialogTitle sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
         <Typography variant="h6" fontWeight="bold">GAI Sidebar 設定</Typography>
@@ -197,32 +215,55 @@ const SidebarV2ConfigDialog = ({
         {tabValue === 0 && (
           <Box sx={{ pt: 2, display: 'flex', flexDirection: 'column', gap: 3 }}>
             <Paper variant="outlined" sx={{ p: 2, bgcolor: '#f8f9fa' }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                  <SettingsSuggestIcon color="primary" />
-                  <Box>
-                    <Typography variant="subtitle1" fontWeight="bold">自動分析狀態</Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      當 Sidebar 開啟且病歷載入完成時，自動執行指定的 GAI 分析
-                    </Typography>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={localAutoConfig?.enabled ?? false}
+                    onChange={(e) => {
+                      console.log('[Config] Tab1 Switch onChange:', e.target.checked);
+                      setLocalAutoConfig({
+                        templateId: localAutoConfig?.templateId || 'comprehensive_summary',
+                        enabled: e.target.checked
+                      });
+                    }}
+                    color="primary"
+                  />
+                }
+                label={
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                    <SettingsSuggestIcon color="primary" />
+                    <Box>
+                      <Typography variant="subtitle1" fontWeight="bold">自動分析狀態</Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        當 Sidebar 開啟且病歷載入完成時，自動執行指定的 GAI 分析
+                      </Typography>
+                    </Box>
                   </Box>
-                </Box>
-                <Switch
-                  checked={localAutoConfig?.enabled || false}
-                  onChange={(e) => setLocalAutoConfig({ ...localAutoConfig, enabled: e.target.checked })}
-                  color="primary"
-                />
-              </Box>
+                }
+                labelPlacement="start"
+                sx={{
+                  margin: 0,
+                  width: '100%',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  cursor: 'pointer'
+                }}
+              />
             </Paper>
 
             <Collapse in={localAutoConfig?.enabled}>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, mt: 3 }}>
                 <FormControl fullWidth>
                   <InputLabel>選擇最佳分析模板</InputLabel>
                   <Select
                     value={localAutoConfig?.templateId || ''}
                     label="選擇最佳分析模板"
-                    onChange={(e) => setLocalAutoConfig({ ...localAutoConfig, templateId: e.target.value })}
+                    onChange={(e) => {
+                      setLocalAutoConfig({
+                        templateId: e.target.value,
+                        enabled: localAutoConfig?.enabled ?? true
+                      });
+                    }}
                     MenuProps={{ sx: { zIndex: 2147483650 } }}
                   >
                     <ListSubheader>基礎分析</ListSubheader>
@@ -374,7 +415,6 @@ const SidebarV2ConfigDialog = ({
                                 size="small"
                                 checked={button.enabled}
                                 onChange={(e) => {
-                                  e.stopPropagation();
                                   handleButtonConfigChange(button.slotIndex, 'enabled', e.target.checked);
                                 }}
                               />
@@ -470,26 +510,45 @@ const SidebarV2ConfigDialog = ({
           <Box sx={{ pt: 2, display: 'flex', flexDirection: 'column', gap: 3 }}>
             {/* Main Toggle Section */}
             <Paper variant="outlined" sx={{ p: 2, bgcolor: '#f8f9fa' }}>
-              <Box sx={{ display: 'flex', alignItems: 'center', justifyContent: 'space-between' }}>
-                <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
-                  <ChatIcon color="primary" />
-                  <Box>
-                    <Typography variant="subtitle1" fontWeight="bold">Chat 功能</Typography>
-                    <Typography variant="caption" color="text.secondary">
-                      與 AI 進行自由對話，AI 將讀取完整的 10 種病歷資料
-                    </Typography>
+              <FormControlLabel
+                control={
+                  <Switch
+                    checked={localChatConfig?.enabled ?? false}
+                    onChange={(e) => {
+                      console.log('[Config] Tab3 Switch onChange:', e.target.checked);
+                      setLocalChatConfig({
+                        ...DEFAULT_CHAT_CONFIG,
+                        ...localChatConfig,
+                        enabled: e.target.checked
+                      });
+                    }}
+                    color="primary"
+                  />
+                }
+                label={
+                  <Box sx={{ display: 'flex', alignItems: 'center', gap: 1.5 }}>
+                    <ChatIcon color="primary" />
+                    <Box>
+                      <Typography variant="subtitle1" fontWeight="bold">Chat 功能</Typography>
+                      <Typography variant="caption" color="text.secondary">
+                        與 AI 進行自由對話，AI 將讀取完整的 10 種病歷資料
+                      </Typography>
+                    </Box>
                   </Box>
-                </Box>
-                <Switch
-                  checked={localChatConfig?.enabled || false}
-                  onChange={(e) => setLocalChatConfig({ ...localChatConfig, enabled: e.target.checked })}
-                  color="primary"
-                />
-              </Box>
+                }
+                labelPlacement="start"
+                sx={{
+                  margin: 0,
+                  width: '100%',
+                  display: 'flex',
+                  justifyContent: 'space-between',
+                  cursor: 'pointer'
+                }}
+              />
             </Paper>
 
             <Collapse in={localChatConfig?.enabled}>
-              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3 }}>
+              <Box sx={{ display: 'flex', flexDirection: 'column', gap: 3, mt: 3 }}>
 
                 {/* Personality Section */}
                 <Box>
