@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>隱私權政策 - 更好的健保雲端 2.0</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, "Microsoft JhengHei", sans-serif;
+            line-height: 1.8;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+            background-color: #fafafa;
+        }
+        h1 { color: #1976d2; border-bottom: 2px solid #1976d2; padding-bottom: 10px; }
+        h2 { color: #424242; margin-top: 30px; }
+        h3 { color: #616161; }
+        .warning { background-color: #fff3e0; border-left: 4px solid #ff9800; padding: 15px; margin: 20px 0; }
+        .important { background-color: #e3f2fd; border-left: 4px solid #1976d2; padding: 15px; margin: 20px 0; }
+        .success { background-color: #e8f5e9; border-left: 4px solid #4caf50; padding: 15px; margin: 20px 0; }
+        table { border-collapse: collapse; width: 100%; margin: 20px 0; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        th { background-color: #f5f5f5; }
+        code { background-color: #f5f5f5; padding: 2px 6px; border-radius: 3px; }
+        a { color: #1976d2; }
+        .lang-switch { text-align: right; margin-bottom: 20px; }
+        .update-date { color: #757575; font-size: 0.9em; }
+    </style>
+</head>
+<body>
+    <div class="lang-switch">
+        <a href="privacy-policy-en.html">English Version</a>
+    </div>
+
+    <h1>隱私權政策</h1>
+    <p class="update-date">最後更新日期：2026 年 1 月 6 日</p>
+
+    <p>「更好的健保雲端 2.0」（以下簡稱「本擴充功能」）尊重並保護使用者的隱私權。本政策說明我們如何處理您的資料。</p>
+
+    <h2>1. 資料收集與儲存</h2>
+
+    <h3>1.1 本地儲存的資料</h3>
+    <p>本擴充功能使用 Chrome Storage API 在您的瀏覽器本地儲存以下資料：</p>
+    <ul>
+        <li>使用者偏好設定（顯示選項、追蹤天數等）</li>
+        <li>AI 服務的 API Key（若您選擇使用 GAI 功能）</li>
+        <li>GAI 對話歷史（僅存於本地，不同步至雲端）</li>
+    </ul>
+
+    <div class="important">
+        <strong>重要說明：</strong>您的 API Key 僅儲存於本地瀏覽器中，不會傳輸至任何第三方伺服器（除了您選擇的 AI 服務提供者）。
+    </div>
+
+    <h3>1.2 不收集的資料</h3>
+    <p>本擴充功能<strong>不會</strong>：</p>
+    <ul>
+        <li>收集或傳送任何資料至本擴充功能的開發者</li>
+        <li>追蹤您的瀏覽行為</li>
+        <li>儲存病患資料於任何外部伺服器</li>
+        <li>分享您的資料給廣告商或資料仲介</li>
+    </ul>
+
+    <h2>2. GAI 智慧分析功能</h2>
+
+    <div class="warning">
+        <strong>注意：</strong>GAI 功能為選用功能，預設為關閉。啟用前請詳閱以下說明。
+    </div>
+
+    <h3>2.1 資料傳輸</h3>
+    <p>當您啟用並使用 GAI 智慧分析功能時，系統會將<strong>您選擇的醫療資料類型</strong>傳送至您所選擇的 AI 服務提供者進行分析：</p>
+
+    <table>
+        <tr>
+            <th>AI 服務提供者</th>
+            <th>API 端點</th>
+            <th>隱私權政策</th>
+        </tr>
+        <tr>
+            <td>Cerebras (推薦)</td>
+            <td>api.cerebras.ai</td>
+            <td><a href="https://cerebras.ai/privacy-policy" target="_blank">連結</a></td>
+        </tr>
+        <tr>
+            <td>Groq</td>
+            <td>api.groq.com</td>
+            <td><a href="https://groq.com/privacy-policy" target="_blank">連結</a></td>
+        </tr>
+        <tr>
+            <td>Google Gemini</td>
+            <td>generativelanguage.googleapis.com</td>
+            <td><a href="https://ai.google.dev/gemini-api/terms" target="_blank">連結</a></td>
+        </tr>
+        <tr>
+            <td>OpenAI</td>
+            <td>api.openai.com</td>
+            <td><a href="https://openai.com/policies/privacy-policy" target="_blank">連結</a></td>
+        </tr>
+    </table>
+
+    <h3>2.2 自動去個資化保護</h3>
+
+    <div class="success">
+        <strong>隱私保護機制：</strong>本擴充功能內建自動去個資化（De-identification）系統，在傳送影像報告等資料至 AI 服務前，會自動遮罩以下敏感資訊：
+    </div>
+
+    <ul>
+        <li><strong>病患資訊</strong>：姓名、病歷號碼、病床號</li>
+        <li><strong>醫療人員資訊</strong>：醫師姓名、放射師姓名、護理師姓名、各類醫療人員證照號碼</li>
+        <li><strong>系統編號</strong>：醫囑單號、影像號、內視鏡編號</li>
+    </ul>
+
+    <p>支援多種醫院報告格式，包括臺北榮總、西園醫院等特定格式的深度優化。</p>
+
+    <h3>2.3 選擇性資料傳輸</h3>
+    <p>您可以自由選擇要傳送哪些類型的醫療資料進行分析（共 10 種類型），未選擇的資料類型不會被傳送。</p>
+
+    <h3>2.4 免費方案警告</h3>
+
+    <div class="warning">
+        <strong>重要警告：</strong>部分 AI 服務的免費方案可能會使用您提交的內容來改進其 AI 模型。若您處理高度敏感的醫療資料，建議：
+        <ul>
+            <li>使用付費方案（通常不會用於模型訓練）</li>
+            <li>避免傳送可直接識別個人身份的資訊</li>
+            <li>詳閱各 AI 服務提供者的資料使用政策</li>
+        </ul>
+    </div>
+
+    <h2>3. 權限說明</h2>
+
+    <p>本擴充功能請求以下權限：</p>
+
+    <table>
+        <tr>
+            <th>權限</th>
+            <th>用途</th>
+        </tr>
+        <tr>
+            <td><code>webRequest</code></td>
+            <td>攔截健保雲端系統的 API 回應以擷取醫療資料</td>
+        </tr>
+        <tr>
+            <td><code>storage</code></td>
+            <td>儲存使用者設定和 API Key 於本地</td>
+        </tr>
+        <tr>
+            <td><code>scripting</code></td>
+            <td>在健保雲端網頁注入內容腳本</td>
+        </tr>
+        <tr>
+            <td><code>clipboardWrite</code></td>
+            <td>支援複製功能</td>
+        </tr>
+        <tr>
+            <td><code>host_permissions</code></td>
+            <td>存取健保雲端網站及 AI API 端點</td>
+        </tr>
+    </table>
+
+    <h2>4. 資料控制權</h2>
+
+    <p>您隨時可以：</p>
+    <ul>
+        <li><strong>關閉 GAI 功能</strong>：在設定中停用「啟用 GAI 智慧分析側邊欄」</li>
+        <li><strong>刪除 API Key</strong>：在設定中清除已儲存的 API Key</li>
+        <li><strong>清除對話歷史</strong>：使用 Chat 分頁的「清除歷史」按鈕</li>
+        <li><strong>重設所有設定</strong>：使用「重設為預設值」功能或移除擴充功能</li>
+    </ul>
+
+    <h2>5. 資料安全</h2>
+
+    <ul>
+        <li>本擴充功能僅在 <code>medcloud2.nhi.gov.tw</code> 網域運作</li>
+        <li>所有本地資料使用 Chrome 的安全儲存機制</li>
+        <li>API 通訊皆使用 HTTPS 加密傳輸</li>
+        <li>本擴充功能為開源專案，程式碼可供檢視</li>
+    </ul>
+
+    <h2>6. 第三方服務</h2>
+
+    <p>本擴充功能可能連線至以下第三方服務：</p>
+    <ul>
+        <li><strong>drugtw.com</strong>：查詢藥品圖片（不傳送病患資料）</li>
+        <li><strong>AI 服務提供者</strong>：僅在您啟用 GAI 功能並主動觸發分析時</li>
+    </ul>
+
+    <h2>7. 政策更新</h2>
+
+    <p>本隱私權政策可能會不定期更新。重大變更將透過擴充功能更新說明或 GitHub 專案頁面公告。</p>
+
+    <h2>8. 聯絡方式</h2>
+
+    <p>如有任何隱私相關問題，請透過以下方式聯繫：</p>
+    <ul>
+        <li>GitHub Issues：<a href="https://github.com/leescot/NHITW_cloud_analyzer_react_MUI/issues" target="_blank">專案問題回報</a></li>
+    </ul>
+
+    <hr>
+    <p style="text-align: center; color: #757575; font-size: 0.9em;">
+        更好的健保雲端 2.0 &copy; 2024-2026
+    </p>
+</body>
+</html>

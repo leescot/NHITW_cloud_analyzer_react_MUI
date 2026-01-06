@@ -1,0 +1,204 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Privacy Policy - NHI Cloud Analyzer 2.0</title>
+    <style>
+        body {
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+            line-height: 1.8;
+            max-width: 800px;
+            margin: 0 auto;
+            padding: 20px;
+            color: #333;
+            background-color: #fafafa;
+        }
+        h1 { color: #1976d2; border-bottom: 2px solid #1976d2; padding-bottom: 10px; }
+        h2 { color: #424242; margin-top: 30px; }
+        h3 { color: #616161; }
+        .warning { background-color: #fff3e0; border-left: 4px solid #ff9800; padding: 15px; margin: 20px 0; }
+        .important { background-color: #e3f2fd; border-left: 4px solid #1976d2; padding: 15px; margin: 20px 0; }
+        .success { background-color: #e8f5e9; border-left: 4px solid #4caf50; padding: 15px; margin: 20px 0; }
+        table { border-collapse: collapse; width: 100%; margin: 20px 0; }
+        th, td { border: 1px solid #ddd; padding: 12px; text-align: left; }
+        th { background-color: #f5f5f5; }
+        code { background-color: #f5f5f5; padding: 2px 6px; border-radius: 3px; }
+        a { color: #1976d2; }
+        .lang-switch { text-align: right; margin-bottom: 20px; }
+        .update-date { color: #757575; font-size: 0.9em; }
+    </style>
+</head>
+<body>
+    <div class="lang-switch">
+        <a href="privacy-policy.html">中文版本</a>
+    </div>
+
+    <h1>Privacy Policy</h1>
+    <p class="update-date">Last Updated: January 6, 2026</p>
+
+    <p>"NHI Cloud Analyzer 2.0" (hereinafter referred to as "this Extension") respects and protects user privacy. This policy explains how we handle your data.</p>
+
+    <h2>1. Data Collection and Storage</h2>
+
+    <h3>1.1 Locally Stored Data</h3>
+    <p>This Extension uses Chrome Storage API to store the following data locally in your browser:</p>
+    <ul>
+        <li>User preferences (display options, tracking days, etc.)</li>
+        <li>AI service API Keys (if you choose to use the GAI feature)</li>
+        <li>GAI conversation history (stored locally only, not synced to cloud)</li>
+    </ul>
+
+    <div class="important">
+        <strong>Important:</strong> Your API Keys are stored only in your local browser and are never transmitted to any third-party servers (except the AI service provider you choose).
+    </div>
+
+    <h3>1.2 Data We Do NOT Collect</h3>
+    <p>This Extension does <strong>NOT</strong>:</p>
+    <ul>
+        <li>Collect or transmit any data to the Extension developers</li>
+        <li>Track your browsing behavior</li>
+        <li>Store patient data on any external servers</li>
+        <li>Share your data with advertisers or data brokers</li>
+    </ul>
+
+    <h2>2. GAI Smart Analysis Feature</h2>
+
+    <div class="warning">
+        <strong>Note:</strong> The GAI feature is optional and disabled by default. Please read the following before enabling.
+    </div>
+
+    <h3>2.1 Data Transmission</h3>
+    <p>When you enable and use the GAI Smart Analysis feature, the system will transmit <strong>the medical data types you select</strong> to your chosen AI service provider for analysis:</p>
+
+    <table>
+        <tr>
+            <th>AI Service Provider</th>
+            <th>API Endpoint</th>
+            <th>Privacy Policy</th>
+        </tr>
+        <tr>
+            <td>Cerebras (Recommended)</td>
+            <td>api.cerebras.ai</td>
+            <td><a href="https://cerebras.ai/privacy-policy" target="_blank">Link</a></td>
+        </tr>
+        <tr>
+            <td>Groq</td>
+            <td>api.groq.com</td>
+            <td><a href="https://groq.com/privacy-policy" target="_blank">Link</a></td>
+        </tr>
+        <tr>
+            <td>Google Gemini</td>
+            <td>generativelanguage.googleapis.com</td>
+            <td><a href="https://ai.google.dev/gemini-api/terms" target="_blank">Link</a></td>
+        </tr>
+        <tr>
+            <td>OpenAI</td>
+            <td>api.openai.com</td>
+            <td><a href="https://openai.com/policies/privacy-policy" target="_blank">Link</a></td>
+        </tr>
+    </table>
+
+    <h3>2.2 Automatic De-identification Protection</h3>
+
+    <div class="success">
+        <strong>Privacy Protection Mechanism:</strong> This Extension includes an automatic de-identification system that masks the following sensitive information before transmitting imaging reports and other data to AI services:
+    </div>
+
+    <ul>
+        <li><strong>Patient Information</strong>: Names, medical record numbers, bed numbers</li>
+        <li><strong>Medical Staff Information</strong>: Physician names, radiologist names, nurse names, various medical license numbers</li>
+        <li><strong>System IDs</strong>: Order numbers, image numbers, endoscopy numbers</li>
+    </ul>
+
+    <p>Supports multiple hospital report formats with deep optimization for specific formats including Taipei Veterans General Hospital and Xiyuan Hospital.</p>
+
+    <h3>2.3 Selective Data Transmission</h3>
+    <p>You can freely choose which types of medical data to transmit for analysis (10 types available). Unselected data types will not be transmitted.</p>
+
+    <h3>2.4 Free Tier Warning</h3>
+
+    <div class="warning">
+        <strong>Important Warning:</strong> Some AI services' free tiers may use your submitted content to improve their AI models. If you handle highly sensitive medical data, we recommend:
+        <ul>
+            <li>Using paid plans (typically not used for model training)</li>
+            <li>Avoiding transmission of directly personally identifiable information</li>
+            <li>Reading each AI service provider's data usage policy</li>
+        </ul>
+    </div>
+
+    <h2>3. Permission Explanations</h2>
+
+    <p>This Extension requests the following permissions:</p>
+
+    <table>
+        <tr>
+            <th>Permission</th>
+            <th>Purpose</th>
+        </tr>
+        <tr>
+            <td><code>webRequest</code></td>
+            <td>Intercept NHI cloud system API responses to extract medical data</td>
+        </tr>
+        <tr>
+            <td><code>storage</code></td>
+            <td>Store user settings and API Keys locally</td>
+        </tr>
+        <tr>
+            <td><code>scripting</code></td>
+            <td>Inject content scripts into NHI cloud webpages</td>
+        </tr>
+        <tr>
+            <td><code>clipboardWrite</code></td>
+            <td>Support copy functionality</td>
+        </tr>
+        <tr>
+            <td><code>host_permissions</code></td>
+            <td>Access NHI cloud website and AI API endpoints</td>
+        </tr>
+    </table>
+
+    <h2>4. Data Control Rights</h2>
+
+    <p>You can at any time:</p>
+    <ul>
+        <li><strong>Disable GAI Feature</strong>: Turn off "Enable GAI Smart Analysis Sidebar" in settings</li>
+        <li><strong>Delete API Keys</strong>: Clear saved API Keys in settings</li>
+        <li><strong>Clear Conversation History</strong>: Use the "Clear History" button in the Chat tab</li>
+        <li><strong>Reset All Settings</strong>: Use "Reset to Defaults" or remove the extension</li>
+    </ul>
+
+    <h2>5. Data Security</h2>
+
+    <ul>
+        <li>This Extension only operates on the <code>medcloud2.nhi.gov.tw</code> domain</li>
+        <li>All local data uses Chrome's secure storage mechanism</li>
+        <li>All API communications use HTTPS encrypted transmission</li>
+        <li>This Extension is open source and the code is available for review</li>
+    </ul>
+
+    <h2>6. Third-Party Services</h2>
+
+    <p>This Extension may connect to the following third-party services:</p>
+    <ul>
+        <li><strong>drugtw.com</strong>: Drug image lookup (no patient data transmitted)</li>
+        <li><strong>AI Service Providers</strong>: Only when you enable GAI feature and actively trigger analysis</li>
+    </ul>
+
+    <h2>7. Policy Updates</h2>
+
+    <p>This privacy policy may be updated from time to time. Significant changes will be announced through extension update notes or the GitHub project page.</p>
+
+    <h2>8. Contact</h2>
+
+    <p>For any privacy-related questions, please contact us through:</p>
+    <ul>
+        <li>GitHub Issues: <a href="https://github.com/leescot/NHITW_cloud_analyzer_react_MUI/issues" target="_blank">Project Issue Tracker</a></li>
+    </ul>
+
+    <hr>
+    <p style="text-align: center; color: #757575; font-size: 0.9em;">
+        NHI Cloud Analyzer 2.0 &copy; 2024-2026
+    </p>
+</body>
+</html>

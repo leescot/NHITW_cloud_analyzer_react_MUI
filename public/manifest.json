@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "更好的健保雲端 2.0",
-  "version": "26.0105.2",
+  "version": "26.0106.1",
   "description": "幫忙醫療人員快速瀏覽「健保雲端系統2.0」資料",
   "homepage_url": "https://github.com/leescot/NHITW_cloud_analyzer_react_MUI",
   "permissions": [
@@ -13,7 +13,10 @@
   "host_permissions": [
     "https://medcloud2.nhi.gov.tw/*",
     "https://drugtw.com/*",
-    "https://api.openai.com/*"
+    "https://api.openai.com/*",
+    "https://generativelanguage.googleapis.com/*",
+    "https://api.groq.com/*",
+    "https://api.cerebras.ai/*"
   ],
   "background": {
     "service_worker": "background.js"
