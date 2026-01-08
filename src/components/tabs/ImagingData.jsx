@@ -18,6 +18,8 @@ import {
 } from "@mui/material";
 import ImageIcon from '@mui/icons-material/Image';
 import PhotoLibraryIcon from '@mui/icons-material/PhotoLibrary';
+import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
+import ExpandLessIcon from '@mui/icons-material/ExpandLess';
 import TypographySizeWrapper from "../utils/TypographySizeWrapper";
 
 // Function to open imaging study in a new window
@@ -407,6 +409,17 @@ const PendingImagingTable = ({ data, generalDisplaySettings }) => {
 
 // ImagingTable 組件 - 處理已有報告
 const ReportImagingTable = ({ data, generalDisplaySettings }) => {
+  // 管理每個報告的展開/收合狀態
+  const [expandedRows, setExpandedRows] = useState({});
+
+  // 切換展開/收合狀態
+  const toggleExpand = (index) => {
+    setExpandedRows(prev => ({
+      ...prev,
+      [index]: !prev[index]
+    }));
+  };
+
   return (
     <TableContainer component={Paper}>
       <Table size="small">
@@ -441,15 +454,22 @@ const ReportImagingTable = ({ data, generalDisplaySettings }) => {
         <TableBody>
           {data.map((item, index) => {
             const formattedName = formatOrderName(item.orderName);
-            let reportResult = item.inspectResult || "";
-            // Define the markers to filter report content
+            const fullReport = item.inspectResult || "";
+            const isExpanded = expandedRows[index] || false;
+
+            // 處理簡化版報告（只在收合狀態使用）
+            let simplifiedReport = fullReport;
             const markers = ["Imaging findings:", "Imaging findings", "Sonographic Findings:", "Sonographic Findings", "報告內容:", "報告內容：", "報告內容"];
             for (const marker of markers) {
-              if (reportResult.includes(marker)) {
-                reportResult = reportResult.split(marker)[1];
+              if (simplifiedReport.includes(marker)) {
+                simplifiedReport = simplifiedReport.split(marker)[1];
                 break;
               }
             }
+
+            // 根據展開狀態選擇顯示的內容
+            const displayReport = isExpanded ? fullReport : simplifiedReport;
+
             return (
               <TableRow key={index}>
                 <TableCell>
@@ -491,28 +511,46 @@ const ReportImagingTable = ({ data, generalDisplaySettings }) => {
                   </Box>
                 </TableCell>
                 <TableCell>
-                  <TypographySizeWrapper
-                    textSizeType="content"
-                    generalDisplaySettings={generalDisplaySettings}
-                  >
-                    {(() => {
-                      // Highlight specific terms in red
-                      const terms = [/diagnosis/i, /impression/i, /IMP/, /conclusion/i, /診斷/];
-                      let content = reportResult;
-                      
-                      // Replace each term with a red-colored version (for all occurrences)
-                      terms.forEach(term => {
-                        // Use replaceAll with a regular expression that has the global flag
-                        content = content.replace(
-                          new RegExp(term.source, 'g' + term.flags), 
-                          match => `<span style="color: red; font-weight: bold;">${match}</span>`
-                        );
-                      });
-                      
-                      // Return content with dangerouslySetInnerHTML
-                      return <div dangerouslySetInnerHTML={{ __html: content }} />;
-                    })()}
-                  </TypographySizeWrapper>
+                  <Box sx={{ position: 'relative' }}>
+                    {/* 展開/收合按鈕 - 右上角 */}
+                    <IconButton
+                      size="small"
+                      onClick={() => toggleExpand(index)}
+                      sx={{
+                        position: 'absolute',
+                        top: 0,
+                        right: 0,
+                        zIndex: 1
+                      }}
+                    >
+                      {isExpanded ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" />}
+                    </IconButton>
+
+                    {/* 報告內容 */}
+                    <TypographySizeWrapper
+                      textSizeType="content"
+                      generalDisplaySettings={generalDisplaySettings}
+                      sx={{ pr: 4 }}
+                    >
+                      {(() => {
+                        // Highlight specific terms in red
+                        const terms = [/diagnosis/i, /impression/i, /IMP/, /conclusion/i, /診斷/];
+                        let content = displayReport;
+
+                        // Replace each term with a red-colored version (for all occurrences)
+                        terms.forEach(term => {
+                          // Use replaceAll with a regular expression that has the global flag
+                          content = content.replace(
+                            new RegExp(term.source, 'g' + term.flags),
+                            match => `<span style="color: red; font-weight: bold;">${match}</span>`
+                          );
+                        });
+
+                        // Return content with dangerouslySetInnerHTML
+                        return <div dangerouslySetInnerHTML={{ __html: content }} />;
+                      })()}
+                    </TypographySizeWrapper>
+                  </Box>
                 </TableCell>
                 <TableCell align="center">
                   {item.images && item.images.length > 0 ? (
