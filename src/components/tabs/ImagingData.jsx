@@ -467,6 +467,9 @@ const ReportImagingTable = ({ data, generalDisplaySettings }) => {
               }
             }
 
+            // 判斷報告是否有被縮減
+            const isReportReduced = simplifiedReport !== fullReport;
+
             // 根據展開狀態選擇顯示的內容
             const displayReport = isExpanded ? fullReport : simplifiedReport;
 
@@ -512,25 +515,27 @@ const ReportImagingTable = ({ data, generalDisplaySettings }) => {
                 </TableCell>
                 <TableCell>
                   <Box sx={{ position: 'relative' }}>
-                    {/* 展開/收合按鈕 - 右上角 */}
-                    <IconButton
-                      size="small"
-                      onClick={() => toggleExpand(index)}
-                      sx={{
-                        position: 'absolute',
-                        top: 0,
-                        right: 0,
-                        zIndex: 1
-                      }}
-                    >
-                      {isExpanded ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" />}
-                    </IconButton>
+                    {/* 展開/收合按鈕 - 只在報告有被縮減時顯示 */}
+                    {isReportReduced && (
+                      <IconButton
+                        size="small"
+                        onClick={() => toggleExpand(index)}
+                        sx={{
+                          position: 'absolute',
+                          top: 0,
+                          right: 0,
+                          zIndex: 1
+                        }}
+                      >
+                        {isExpanded ? <ExpandLessIcon fontSize="small" /> : <ExpandMoreIcon fontSize="small" />}
+                      </IconButton>
+                    )}
 
                     {/* 報告內容 */}
                     <TypographySizeWrapper
                       textSizeType="content"
                       generalDisplaySettings={generalDisplaySettings}
-                      sx={{ pr: 4 }}
+                      sx={{ pr: isReportReduced ? 4 : 0 }}
                     >
                       {(() => {
                         // Highlight specific terms in red
