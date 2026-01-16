@@ -28,13 +28,16 @@ import { alpha } from "@mui/material/styles";
 import InfoIcon from '@mui/icons-material/Info';
 import GrassIcon from '@mui/icons-material/Grass';
 import TypographySizeWrapper from "../utils/TypographySizeWrapper";
+import AcupunctureIndicator from "../indicators/AcupunctureIndicator";
+import { checkAcupunctureEligibility } from "../../utils/acupunctureChecker";
 
 const Overview_RecentDiagnosis = ({
   groupedMedications = [],
   groupedChineseMeds = [],
   patientSummaryData = [],
   generalDisplaySettings = {},
-  trackingDays = 180
+  trackingDays = 180,
+  enableAcupunctureIndicator = false
 }) => {
   // 處理來自藥物和中藥記錄的診斷數據
   const diagnosisData = useMemo(() => {
@@ -305,6 +308,14 @@ const Overview_RecentDiagnosis = ({
       diagnosisData.vaccines.length > 0 ||
       diagnosisData.enrollment.length > 0;
   }, [diagnosisData]);
+
+  // 檢查針灸申報資格（只在功能啟用時執行）
+  const acupunctureEligibility = useMemo(() => {
+    if (!enableAcupunctureIndicator) {
+      return null;
+    }
+    return checkAcupunctureEligibility(diagnosisData);
+  }, [diagnosisData, enableAcupunctureIndicator]);
 
   // 使用Map來定義類別顯示配置
   const categoryConfig = new Map([

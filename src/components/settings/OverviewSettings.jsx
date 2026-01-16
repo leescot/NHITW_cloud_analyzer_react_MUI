@@ -23,7 +23,9 @@ import {
   Checkbox,
   IconButton,
   ListItemIcon,
-  ListItemSecondaryAction
+  ListItemSecondaryAction,
+  FormControlLabel,
+  Switch
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import DashboardCustomizeIcon from '@mui/icons-material/DashboardCustomize';
@@ -31,6 +33,7 @@ import ScienceIcon from '@mui/icons-material/Science';
 import ArrowCircleUpIcon from '@mui/icons-material/ArrowCircleUp';
 import ArrowCircleDownIcon from '@mui/icons-material/ArrowCircleDown';
 import ImageIcon from '@mui/icons-material/Image';
+import LocalHospitalIcon from '@mui/icons-material/LocalHospital';
 
 // 導入從配置文件中移出的常數
 import { DEFAULT_LAB_TESTS } from '../../config/labTests';
@@ -143,6 +146,9 @@ const OverviewSettings = () => {
   const [imageDialogOpen, setImageDialogOpen] = useState(false);
   const [tempImageTests, setTempImageTests] = useState([]);
 
+  // 針灸指示器功能開關
+  const [enableAcupunctureIndicator, setEnableAcupunctureIndicator] = useState(false);
+
   // 加載設定
   useEffect(() => {
     chrome.storage.sync.get({
@@ -150,13 +156,15 @@ const OverviewSettings = () => {
       labTrackingDays: 180,
       imageTrackingDays: 180,
       focusedLabTests: DEFAULT_LAB_TESTS,
-      focusedImageTests: DEFAULT_IMAGE_TESTS
+      focusedImageTests: DEFAULT_IMAGE_TESTS,
+      enableAcupunctureIndicator: false
     }, (items) => {
       setMedicationTrackingDays(items.medicationTrackingDays);
       setLabTrackingDays(items.labTrackingDays);
       setImageTrackingDays(items.imageTrackingDays);
       setFocusedLabTests(items.focusedLabTests);
       setFocusedImageTests(items.focusedImageTests);
+      setEnableAcupunctureIndicator(items.enableAcupunctureIndicator);
     });
   }, []);
 
@@ -353,6 +361,25 @@ const OverviewSettings = () => {
     setTempImageTests(updatedTests);
   };
 
+  // 切換針灸指示器功能
+  const handleToggleAcupunctureIndicator = (event) => {
+    const newValue = event.target.checked;
+    setEnableAcupunctureIndicator(newValue);
+    chrome.storage.sync.set({ enableAcupunctureIndicator: newValue });
+
+    // 發送消息給 FloatingIcon 組件更新
+    chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+      if (tabs[0]) {
+        chrome.tabs.sendMessage(tabs[0].id, {
+          action: "settingChanged",
+          settingType: "overview",
+          setting: "enableAcupunctureIndicator",
+          value: newValue
+        });
+      }
+    });
+  };
+
   return (
     <Accordion>
       <AccordionSummary
@@ -431,8 +458,32 @@ const OverviewSettings = () => {
           >
             關注影像清單設定
           </Button>
-          <Typography variant="caption" color="text.secondary">
+          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 2 }}>
             設定要在總覽頁面顯示的影像檢查項目及其排序
+          </Typography>
+
+          <Divider sx={{ my: 2 }} />
+
+          <FormControlLabel
+            control={
+              <Switch
+                checked={enableAcupunctureIndicator}
+                onChange={handleToggleAcupunctureIndicator}
+                color="primary"
+              />
+            }
+            label={
+              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                <LocalHospitalIcon sx={{ mr: 1, color: '#e65100', fontSize: '1.2rem' }} />
+                <Typography variant="body2">啟用針灸適應症指示器（中醫）</Typography>
+              </Box>
+            }
+            sx={{ mb: 1 }}
+          />
+          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', ml: 4 }}>
+            在總覽頁面顯示「高度複雜性針灸」和「中度複雜性針灸」的提示圖示。
+            <br />
+            此功能專為中醫師設計，可協助判斷患者是否符合針灸申報條件。
           </Typography>
         </Box>
 

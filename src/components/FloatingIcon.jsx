@@ -99,10 +99,12 @@ import {
   CONTENT_TEXT_SIZES,
   NOTE_TEXT_SIZES,
 } from "../utils/textSizeUtils";
+import { checkAcupunctureEligibility } from "../utils/acupunctureChecker";
 
 // Import new indicators
 import StatusIndicator from "./indicators/StatusIndicator";
 import KidneyStatusIndicator from "./indicators/KidneyStatusIndicator";
+import AcupunctureIndicator from "./indicators/AcupunctureIndicator";
 
 // Import new settings
 import { DEFAULT_SETTINGS } from "../config/defaultSettings";
@@ -415,6 +417,61 @@ const FloatingIcon = () => {
   const gfrValue = extractGFRValue(patientSummaryData);
   const ckdStage = getCKDStage(gfrValue);
 
+  // Build diagnosis data for acupuncture checking
+  const diagnosisDataForAcupuncture = React.useMemo(() => {
+    const outpatient = [];
+    const emergency = [];
+    const inpatient = [];
+
+    // Process western medications
+    groupedMedications.forEach(group => {
+      if (!group.icd_code || !group.icd_name) return;
+
+      const diagnosisItem = {
+        code: group.icd_code.toUpperCase(),
+        name: group.icd_name || group.icd_cname,
+        count: 1
+      };
+
+      if (group.visitType === '急診') {
+        emergency.push({ ...diagnosisItem, date: group.date || group.drug_date });
+      } else if (group.visitType === '住診') {
+        inpatient.push({ ...diagnosisItem, date: group.date || group.drug_date });
+      } else {
+        outpatient.push(diagnosisItem);
+      }
+    });
+
+    // Process Chinese medications
+    groupedChineseMeds.forEach(group => {
+      if (!group.icd_code || !group.icd_name) return;
+
+      const diagnosisItem = {
+        code: group.icd_code.toUpperCase(),
+        name: group.icd_name || group.icd_cname,
+        count: 1
+      };
+
+      if (group.visitType === '急診') {
+        emergency.push({ ...diagnosisItem, date: group.date || group.drug_date });
+      } else if (group.visitType === '住診') {
+        inpatient.push({ ...diagnosisItem, date: group.date || group.drug_date });
+      } else {
+        outpatient.push(diagnosisItem);
+      }
+    });
+
+    return { outpatient, emergency, inpatient };
+  }, [groupedMedications, groupedChineseMeds]);
+
+  // Check acupuncture eligibility (only if enabled)
+  const acupunctureEligibility = React.useMemo(() => {
+    if (!appSettings.overview?.enableAcupunctureIndicator) {
+      return null;
+    }
+    return checkAcupunctureEligibility(diagnosisDataForAcupuncture);
+  }, [diagnosisDataForAcupuncture, appSettings.overview?.enableAcupunctureIndicator]);
+
   // Get position styles based on settings
   const getIconPositionStyle = () => {
     const baseStyle = {
@@ -724,6 +781,21 @@ const FloatingIcon = () => {
               {ckdStage && (
                 <KidneyStatusIndicator
                   stage={ckdStage}
+                  fontSize={generalDisplaySettings.noteTextSize}
+                />
+              )}
+              {/* 針灸指示器 */}
+              {acupunctureEligibility && acupunctureEligibility.highlyComplex.isEligible && (
+                <AcupunctureIndicator
+                  type="highly"
+                  matchedDiagnoses={acupunctureEligibility.highlyComplex.matchedDiagnoses}
+                  fontSize={generalDisplaySettings.noteTextSize}
+                />
+              )}
+              {acupunctureEligibility && acupunctureEligibility.moderateComplex.isEligible && (
+                <AcupunctureIndicator
+                  type="moderate"
+                  matchedDiagnoses={acupunctureEligibility.moderateComplex.matchedDiagnoses}
                   fontSize={generalDisplaySettings.noteTextSize}
                 />
               )}
