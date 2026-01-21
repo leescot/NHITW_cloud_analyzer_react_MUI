@@ -1,4 +1,4 @@
-# 更好的健保雲端 2.0 (NHI Extractor)
+# NHITW Cloud Analyzer (更好的健保雲端 2.0)
 
 這是一個 Chrome 擴充功能，用於從健保雲端資料系統擷取資料。此工具可協助醫療專業人員更有效率地處理健保雲端資料。
 
@@ -111,7 +111,7 @@
 
 ## 貢獻
 
-我們歡迎各種形式的貢獻！如果您想要參與開發，請查看我們的[貢獻指南](CONTRIBUTING.md)。
+我們歡迎各種形式的貢獻！
 
 ### 如何貢獻
 
@@ -121,40 +121,15 @@
 4. Push 到分支 (`git push origin feature/AmazingFeature`)
 5. 發起 Pull Request
 
-詳細的貢獻指南請參考 [CONTRIBUTING.md](CONTRIBUTING.md)。
-
 ## 授權協議
 
-本專案採用 Apache License 2.0 授權 - 詳見 [LICENSE](LICENSE) 檔案。
-
-```
-Copyright 2025-2026 The NHITW Cloud Analyzer Project Authors
-
-Licensed under the Apache License, Version 2.0 (the "License");
-you may not use this file except in compliance with the License.
-You may obtain a copy of the License at
-
-    http://www.apache.org/licenses/LICENSE-2.0
-
-Unless required by applicable law or agreed to in writing, software
-distributed under the License is distributed on an "AS IS" BASIS,
-WITHOUT WARRANTIES OR CONDITIONS OF ANY KIND, either express or implied.
-See the License for the specific language governing permissions and
-limitations under the License.
-```
+本專案採用 Apache License 2.0 授權。詳見 [LICENSE](LICENSE) 檔案。
 
 ## 貢獻者
 
 感謝所有對本專案做出貢獻的開發者！
 
-完整的貢獻者名單請參考 [AUTHORS](AUTHORS) 檔案。
-
-### 專案維護者
-
-- **leescot** - 專案負責人
-
-### 核心貢獻者
-
+- **leescot** - 專案維護者
 - aszk1415
 - Danny Lin
 - Hsieh-Ting Lin (林協霆)
