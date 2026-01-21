@@ -1,4 +1,4 @@
-# 更好的健保雲端 2.0 (NHI Extractor)
+# NHITW Cloud Analyzer (更好的健保雲端 2.0)
 
 這是一個 Chrome 擴充功能，用於從健保雲端資料系統擷取資料。此工具可協助醫療專業人員更有效率地處理健保雲端資料。
 
@@ -108,3 +108,39 @@
 - **影像追蹤天數**：180 天 （預設值，可自行更改）
 - **關注檢驗項目**：預設包含常見檢驗項目 （有固定清單，可自行選定與排序）)
 - **關注影像項目**：預設包含常見影像檢查 （有固定清單，可自行選定）
+
+## 貢獻
+
+我們歡迎各種形式的貢獻！
+
+### 如何貢獻
+
+1. Fork 本專案
+2. 創建您的功能分支 (`git checkout -b feature/AmazingFeature`)
+3. 提交您的修改 (`git commit -m 'feat: add some AmazingFeature'`)
+4. Push 到分支 (`git push origin feature/AmazingFeature`)
+5. 發起 Pull Request
+
+## 授權協議
+
+本專案採用 Apache License 2.0 授權。詳見 [LICENSE](LICENSE) 檔案。
+
+## 貢獻者
+
+感謝所有對本專案做出貢獻的開發者！
+
+- **leescot** - 專案維護者
+- aszk1415
+- Danny Lin
+- Hsieh-Ting Lin (林協霆)
+
+## 聯絡方式
+
+如有問題或建議，歡迎透過以下方式聯繫：
+
+- 提交 [GitHub Issue](https://github.com/leescot/NHITW_cloud_analyzer_react_MUI/issues)
+- 查看 [GitHub Discussions](https://github.com/leescot/NHITW_cloud_analyzer_react_MUI/discussions)
+
+---
+
+**免責聲明**：本工具僅供醫療專業人員輔助使用，所有醫療決策應基於專業判斷。
