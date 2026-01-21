@@ -438,7 +438,7 @@ const FloatingIcon = () => {
       } else if (group.visitType === '住診') {
         inpatient.push({ ...diagnosisItem, date: group.date || group.drug_date });
       } else {
-        outpatient.push(diagnosisItem);
+        outpatient.push({ ...diagnosisItem, date: group.date || group.drug_date });
       }
     });
 
@@ -457,7 +457,7 @@ const FloatingIcon = () => {
       } else if (group.visitType === '住診') {
         inpatient.push({ ...diagnosisItem, date: group.date || group.drug_date });
       } else {
-        outpatient.push(diagnosisItem);
+        outpatient.push({ ...diagnosisItem, date: group.date || group.drug_date });
       }
     });
 

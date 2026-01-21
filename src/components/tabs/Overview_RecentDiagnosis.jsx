@@ -84,16 +84,30 @@ const Overview_RecentDiagnosis = ({
 
     // 使用 Map 來定義不同訪問類型的處理邏輯
     const visitTypeHandlers = new Map([
-      ["門診", (diagnosisKey, isChineseMed) => {
+      ["門診", (diagnosisKey, isChineseMed, group) => {
+        const existing = outpatientDiagnoses[diagnosisKey];
+        const groupDate = group.date || group.drug_date || group.cure_e_date;
+        const newDate = groupDate && (!existing?.date || groupDate > existing.date)
+          ? groupDate
+          : existing?.date;
+
         outpatientDiagnoses[diagnosisKey] = {
-          count: (outpatientDiagnoses[diagnosisKey]?.count || 0) + 1,
-          isChineseMed
+          count: (existing?.count || 0) + 1,
+          isChineseMed,
+          date: newDate
         };
       }],
-      ["藥局", (diagnosisKey, isChineseMed) => {
+      ["藥局", (diagnosisKey, isChineseMed, group) => {
+        const existing = outpatientDiagnoses[diagnosisKey];
+        const groupDate = group.date || group.drug_date || group.cure_e_date;
+        const newDate = groupDate && (!existing?.date || groupDate > existing.date)
+          ? groupDate
+          : existing?.date;
+
         outpatientDiagnoses[diagnosisKey] = {
-          count: (outpatientDiagnoses[diagnosisKey]?.count || 0) + 1,
-          isChineseMed
+          count: (existing?.count || 0) + 1,
+          isChineseMed,
+          date: newDate
         };
       }],
       ["急診", (diagnosisKey, isChineseMed, group, normalizedIcdCode) => {
@@ -122,10 +136,17 @@ const Overview_RecentDiagnosis = ({
     ]);
 
     // 設定默認處理邏輯（用於未分類的訪問類型）
-    const defaultHandler = (diagnosisKey, isChineseMed) => {
+    const defaultHandler = (diagnosisKey, isChineseMed, group) => {
+      const existing = outpatientDiagnoses[diagnosisKey];
+      const groupDate = group.date || group.drug_date || group.cure_e_date;
+      const newDate = groupDate && (!existing?.date || groupDate > existing.date)
+        ? groupDate
+        : existing?.date;
+
       outpatientDiagnoses[diagnosisKey] = {
-        count: (outpatientDiagnoses[diagnosisKey]?.count || 0) + 1,
-        isChineseMed
+        count: (existing?.count || 0) + 1,
+        isChineseMed,
+        date: newDate
       };
     };
 
@@ -242,6 +263,7 @@ const Overview_RecentDiagnosis = ({
             name,
             count: data.count,
             isChineseMed: data.isChineseMed,
+            date: data.date,
             key
           };
         }).sort((a, b) => {

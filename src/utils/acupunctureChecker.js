@@ -227,7 +227,8 @@ export const checkHighlyComplexAcupuncture = (diagnosisData) => {
           code: diagnosis.code,
           name: diagnosis.name,
           type: '門診',
-          count: diagnosis.count
+          count: diagnosis.count,
+          date: diagnosis.date
         });
       }
     });
@@ -389,6 +390,41 @@ export const checkSpecialDisease = (diagnosisData) => {
 };
 
 /**
+ * 去除重複病名並只保留最近的一次
+ * @param {Array} diagnoses - 診斷陣列
+ * @returns {Array} 去重後的診斷陣列（依日期排序，最新的在前）
+ */
+const deduplicateDiagnoses = (diagnoses) => {
+  // 使用 Map 來追蹤每個病名碼的最新診斷
+  const latestDiagnosesMap = new Map();
+
+  diagnoses.forEach(diagnosis => {
+    const existing = latestDiagnosesMap.get(diagnosis.code);
+
+    // 如果沒有現有記錄，或現有記錄沒有日期，直接設置
+    if (!existing || !existing.date) {
+      latestDiagnosesMap.set(diagnosis.code, diagnosis);
+      return;
+    }
+
+    // 如果當前診斷有日期，比較日期
+    if (diagnosis.date) {
+      // 比較日期字串（假設格式為 YYYY/MM/DD 或類似可比較格式）
+      if (diagnosis.date > existing.date) {
+        latestDiagnosesMap.set(diagnosis.code, diagnosis);
+      }
+    }
+  });
+
+  // 轉換回陣列並依日期排序（最新的在前）
+  return Array.from(latestDiagnosesMap.values()).sort((a, b) => {
+    if (!a.date) return 1;
+    if (!b.date) return -1;
+    return b.date.localeCompare(a.date);
+  });
+};
+
+/**
  * 檢查患者的針灸申報資格（整合所有檢查）
  * @param {Object} diagnosisData - 診斷資料
  * @returns {Object} 完整的檢查結果
@@ -449,14 +485,18 @@ export const checkAcupunctureEligibility = (diagnosisData) => {
     new Map(moderateOnlyDiagnoses.map(d => [d.code, d])).values()
   );
 
+  // 去重並排序（只保留每個病名最近的一次）
+  const deduplicatedHighly = deduplicateDiagnoses(highlyComplexDiagnoses);
+  const deduplicatedModerate = deduplicateDiagnoses(uniqueModerateOnly);
+
   return {
     highlyComplex: {
-      isEligible: highlyComplexDiagnoses.length > 0,
-      matchedDiagnoses: highlyComplexDiagnoses
+      isEligible: deduplicatedHighly.length > 0,
+      matchedDiagnoses: deduplicatedHighly
     },
     moderateComplex: {
-      isEligible: uniqueModerateOnly.length > 0,
-      matchedDiagnoses: uniqueModerateOnly
+      isEligible: deduplicatedModerate.length > 0,
+      matchedDiagnoses: deduplicatedModerate
     }
   };
 };
