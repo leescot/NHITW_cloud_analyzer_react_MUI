@@ -53,7 +53,8 @@ const Overview = ({
     labTrackingDays: 90,
     imageTrackingDays: 90,
     focusedLabTests: DEFAULT_LAB_TESTS,
-    focusedImageTests: DEFAULT_IMAGE_TESTS
+    focusedImageTests: DEFAULT_IMAGE_TESTS,
+    enableAcupunctureIndicator: false
   },
   generalDisplaySettings = { titleTextSize: 'medium', contentTextSize: 'medium', noteTextSize: 'small' },
   labSettings = {},
@@ -85,6 +86,7 @@ const Overview = ({
             groupedChineseMeds={groupedChineseMeds}
             patientSummaryData={patientSummaryData}
             generalDisplaySettings={generalDisplaySettings}
+            enableAcupunctureIndicator={overviewSettings.enableAcupunctureIndicator}
           />
 
           {/* 重點藥物 */}

@@ -19,6 +19,7 @@ const AdvancedSettings = () => {
     enableMedicationCopyAll: false,
     enableLabCustomCopyFormat: false,
     enableLabCopyAll: false,
+    enableAcupunctureIndicator: false,
   });
 
   useEffect(() => {
@@ -29,6 +30,7 @@ const AdvancedSettings = () => {
         enableMedicationCopyAll: false,
         enableLabCustomCopyFormat: false,
         enableLabCopyAll: false,
+        enableAcupunctureIndicator: false,
       },
       (items) => {
         setSettings({
@@ -36,6 +38,7 @@ const AdvancedSettings = () => {
           enableMedicationCopyAll: items.enableMedicationCopyAll,
           enableLabCustomCopyFormat: items.enableLabCustomCopyFormat,
           enableLabCopyAll: items.enableLabCopyAll,
+          enableAcupunctureIndicator: items.enableAcupunctureIndicator,
         });
       }
     );
@@ -204,6 +207,21 @@ const AdvancedSettings = () => {
             />
           }
           label="開啟檢驗報告全部資料複製功能"
+        />
+
+        <FormControlLabel
+          control={
+            <Switch
+              checked={settings.enableAcupunctureIndicator}
+              onChange={(e) => {
+                handleLocalSettingChange(
+                  "enableAcupunctureIndicator",
+                  e.target.checked
+                );
+              }}
+            />
+          }
+          label="顯示針灸適應症指示器（中醫）"
         />
       </AccordionDetails>
     </Accordion>
