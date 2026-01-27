@@ -780,6 +780,7 @@ const FloatingIcon = () => {
               groupedLabs={groupedLabs}
               labData={groupedLabs}
               imagingData={imagingData}
+              userInfo={userInfo}
               settings={{
                 ...appSettings.western,
                 enableATC5Colors: appSettings.atc5.enableColors,
