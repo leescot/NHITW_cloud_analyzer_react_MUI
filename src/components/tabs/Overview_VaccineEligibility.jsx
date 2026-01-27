@@ -206,29 +206,39 @@ const Overview_VaccineEligibility = ({
 
                 {/* 公費/自費 */}
                 <TableCell align="center">
-                  <Chip
-                    label={vaccine.fundingStatus}
-                    size="small"
-                    sx={{
-                      height: "22px",
-                      fontSize: "0.75rem",
-                      fontWeight: "bold",
-                      ...(vaccine.fundingStatus === "公費"
-                        ? {
-                            backgroundColor: alpha("#2e7d32", 0.12),
-                            color: "#2e7d32",
-                            border: "1px solid",
-                            borderColor: alpha("#2e7d32", 0.3),
-                          }
-                        : {
-                            backgroundColor: alpha("#ed6c02", 0.12),
-                            color: "#ed6c02",
-                            border: "1px solid",
-                            borderColor: alpha("#ed6c02", 0.3),
-                          }),
-                      "& .MuiChip-label": { px: 1 },
-                    }}
-                  />
+                  {vaccine.fundingStatus === "—" ? (
+                    <TypographySizeWrapper
+                      textSizeType="note"
+                      generalDisplaySettings={generalDisplaySettings}
+                      sx={{ color: "text.secondary" }}
+                    >
+                      —
+                    </TypographySizeWrapper>
+                  ) : (
+                    <Chip
+                      label={vaccine.fundingStatus}
+                      size="small"
+                      sx={{
+                        height: "22px",
+                        fontSize: "0.75rem",
+                        fontWeight: "bold",
+                        ...(vaccine.fundingStatus === "公費"
+                          ? {
+                              backgroundColor: alpha("#2e7d32", 0.12),
+                              color: "#2e7d32",
+                              border: "1px solid",
+                              borderColor: alpha("#2e7d32", 0.3),
+                            }
+                          : {
+                              backgroundColor: alpha("#ed6c02", 0.12),
+                              color: "#ed6c02",
+                              border: "1px solid",
+                              borderColor: alpha("#ed6c02", 0.3),
+                            }),
+                        "& .MuiChip-label": { px: 1 },
+                      }}
+                    />
+                  )}
                 </TableCell>
               </TableRow>
             ))}
