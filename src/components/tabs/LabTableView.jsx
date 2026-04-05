@@ -16,6 +16,7 @@ import {
 } from '@mui/material';
 import { labProcessor } from '../../utils/labProcessor';
 import TypographySizeWrapper from "../utils/TypographySizeWrapper";
+import LabItemTrendPopover from "./lab/LabItemTrendPopover";
 
 const LabTableView = ({ groupedLabs, labSettings, generalDisplaySettings }) => {
   // console.log("LabTableView rendering with lab settings:", labSettings);
@@ -279,14 +280,17 @@ const LabTableView = ({ groupedLabs, labSettings, generalDisplaySettings }) => {
                     }
                   }}
                 >
-                  <TypographySizeWrapper
-                    variant="body2"
-                    textSizeType="content"
-                    generalDisplaySettings={generalDisplaySettings}
-                    fontWeight="medium"
-                  >
-                    {item.displayName}
-                  </TypographySizeWrapper>
+                  <LabItemTrendPopover item={item} dates={dates}>
+                    <TypographySizeWrapper
+                      variant="body2"
+                      textSizeType="content"
+                      generalDisplaySettings={generalDisplaySettings}
+                      fontWeight="medium"
+                      sx={{ textDecoration: 'underline dotted', textDecorationColor: '#bdbdbd' }}
+                    >
+                      {item.displayName}
+                    </TypographySizeWrapper>
+                  </LabItemTrendPopover>
                 </TableCell>
 
                 {dates.map((dateInfo, dateIndex) => {

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Box, Divider, Snackbar } from "@mui/material";
 import TypographySizeWrapper from "../utils/TypographySizeWrapper";
 
@@ -12,9 +12,6 @@ import { formatLabItemForCopy, formatDate } from "../utils/lab/LabUtilities";
 import { labCopyFormatter } from "../../utils/labCopyFormatter";
 
 const LabData = ({ groupedLabs, settings, labSettings, generalDisplaySettings }) => {
-  // Add detailed logging to see what's coming in from props
-  console.log("LabData props:", { settings, labSettings, displayLabFormat: labSettings?.displayLabFormat });
-  
   // 添加搜尋功能狀態
   const [searchText, setSearchText] = useState("");
   const [filteredGroupedLabs, setFilteredGroupedLabs] = useState(groupedLabs);
@@ -54,19 +51,11 @@ const LabData = ({ groupedLabs, settings, labSettings, generalDisplaySettings })
 
   // Function to map format names (handles legacy formats and ensures valid values)
   const mapFormatName = (format) => {
-    // Log format value for debugging
-    console.log("FORMAT VALUE TO MAP:", format);
+    if (format === undefined || format === null) return 'byType';
 
-    // Check if format is undefined or null, return default
-    if (format === undefined || format === null) {
-      console.log("FORMAT UNDEFINED/NULL, RETURNING DEFAULT");
-      return 'byType';
-    }
-
-    // Map of supported format names
     const formatMap = {
-      'columns': 'twoColumn',    // Legacy format name
-      'column': 'twoColumn',     // Handle possible typo
+      'columns': 'twoColumn',
+      'column': 'twoColumn',
       'twoColumn': 'twoColumn',
       'threeColumn': 'threeColumn',
       'byType': 'byType',
@@ -74,14 +63,7 @@ const LabData = ({ groupedLabs, settings, labSettings, generalDisplaySettings })
       'horizontal': 'horizontal'
     };
 
-    // Check if this is a valid format and return mapped value (or default)
-    if (formatMap[format]) {
-      console.log(`MAPPED FORMAT from ${format} to ${formatMap[format]}`);
-      return formatMap[format];
-    } else {
-      console.log(`INVALID FORMAT: ${format}, DEFAULTING TO byType`);
-      return 'byType';
-    }
+    return formatMap[format] || 'byType';
   };
 
   // Ensure all required properties exist in labSettings with defaults
@@ -98,17 +80,6 @@ const LabData = ({ groupedLabs, settings, labSettings, generalDisplaySettings })
     // Ensure display format is properly mapped
     displayLabFormat: mapFormatName(labSettings?.displayLabFormat)
   };
-
-  // Log to help debug the display format
-  console.log("Lab settings after merge:", completeLabSettings);
-  console.log("Original format in props:", labSettings?.displayLabFormat);
-  console.log("Mapped display format:", completeLabSettings.displayLabFormat);
-
-  // Add an effect to respond to labSettings changes
-  useEffect(() => {
-    console.log("labSettings prop changed:", labSettings);
-    console.log("Current displayLabFormat:", labSettings?.displayLabFormat);
-  }, [labSettings]);
 
   // 使用自定義 Hook 處理複製功能
   const {
@@ -329,20 +300,6 @@ const LabData = ({ groupedLabs, settings, labSettings, generalDisplaySettings })
       });
   };
 
-  // 使用 Map 來取代 switch-case 結構
-  // # zh-TW: 使用 Map 定義不同顯示格式對應的欄數
-  const columnCountMap = new Map([
-    ["twoColumn", 2],
-    ["threeColumn", 3],
-    ["byType", 0],  // 特殊情況，按類型分群
-    ["default", 1]  // 'vertical' 或其他情況
-  ]);
-
-  // 確定欄數設置
-  const getColumnCount = () => {
-    return columnCountMap.get(completeLabSettings.displayLabFormat) || columnCountMap.get("default");
-  };
-
   // 使用 Map 來儲存不同的布局組件
   // # zh-TW: 使用 Map 來決定要渲染的布局組件
   const layoutComponentMap = new Map([
@@ -413,14 +370,14 @@ const LabData = ({ groupedLabs, settings, labSettings, generalDisplaySettings })
   return (
     <>
       {/* 添加搜尋欄 */}
-      <LabSearch 
+      <LabSearch
         searchText={searchText}
         handleSearchChange={handleSearchChange}
         generalDisplaySettings={generalDisplaySettings}
         labSettings={completeLabSettings}
         onCopyAll={handleCopyAllLabData}
       />
-      
+
       {filteredGroupedLabs.length === 0 ? (
         <TypographySizeWrapper
           color="text.secondary"
