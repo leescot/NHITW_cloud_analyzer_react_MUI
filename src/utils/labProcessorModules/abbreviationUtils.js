@@ -46,7 +46,11 @@ const specialHandlers = new Map([
   ["09015C", (_, itemName) => {
     if (!itemName) return null;
     const gfrKeywords = ["GFR", "腎絲球過濾率", "Ccr"];
-    return gfrKeywords.some(keyword => itemName.includes(keyword)) ? "GFR" : "Cr";
+    if (!gfrKeywords.some(keyword => itemName.includes(keyword))) return "Cr";
+    // MDRD 舊公式
+    if (itemName.includes("MDRD")) return "eGFR(MDRD)";
+    // CKD-EPI 新公式或其他 GFR（預設視為新公式）
+    return "eGFR";
   }],
   
   // 特殊處理 09040C（尿液總蛋白相關）
