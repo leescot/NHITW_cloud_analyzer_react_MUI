@@ -18,6 +18,7 @@ window.lastInterceptedMasterMenuData = null; // 新增主選單數據
 window.lastInterceptedAdultHealthCheckData = null; // 新增成人預防保健資料
 window.lastInterceptedCancerScreeningData = null; // 新增四癌篩檢結果資料
 window.lastInterceptedHbcvdata = null; // 新增B、C肝炎專區資料
+window.lastInterceptedImue0080s05Data = null; // 新增 imue0080s05 資料（待分析）
 // window.lastInterceptedRehabilitationData = null; // 新增復健資料
 // window.lastInterceptedAcupunctureData = null; // 新增針灸資料
 // window.lastInterceptedSpecialChineseMedCareData = null; // 新增特殊中醫處置資料
@@ -503,6 +504,7 @@ const API_URL_PATTERNS = new Map([
   ["adultHealthCheck", "/imu/api/imue0140/imue0140s01/hpa-data"],
   ["cancerScreening", "/imu/api/imue0150/imue0150s01/hpa-data"],
   ["hbcvdata", "/imu/api/imue0180/imue0180s01/hbcv-data"],
+  ["imue0080s05", "/imu/api/imue0080/imue0080s05/get-data"],
   // ["rehabilitation", "/imu/api/imue0080/imue0080s02/get-data"],
   // ["acupuncture", "/imu/api/imue0100/imue0100s02/get-data"],
   // ["specialChineseMedCare", "/imu/api/imue0170/imue0170s02/get-data"]
@@ -527,6 +529,7 @@ const DataProcessor = {
     ["adultHealthCheck", "/imu/api/imue0140/imue0140s01/hpa-data"],
     ["cancerScreening", "/imu/api/imue0150/imue0150s01/hpa-data"],
     ["hbcvdata", "/imu/api/imue0180/imue0180s01/hbcv-data"],
+    ["imue0080s05", "/imu/api/imue0080/imue0080s05/get-data"],
     // ["rehabilitation", "/imu/api/imue0080/imue0080s02/get-data"],
     // ["acupuncture", "/imu/api/imue0100/imue0100s02/get-data"],
     // ["specialChineseMedCare", "/imu/api/imue0170/imue0170s02/get-data"]
@@ -548,6 +551,7 @@ const DataProcessor = {
     ["adultHealthCheck", "lastInterceptedAdultHealthCheckData"],
     ["cancerScreening", "lastInterceptedCancerScreeningData"],
     ["hbcvdata", "lastInterceptedHbcvdata"],
+    ["imue0080s05", "lastInterceptedImue0080s05Data"],
     // ["rehabilitation", "lastInterceptedRehabilitationData"],
     // ["acupuncture", "lastInterceptedAcupunctureData"],
     // ["specialChineseMedCare", "lastInterceptedSpecialChineseMedCareData"]
@@ -569,6 +573,7 @@ const DataProcessor = {
     ["adultHealthCheck", "saveAdultHealthCheckData"],
     ["cancerScreening", "saveCancerScreeningData"],
     ["hbcvdata", "saveHbcvdata"],
+    ["imue0080s05", "saveImue0080s05Data"],
     // ["rehabilitation", "saveRehabilitationData"],
     // ["acupuncture", "saveAcupunctureData"],
     // ["specialChineseMedCare", "saveSpecialChineseMedCareData"]
@@ -1526,6 +1531,7 @@ const apiPathMap = new Map([
   ["adultHealthCheck", "imue0140/imue0140s01/hpa-data"],
   ["cancerScreening", "imue0150/imue0150s01/hpa-data"],
   ["hbcvdata", "imue0180/imue0180s01/hbcv-data"],
+  ["imue0080s05", "imue0080/imue0080s05/get-data"],
   // ["rehabilitation", "imue0080/imue0080s02/get-data"],
   // ["acupuncture", "imue0160/imue0160s02/get-data"],
   // ["specialChineseMedCare", "imue0170/imue0170s02/get-data"]
@@ -1554,6 +1560,7 @@ function enhancedFetchData(dataType, options = {}) {
     "adultHealthCheck",
     "cancerScreening",
     "hbcvdata",
+    "imue0080s05",
     // "rehabilitation",
     // "acupuncture",
     // "specialChineseMedCare",
@@ -2006,6 +2013,7 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
         adultHealthCheck: window.lastInterceptedAdultHealthCheckData,
         cancerScreening: window.lastInterceptedCancerScreeningData,
         hbcvdata: window.lastInterceptedHbcvdata,
+        imue0080s05: window.lastInterceptedImue0080s05Data,
         // rehabilitation: window.lastInterceptedRehabilitationData,
         // acupuncture: window.lastInterceptedAcupunctureData,
         // specialChineseMedCare: window.lastInterceptedSpecialChineseMedCareData,
