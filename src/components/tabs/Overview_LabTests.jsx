@@ -305,20 +305,22 @@ const Overview_LabTests = ({ groupedLabs = [], labData, overviewSettings = {}, g
                   // 使用 Map 為特殊處理的測試類型定義處理邏輯
                   const specialTestHandlers = new Map([
                     ['09015C', () => {
-                      // 使用 abbrName 來判斷是否為 GFR
-                      let displayName = 'Cr';  // 默認為 Cr
+                      let displayName = 'Cr';
+                      const isGFR = lab.abbrName === 'eGFR' || lab.abbrName === 'eGFR(MDRD)' ||
+                                    (lab.itemName && (lab.itemName.includes('GFR') ||
+                                                     lab.itemName.includes('腎絲球過濾率') ||
+                                                     lab.itemName.includes('Ccr')));
+                      if (isGFR) displayName = 'eGFR';
 
-                      if (lab.abbrName === 'GFR' ||
-                          (lab.itemName && (lab.itemName.includes('GFR') ||
-                                           lab.itemName.includes('腎絲球過濾率') ||
-                                           lab.itemName.includes('Ccr')))) {
-                        displayName = 'GFR';
-                      }
+                      // 標記是否為 CKD-EPI 新公式，供後續優先選值使用
+                      const isCKDEPI = isGFR && lab.abbrName !== 'eGFR(MDRD)' &&
+                                       !(lab.itemName && lab.itemName.includes('MDRD'));
 
                       matchingTests.push({
                         ...lab,
                         date: labGroup.date,
-                        displayName: displayName
+                        displayName,
+                        _isCKDEPI: isCKDEPI
                       });
                     }],
                     ['09040C', () => {
@@ -392,7 +394,7 @@ const Overview_LabTests = ({ groupedLabs = [], labData, overviewSettings = {}, g
                                               test.orderCode !== '12111C' &&
                                               !test.orderCode.startsWith('08011C-'))
                 .map(test => test.displayName),
-              'GFR', 'Cr', 'UPCR', 'UACR', 'WBC', 'Hb', 'PLT'
+              'eGFR', 'Cr', 'UPCR', 'UACR', 'WBC', 'Hb', 'PLT'
             ];
 
             // Debug the display names being used
@@ -418,10 +420,15 @@ const Overview_LabTests = ({ groupedLabs = [], labData, overviewSettings = {}, g
 
               // Only process if this test type and date should be shown
               if (testsByTypeAndDate[displayName] && uniqueDates.includes(date)) {
-                // If we already have a value for this test type and date, keep the newer one
-                if (testsByTypeAndDate[displayName][date] === null ||
-                    (test.timestamp && testsByTypeAndDate[displayName][date].timestamp &&
-                     test.timestamp > testsByTypeAndDate[displayName][date].timestamp)) {
+                const existing = testsByTypeAndDate[displayName][date];
+                if (existing === null) {
+                  testsByTypeAndDate[displayName][date] = test;
+                } else if (displayName === 'eGFR' && test._isCKDEPI && !existing._isCKDEPI) {
+                  // CKD-EPI 新公式優先於 MDRD 舊公式
+                  testsByTypeAndDate[displayName][date] = test;
+                } else if (displayName !== 'eGFR' &&
+                           test.timestamp && existing.timestamp &&
+                           test.timestamp > existing.timestamp) {
                   testsByTypeAndDate[displayName][date] = test;
                 }
               } else {
@@ -451,7 +458,7 @@ const Overview_LabTests = ({ groupedLabs = [], labData, overviewSettings = {}, g
                 ['08011C-WBC', 'WBC'],
                 ['08011C-Hb', 'Hb'],
                 ['08011C-Platelet', 'PLT'],
-                ['09015C', ['Cr', 'GFR']],
+                ['09015C', ['Cr', 'eGFR']],
                 ['09040C', 'UPCR'],
                 ['12111C', 'UACR']
               ]);
@@ -561,7 +568,17 @@ const Overview_LabTests = ({ groupedLabs = [], labData, overviewSettings = {}, g
                               sx={cellStyles}
                             >
                               <TypographySizeWrapper variant="body2" generalDisplaySettings={generalDisplaySettings}>
-                                {test ? (test.value || test.result || '') : <span style={{ color: '#aaaaaa' }}>—</span>}
+                                {test ? (
+                                  (displayName === 'eGFR' && test.hasMultipleValues && test.valueRange)
+                                    ? (() => {
+                                        const min = test.valueRange.min;
+                                        const max = test.valueRange.max;
+                                        const minDec = (min.toString().split('.')[1] || '').length;
+                                        const maxDec = (max.toString().split('.')[1] || '').length;
+                                        return minDec <= maxDec ? min : max;
+                                      })()
+                                    : (test.value || test.result || '')
+                                ) : <span style={{ color: '#aaaaaa' }}>—</span>}
                               </TypographySizeWrapper>
                             </TableCell>
                           );
