@@ -27,7 +27,7 @@ const API_ENDPOINTS = {
   imaging: "medcloud2.nhi.gov.tw/imu/api/imue0130/imue0130s02/get-data",
   medication: "medcloud2.nhi.gov.tw/imu/api/imue0008/imue0008s02/get-data",
   labdata: "medcloud2.nhi.gov.tw/imu/api/imue0060/imue0060s02/get-data",
-  imue0080s05: "medcloud2.nhi.gov.tw/imu/api/imue0080/imue0080s05/get-data"
+  chronicMed: "medcloud2.nhi.gov.tw/imu/api/imue0008/imue0008s05/get-data"
 };
 
 // Add listeners for all API endpoints
@@ -76,7 +76,7 @@ const DATA_TYPE_TO_STORAGE_KEY = {
   'discharge': 'dischargeData',
   'medDays': 'medDaysData',
   'patientSummary': 'patientSummaryData',
-  'imue0080s05': 'imue0080s05Data'
+  'chronicMed': 'chronicMedData'
 };
 
 // 動作與處理函數的映射
@@ -176,7 +176,7 @@ const ACTION_HANDLERS = new Map([
   ['saveDischargeData', saveDataHandler('discharge')],
   ['saveMedDaysData', saveDataHandler('medDays')],
   ['savePatientSummaryData', saveDataHandler('patientSummary')],
-  ['saveImue0080s05Data', saveDataHandler('imue0080s05')],
+  ['saveChronicMedData', saveDataHandler('chronicMed')],
   
   ['saveToken', (message, sender, sendResponse) => {
     // console.log("Background script received token to save");

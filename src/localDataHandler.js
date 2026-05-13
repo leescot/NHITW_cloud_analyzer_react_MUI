@@ -199,10 +199,10 @@ export async function processLocalData(jsonData, filename) {
         loadedTypes.push('hbcvdata');
         triggerDataFetchCompleted('hbcvdata');
       }],
-      ['imue0080s05', () => {
-        window.lastInterceptedImue0080s05Data = cleanData(JSON.parse(JSON.stringify(jsonData.imue0080s05)));
-        loadedTypes.push('imue0080s05');
-        triggerDataFetchCompleted('imue0080s05');
+      ['chronicMed', () => {
+        window.lastInterceptedChronicMedData = cleanData(JSON.parse(JSON.stringify(jsonData.chronicMed)));
+        loadedTypes.push('chronicMed');
+        triggerDataFetchCompleted('chronicMed');
       }]
     ]);
 
@@ -243,7 +243,7 @@ export async function processLocalData(jsonData, filename) {
           adultHealthCheck: window.lastInterceptedAdultHealthCheckData,
           cancerScreening: window.lastInterceptedCancerScreeningData,
           hbcvdata: window.lastInterceptedHbcvdata,
-          imue0080s05: window.lastInterceptedImue0080s05Data,
+          chronicMed: window.lastInterceptedChronicMedData,
           rehabilitation: window.lastInterceptedRehabilitationData,
           acupuncture: window.lastInterceptedAcupunctureData,
           specialChineseMedCare: window.lastInterceptedSpecialChineseMedCareData,

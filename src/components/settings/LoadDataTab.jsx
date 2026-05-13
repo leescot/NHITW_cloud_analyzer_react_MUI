@@ -29,7 +29,8 @@ const dataTypeMap = new Map([
   ['surgery', '手術記錄'],
   ['discharge', '出院病摘'],
   ['medDays', '餘藥資料'],
-  ['patientSummary', '病患摘要']
+  ['patientSummary', '病患摘要'],
+  ['chronicMed', '慢性處方箋']
 ]);
 
 // 新增下載功能
