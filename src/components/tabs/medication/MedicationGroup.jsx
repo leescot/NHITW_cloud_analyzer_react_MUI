@@ -14,6 +14,10 @@ const MedicationGroup = ({
   setSnackbarMessage,
   setSnackbarOpen
 }) => {
+  const allChronicSynthesized =
+    group.medications?.length > 0 &&
+    group.medications.every((m) => m.isChronicSynthesized === true);
+
   return (
     <Box sx={{ mb: 1.5 }}>
       <Box>
@@ -25,6 +29,16 @@ const MedicationGroup = ({
           gutterBottom
         >
           {group.date} - {group.hosp} {group.visitType && `(${group.visitType})`}
+          {allChronicSynthesized && (
+            <TypographySizeWrapper
+              component="span"
+              textSizeType="note"
+              generalDisplaySettings={generalDisplaySettings}
+              sx={{ color: "text.disabled", ml: 0.8 }}
+            >
+              (慢箋續領)
+            </TypographySizeWrapper>
+          )}
           {settings.showDiagnosis && group.icd_code && (
             <TypographySizeWrapper
               component="span"

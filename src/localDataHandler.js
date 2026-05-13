@@ -413,7 +413,10 @@ export const localDataHandler = {
         ["medication", async () => {
           const medicationProcessor = (await import("./utils/medicationProcessor.js")).default;
           window.lastInterceptedMedicationData = data;
-          const processedData = await medicationProcessor.processMedicationData(data);
+          const processedData = await medicationProcessor.processMedicationData(
+            data,
+            window.lastInterceptedChronicMedData
+          );
           window.lastProcessedMedicationData = processedData;
           localDataStatus.loadedTypes.push("medication");
         }],

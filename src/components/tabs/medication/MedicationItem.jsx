@@ -77,6 +77,20 @@ const MedicationItem = ({
             (餘{med.drug_left}天)
           </TypographySizeWrapper>
         )}
+        {med.chronicSeq != null && med.chronicTotal != null && (
+          <TypographySizeWrapper
+            component="span"
+            textSizeType="note"
+            generalDisplaySettings={generalDisplaySettings}
+            sx={{
+              color: "secondary.main",
+              ml: 0.5
+            }}
+          >
+            {" "}
+            (慢箋:{med.chronicSeq}/{med.chronicTotal})
+          </TypographySizeWrapper>
+        )}
         {settings.showExternalDrugImage && med.drugcode && (
           <Tooltip title="查看藥物圖片">
             <IconButton

@@ -214,8 +214,216 @@ export const medicationProcessor = {
     return roundedDose.toString();
   },
 
+  // 民國年日期 (例 "115/02/24") 轉為西元年 (例 "2026/02/24")
+  rocToGregorianDate(rocStr) {
+    if (!rocStr || typeof rocStr !== "string") return rocStr || "";
+    const parts = rocStr.split("/");
+    if (parts.length !== 3) return rocStr;
+    const yr = parseInt(parts[0], 10);
+    if (isNaN(yr)) return rocStr;
+    return `${yr + 1911}/${parts[1]}/${parts[2]}`;
+  },
+
+  // 由 medication.rObject 建立 drug_code -> {atc5, 學名, ...} 查表，供 chronicMed 合成紀錄回填缺失欄位
+  buildDrugInfoMap(data) {
+    const map = new Map();
+    if (!data || !Array.isArray(data.rObject)) return map;
+    for (const rec of data.rObject) {
+      const code = rec.drug_code;
+      if (!code) continue;
+      const existing = map.get(code);
+      const recDate = rec.drug_date || "";
+      if (!existing || recDate.localeCompare(existing.drug_date || "") > 0) {
+        map.set(code, {
+          drug_atc5_code: rec.drug_atc5_code || "",
+          drug_atc5_name: rec.drug_atc5_name || "",
+          drug_atc7_code: rec.drug_atc7_code || "",
+          drug_atc3_code: rec.drug_atc3_code || "",
+          drug_ing_name: rec.drug_ing_name || "",
+          drug_ename: rec.drug_ename || "",
+          drug_date: recDate
+        });
+      }
+    }
+    return map;
+  },
+
+  // 解析 chronicMed 的慢箋週期，回傳每一次領藥 pickup 及對應的 (chronicSeq, chronicTotal)
+  //
+  // NHI 官方定義（取自 IMUE0008S05 頁面說明）：
+  //   「同醫事機構、同就醫序號及同就醫日期之慢性病連續處方箋用藥品項視為同一張慢性病連續處方箋。」
+  //
+  // 但 cycle key 不能含 hosp_id：sort_code=3 (續領) 紀錄的 hosp_id 是「領藥藥局」而非開立醫事機構，
+  // 加入 hosp_id 會把原處方端 (sort=1/2) 與藥局續領端 (sort=3) 切成兩個假 cycle。
+  // 改用 (orig_func_seq_no, func_date) — 已足夠識別一張慢箋。
+  //
+  // sort_code 語意：
+  //   1 = 原處方 visit 事件（有 treat_t；無 chr_num/chr_days）
+  //   2 = 慢箋註記（有 chr_days = 總天數；rel_date 通常等於 func_date）
+  //   3 = 續領紀錄（有 chr_num = 連續處方可調劑次數；func_seq_no 為 IC02/IC03...；rel_date 是實際領藥日；hosp_abbr 是藥局）
+  //
+  // M（連續處方可調劑次數）優先用 sort=3 的 chr_num，否則用 sort=2 的 chr_days / order_drug_day。
+  // 都拿不到 → 不是登記為慢箋，整個 cycle 跳過（不掛 (慢箋:N/M) 標記）。
+  parseChronicMedCycles(rawChronicMed) {
+    const payload = rawChronicMed?.rObject?.[0];
+    if (!payload) return [];
+    const all = [
+      ...(Array.isArray(payload.chrDataY) ? payload.chrDataY : []),
+      ...(Array.isArray(payload.chrDataN) ? payload.chrDataN : [])
+    ];
+    if (all.length === 0) return [];
+
+    // 依 (orig_func_seq_no, func_date) 分群 = 一張慢箋
+    const cycles = new Map();
+    for (const r of all) {
+      if (!r || !r.orig_func_seq_no || !r.func_date) continue;
+      const key = `${r.orig_func_seq_no}|${r.func_date}`;
+      if (!cycles.has(key)) cycles.set(key, []);
+      cycles.get(key).push(r);
+    }
+
+    const pickups = [];
+    for (const [, records] of cycles.entries()) {
+      // 計算 M
+      let M = null;
+      const sort3 = records.filter(r => Number(r.sort_code) === 3);
+      if (sort3.length > 0 && sort3[0].chr_num) {
+        M = parseInt(sort3[0].chr_num, 10);
+      }
+      if (!M) {
+        const sort2 = records.find(r => Number(r.sort_code) === 2 && r.chr_days);
+        if (sort2) {
+          const dd = parseInt(sort2.order_drug_day || records[0]?.order_drug_day || "0", 10);
+          const cd = parseInt(sort2.chr_days, 10);
+          if (dd > 0 && cd > 0) M = Math.round(cd / dd);
+        }
+      }
+      if (!M || M < 1) continue; // 非登記慢箋，跳過
+
+      // 對每個 order_code 各自展開 pickups
+      const byDrug = new Map();
+      for (const r of records) {
+        if (!r.order_code) continue;
+        if (!byDrug.has(r.order_code)) byDrug.set(r.order_code, []);
+        byDrug.get(r.order_code).push(r);
+      }
+
+      for (const [, drugRecs] of byDrug.entries()) {
+        for (const r of drugRecs) {
+          const sc = Number(r.sort_code);
+          if (sc === 2) continue; // metadata only
+
+          let N = null;
+          let pickupDate = null;
+          let pickupHosp = null;
+          let isOriginal = false;
+
+          if (sc === 1) {
+            N = 1;
+            pickupDate = this.rocToGregorianDate(r.func_date);
+            pickupHosp = r.hosp_abbr || "";
+            isOriginal = true;
+          } else if (sc === 3) {
+            const m = (r.func_seq_no || "").match(/^IC0?(\d+)$/i);
+            if (m) N = parseInt(m[1], 10);
+            pickupDate = this.rocToGregorianDate(r.rel_date || r.func_date);
+            pickupHosp = r.hosp_abbr || ""; // 藥局
+          }
+
+          if (N == null || !pickupDate) continue;
+          pickups.push({
+            record: r,
+            chronicSeq: N,
+            chronicTotal: M,
+            gregorianDate: pickupDate,
+            pickupHosp: pickupHosp,
+            isOriginal: isOriginal
+          });
+        }
+      }
+    }
+    return pickups;
+  },
+
+  // 將 chronicMed 領藥紀錄合併進已分群的 processedRecords：
+  //   原處方 pickup (isOriginal=true, sort_code=1)：
+  //     - 命中 medication.rObject 既有紀錄 → 掛 chronicSeq/chronicTotal，不加列
+  //     - 未命中 → 合成 drug 紀錄放進 hospital 的 "門診" visit group（不標 isChronicSynthesized；視為正規紀錄）
+  //   續領 pickup (isOriginal=false, sort_code=3)：
+  //     - 必然合成（medication.rObject 沒有藥局紀錄）→ 放進藥局的 "藥局" visit group，標 isChronicSynthesized=true
+  mergeChronicMedIntoGroups(processedRecords, rawChronicMed, drugInfoMap, settings) {
+    const pickups = this.parseChronicMedCycles(rawChronicMed);
+    if (pickups.length === 0) return;
+
+    for (const { record, chronicSeq, chronicTotal, gregorianDate, pickupHosp, isOriginal } of pickups) {
+      // 1. 對原處方 pickup，先嘗試對應 medication.rObject 既有紀錄
+      if (isOriginal) {
+        let matched = false;
+        for (const group of Object.values(processedRecords)) {
+          if (group.date !== gregorianDate) continue;
+          if (group.hosp !== pickupHosp) continue;
+          for (const med of group.medications) {
+            if (med.drugcode === record.order_code) {
+              med.chronicSeq = chronicSeq;
+              med.chronicTotal = chronicTotal;
+              matched = true;
+              break;
+            }
+          }
+          if (matched) break;
+        }
+        if (matched) continue;
+      }
+
+      // 2. 合成新藥物紀錄（原處方未命中 或 藥局續領）
+      const lookup = drugInfoMap.get(record.order_code) || {};
+      let synthName = record.drug_ename || lookup.drug_ename || record.order_code;
+      if (settings.simplifyMedicineName) {
+        synthName = this.simplifyMedicineName(synthName);
+      }
+      const dosage = String(record.order_qty ?? "1");
+      const frequency = record.drug_fre || "QD";
+      const days = String(record.order_drug_day ?? "1");
+      const perDose = this.calculatePerDosage(dosage, frequency, days);
+
+      const synthDrug = {
+        name: synthName,
+        ingredient: lookup.drug_ing_name || "",
+        dosage: dosage,
+        perDosage: perDose,
+        frequency: frequency,
+        days: days,
+        atc_code: lookup.drug_atc7_code || "",
+        atc_name: lookup.drug_atc5_name || "",
+        drug_left: 0,
+        drugcode: record.order_code,
+        chronicSeq: chronicSeq,
+        chronicTotal: chronicTotal,
+        // 原處方未命中 → 不標記，視為正規 medication 紀錄
+        // 續領 → 標記 isChronicSynthesized 讓 group header 顯示 (慢箋續領)
+        isChronicSynthesized: !isOriginal
+      };
+
+      // 3. 找或建 visit group
+      const icdCode = record.icd9cm_code || "";
+      const visitType = isOriginal ? "門診" : "藥局";
+      const groupKey = `${gregorianDate}_${pickupHosp}_${visitType}_${icdCode}`;
+      if (!processedRecords[groupKey]) {
+        processedRecords[groupKey] = {
+          date: gregorianDate,
+          hosp: pickupHosp,
+          visitType: visitType,
+          icd_code: icdCode,
+          icd_name: record.icd_cname || "",
+          medications: []
+        };
+      }
+      processedRecords[groupKey].medications.push(synthDrug);
+    }
+  },
+
   // 處理藥物資料的主要函數
-  processMedicationData(data) {
+  processMedicationData(data, rawChronicMed) {
     if (!data || !data.rObject || !Array.isArray(data.rObject)) {
       console.error("無效的藥物資料格式");
       return Promise.resolve([]);
@@ -321,6 +529,9 @@ export const medicationProcessor = {
         }
         
         try {
+          // 預先建立 drug_code -> 藥品資訊 查表，給 chronicMed 合成紀錄回填使用
+          const drugInfoMap = this.buildDrugInfoMap(data);
+
           // 按訪問日期和醫療機構分組藥物
           const processedRecords = {};
 
@@ -416,6 +627,11 @@ export const medicationProcessor = {
               drugcode: getFieldValue(record, "drugcode") // 增加新的 drugcode 欄位
             });
           });
+
+          // 合併 chronicMed 慢性處方箋資料：命中既有藥物則掛 chronicSeq/chronicTotal，未命中則合成新紀錄
+          if (rawChronicMed) {
+            this.mergeChronicMedIntoGroups(processedRecords, rawChronicMed, drugInfoMap, settings);
+          }
 
           // 轉換為數組並按日期排序（最新的優先）
           const groupedData = Object.values(processedRecords);

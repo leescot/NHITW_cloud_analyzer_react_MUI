@@ -1790,6 +1790,11 @@ const nodeToDataTypeMap = [
 
 // 新增: 檢查資料類型是否有授權
 function isDataTypeAuthorized(dataType) {
+  // chronicMed 略過 masterMenu prsnAuth 檢查 — prsnAuth 是「有授權且有資料」的節點，
+  // 部分病患沒有慢箋資料時不會列入 2.3，但他們在 NHI 頁面仍能進入 IMUE0008S05；
+  // 直接 fetch，如果無資料 API 會回空集合 (chrDataN:[], chrDataY:[])，無副作用。
+  if (dataType === "chronicMed") return true;
+
   // 如果尚未獲取主選單資料，預設所有資料類型都有授權
   if (!window.lastInterceptedMasterMenuData) {
     return true;
