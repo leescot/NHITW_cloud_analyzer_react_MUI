@@ -163,8 +163,8 @@ const Overview_CancerScreening = ({ cancerScreeningData, generalDisplaySettings 
           {renderScreeningItem('mammography', '乳房攝影')}
           {renderScreeningItem('papSmears', '子宮頸癌')}
           {renderScreeningItem('lungCancer', '肺癌篩檢')}
-          {renderScreeningItem('papillomavirus', 'HPV')}
-          {renderScreeningItem('helicobacter', '胃癌篩檢')}
+          {renderScreeningItem('papillomavirus', '乳突病毒')}
+          {renderScreeningItem('helicobacter', '幽門桿菌')}
         </Box>
       ) : (
         <Typography

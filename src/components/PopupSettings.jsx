@@ -14,7 +14,6 @@ import {
   Tooltip
 } from '@mui/material';
 import SettingsIcon from '@mui/icons-material/Settings';
-import InfoIcon from '@mui/icons-material/Info';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import HelpIcon from '@mui/icons-material/Help';
 import OpenInNewIcon from '@mui/icons-material/OpenInNew';
@@ -24,7 +23,8 @@ import VolunteerActivismIcon from '@mui/icons-material/VolunteerActivism';
 import { getTabColor, getTabSelectedColor } from '../utils/tabColorUtils';
 
 // 導入拆分出的組件
-import DataStatusTab from './settings/DataStatusTab';
+// DataStatusTab 已隱藏（保留 dataStatus 狀態機，方便日後重啟）
+// import DataStatusTab from './settings/DataStatusTab';
 import GeneralDisplaySettings from './settings/GeneralDisplaySettings';
 import MedicationSettings from './settings/MedicationSettings';
 import ChineseMedicationSettings from './settings/ChineseMedicationSettings';
@@ -84,7 +84,10 @@ const PopupSettings = () => {
   // Add tab state
   const [activeTab, setActiveTab] = useState(0);
 
-  // 使用 Map 處理標籤內容的顯示
+  // Tab 順序：
+  //   一般模式 (4 tabs)：設定 / 關於 / 贊助 / 雲端
+  //   開發者模式 (5 tabs)：設定 / 關於 / 贊助 / 開發 / 雲端
+  // 「雲端」是動作鍵（開啟外部 NHI 頁面），不對應內容 map。
   const tabContentMap = new Map([
     [0, (
       <Box sx={{ display: 'flex', flexDirection: 'column' }}>
@@ -99,15 +102,10 @@ const PopupSettings = () => {
     )],
     [1, (
       <Box>
-        <DataStatusTab dataStatus={dataStatus} />
-      </Box>
-    )],
-    [2, (
-      <Box>
         <AboutTab />
       </Box>
     )],
-    [3, (
+    [2, (
       <Box>
         <Typography variant="h6" align="center" gutterBottom>贊助我們</Typography>
         <Typography paragraph  align="center">
@@ -116,14 +114,14 @@ const PopupSettings = () => {
         </Typography>
         <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mt: 2 }}>
           <Box sx={{ mb: 2, maxWidth: '200px', maxHeight: '200px' }}>
-            <img 
-              src="/images/buymeacoffee_qr.png" 
+            <img
+              src="/images/buymeacoffee_qr.png"
               alt="Buy Me A Coffee QR Code"
               style={{ width: '100%', height: 'auto', borderRadius: '8px' }}
             />
           </Box>
-          <Button 
-            variant="contained" 
+          <Button
+            variant="contained"
             color="primary"
             startIcon={<VolunteerActivismIcon />}
             onClick={() => chrome.tabs.create({ url: 'https://buymeacoffee.com/leescot' })}
@@ -133,7 +131,7 @@ const PopupSettings = () => {
         </Box>
       </Box>
     )],
-    [4, (
+    [3, (
       <Box>
         <LoadDataTab
           localDataStatus={localDataStatus}
@@ -144,8 +142,8 @@ const PopupSettings = () => {
   ]);
 
   const handleTabChange = (event, newValue) => {
-    // 檢查是否點擊了"開啟雲端"標籤
-    const lastTabIndex = developerMode ? 5 : 4;
+    // 檢查是否點擊了"開啟雲端"標籤（永遠在最後一格：dev mode 5 tabs → idx 4；一般 4 tabs → idx 3）
+    const lastTabIndex = developerMode ? 4 : 3;
     if (newValue === lastTabIndex) {
       // 開啟雲端連結而不切換標籤
       openNHIMedCloud();
@@ -170,8 +168,8 @@ const PopupSettings = () => {
         // 儲存開發者模式狀態
         chrome.storage.local.set({ developerMode: newMode });
         
-        // 如果關閉開發者模式，且當前在開發模式頁面，切換回設定頁面
-        if (!newMode && activeTab === 4) {
+        // 如果關閉開發者模式，且當前在開發頁面 (idx=3)，切換回設定頁面
+        if (!newMode && activeTab === 3) {
           setActiveTab(0);
         }
         
@@ -358,17 +356,6 @@ const PopupSettings = () => {
             }}
           />
           <Tab
-            icon={<InfoIcon />}
-            label="資料"
-            sx={{
-              color: getTabColor(generalDisplaySettings, "dataStatus"),
-              "&.Mui-selected": {
-                color: getTabSelectedColor(generalDisplaySettings, "dataStatus"),
-              },
-              minHeight: '58px',
-            }}
-          />
-          <Tab
             icon={<HelpIcon />}
             label="關於"
             sx={{
@@ -424,8 +411,7 @@ const PopupSettings = () => {
         {/* 使用 Map 渲染其他標籤內容 */}
         {activeTab === 1 && tabContentMap.get(1)}
         {activeTab === 2 && tabContentMap.get(2)}
-        {activeTab === 3 && tabContentMap.get(3)}
-        {activeTab === 4 && developerMode && tabContentMap.get(4)}
+        {activeTab === 3 && developerMode && tabContentMap.get(3)}
       </Box>
 
       <Box
@@ -456,13 +442,16 @@ const PopupSettings = () => {
         </Typography>
       </Box>
 
-      {/* 通知訊息 */}
+      {/* 通知訊息 — 垂直置中，避免遮住上方 tabs（點 tab）或下方 footer（點擊切換開發者模式） */}
       <Snackbar
         open={snackbar.open}
-        autoHideDuration={snackbar.autoHideDuration || 6000}
+        autoHideDuration={snackbar.autoHideDuration || 3000}
         onClose={handleCloseSnackbar}
         anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
         sx={{
+          top: '50% !important',
+          bottom: 'auto !important',
+          transform: 'translateY(-50%)',
           '& .MuiAlert-root': {
             minWidth: '200px',
             maxWidth: '90%'

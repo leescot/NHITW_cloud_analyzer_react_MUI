@@ -43,13 +43,15 @@ const specialHandlers = new Map([
   }],
   
   // 特殊處理 09015C (肌酐/GFR)
-  ["09015C", (_, itemName) => {
+  // 一張就醫紀錄可能有最多 3 筆 09015C：Creatinine、院所上傳 eGFR、健保署計算 eGFR。
+  // 健保署計算的識別依據：assay_method === "健保署計算"（NHI 算的 CKD-EPI eGFR）。
+  // 院所上傳的 eGFR（包括 MDRD 舊公式）一律歸到 "eGFR"，MDRD vs CKD-EPI 的選值優先序
+  // 改由 Overview_LabTests 內的 _isCKDEPI flag 處理。
+  ["09015C", (_, itemName, _unit, assayMethod) => {
     if (!itemName) return null;
     const gfrKeywords = ["GFR", "腎絲球過濾率", "Ccr"];
     if (!gfrKeywords.some(keyword => itemName.includes(keyword))) return "Cr";
-    // MDRD 舊公式
-    if (itemName.includes("MDRD")) return "eGFR(MDRD)";
-    // CKD-EPI 新公式或其他 GFR（預設視為新公式）
+    if (assayMethod === "健保署計算") return "eGFR(健保署)";
     return "eGFR";
   }],
   
@@ -133,20 +135,21 @@ const specialHandlers = new Map([
 ]);
 
 // 獲取縮寫的方法 - 使用 Map 結構重構
-const getAbbreviation = (orderCode, unitData = '', itemName = '') => {
+// assayMethod 是新加的第 4 參數，目前只有 09015C handler 需要（用來區分 "健保署計算" eGFR）。
+const getAbbreviation = (orderCode, unitData = '', itemName = '', assayMethod = '') => {
   // 檢查是否有 orderCode 和 itemName
   if (!orderCode || !itemName) return '';
 
   // 1. 首先檢查特殊的 HDL/LDL 比值情況
   const tcHdlResult = specialHandlers.get("tc_hdl_ratio")(orderCode, itemName);
   if (tcHdlResult) return tcHdlResult;
-  
+
   // 2. 然後查找是否存在特殊處理邏輯
   if (specialHandlers.has(orderCode)) {
-    const result = specialHandlers.get(orderCode)(orderCode, itemName);
+    const result = specialHandlers.get(orderCode)(orderCode, itemName, unitData, assayMethod);
     if (result) return result;
   }
-  
+
   // 3. 最後從簡單對照表查詢
   return labCodeAbbreviations[orderCode] || null;
 };

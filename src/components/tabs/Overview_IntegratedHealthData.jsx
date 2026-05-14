@@ -82,10 +82,10 @@ const Overview_IntegratedHealthData = ({
 
         const dataFromRObject = cancerScreeningData.rObject && cancerScreeningData.rObject[0];
         const dataFromOriginal = cancerScreeningData.originalData && cancerScreeningData.originalData.robject;
-        const dataFromDirect = (cancerScreeningData.colorectal || cancerScreeningData.oralMucosa || cancerScreeningData.mammography || cancerScreeningData.papSmears || cancerScreeningData.lungCancer) ? cancerScreeningData : null;
+        const dataFromDirect = (cancerScreeningData.colorectal || cancerScreeningData.oralMucosa || cancerScreeningData.mammography || cancerScreeningData.papSmears || cancerScreeningData.lungCancer || cancerScreeningData.papillomavirus || cancerScreeningData.helicobacter) ? cancerScreeningData : null;
         const actualData = dataFromRObject || dataFromOriginal || dataFromDirect;
 
-        return actualData && (actualData.colorectal || actualData.oralMucosa || actualData.mammography || actualData.papSmears || actualData.lungCancer);
+        return actualData && (actualData.colorectal || actualData.oralMucosa || actualData.mammography || actualData.papSmears || actualData.lungCancer || actualData.papillomavirus || actualData.helicobacter);
     };
 
     // Check Hepatitis B & C data
@@ -167,7 +167,7 @@ const Overview_IntegratedHealthData = ({
 
         const dataFromRObject = cancerScreeningData.rObject && cancerScreeningData.rObject[0];
         const dataFromOriginal = cancerScreeningData.originalData && cancerScreeningData.originalData.robject;
-        const dataFromDirect = (cancerScreeningData.colorectal || cancerScreeningData.oralMucosa || cancerScreeningData.mammography || cancerScreeningData.papSmears || cancerScreeningData.lungCancer) ? cancerScreeningData : null;
+        const dataFromDirect = (cancerScreeningData.colorectal || cancerScreeningData.oralMucosa || cancerScreeningData.mammography || cancerScreeningData.papSmears || cancerScreeningData.lungCancer || cancerScreeningData.papillomavirus || cancerScreeningData.helicobacter) ? cancerScreeningData : null;
         const actualData = dataFromRObject || dataFromOriginal || dataFromDirect;
 
         const screeningItems = [
@@ -175,7 +175,9 @@ const Overview_IntegratedHealthData = ({
             { type: 'oralMucosa', label: '口腔黏膜' },
             { type: 'mammography', label: '乳房攝影' },
             { type: 'papSmears', label: '子宮頸癌' },
-            { type: 'lungCancer', label: '肺癌篩檢' }
+            { type: 'lungCancer', label: '肺癌篩檢' },
+            { type: 'papillomavirus', label: '乳突病毒' },
+            { type: 'helicobacter', label: '幽門桿菌' }
         ];
 
         // Separate items with data and items without data

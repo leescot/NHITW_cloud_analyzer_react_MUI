@@ -305,15 +305,19 @@ const Overview_LabTests = ({ groupedLabs = [], labData, overviewSettings = {}, g
                   // 使用 Map 為特殊處理的測試類型定義處理邏輯
                   const specialTestHandlers = new Map([
                     ['09015C', () => {
-                      let displayName = 'Cr';
-                      const isGFR = lab.abbrName === 'eGFR' || lab.abbrName === 'eGFR(MDRD)' ||
+                      // 三分：Cr / eGFR (院所上傳) / eGFR(健保署) (assay_method === "健保署計算")
+                      const isNHI = lab.assayMethod === '健保署計算' || lab.abbrName === 'eGFR(健保署)';
+                      const isGFR = isNHI || lab.abbrName === 'eGFR' || lab.abbrName === 'eGFR(MDRD)' ||
                                     (lab.itemName && (lab.itemName.includes('GFR') ||
                                                      lab.itemName.includes('腎絲球過濾率') ||
                                                      lab.itemName.includes('Ccr')));
-                      if (isGFR) displayName = 'eGFR';
+                      let displayName = 'Cr';
+                      if (isNHI) displayName = 'eGFR(健保署)';
+                      else if (isGFR) displayName = 'eGFR';
 
-                      // 標記是否為 CKD-EPI 新公式，供後續優先選值使用
-                      const isCKDEPI = isGFR && lab.abbrName !== 'eGFR(MDRD)' &&
+                      // 標記是否為 CKD-EPI 新公式（僅用於 "eGFR" 院所紀錄的同日選值優先序；
+                      // "eGFR(健保署)" 無此 ranking 需求）
+                      const isCKDEPI = isGFR && !isNHI && lab.abbrName !== 'eGFR(MDRD)' &&
                                        !(lab.itemName && lab.itemName.includes('MDRD'));
 
                       matchingTests.push({
@@ -394,7 +398,7 @@ const Overview_LabTests = ({ groupedLabs = [], labData, overviewSettings = {}, g
                                               test.orderCode !== '12111C' &&
                                               !test.orderCode.startsWith('08011C-'))
                 .map(test => test.displayName),
-              'eGFR', 'Cr', 'UPCR', 'UACR', 'WBC', 'Hb', 'PLT'
+              'eGFR', 'eGFR(健保署)', 'Cr', 'UPCR', 'UACR', 'WBC', 'Hb', 'PLT'
             ];
 
             // Debug the display names being used
@@ -458,7 +462,7 @@ const Overview_LabTests = ({ groupedLabs = [], labData, overviewSettings = {}, g
                 ['08011C-WBC', 'WBC'],
                 ['08011C-Hb', 'Hb'],
                 ['08011C-Platelet', 'PLT'],
-                ['09015C', ['Cr', 'eGFR']],
+                ['09015C', ['Cr', 'eGFR', 'eGFR(健保署)']],
                 ['09040C', 'UPCR'],
                 ['12111C', 'UACR']
               ]);
