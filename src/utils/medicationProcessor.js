@@ -284,21 +284,28 @@ export const medicationProcessor = {
 
     const pickups = [];
     for (const [, records] of cycles.entries()) {
-      // 計算 M
+      // 計算 M：優先 chr_num，否則 chr_days/order_drug_day
+      // 注意：chr_num 出現在 sort=3；chr_days 出現在 sort=2 「或」sort=3（不同病患資料格式不一致）
       let M = null;
-      const sort3 = records.filter(r => Number(r.sort_code) === 3);
-      if (sort3.length > 0 && sort3[0].chr_num) {
-        M = parseInt(sort3[0].chr_num, 10);
+      const withChrNum = records.find(r => Number(r.sort_code) === 3 && r.chr_num);
+      if (withChrNum) {
+        M = parseInt(withChrNum.chr_num, 10);
       }
       if (!M) {
-        const sort2 = records.find(r => Number(r.sort_code) === 2 && r.chr_days);
-        if (sort2) {
-          const dd = parseInt(sort2.order_drug_day || records[0]?.order_drug_day || "0", 10);
-          const cd = parseInt(sort2.chr_days, 10);
+        const withChrDays = records.find(r => r.chr_days);
+        if (withChrDays) {
+          const dd = parseInt(withChrDays.order_drug_day || records[0]?.order_drug_day || "0", 10);
+          const cd = parseInt(withChrDays.chr_days, 10);
           if (dd > 0 && cd > 0) M = Math.round(cd / dd);
         }
       }
-      if (!M || M < 1) continue; // 非登記慢箋，跳過
+      // M 拿不到時：只有 overdue=N (chrDataN，效期內未啟動續領) 才標記為「(慢箋:效期內)」。
+      // overdue=Y (chrDataY，已逾期且無 metadata) 通常是只領一次沒走慢箋路徑，不應誤標。
+      if (!M || M < 1) {
+        M = null;
+        const isWithinValidity = records[0]?.overdue === "N";
+        if (!isWithinValidity) continue;
+      }
 
       // 對每個 order_code 各自展開 pickups
       const byDrug = new Map();

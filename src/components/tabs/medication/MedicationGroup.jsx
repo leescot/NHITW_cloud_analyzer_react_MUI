@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Divider, IconButton, Tooltip } from "@mui/material";
+import { Box, Divider, IconButton, Tooltip, Chip } from "@mui/material";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import TypographySizeWrapper from "../../utils/TypographySizeWrapper";
 import MedicationItem from "./MedicationItem";
@@ -30,14 +30,19 @@ const MedicationGroup = ({
         >
           {group.date} - {group.hosp} {group.visitType && `(${group.visitType})`}
           {allChronicSynthesized && (
-            <TypographySizeWrapper
-              component="span"
-              textSizeType="note"
-              generalDisplaySettings={generalDisplaySettings}
-              sx={{ color: "text.disabled", ml: 0.8 }}
-            >
-              (慢箋續領)
-            </TypographySizeWrapper>
+            <Chip
+              label="慢箋續領"
+              size="small"
+              variant="outlined"
+              color="secondary"
+              sx={{
+                ml: 0.8,
+                height: 18,
+                fontSize: "0.7rem",
+                "& .MuiChip-label": { px: 0.7, py: 0 },
+                verticalAlign: "middle"
+              }}
+            />
           )}
           {settings.showDiagnosis && group.icd_code && (
             <TypographySizeWrapper

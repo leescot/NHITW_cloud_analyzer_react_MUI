@@ -16,6 +16,7 @@ import {
   IconButton,
   Tooltip,
   Snackbar,
+  Chip,
 } from "@mui/material";
 import ImageIcon from "@mui/icons-material/Image";
 import TypographySizeWrapper from "../utils/TypographySizeWrapper";
@@ -484,15 +485,24 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
               {` (餘${medData.drug_left})`}
             </TypographySizeWrapper>
           )}
-          {medData.chronicSeq != null && medData.chronicTotal != null && (
-            <TypographySizeWrapper
-              component="span"
-              textSizeType="note"
-              generalDisplaySettings={generalDisplaySettings}
-              sx={{ color: "secondary.main" }}
-            >
-              {` (慢箋:${medData.chronicSeq}/${medData.chronicTotal})`}
-            </TypographySizeWrapper>
+          {medData.chronicSeq != null && (
+            <Chip
+              label={
+                medData.chronicTotal != null
+                  ? `慢箋:${medData.chronicSeq}/${medData.chronicTotal}`
+                  : "慢箋:效期內"
+              }
+              size="small"
+              variant="outlined"
+              color={medData.chronicTotal != null ? "secondary" : "error"}
+              sx={{
+                ml: 0.4,
+                height: 16,
+                fontSize: "0.65rem",
+                "& .MuiChip-label": { px: 0.5, py: 0 },
+                verticalAlign: "middle"
+              }}
+            />
           )}
         </TypographySizeWrapper>
       );
