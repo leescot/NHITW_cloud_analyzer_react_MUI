@@ -42,14 +42,14 @@ const Overview_CancerScreening = ({ cancerScreeningData, generalDisplaySettings 
     // 嘗試從 originalData.robject 取得資料
     const dataFromOriginal = combinedData.originalData && combinedData.originalData.robject;
     // 或者直接從 combinedData（舊格式）
-    const dataFromDirect = combinedData.colorectal || combinedData.oralMucosa || combinedData.mammography || combinedData.papSmears || combinedData.lungCancer;
+    const dataFromDirect = combinedData.colorectal || combinedData.oralMucosa || combinedData.mammography || combinedData.papSmears || combinedData.lungCancer || combinedData.papillomavirus || combinedData.helicobacter;
 
     const actualData = dataFromRObject || dataFromOriginal || (dataFromDirect ? combinedData : null);
 
     // 癌症篩檢的資料結構不同，檢查是否有任何篩檢項目
     const result = (
       actualData &&
-      (actualData.colorectal || actualData.oralMucosa || actualData.mammography || actualData.papSmears || actualData.lungCancer)
+      (actualData.colorectal || actualData.oralMucosa || actualData.mammography || actualData.papSmears || actualData.lungCancer || actualData.papillomavirus || actualData.helicobacter)
     );
     return result;
   };
@@ -82,7 +82,7 @@ const Overview_CancerScreening = ({ cancerScreeningData, generalDisplaySettings 
     // 取得實際資料（支援多種格式）
     const dataFromRObject = combinedData.rObject && combinedData.rObject[0];
     const dataFromOriginal = combinedData.originalData && combinedData.originalData.robject;
-    const dataFromDirect = (combinedData.colorectal || combinedData.oralMucosa || combinedData.mammography || combinedData.papSmears || combinedData.lungCancer) ? combinedData : null;
+    const dataFromDirect = (combinedData.colorectal || combinedData.oralMucosa || combinedData.mammography || combinedData.papSmears || combinedData.lungCancer || combinedData.papillomavirus || combinedData.helicobacter) ? combinedData : null;
 
     const actualData = dataFromRObject || dataFromOriginal || dataFromDirect;
 
@@ -163,6 +163,8 @@ const Overview_CancerScreening = ({ cancerScreeningData, generalDisplaySettings 
           {renderScreeningItem('mammography', '乳房攝影')}
           {renderScreeningItem('papSmears', '子宮頸癌')}
           {renderScreeningItem('lungCancer', '肺癌篩檢')}
+          {renderScreeningItem('papillomavirus', '乳突病毒')}
+          {renderScreeningItem('helicobacter', '幽門桿菌')}
         </Box>
       ) : (
         <Typography

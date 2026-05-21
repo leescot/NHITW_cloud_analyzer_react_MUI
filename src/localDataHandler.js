@@ -198,6 +198,11 @@ export async function processLocalData(jsonData, filename) {
         window.lastInterceptedHbcvdata = cleanData(JSON.parse(JSON.stringify(jsonData.hbcvdata)));
         loadedTypes.push('hbcvdata');
         triggerDataFetchCompleted('hbcvdata');
+      }],
+      ['chronicMed', () => {
+        window.lastInterceptedChronicMedData = cleanData(JSON.parse(JSON.stringify(jsonData.chronicMed)));
+        loadedTypes.push('chronicMed');
+        triggerDataFetchCompleted('chronicMed');
       }]
     ]);
 
@@ -238,6 +243,7 @@ export async function processLocalData(jsonData, filename) {
           adultHealthCheck: window.lastInterceptedAdultHealthCheckData,
           cancerScreening: window.lastInterceptedCancerScreeningData,
           hbcvdata: window.lastInterceptedHbcvdata,
+          chronicMed: window.lastInterceptedChronicMedData,
           rehabilitation: window.lastInterceptedRehabilitationData,
           acupuncture: window.lastInterceptedAcupunctureData,
           specialChineseMedCare: window.lastInterceptedSpecialChineseMedCareData,
@@ -407,7 +413,10 @@ export const localDataHandler = {
         ["medication", async () => {
           const medicationProcessor = (await import("./utils/medicationProcessor.js")).default;
           window.lastInterceptedMedicationData = data;
-          const processedData = await medicationProcessor.processMedicationData(data);
+          const processedData = await medicationProcessor.processMedicationData(
+            data,
+            window.lastInterceptedChronicMedData
+          );
           window.lastProcessedMedicationData = processedData;
           localDataStatus.loadedTypes.push("medication");
         }],

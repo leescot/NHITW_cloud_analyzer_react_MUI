@@ -16,6 +16,7 @@ import {
   IconButton,
   Tooltip,
   Snackbar,
+  Chip,
 } from "@mui/material";
 import ImageIcon from "@mui/icons-material/Image";
 import TypographySizeWrapper from "../utils/TypographySizeWrapper";
@@ -216,25 +217,32 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
           frequency: med.frequency,
           days: med.days,
           drug_left: med.drug_left || 0,
+          chronicSeq: med.chronicSeq,
+          chronicTotal: med.chronicTotal,
           dosageFreqs: [currentDosageFreq],
         });
       } else {
         // 更新現有記錄
         const existingMed = dateHospMap.get(dateHospKey);
-        
+
         // 檢查是否有重複的劑量和頻次
         const hasDuplicate = existingMed.dosageFreqs.some(
           df => df.perDosage === med.perDosage && df.frequency === med.frequency
         );
-        
+
         // 如果不是重複的，添加到 dosageFreqs 數組
         if (!hasDuplicate) {
           existingMed.dosageFreqs.push(currentDosageFreq);
         }
-        
+
         // 更新藥物天數和剩餘藥物 (取較大值)
         existingMed.days = Math.max(parseInt(existingMed.days), parseInt(med.days)).toString();
         existingMed.drug_left = Math.max(existingMed.drug_left, med.drug_left || 0);
+        // 保留 chronicSeq/chronicTotal（任一筆有值就帶入；不覆蓋已有值）
+        if (existingMed.chronicSeq == null && med.chronicSeq != null) {
+          existingMed.chronicSeq = med.chronicSeq;
+          existingMed.chronicTotal = med.chronicTotal;
+        }
       }
       
       // 保存日期醫院組合映射
@@ -476,6 +484,25 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
             >
               {` (餘${medData.drug_left})`}
             </TypographySizeWrapper>
+          )}
+          {medData.chronicSeq != null && (
+            <Chip
+              label={
+                medData.chronicTotal != null
+                  ? `慢箋:${medData.chronicSeq}/${medData.chronicTotal}`
+                  : "慢箋:效期內"
+              }
+              size="small"
+              variant="outlined"
+              color={medData.chronicTotal != null ? "secondary" : "error"}
+              sx={{
+                ml: 0.4,
+                height: 16,
+                fontSize: "0.65rem",
+                "& .MuiChip-label": { px: 0.5, py: 0 },
+                verticalAlign: "middle"
+              }}
+            />
           )}
         </TypographySizeWrapper>
       );

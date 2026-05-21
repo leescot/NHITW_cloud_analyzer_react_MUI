@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Tooltip, IconButton } from "@mui/material";
+import { Box, Tooltip, IconButton, Chip } from "@mui/material";
 import ImageIcon from "@mui/icons-material/Image";
 import TypographySizeWrapper from "../../utils/TypographySizeWrapper";
 import { getMedicationColor, shouldBeBold, handleDrugImageClick } from "./MedicationHelpers";
@@ -76,6 +76,25 @@ const MedicationItem = ({
             {" "}
             (餘{med.drug_left}天)
           </TypographySizeWrapper>
+        )}
+        {med.chronicSeq != null && (
+          <Chip
+            label={
+              med.chronicTotal != null
+                ? `慢箋:${med.chronicSeq}/${med.chronicTotal}`
+                : "慢箋:效期內"
+            }
+            size="small"
+            variant="outlined"
+            color={med.chronicTotal != null ? "secondary" : "error"}
+            sx={{
+              ml: 0.6,
+              height: 18,
+              fontSize: "0.7rem",
+              "& .MuiChip-label": { px: 0.7, py: 0 },
+              verticalAlign: "middle"
+            }}
+          />
         )}
         {settings.showExternalDrugImage && med.drugcode && (
           <Tooltip title="查看藥物圖片">

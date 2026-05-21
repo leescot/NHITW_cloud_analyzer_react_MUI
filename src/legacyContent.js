@@ -18,6 +18,7 @@ window.lastInterceptedMasterMenuData = null; // 新增主選單數據
 window.lastInterceptedAdultHealthCheckData = null; // 新增成人預防保健資料
 window.lastInterceptedCancerScreeningData = null; // 新增四癌篩檢結果資料
 window.lastInterceptedHbcvdata = null; // 新增B、C肝炎專區資料
+window.lastInterceptedChronicMedData = null; // 慢性處方箋資料
 // window.lastInterceptedRehabilitationData = null; // 新增復健資料
 // window.lastInterceptedAcupunctureData = null; // 新增針灸資料
 // window.lastInterceptedSpecialChineseMedCareData = null; // 新增特殊中醫處置資料
@@ -503,6 +504,7 @@ const API_URL_PATTERNS = new Map([
   ["adultHealthCheck", "/imu/api/imue0140/imue0140s01/hpa-data"],
   ["cancerScreening", "/imu/api/imue0150/imue0150s01/hpa-data"],
   ["hbcvdata", "/imu/api/imue0180/imue0180s01/hbcv-data"],
+  ["chronicMed", "/imu/api/imue0008/imue0008s05/get-data"],
   // ["rehabilitation", "/imu/api/imue0080/imue0080s02/get-data"],
   // ["acupuncture", "/imu/api/imue0100/imue0100s02/get-data"],
   // ["specialChineseMedCare", "/imu/api/imue0170/imue0170s02/get-data"]
@@ -527,6 +529,7 @@ const DataProcessor = {
     ["adultHealthCheck", "/imu/api/imue0140/imue0140s01/hpa-data"],
     ["cancerScreening", "/imu/api/imue0150/imue0150s01/hpa-data"],
     ["hbcvdata", "/imu/api/imue0180/imue0180s01/hbcv-data"],
+    ["chronicMed", "/imu/api/imue0008/imue0008s05/get-data"],
     // ["rehabilitation", "/imu/api/imue0080/imue0080s02/get-data"],
     // ["acupuncture", "/imu/api/imue0100/imue0100s02/get-data"],
     // ["specialChineseMedCare", "/imu/api/imue0170/imue0170s02/get-data"]
@@ -548,6 +551,7 @@ const DataProcessor = {
     ["adultHealthCheck", "lastInterceptedAdultHealthCheckData"],
     ["cancerScreening", "lastInterceptedCancerScreeningData"],
     ["hbcvdata", "lastInterceptedHbcvdata"],
+    ["chronicMed", "lastInterceptedChronicMedData"],
     // ["rehabilitation", "lastInterceptedRehabilitationData"],
     // ["acupuncture", "lastInterceptedAcupunctureData"],
     // ["specialChineseMedCare", "lastInterceptedSpecialChineseMedCareData"]
@@ -569,6 +573,7 @@ const DataProcessor = {
     ["adultHealthCheck", "saveAdultHealthCheckData"],
     ["cancerScreening", "saveCancerScreeningData"],
     ["hbcvdata", "saveHbcvdata"],
+    ["chronicMed", "saveChronicMedData"],
     // ["rehabilitation", "saveRehabilitationData"],
     // ["acupuncture", "saveAcupunctureData"],
     // ["specialChineseMedCare", "saveSpecialChineseMedCareData"]
@@ -590,6 +595,7 @@ const DataProcessor = {
     ["adultHealthCheck", "成人預防保健"],
     ["cancerScreening", "四癌篩檢結果"],
     ["hbcvdata", "B、C肝炎專區"],
+    ["chronicMed", "慢性處方箋"],
     // ["rehabilitation", "復健治療"],
     // ["acupuncture", "針灸治療"],
     // ["specialChineseMedCare", "特殊中醫處置"]
@@ -1327,6 +1333,7 @@ function fetchAllDataTypes() {
         "discharge",
         "medDays",
         "patientsummary",
+        "chronicMed",
         // "rehabilitation",
         // "acupuncture",
         // "specialChineseMedCare",
@@ -1336,12 +1343,18 @@ function fetchAllDataTypes() {
       const fetchPromises = dataTypes.map((dataType) => {
         if (isDataTypeAuthorized(dataType)) {
           // console.log(`${dataType} 已授權，開始取資料`);
+          if (dataType === "chronicMed") {
+            console.log(`[DEBUG chronicMed] dataTypes 路徑：已授權，呼叫 enhancedFetchData`);
+          }
           return enhancedFetchData(dataType).catch((err) => {
             console.error(`獲取 ${dataType} 資料時發生錯誤:`, err);
             return { status: "error", recordCount: 0, error: err, dataType };
           });
         } else {
           // console.log(`${dataType} 無資料，返回空集合`);
+          if (dataType === "chronicMed") {
+            console.log(`[DEBUG chronicMed] dataTypes 路徑：未授權，返回空 rObject:[]`);
+          }
           // 未授權的資料類型返回空集合
           return Promise.resolve(createEmptyDataResult(dataType));
         }
@@ -1526,6 +1539,7 @@ const apiPathMap = new Map([
   ["adultHealthCheck", "imue0140/imue0140s01/hpa-data"],
   ["cancerScreening", "imue0150/imue0150s01/hpa-data"],
   ["hbcvdata", "imue0180/imue0180s01/hbcv-data"],
+  ["chronicMed", "imue0008/imue0008s05/get-data"],
   // ["rehabilitation", "imue0080/imue0080s02/get-data"],
   // ["acupuncture", "imue0160/imue0160s02/get-data"],
   // ["specialChineseMedCare", "imue0170/imue0170s02/get-data"]
@@ -1554,6 +1568,7 @@ function enhancedFetchData(dataType, options = {}) {
     "adultHealthCheck",
     "cancerScreening",
     "hbcvdata",
+    "chronicMed",
     // "rehabilitation",
     // "acupuncture",
     // "specialChineseMedCare",
@@ -1621,6 +1636,9 @@ function enhancedFetchData(dataType, options = {}) {
         });
       }
 
+      if (dataType === "chronicMed") {
+        console.log(`[DEBUG chronicMed] 發送 fetch:`, apiUrl);
+      }
       // 發送請求
       fetch(apiUrl, {
         method: "GET",
@@ -1630,6 +1648,9 @@ function enhancedFetchData(dataType, options = {}) {
       })
         .then((response) => {
           // console.log(`${dataType} API response:`, response.status, apiUrl);
+          if (dataType === "chronicMed") {
+            console.log(`[DEBUG chronicMed] HTTP 回應 status=${response.status} ok=${response.ok}`);
+          }
           if (!response.ok) {
             if (response.status === 401 && retryCount < maxRetries) {
               retryCount++;
@@ -1647,6 +1668,9 @@ function enhancedFetchData(dataType, options = {}) {
           if (dataType === "adultHealthCheck" || dataType === "cancerScreening") {
             console.log(`[DEBUG] enhancedFetchData 收到 ${dataType} 回應:`, data);
           }
+          if (dataType === "chronicMed") {
+            console.log(`[DEBUG chronicMed] enhancedFetchData 收到回應:`, data);
+          }
 
           const recordsArray = data.rObject || data.robject;
           if (
@@ -1658,7 +1682,8 @@ function enhancedFetchData(dataType, options = {}) {
               dataType === "masterMenu" ||
               dataType === "adultHealthCheck" ||
               dataType === "cancerScreening" ||
-              dataType === "hbcvdata")
+              dataType === "hbcvdata" ||
+              dataType === "chronicMed")
           ) {
             let rObject;
             let normalizedData;
@@ -1670,8 +1695,9 @@ function enhancedFetchData(dataType, options = {}) {
             } else if (dataType === "patientsummary") {
               rObject = Array.isArray(recordsArray) ? recordsArray : (recordsArray ? [recordsArray] : []);
               normalizedData = { rObject: rObject };
-            } else if (dataType === "masterMenu") {
+            } else if (dataType === "masterMenu" || dataType === "chronicMed") {
               // masterMenu 需要包裝整個 data 物件（包含 prsnAuth 等授權資訊）
+              // chronicMed 回應為 { chrDataN: [...], chrDataY: [...] }，沒有 rObject，整包包裝
               rObject = [data];
               normalizedData = { rObject: rObject };
             } else if (dataType === "adultHealthCheck" || dataType === "cancerScreening" || dataType === "hbcvdata") {
@@ -1746,6 +1772,7 @@ const nodeToDataTypeMap = [
   ["1.1", "patientsummary"],
   ["1.2", "hbcvdata"],
   ["2.1", "medication"],
+  ["2.3", "chronicMed"],
   ["2.4", "medDays"],
   ["3.1", "chinesemed"],
   // ["3.2", "acupuncture"],
@@ -1763,6 +1790,11 @@ const nodeToDataTypeMap = [
 
 // 新增: 檢查資料類型是否有授權
 function isDataTypeAuthorized(dataType) {
+  // chronicMed 略過 masterMenu prsnAuth 檢查 — prsnAuth 是「有授權且有資料」的節點，
+  // 部分病患沒有慢箋資料時不會列入 2.3，但他們在 NHI 頁面仍能進入 IMUE0008S05；
+  // 直接 fetch，如果無資料 API 會回空集合 (chrDataN:[], chrDataY:[])，無副作用。
+  if (dataType === "chronicMed") return true;
+
   // 如果尚未獲取主選單資料，預設所有資料類型都有授權
   if (!window.lastInterceptedMasterMenuData) {
     return true;
@@ -1783,7 +1815,19 @@ function isDataTypeAuthorized(dataType) {
     }
 
     // 檢查任何對應的節點ID是否在授權列表中
-    return nodeIds.some((nodeId) => prsnAuth.includes(nodeId));
+    const authorized = nodeIds.some((nodeId) => prsnAuth.includes(nodeId));
+    if (dataType === "chronicMed") {
+      console.log(`[DEBUG chronicMed] isDataTypeAuthorized`, {
+        dataType,
+        mappedNodeIds: nodeIds,
+        prsnAuth,
+        authorized,
+        hint: nodeIds.length === 0
+          ? "nodeToDataTypeMap 沒有 chronicMed 的對應節點 — 請從 prsnAuth 找出對應節點 ID 並加入 nodeToDataTypeMap"
+          : undefined,
+      });
+    }
+    return authorized;
   } catch (error) {
     console.error("Error checking authorization:", error);
     // 發生錯誤時，預設有授權
@@ -2006,6 +2050,7 @@ chrome.runtime.onMessage.addListener(function (request, sender, sendResponse) {
         adultHealthCheck: window.lastInterceptedAdultHealthCheckData,
         cancerScreening: window.lastInterceptedCancerScreeningData,
         hbcvdata: window.lastInterceptedHbcvdata,
+        chronicMed: window.lastInterceptedChronicMedData,
         // rehabilitation: window.lastInterceptedRehabilitationData,
         // acupuncture: window.lastInterceptedAcupunctureData,
         // specialChineseMedCare: window.lastInterceptedSpecialChineseMedCareData,

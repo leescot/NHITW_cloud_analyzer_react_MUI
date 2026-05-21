@@ -24,7 +24,9 @@ NHITW 健保雲端系統資料擷取擴充功能通過 `saveDataToLocalStorage()
   "patientsummary": { ... },   // 病患摘要
   "masterMenu": { ... },       // 主選單資料
   "adultHealthCheck": { ... }, // 成人預防保健資料
-  "cancerScreening": { ... }   // 四癌篩檢結果資料
+  "cancerScreening": { ... },  // 四癌篩檢結果資料
+  "hbcvdata": { ... },         // B、C 型肝炎專區資料
+  "chronicMed": { ... }        // 慢性處方箋資料（rObject[0] 內含 chrDataN / chrDataY）
 }
 ```
 

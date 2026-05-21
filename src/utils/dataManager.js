@@ -50,7 +50,7 @@ export const handleAllData = async (dataSources, settings, setters) => {
           if (dataSources.medication?.rObject) {
             const processedMedications = await medicationProcessor.processMedicationData(
               dataSources.medication,
-              settings.western
+              dataSources.chronicMed
             );
             setters.setGroupedMedications(processedMedications);
             results.medications = processedMedications;
@@ -229,7 +229,8 @@ export const collectDataSources = () => {
     patientSummary: window.lastInterceptedPatientSummaryData,
     cancerScreening: window.lastInterceptedCancerScreeningData,
     adultHealthCheck: window.lastInterceptedAdultHealthCheckData,
-    hbcvdata: window.lastInterceptedHbcvdata
+    hbcvdata: window.lastInterceptedHbcvdata,
+    chronicMed: window.lastInterceptedChronicMedData
   };
 
   console.log("[dataManager] collectDataSources - hbcvdata:", sources.hbcvdata);
@@ -249,8 +250,11 @@ export const reprocessData = async (dataType, data, settings, setter) => {
 
   try {
     const processors = new Map([
-      ['medication', async (data, settings) => {
-        return await medicationProcessor.processMedicationData(data, settings);
+      ['medication', async (data) => {
+        return await medicationProcessor.processMedicationData(
+          data,
+          window.lastInterceptedChronicMedData
+        );
       }],
       ['lab', (data, settings) => {
         return labProcessor.processLabData(data, settings);

@@ -205,7 +205,8 @@ const labProcessor = {
       isAbnormal = valueStatus !== "normal";
 
       // 獲取縮寫名稱 - 傳入 itemName 作為新參數
-      const abbrName = this.getAbbreviation(lab.order_code, lab.unit_data, lab.assay_item_name);
+      // assay_method 為 09015C 區分 "院所上傳 eGFR" vs "健保署計算 eGFR" 所需
+      const abbrName = this.getAbbreviation(lab.order_code, lab.unit_data, lab.assay_item_name, lab.assay_method);
 
       // 檢查是否有多值數據
       let normalizedValue;
@@ -277,9 +278,15 @@ const labProcessor = {
       const assayTypeMap = new Map([
         ["試管TubeMethod", "生化學檢查"],
       ]);
-      
+
       let assayType = lab.assay_tp_cname || '';
       assayType = assayTypeMap.get(assayType) || assayType;
+
+      // 09015C「健保署計算」紀錄沒有 assay_tp_cname，會落入「其它檢驗」分類；
+      // 但本質是 Creatinine/eGFR，應歸到生化學檢查與其他 09015C 紀錄同類。
+      if (!assayType && lab.order_code === '09015C') {
+        assayType = '生化學檢查';
+      }
 
       acc[groupKey].labs.push({
         itemName: lab.assay_item_name || '',
@@ -297,6 +304,7 @@ const labProcessor = {
         isAbnormal: isAbnormal,      // 保留為向後兼容
         valueStatus: valueStatus,    // 新增詳細狀態 (normal, high, low)
         abbrName: abbrName,          // 新增縮寫屬性
+        assayMethod: lab.assay_method || '',  // 保留供 Overview 等下游使用（如 09015C 區分院所/健保署）
         // 自定義參考範圍相關資訊
         _usingCustomRange: usingCustomRange,
         _originalConsultValue: originalConsultValue,
