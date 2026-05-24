@@ -29,7 +29,7 @@ const deduplicateLabData = (labArray) => {
   if (labs09006C.length > 1) {
     // 找出包含 HbA1c 的項目
     const hba1cLabs = labs09006C.filter(lab =>
-      lab.assay_item_name && lab.assay_item_name.includes("HbA1c")
+      lab.assay_item_name && lab.assay_item_name.toLowerCase().includes("hba1c")
     );
 
     // 如果找到了包含 HbA1c 的項目，只保留這些項目
