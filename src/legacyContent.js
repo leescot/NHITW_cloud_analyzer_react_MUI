@@ -1593,6 +1593,7 @@ function enhancedFetchData(dataType, options = {}) {
 
   // 主要的獲取邏輯
   const attemptFetch = () => {
+    const requestPatientId = currentPatientId; // 鎖定發出請求當下的病患
     return new Promise((resolve, reject) => {
       // 構建 API URL
       const apiPath = apiPathMap.get(dataType);
@@ -1708,6 +1709,12 @@ function enhancedFetchData(dataType, options = {}) {
             } else {
               rObject = Array.isArray(recordsArray) ? recordsArray : [];
               normalizedData = { rObject: rObject };
+            }
+
+            // 病患已切換，丟棄此筆過期回應
+            if (currentPatientId !== requestPatientId) {
+              resolve({ status: "stale", recordCount: 0, dataType });
+              return;
             }
 
             // 使用 Map 更新全局變數
