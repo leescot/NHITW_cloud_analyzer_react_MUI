@@ -23,7 +23,9 @@ import {
   Checkbox,
   IconButton,
   ListItemIcon,
-  ListItemSecondaryAction
+  ListItemSecondaryAction,
+  FormControlLabel,
+  Switch
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import DashboardCustomizeIcon from '@mui/icons-material/DashboardCustomize';
@@ -431,7 +433,7 @@ const OverviewSettings = () => {
           >
             關注影像清單設定
           </Button>
-          <Typography variant="caption" color="text.secondary">
+          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 2 }}>
             設定要在總覽頁面顯示的影像檢查項目及其排序
           </Typography>
         </Box>

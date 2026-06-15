@@ -58,6 +58,7 @@ export const loadAllSettings = async () => {
       imageTrackingDays: DEFAULT_SETTINGS.overview.imageTrackingDays,
       focusedLabTests: DEFAULT_SETTINGS.overview.focusedLabTests,
       focusedImageTests: DEFAULT_SETTINGS.overview.focusedImageTests,
+      enableAcupunctureIndicator: false,
 
       // General display settings
       autoOpenPage: DEFAULT_SETTINGS.general.autoOpenPage,
@@ -120,7 +121,8 @@ export const loadAllSettings = async () => {
           labTrackingDays: items.labTrackingDays,
           imageTrackingDays: items.imageTrackingDays,
           focusedLabTests: items.focusedLabTests || DEFAULT_LAB_TESTS,
-          focusedImageTests: items.focusedImageTests || DEFAULT_IMAGE_TESTS
+          focusedImageTests: items.focusedImageTests || DEFAULT_IMAGE_TESTS,
+          enableAcupunctureIndicator: items.enableAcupunctureIndicator || false
         },
         general: {
           autoOpenPage: items.autoOpenPage,

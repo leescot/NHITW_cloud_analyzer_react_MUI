@@ -28,13 +28,16 @@ import { alpha } from "@mui/material/styles";
 import InfoIcon from '@mui/icons-material/Info';
 import GrassIcon from '@mui/icons-material/Grass';
 import TypographySizeWrapper from "../utils/TypographySizeWrapper";
+import AcupunctureIndicator from "../indicators/AcupunctureIndicator";
+import { checkAcupunctureEligibility } from "../../utils/acupunctureChecker";
 
 const Overview_RecentDiagnosis = ({
   groupedMedications = [],
   groupedChineseMeds = [],
   patientSummaryData = [],
   generalDisplaySettings = {},
-  trackingDays = 180
+  trackingDays = 180,
+  enableAcupunctureIndicator = false
 }) => {
   // 處理來自藥物和中藥記錄的診斷數據
   const diagnosisData = useMemo(() => {
@@ -81,16 +84,30 @@ const Overview_RecentDiagnosis = ({
 
     // 使用 Map 來定義不同訪問類型的處理邏輯
     const visitTypeHandlers = new Map([
-      ["門診", (diagnosisKey, isChineseMed) => {
+      ["門診", (diagnosisKey, isChineseMed, group) => {
+        const existing = outpatientDiagnoses[diagnosisKey];
+        const groupDate = group.date || group.drug_date || group.cure_e_date;
+        const newDate = groupDate && (!existing?.date || groupDate > existing.date)
+          ? groupDate
+          : existing?.date;
+
         outpatientDiagnoses[diagnosisKey] = {
-          count: (outpatientDiagnoses[diagnosisKey]?.count || 0) + 1,
-          isChineseMed
+          count: (existing?.count || 0) + 1,
+          isChineseMed,
+          date: newDate
         };
       }],
-      ["藥局", (diagnosisKey, isChineseMed) => {
+      ["藥局", (diagnosisKey, isChineseMed, group) => {
+        const existing = outpatientDiagnoses[diagnosisKey];
+        const groupDate = group.date || group.drug_date || group.cure_e_date;
+        const newDate = groupDate && (!existing?.date || groupDate > existing.date)
+          ? groupDate
+          : existing?.date;
+
         outpatientDiagnoses[diagnosisKey] = {
-          count: (outpatientDiagnoses[diagnosisKey]?.count || 0) + 1,
-          isChineseMed
+          count: (existing?.count || 0) + 1,
+          isChineseMed,
+          date: newDate
         };
       }],
       ["急診", (diagnosisKey, isChineseMed, group, normalizedIcdCode) => {
@@ -119,10 +136,17 @@ const Overview_RecentDiagnosis = ({
     ]);
 
     // 設定默認處理邏輯（用於未分類的訪問類型）
-    const defaultHandler = (diagnosisKey, isChineseMed) => {
+    const defaultHandler = (diagnosisKey, isChineseMed, group) => {
+      const existing = outpatientDiagnoses[diagnosisKey];
+      const groupDate = group.date || group.drug_date || group.cure_e_date;
+      const newDate = groupDate && (!existing?.date || groupDate > existing.date)
+        ? groupDate
+        : existing?.date;
+
       outpatientDiagnoses[diagnosisKey] = {
-        count: (outpatientDiagnoses[diagnosisKey]?.count || 0) + 1,
-        isChineseMed
+        count: (existing?.count || 0) + 1,
+        isChineseMed,
+        date: newDate
       };
     };
 
@@ -239,6 +263,7 @@ const Overview_RecentDiagnosis = ({
             name,
             count: data.count,
             isChineseMed: data.isChineseMed,
+            date: data.date,
             key
           };
         }).sort((a, b) => {
@@ -305,6 +330,14 @@ const Overview_RecentDiagnosis = ({
       diagnosisData.vaccines.length > 0 ||
       diagnosisData.enrollment.length > 0;
   }, [diagnosisData]);
+
+  // 檢查針灸申報資格（只在功能啟用時執行）
+  const acupunctureEligibility = useMemo(() => {
+    if (!enableAcupunctureIndicator) {
+      return null;
+    }
+    return checkAcupunctureEligibility(diagnosisData);
+  }, [diagnosisData, enableAcupunctureIndicator]);
 
   // 使用Map來定義類別顯示配置
   const categoryConfig = new Map([
