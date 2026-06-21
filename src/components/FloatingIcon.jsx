@@ -76,7 +76,6 @@ import LabTableView from "./tabs/LabTableView";
 import Instructions from "./tabs/Instructions";
 import AdvancedSettings from "./tabs/AdvancedSettings";
 
-import HomeIcon from "@mui/icons-material/Home";
 import MedicationIcon from "@mui/icons-material/Medication";
 import ScienceIcon from "@mui/icons-material/Science";
 import ImageIcon from "@mui/icons-material/Image";
@@ -122,7 +121,7 @@ window.isFloatingIconOpening = false;
 
 const FloatingIcon = () => {
   const [open, setOpen] = useState(false);
-  const [tabValue, setTabValue] = useState(0);
+  const [tabValue, setTabValue] = useState(false);
   const [groupedMedications, setGroupedMedications] = useState([]);
   const [userInfo, setUserInfo] = useState(null);
   const [groupedLabs, setGroupedLabs] = useState([]);
@@ -368,7 +367,7 @@ const FloatingIcon = () => {
         setOpen(true);
 
         if (generalDisplaySettings.alwaysOpenOverviewTab) {
-          setTabValue(0); // Always set to Overview tab (index 0) if setting is enabled
+          setTabValue(false); // Show overview (no tab selected)
         }
         // Reset the flag after a short delay to prevent rapid multiple openings
         setTimeout(() => {
@@ -395,7 +394,7 @@ const FloatingIcon = () => {
     setOpen(true);
 
     if (generalDisplaySettings.alwaysOpenOverviewTab) {
-      setTabValue(0); // Always set to Overview tab (index 0) if setting is enabled
+      setTabValue(false); // Show overview (no tab selected)
     }
   };
 
@@ -405,6 +404,10 @@ const FloatingIcon = () => {
 
   const handleTabChange = (event, newValue) => {
     setTabValue(newValue);
+  };
+
+  const handleOverviewClick = () => {
+    setTabValue(false);
   };
 
   const handleSnackbarClose = () => {
@@ -507,16 +510,17 @@ const FloatingIcon = () => {
                 alignItems: "center",
               }}
             >
-              {/* User Info Display - shown before tabs, not selectable */}
+              {/* User Info Display - clickable to show overview */}
               {userInfo && formatUserInfoDisplay(userInfo) && (
                 <Box
+                  onClick={handleOverviewClick}
                   sx={{
                     display: "flex",
                     alignItems: "center",
                     px: 2,
                     py: 0.75,
                     fontWeight: "bold",
-                    color: "#1976d2",
+                    color: tabValue === false ? "#0d47a1" : "#1976d2",
                     fontSize:
                       (generalDisplaySettings &&
                         generalDisplaySettings.contentTextSize &&
@@ -525,7 +529,13 @@ const FloatingIcon = () => {
                         ]) ||
                       CONTENT_TEXT_SIZES["medium"],
                     borderRight: "1px solid #e0e0e0",
+                    borderBottom: tabValue === false ? "2px solid #1976d2" : "2px solid transparent",
                     flexShrink: 0,
+                    cursor: "pointer",
+                    "&:hover": {
+                      color: "#0d47a1",
+                      backgroundColor: "rgba(25, 118, 210, 0.04)",
+                    },
                   }}
                 >
                   {formatUserInfoDisplay(userInfo)}
@@ -568,18 +578,6 @@ const FloatingIcon = () => {
                   },
                 }}
               >
-                <Tab
-                  label="總覽"
-                  icon={<HomeIcon sx={{ fontSize: "1rem" }} />}
-                  iconPosition="start"
-                  sx={{
-                    padding: "6px 10px",
-                    color: getTabColor(generalDisplaySettings, "overview"),
-                    "&.Mui-selected": {
-                      color: getTabSelectedColor(generalDisplaySettings, "overview"),
-                    },
-                  }}
-                />
                 <Tab
                   label={`西藥 (${groupedMedications.length})`}
                   icon={<MedicationIcon sx={{ fontSize: "1rem" }} />}
@@ -767,8 +765,8 @@ const FloatingIcon = () => {
           </Box>
         </DialogTitle>
         <DialogContent sx={{ flex: 1, overflow: "auto", minHeight: 0 }}>
-          {/* Overview Tab */}
-          <TabPanel value={tabValue} index={0}>
+          {/* Overview - shown when no tab is selected (clicking patient name) */}
+          {tabValue === false && (
             <Overview
               dashboardData={dashboardData}
               allergyData={allergyData}
@@ -794,10 +792,10 @@ const FloatingIcon = () => {
               cancerScreeningData={cancerScreeningData}
               hbcvData={hbcvData}
             />
-          </TabPanel>
+          )}
 
           {/* Western Medication List Tab */}
-          <TabPanel value={tabValue} index={1}>
+          <TabPanel value={tabValue} index={0}>
             <MedicationList
               groupedMedications={groupedMedications}
               settings={{
@@ -812,7 +810,7 @@ const FloatingIcon = () => {
           </TabPanel>
 
           {/* Western Medication Table Tab */}
-          <TabPanel value={tabValue} index={2}>
+          <TabPanel value={tabValue} index={1}>
             <MedicationTable
               groupedMedications={groupedMedications}
               settings={{
@@ -826,7 +824,7 @@ const FloatingIcon = () => {
           </TabPanel>
 
           {/* Chinese Medicine Tab */}
-          <TabPanel value={tabValue} index={3}>
+          <TabPanel value={tabValue} index={2}>
             <ChineseMedicine
               groupedChineseMeds={groupedChineseMeds}
               chineseMedSettings={appSettings.chinese}
@@ -835,7 +833,7 @@ const FloatingIcon = () => {
           </TabPanel>
 
           {/* Lab Data Tab */}
-          <TabPanel value={tabValue} index={4}>
+          <TabPanel value={tabValue} index={3}>
             <LabData
               groupedLabs={groupedLabs}
               settings={appSettings.western}
@@ -845,7 +843,7 @@ const FloatingIcon = () => {
           </TabPanel>
 
           {/* New Lab Table Tab */}
-          <TabPanel value={tabValue} index={5}>
+          <TabPanel value={tabValue} index={4}>
             <LabTableView
               groupedLabs={groupedLabs}
               labSettings={appSettings.lab}
@@ -854,7 +852,7 @@ const FloatingIcon = () => {
           </TabPanel>
 
           {/* Imaging Data Tab */}
-          <TabPanel value={tabValue} index={6}>
+          <TabPanel value={tabValue} index={5}>
             <ImagingData
               imagingData={imagingData}
               generalDisplaySettings={generalDisplaySettings}
@@ -862,7 +860,7 @@ const FloatingIcon = () => {
           </TabPanel>
 
           {/* MedDays Data Tab */}
-          <TabPanel value={tabValue} index={7}>
+          <TabPanel value={tabValue} index={6}>
             <MedDaysData
               medDaysData={medDaysData}
               generalDisplaySettings={generalDisplaySettings}
@@ -870,13 +868,13 @@ const FloatingIcon = () => {
           </TabPanel>
 
           {/* Instructions Tab */}
-          <TabPanel value={tabValue} index={8}>
+          <TabPanel value={tabValue} index={7}>
             <Instructions generalDisplaySettings={generalDisplaySettings} />
           </TabPanel>
 
           {/* Advanced Settings Tab */}
           {(appSettings.western.enableMedicationCustomCopyFormat || appSettings.lab.enableLabCustomCopyFormat) && (
-            <TabPanel value={tabValue} index={9}>
+            <TabPanel value={tabValue} index={8}>
               <AdvancedSettings
                 appSettings={appSettings}
                 setAppSettings={setAppSettings}

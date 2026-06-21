@@ -256,7 +256,7 @@ const Overview_ImagingTests = ({
                           }
 
                           // Highlight specific terms
-                          const terms = [/diagnosis/i, /impression/i, /IMP/, /conclusion/i, /診斷/];
+                          const terms = [/diagnosis/i, /impression/i, /(?<![A-Za-z])IMP(?![A-Za-z])/, /interpretation/i, /conclusion/i, /LVEF/i, /\bEF(?![A-Za-z])/, /診斷/];
                           let highlightedContent = processedContent;
 
                           // Apply highlighting for tooltip (for all occurrences)
@@ -380,7 +380,7 @@ const Overview_ImagingTests = ({
           >
             {(() => {
               // Highlight specific terms in red
-              const terms = [/diagnosis/i, /impression/i, /IMP/, /conclusion/i, /診斷/];
+              const terms = [/diagnosis/i, /impression/i, /(?<![A-Za-z])IMP(?![A-Za-z])/, /interpretation/i, /conclusion/i, /LVEF/i, /\bEF(?![A-Za-z])/, /診斷/];
               let content = reportDialog.content;
 
               // Replace each term with a red-colored version (for all occurrences)

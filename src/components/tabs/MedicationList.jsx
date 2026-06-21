@@ -202,7 +202,11 @@ const MedicationList = ({
       return;
     }
 
-    const allFormattedText = filteredMedications.map(group => {
+    const medsToProcess = settings.medicationCopyAllOrder === 'oldToNew'
+      ? [...filteredMedications].reverse()
+      : filteredMedications;
+
+    const allFormattedText = medsToProcess.map(group => {
       const groupInfo = {
         date: group.date,
         hosp: group.hosp,

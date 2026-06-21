@@ -2,140 +2,122 @@
 
 ## 用戶識別(UserID)流程
 
-1. 從`initialize()`開始，調用`checkAndInitUserSession()`
-2. `extractUserInfo()`會嘗試多種方式獲取用戶ID:
-   - 從JWT令牌解析UserID (優先)
-   - 從URL參數提取patientId
-   - 從DOM元素獲取病患資訊
-   - 最後使用時間戳作為備用
+從 `initialize()` 開始，透過 `tokenUtils.getPatientId()` 直接從 JWT token 的 `UserID` 欄位取得病患身分證號。
 
-識別格式會以`patient_{ID}`、`token_{prefix}`、`dom_{text}`或`session_{timestamp}`存儲。
+Token 儲存在 `sessionStorage` key `"token"` 中，由 NHI 頁面登入流程（`verify3cards`）寫入。
+解碼方式為標準 JWT Base64 + UTF-8 解碼（支援中文姓名等欄位）。
 
-**更新**: 新增使用者資訊快取機制，設定5秒內不重複提取令牌，減少系統負擔。
+識別格式為 `patient_{UserID}`（如 `patient_A123456789`）。
 
 ## 授權令牌(Token)獲取流程
 
-1. `captureXhrRequestHeaders()`監聽所有XHR請求頭，捕獲Authorization頭部
-2. `extractAuthorizationToken()`嘗試多種方式獲取令牌:
-   - 使用已捕獲的請求頭中的Authorization (優先)
-   - 從sessionStorage獲取(健保系統實際使用方式)
-   - 從頁面script標籤中查找
-   - 從localStorage獲取(最後嘗試)
-3. `validateToken()`驗證JWT令牌有效性
-4. `saveToken()`儲存令牌並通知背景腳本
+1. `tokenUtils.getRawToken()` 從 `sessionStorage.getItem('token')` 直接讀取
+2. `tokenUtils.getAuthToken()` 加上 `Bearer ` 前綴，供 API 呼叫使用
+3. `tokenUtils.getApiHeaders()` 組合完整的 HTTP headers（Authorization + Accept + X-Requested-With）
+4. `tokenUtils.isTokenExpired()` 檢查 JWT `exp` 欄位判斷是否過期
+
+不再使用 XHR header 攔截、script 標籤掃描或 localStorage fallback。
+
+## 授權檢查流程
+
+授權清單直接從 JWT payload 的 `Permission` 欄位解析（逗號分隔的節點 ID），不再呼叫 `master-menu` API。
+
+`getAuthorizedDataTypes()` 透過 `NODE_TO_DATA_TYPE` 對照表將節點 ID 轉換為資料類型。
+只有授權的資料類型才會發出 API 請求。
+
+特例：`chronicMed` 永遠嘗試抓取，無資料時 API 回空集合，無副作用。
 
 ## 資料擷取流程
 
-1. `setupMonitoring()`設置XHR和fetch監聽，劫持網路請求
-2. 檢測符合特定API路徑的請求(藥歷、檢驗資料、中醫用藥等多種類型)
-3. `fetchAllDataTypes()`同時啟動所有資料類型的抓取:
-   - 先獲取主選單(masterMenu)資料來判斷使用者有權限的資料類型
-   - 過濾並只獲取有授權的資料類型
-   - 使用`Promise.all`併發請求所有資料
-   - 每種類型透過`enhancedFetchData()`單獨獲取
-4. `enhancedFetchData()`處理單一資料類型:
-   - 構建API URL
-   - 添加授權令牌和必要請求頭
-   - 發送請求並處理返回資料
-   - 實作重試機制
-5. `saveData()`保存獲取到的資料:
-   - 更新全局變數(如`lastInterceptedMedicationData`)
-   - 發送資料給background script儲存
+1. `fetchAllDataTypes()` 為主要入口：
+   - 從 JWT 取得 token 和授權清單
+   - 將資料類型分為常規類（medication, labdata, chinesemed 等）和特殊類（adultHealthCheck, cancerScreening, hbcvdata, labdraw）
+   - 特殊類會額外檢查 `chrome.storage.sync` 中的使用者設定（如 `fetchAdultHealthCheck`）
+   - 使用 `Promise.all` 併發請求所有授權的資料類型
+2. `fetchSingleDataType()` 處理單一資料類型：
+   - 從 `API_PATH_MAP` 查出 API 路徑
+   - 構建完整 URL（含 `cli_datetime` 和 `insert_log` 參數）
+   - 使用 `fetch()` 發送 GET 請求（`credentials: "include"`, `cache: "no-store"`）
+   - 回應經 `normalizeResponseData()` 標準化為 `{ rObject: [...] }` 格式
+   - 包含 race condition 防護：比對 `requestPatientId` 與 `lastPatientId`，病患已切換則丟棄
+3. 資料儲存：
+   - 更新 `window.lastIntercepted*Data` 全域變數（供 React UI 讀取）
+   - 所有資料抓完後統一寫入 `localStorage('NHITW_DATA')`（跨擴充功能共享）
+   - 透過 `chrome.runtime.sendMessage({ action: 'setBadge' })` 通知 background 設定 badge
 
-**更新**: 新增去抖動機制，確保短時間內不重複清除資料(2秒冷卻時間)。
+## 病患切換偵測
 
-## Master Menu 節點對應表
+採用雙重偵測機制：
 
-masterMenu API 回傳的節點ID對應到健保雲端系統的各個頁面和資料類型：
+1. **按鈕點擊（即時）**：`watchPatientSwitchButtons()` 監聯 NHI 頁面的「請換卡再按我」和「請掃描再按我」連結。按下後以 500ms 間隔密集輪詢 token，偵測到新 UserID 後立即抓取。
+2. **Token 輪詢（兜底）**：`startTokenPolling()` 每 1.5 秒檢查 JWT `UserID` 是否變化，防止按鈕偵測失效。
+
+## URL 變化偵測
+
+`observeUrlChanges()` 每秒輪詢 `window.location.href`：
+- 導航到登入頁 → 清除所有資料
+- 導航到目標頁 → 啟動 token polling、掛載按鈕監聽、觸發資料抓取
+
+## background.js 角色
+
+精簡為只處理 content script 無法直接呼叫的 Chrome API：
+- `chrome.action.openPopup()` — 開啟 popup
+- `chrome.action.setBadgeText/Color()` — 設定 badge
+- `chrome.tabs.onUpdated` — 偵測導航到登入頁時清除 badge
+
+不再處理 webRequest 監聽、資料儲存或 session 管理。
+
+## JWT Permission 節點對應表
+
+JWT payload 的 `Permission` 欄位（等同 masterMenu API 的 `prsnAuth`）：
 
 | 節點ID | 群組 | 名稱 | 對應資料類型 | API 端點 |
 |--------|------|------|------------|---------|
-| 1.1 | 摘要 | 病人資訊 | patientSummary | /imu/api/imue2000/imue2000s01/get-summary |
+| 1.1 | 摘要 | 病人資訊 | patientsummary | /imu/api/imue2000/imue2000s01/get-summary |
 | 1.2 | 摘要 | B、C型肝炎專區 | hbcvdata | /imu/api/imue0180/imue0180s01/hbcv-data |
-| 1.3 | 摘要 | 特殊給付限制 | - | - |
+| 1.3 | 摘要 | 特殊給付限制 | — | — |
 | 2.1 | 西醫用藥 | 用藥紀錄 | medication | /imu/api/imue0008/imue0008s02/get-data |
-| 2.2 | 西醫用藥 | 特定管制用藥 | - | - |
+| 2.2 | 西醫用藥 | 特定管制用藥 | — | — |
 | 2.3 | 西醫用藥 | 慢性處方箋 | chronicMed* | /imu/api/imue0008/imue0008s05/get-data |
 | 2.4 | 西醫用藥 | 門診藥品餘藥日數 | medDays | /imu/api/imue0120/imue0120s01/pres-med-day |
-
-> *chronicMed 在 `isDataTypeAuthorized` 中直接 `return true`，繞過 masterMenu 的 `prsnAuth` 檢查。
-> 原因：`prsnAuth` 只列出「有授權且有資料」的節點，但部分病患即使在 NHI 頁面可進入
-> `IMUE0008S05` 也不會在 `prsnAuth` 出現 `2.3`；無慢箋資料時 API 自然回空集合，
-> 無副作用。
 | 3.1 | 中醫醫療 | 用藥紀錄 | chinesemed | /imu/api/imue0090/imue0090s02/get-data |
-| 3.2 | 中醫醫療 | 針傷治療 | acupuncture | /imu/api/imue0160/imue0160s02/get-data |
-| 3.3 | 中醫醫療 | 特定疾病門診加強照護 | specialChineseMedCare | /imu/api/imue0170/imue0170s02/get-data |
-| 4.1 | 牙科處置紀錄 | 牙科處置紀錄項目 | - | - |
+| 3.2 | 中醫醫療 | 針傷治療 | — | 目前未啟用 |
+| 3.3 | 中醫醫療 | 特定疾病門診加強照護 | — | 目前未啟用 |
+| 4.1 | 牙科處置紀錄 | 牙科處置紀錄項目 | — | — |
 | 5.1 | 過敏紀錄 | 過敏紀錄 | allergy | /imu/api/imue0040/imue0040s02/get-data |
 | 6.1 | 檢查與檢驗 | 檢查檢驗結果 | labdata | /imu/api/imue0060/imue0060s02/get-data |
 | 6.1 | 檢查與檢驗 | 檢查檢驗結果-圖形化查詢 | labdraw | /imu/api/imue0060/imue0060s03/get-data |
 | 6.2 | 檢查與檢驗 | 影像及病理 | imaging | /imu/api/imue0130/imue0130s02/get-data |
 | 6.3 | 檢查與檢驗 | 成人預防保健 | adultHealthCheck | /imu/api/imue0140/imue0140s01/hpa-data |
 | 6.4 | 檢查與檢驗 | 四癌篩檢結果 | cancerScreening | /imu/api/imue0150/imue0150s01/hpa-data |
-| 6.5 | 檢查與檢驗 | 檢查檢驗紀錄 | - | - |
+| 6.5 | 檢查與檢驗 | 檢查檢驗紀錄 | — | — |
 | 7.1 | 手術紀錄 | 手術紀錄項目 | surgery | /imu/api/imue0020/imue0020s02/get-data |
 | 8.1 | 出院病摘 | 出院病歷摘要 | discharge | /imu/api/imue0070/imue0070s02/get-data |
-| 9.1 | 復健醫療 | 復健醫療紀錄 | rehabilitation | /imu/api/imue0080/imue0080s02/get-data |
-| 10.1 | 特材紀錄 | 特材紀錄 | - | - |
+| 9.1 | 復健醫療 | 復健醫療紀錄 | — | 目前未啟用 |
+| 10.1 | 特材紀錄 | 特材紀錄 | — | — |
 
-masterMenu API 回傳的 "prsnAuth" 陣列包含目前使用者有權限存取且有資料的節點。只有在該陣列中的節點才應該被抓取。
+> *chronicMed 在授權檢查中直接加入 `authorized` 集合，繞過 Permission 節點檢查。
+> 原因：Permission 只列出「有授權且有資料」的節點，但部分病患即使在 NHI 頁面可進入
+> IMUE0008S05 也不會在 Permission 出現 2.3；無慢箋資料時 API 自然回空集合，無副作用。
 
-## 資料抓取流程與權限檢查
+## 特殊資料類型的設定控制
 
-抓取資料時的處理流程：
+adultHealthCheck、cancerScreening、hbcvdata 可透過 `chrome.storage.sync` 設定控制是否抓取：
+- `fetchAdultHealthCheck`（預設 true）
+- `fetchCancerScreening`（預設 true）
+- `fetchHbcvdata`（預設 true）
 
-1. 首先抓取 masterMenu 資料 (/imu/api/imue1000/imue1000s02/master-menu)
-2. 從 masterMenu 的 prsnAuth 陣列中檢查使用者有權限存取的節點
-3. 只針對有授權的節點發送資料請求，未授權的節點則傳回空集合
-4. 若 masterMenu 抓取失敗，則預設嘗試抓取所有資料類型
+使用者可在 PopupSettings 中開關這些選項。
 
-此方式能大幅減少不必要的API請求，提高應用效能。
+## 慢性處方箋 (chronicMed) 支援
 
-## 新增功能與改進
-
-1. **擴充資料類型**：新增對復健治療(rehabilitation)、針灸治療(acupuncture)和特殊中醫處置(specialChineseMedCare)的支援。
-
-2. **批次資料抓取控制**：
-   - 追蹤進行中的批次抓取，避免重複請求
-   - 使用 `isBatchFetchInProgress` 標記，防止短時間內重複啟動抓取
-
-3. **資料清除優化**：
-   - 避免短時間內多次清除資料(添加冷卻期)
-   - 批次抓取進行中不執行清除
-
-4. **URL變更監控**：
-   - 新增 `observeUrlChanges()` 監控URL變化
-   - URL變更時重置用戶資訊快取，確保頁面變更後重新提取
-
-5. **用戶資訊快取**：
-   - 添加 `cachedUserInfo` 和 `lastUserInfoExtractTime` 以減少重複提取
-   - 設置 5 秒的快取期限，優化效能
-
-6. **自動開啟控制**：
-   - 支援 `autoOpenPage` 設定，自動打開浮動圖標對話框
-   - 設定值儲存在 chrome.storage.sync
-
-7. **設定變更監聽**：
-   - 新增對設定變更的監聽，包括西醫用藥和中醫用藥相關設定
-   - 主動觸發UI更新顯示
-
-8. **直接下載功能**：
-   - 添加 `getPatientData` 處理程序
-   - 支援直接在瀏覽器下載完整病人資料
-
-9. **開發模式**：
-   - 新增 `setupDevMode()` 支援測試資料載入與清除
-   - 提供便於開發測試的模式
-
-10. **慢性處方箋 (chronicMed) 支援**：
-    - 端點：`/imu/api/imue0008/imue0008s05/get-data` (NHI 頁面 `IMUE0008S05`)
-    - 已加入 `fetchAllDataTypes` 常規 `dataTypes` 陣列，每次抓取時主動 fetch
-    - 授權檢查：對 chronicMed 直接 `return true` 略過 masterMenu 檢查（見上方節點表格註釋）
-    - 該 API 回應與其他端點不同，**沒有 `rObject` 欄位**，而是回傳 `{ chrDataN: [...], chrDataY: [...] }`：
-      - `chrDataN`：`overdue === "N"`（**效期內**處方箋）
-      - `chrDataY`：`overdue === "Y"`（**已逾期**處方箋）
-    - 於 `enhancedFetchData` 的標準化路徑中，與 `masterMenu` 共用「整包包成 `rObject: [data]`」的處理；下游存取為 `window.lastInterceptedChronicMedData.rObject[0].chrDataN` / `.chrDataY`
-    - **已整合進「西藥」(MedicationList) 與「西藥表格」(MedicationTable)** — 處理邏輯與顯示規則請見 `src/utils/medicationProcessor.js` 內的 helper 區塊（`parseChronicMedCycles` / `mergeChronicMedIntoGroups`）以及下方「慢箋資料 schema 與 cycle 偵測規則」一節。
+- 端點：`/imu/api/imue0008/imue0008s05/get-data`（NHI 頁面 `IMUE0008S05`）
+- 每次抓取時主動 fetch，不依賴授權節點檢查
+- 該 API 回應與其他端點不同，**沒有 `rObject` 欄位**，而是回傳 `{ chrDataN: [...], chrDataY: [...] }`：
+  - `chrDataN`：`overdue === "N"`（**效期內**處方箋）
+  - `chrDataY`：`overdue === "Y"`（**已逾期**處方箋）
+- 於 `normalizeResponseData` 中以「整包包成 `rObject: [data]`」處理；下游存取為 `window.lastInterceptedChronicMedData.rObject[0].chrDataN` / `.chrDataY`
+- **已整合進「西藥」(MedicationList) 與「西藥表格」(MedicationTable)** — 處理邏輯與顯示規則請見 `src/utils/medicationProcessor.js` 內的 helper 區塊（`parseChronicMedCycles` / `mergeChronicMedIntoGroups`）以及下方「慢箋資料 schema 與 cycle 偵測規則」一節。
 
 ## 慢箋資料 schema 與 cycle 偵測規則
 

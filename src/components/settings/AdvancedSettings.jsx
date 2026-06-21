@@ -6,6 +6,8 @@ import {
   AccordionSummary,
   AccordionDetails,
   FormControlLabel,
+  Radio,
+  RadioGroup,
   Button,
   Box,
 } from "@mui/material";
@@ -17,8 +19,10 @@ const AdvancedSettings = () => {
   const [settings, setSettings] = useState({
     enableMedicationCustomCopyFormat: false,
     enableMedicationCopyAll: false,
+    medicationCopyAllOrder: 'newToOld',
     enableLabCustomCopyFormat: false,
     enableLabCopyAll: false,
+    labCopyAllOrder: 'newToOld',
   });
 
   useEffect(() => {
@@ -27,15 +31,19 @@ const AdvancedSettings = () => {
       {
         enableMedicationCustomCopyFormat: false,
         enableMedicationCopyAll: false,
+        medicationCopyAllOrder: 'newToOld',
         enableLabCustomCopyFormat: false,
         enableLabCopyAll: false,
+        labCopyAllOrder: 'newToOld',
       },
       (items) => {
         setSettings({
           enableMedicationCustomCopyFormat: items.enableMedicationCustomCopyFormat,
           enableMedicationCopyAll: items.enableMedicationCopyAll,
+          medicationCopyAllOrder: items.medicationCopyAllOrder,
           enableLabCustomCopyFormat: items.enableLabCustomCopyFormat,
           enableLabCopyAll: items.enableLabCopyAll,
+          labCopyAllOrder: items.labCopyAllOrder,
         });
       }
     );
@@ -168,6 +176,22 @@ const AdvancedSettings = () => {
           label="開啟西藥全部資料複製功能"
         />
 
+        {settings.enableMedicationCopyAll && (
+          <Box sx={{ ml: 4, mt: 1, mb: 1 }}>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
+              複製排序方式
+            </Typography>
+            <RadioGroup
+              value={settings.medicationCopyAllOrder}
+              onChange={(e) => handleLocalSettingChange('medicationCopyAllOrder', e.target.value)}
+              row
+            >
+              <FormControlLabel value="newToOld" control={<Radio size="small" />} label="由新到舊" />
+              <FormControlLabel value="oldToNew" control={<Radio size="small" />} label="由舊到新" />
+            </RadioGroup>
+          </Box>
+        )}
+
         <FormControlLabel
           control={
             <Switch
@@ -205,6 +229,22 @@ const AdvancedSettings = () => {
           }
           label="開啟檢驗報告全部資料複製功能"
         />
+
+        {settings.enableLabCopyAll && (
+          <Box sx={{ ml: 4, mt: 1, mb: 1 }}>
+            <Typography variant="body2" color="text.secondary" sx={{ mb: 0.5 }}>
+              複製排序方式
+            </Typography>
+            <RadioGroup
+              value={settings.labCopyAllOrder}
+              onChange={(e) => handleLocalSettingChange('labCopyAllOrder', e.target.value)}
+              row
+            >
+              <FormControlLabel value="newToOld" control={<Radio size="small" />} label="由新到舊" />
+              <FormControlLabel value="oldToNew" control={<Radio size="small" />} label="由舊到新" />
+            </RadioGroup>
+          </Box>
+        )}
       </AccordionDetails>
     </Accordion>
   );

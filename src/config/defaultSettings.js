@@ -24,6 +24,7 @@ export const DEFAULT_SETTINGS = {
     showExternalDrugImage: false,
     enableMedicationCustomCopyFormat: false,
     enableMedicationCopyAll: false,
+    medicationCopyAllOrder: 'newToOld',
     drugSeparator: ',',
     customMedicationHeaderCopyFormat: [
       { id: 'date_default', display: '日期', group: 'header', section: 'header' },
@@ -76,6 +77,7 @@ export const DEFAULT_SETTINGS = {
     labChooseCopyItems: DEFAULT_LAB_COPY_ITEMS,
     enableLabCustomCopyFormat: false,
     enableLabCopyAll: false,
+    labCopyAllOrder: 'newToOld',
     itemSeparator: ',',
     customLabHeaderCopyFormat: [
       { id: 'date_default', display: '日期', group: 'header', section: 'labheader' },

@@ -76,6 +76,7 @@ const LabData = ({ groupedLabs, settings, labSettings, generalDisplaySettings })
     enableLabChooseCopy: false,
     labChooseCopyItems: [],
     enableLabCopyAll: false,
+    labCopyAllOrder: 'newToOld',
     ...labSettings,
     // Ensure display format is properly mapped
     displayLabFormat: mapFormatName(labSettings?.displayLabFormat)
@@ -220,6 +221,11 @@ const LabData = ({ groupedLabs, settings, labSettings, generalDisplaySettings })
       return;
     }
 
+    // 根據排序設定決定順序
+    const labsToProcess = completeLabSettings.labCopyAllOrder === 'oldToNew'
+      ? [...filteredGroupedLabs].reverse()
+      : filteredGroupedLabs;
+
     // 根據 copyLabFormat 決定如何格式化
     const { copyLabFormat, showUnit, showReference } = completeLabSettings;
     let allFormattedText = '';
@@ -227,38 +233,27 @@ const LabData = ({ groupedLabs, settings, labSettings, generalDisplaySettings })
     // 創建格式化函數映射
     const formatFunctions = {
       vertical: () => {
-        // 垂直格式: 每個組一個區塊，每個項目一行
-        return filteredGroupedLabs.map(group => {
-          // 標準垂直格式生成
+        return labsToProcess.map(group => {
           const formattedDate = formatDate(group.date);
           let groupText = `${formattedDate} - ${group.hosp}\n`;
-          
-          // 垂直格式：每個項目一行
           group.labs.forEach((lab) => {
             groupText += `${formatLabItemForCopy(lab, showUnit, showReference)}\n`;
           });
-          
           return groupText;
         }).join("\n");
       },
       horizontal: () => {
-        // 水平格式: 每個組一個區塊，項目在同一行
-        return filteredGroupedLabs.map(group => {
-          // 標準水平格式生成
+        return labsToProcess.map(group => {
           const formattedDate = formatDate(group.date);
           let groupText = `${formattedDate} - ${group.hosp}\n`;
-          
-          // 水平格式：項目在同一行，用空格分隔
           let labItems = group.labs.map((lab) => formatLabItemForCopy(lab, showUnit, showReference));
           groupText += labItems.join(" ");
-          
           return groupText;
         }).join("\n\n");
       },
       customVertical: () => {
-        // 嘗試使用自定義格式，如果失敗則回退到標準垂直格式
         try {
-          return filteredGroupedLabs.map(group => {
+          return labsToProcess.map(group => {
             return labCopyFormatter.applyCustomFormat(group.labs, group, completeLabSettings);
           }).join("\n\n");
         } catch (error) {
@@ -267,9 +262,8 @@ const LabData = ({ groupedLabs, settings, labSettings, generalDisplaySettings })
         }
       },
       customHorizontal: () => {
-        // 嘗試使用自定義格式，如果失敗則回退到標準水平格式
         try {
-          return filteredGroupedLabs.map(group => {
+          return labsToProcess.map(group => {
             return labCopyFormatter.applyCustomFormat(group.labs, group, completeLabSettings);
           }).join("\n\n");
         } catch (error) {

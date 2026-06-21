@@ -25,71 +25,11 @@ import TypographySizeWrapper from "../utils/TypographySizeWrapper";
 // Function to open imaging study in a new window
 const viewImage = async (imageParams) => {
   try {
-    // 嘗試多種方式獲取授權令牌
+    // 從 sessionStorage 取得 token
     let authToken = null;
-
-    // 方法1: 直接嘗試從 chrome storage 獲取
-    try {
-      await new Promise((resolve) => {
-        chrome.storage.local.get('nhiToken', function(result) {
-          if (result && result.nhiToken) {
-            authToken = result.nhiToken;
-          }
-          resolve();
-        });
-      });
-    } catch (e) {
-      // Silent error handling
-    }
-
-    // 方法2: 嘗試從 window.extractAuthorizationToken() 獲取
-    if (!authToken && window.extractAuthorizationToken) {
-      try {
-        authToken = window.extractAuthorizationToken();
-      } catch (e) {
-        // Silent error handling
-      }
-    }
-
-    // 方法3: 嘗試從 sessionStorage 獲取
-    if (!authToken) {
-      const tokenKeys = ['jwt_token', 'token', 'access_token', 'auth_token', 'nhi_extractor_token'];
-      for (const key of tokenKeys) {
-        const token = sessionStorage.getItem(key);
-        if (token) {
-          authToken = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
-          break;
-        }
-      }
-    }
-
-    // 方法4: 嘗試從 localStorage 獲取
-    if (!authToken) {
-      const tokenKeys = ['jwt_token', 'token', 'access_token', 'auth_token', 'nhi_extractor_token'];
-      for (const key of tokenKeys) {
-        const token = localStorage.getItem(key);
-        if (token) {
-          authToken = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
-          break;
-        }
-      }
-    }
-
-    // 方法5: 透過消息傳遞請求背景腳本提供令牌
-    if (!authToken) {
-      try {
-        const response = await new Promise((resolve) => {
-          chrome.runtime.sendMessage({ action: 'getAuthToken' }, (response) => {
-            resolve(response);
-          });
-        });
-
-        if (response && response.token) {
-          authToken = response.token;
-        }
-      } catch (e) {
-        // Silent error handling
-      }
+    const token = sessionStorage.getItem('token');
+    if (token) {
+      authToken = token.startsWith('Bearer ') ? token : `Bearer ${token}`;
     }
 
     if (!authToken) {
@@ -539,7 +479,7 @@ const ReportImagingTable = ({ data, generalDisplaySettings }) => {
                     >
                       {(() => {
                         // Highlight specific terms in red
-                        const terms = [/diagnosis/i, /impression/i, /IMP/, /conclusion/i, /診斷/];
+                        const terms = [/diagnosis/i, /impression/i, /(?<![A-Za-z])IMP(?![A-Za-z])/, /interpretation/i, /conclusion/i, /LVEF/i, /\bEF(?![A-Za-z])/, /診斷/];
                         let content = displayReport;
 
                         // Replace each term with a red-colored version (for all occurrences)
