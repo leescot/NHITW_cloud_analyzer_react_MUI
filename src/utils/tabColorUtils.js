@@ -19,6 +19,7 @@ const TAB_COLORS = {
     lab: { primary: "#e65100", dark: "#e65100" }, // 橙色
     imaging: { primary: "#4a148c", dark: "#4a148c" }, // 紫色
     medDays: { primary: "#880e4f", dark: "#880e4f" }, // 粉紅色
+    ckm: { primary: "#c62828", dark: "#b71c1c" }, // 紅色（心血管主題）
     help: { primary: "#2196f3", dark: "#0d47a1" }, // 藍色
     settings: { primary: "#607d8b", dark: "#455a64" }, // 藍灰色
 

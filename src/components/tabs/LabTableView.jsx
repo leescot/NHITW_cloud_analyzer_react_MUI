@@ -280,17 +280,34 @@ const LabTableView = ({ groupedLabs, labSettings, generalDisplaySettings }) => {
                     }
                   }}
                 >
-                  <LabItemTrendPopover item={item} dates={dates}>
-                    <TypographySizeWrapper
-                      variant="body2"
-                      textSizeType="content"
-                      generalDisplaySettings={generalDisplaySettings}
-                      fontWeight="medium"
-                      sx={{ textDecoration: 'underline dotted', textDecorationColor: '#bdbdbd' }}
-                    >
-                      {item.displayName}
-                    </TypographySizeWrapper>
-                  </LabItemTrendPopover>
+                  {(() => {
+                    const numericCount = Object.values(item.values).filter(v => v && !isNaN(parseFloat(v.value))).length;
+                    if (numericCount >= 2) {
+                      return (
+                        <LabItemTrendPopover item={item} dates={dates}>
+                          <TypographySizeWrapper
+                            variant="body2"
+                            textSizeType="content"
+                            generalDisplaySettings={generalDisplaySettings}
+                            fontWeight="medium"
+                            sx={{ textDecoration: 'underline dotted', textDecorationColor: '#bdbdbd', cursor: 'pointer' }}
+                          >
+                            {item.displayName}
+                          </TypographySizeWrapper>
+                        </LabItemTrendPopover>
+                      );
+                    }
+                    return (
+                      <TypographySizeWrapper
+                        variant="body2"
+                        textSizeType="content"
+                        generalDisplaySettings={generalDisplaySettings}
+                        fontWeight="medium"
+                      >
+                        {item.displayName}
+                      </TypographySizeWrapper>
+                    );
+                  })()}
                 </TableCell>
 
                 {dates.map((dateInfo, dateIndex) => {

@@ -35,6 +35,7 @@ import GrassIcon from "@mui/icons-material/Grass";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import SettingsIcon from "@mui/icons-material/Settings";
 import FormatListBulletedIcon from "@mui/icons-material/FormatListBulleted";
+import FavoriteIcon from "@mui/icons-material/Favorite";
 
 // Import cloud icon
 import { cloud_icon } from "../assets/pic_cloud_icon.js";
@@ -75,6 +76,8 @@ import MedDaysData from "./tabs/MedDaysData";
 import LabTableView from "./tabs/LabTableView";
 import Instructions from "./tabs/Instructions";
 import AdvancedSettings from "./tabs/AdvancedSettings";
+import CKMData from "./tabs/CKMData";
+import { ckmProcessor } from "../utils/ckmProcessor";
 
 import MedicationIcon from "@mui/icons-material/Medication";
 import ScienceIcon from "@mui/icons-material/Science";
@@ -143,6 +146,7 @@ const FloatingIcon = () => {
   const [adultHealthCheckData, setAdultHealthCheckData] = useState(null);
   const [cancerScreeningData, setCancerScreeningData] = useState(null);
   const [hbcvData, setHbcvData] = useState(null);
+  const [ckmData, setCkmData] = useState(null);
   const [generalDisplaySettings, setGeneralDisplaySettings] = useState(
     DEFAULT_SETTINGS.general
   );
@@ -261,9 +265,8 @@ const FloatingIcon = () => {
         if (!open) {
           setOpen(true);
         }
-        // 自訂設定標籤的索引是 9，只有當自訂設定已啟用時才切換
         if (appSettings.western.enableMedicationCustomCopyFormat) {
-          setTabValue(9);
+          setTabValue(advancedTabIndex);
         }
       }
 
@@ -272,9 +275,8 @@ const FloatingIcon = () => {
         if (!open) {
           setOpen(true);
         }
-        // 只有當檢驗自訂設定已啟用時才切換
         if (appSettings.lab.enableLabCustomCopyFormat) {
-          setTabValue(9);
+          setTabValue(advancedTabIndex);
         }
       }
     });
@@ -349,7 +351,36 @@ const FloatingIcon = () => {
     };
 
     // 使用dataManager處理所有資料
-    await handleAllData(dataSources, appSettings, setters);
+    const results = await handleAllData(dataSources, appSettings, setters);
+
+    // CKM 資料處理（跨資料源篩選，不受設定開關影響，UI 層條件渲染）
+    try {
+      const ckm = ckmProcessor.processCKMData({
+        groupedMedications: results?.medications || [],
+        rawLabData: dataSources.labData,
+        imagingData: results?.imaging || { withReport: [], withoutReport: [] },
+        dischargeData: results?.discharge || [],
+      });
+      setCkmData(ckm);
+    } catch (e) {
+      console.error('[CKM] processCKMData error', e);
+    }
+
+    // 本地 JSON 匯入時重新取得使用者資訊
+    if (!userInfo && window._localUserInfo) {
+      const local = window._localUserInfo;
+      let age = null;
+      if (local.birthday && local.birthday.length === 7) {
+        const rocYear = parseInt(local.birthday.substring(0, 3), 10);
+        const month = parseInt(local.birthday.substring(3, 5), 10);
+        const day = parseInt(local.birthday.substring(5, 7), 10);
+        const birthDate = new Date(rocYear + 1911, month - 1, day);
+        const today = new Date();
+        age = today.getFullYear() - birthDate.getFullYear();
+        if (today.getMonth() < month - 1 || (today.getMonth() === month - 1 && today.getDate() < day)) age--;
+      }
+      setUserInfo({ name: local.name, userId: local.userId, gender: local.gender, birthday: local.birthday, age });
+    }
   };
 
   // 初始數據加載
@@ -385,7 +416,22 @@ const FloatingIcon = () => {
   // Extract user information when the dialog opens or data changes
   useEffect(() => {
     if (open) {
-      const info = extractUserInfoFromToken();
+      let info = extractUserInfoFromToken();
+      // Fallback: 本地 JSON 匯入的使用者資訊
+      if (!info && window._localUserInfo) {
+        const local = window._localUserInfo;
+        let age = null;
+        if (local.birthday && local.birthday.length === 7) {
+          const rocYear = parseInt(local.birthday.substring(0, 3), 10);
+          const month = parseInt(local.birthday.substring(3, 5), 10);
+          const day = parseInt(local.birthday.substring(5, 7), 10);
+          const birthDate = new Date(rocYear + 1911, month - 1, day);
+          const today = new Date();
+          age = today.getFullYear() - birthDate.getFullYear();
+          if (today.getMonth() < month - 1 || (today.getMonth() === month - 1 && today.getDate() < day)) age--;
+        }
+        info = { name: local.name, userId: local.userId, gender: local.gender, birthday: local.birthday, age };
+      }
       setUserInfo(info);
     }
   }, [open]);
@@ -417,6 +463,12 @@ const FloatingIcon = () => {
   // Calculate CKD stage
   const gfrValue = extractGFRValue(patientSummaryData);
   const ckdStage = getCKDStage(gfrValue);
+
+  // 動態計算條件 Tab 的 index
+  const ckmTabEnabled = generalDisplaySettings.enableCKMTab;
+  const ckmTabIndex = ckmTabEnabled ? 7 : -1;
+  const helpTabIndex = ckmTabEnabled ? 8 : 7;
+  const advancedTabIndex = ckmTabEnabled ? 9 : 8;
 
   // Get position styles based on settings
   const getIconPositionStyle = () => {
@@ -680,6 +732,20 @@ const FloatingIcon = () => {
                     },
                   }}
                 />
+                {generalDisplaySettings.enableCKMTab && (
+                  <Tab
+                    label="CKM"
+                    icon={<FavoriteIcon sx={{ fontSize: "1rem" }} />}
+                    iconPosition="start"
+                    sx={{
+                      padding: "6px 10px",
+                      color: ckmData?.hasCKMData ? getTabColor(generalDisplaySettings, "ckm") : "#9e9e9e",
+                      "&.Mui-selected": {
+                        color: ckmData?.hasCKMData ? getTabSelectedColor(generalDisplaySettings, "ckm") : "#616161",
+                      },
+                    }}
+                  />
+                )}
                 <Tab
                   label="說明"
                   icon={<HelpOutlineIcon sx={{ fontSize: "1rem" }} />}
@@ -867,14 +933,27 @@ const FloatingIcon = () => {
             />
           </TabPanel>
 
+          {/* CKM Tab */}
+          {ckmTabEnabled && (
+            <TabPanel value={tabValue} index={ckmTabIndex}>
+              <CKMData
+                ckmData={ckmData}
+                groupedLabs={groupedLabs}
+                labSettings={appSettings.lab}
+                generalDisplaySettings={generalDisplaySettings}
+                userInfo={userInfo}
+              />
+            </TabPanel>
+          )}
+
           {/* Instructions Tab */}
-          <TabPanel value={tabValue} index={7}>
+          <TabPanel value={tabValue} index={helpTabIndex}>
             <Instructions generalDisplaySettings={generalDisplaySettings} />
           </TabPanel>
 
           {/* Advanced Settings Tab */}
           {(appSettings.western.enableMedicationCustomCopyFormat || appSettings.lab.enableLabCustomCopyFormat) && (
-            <TabPanel value={tabValue} index={8}>
+            <TabPanel value={tabValue} index={advancedTabIndex}>
               <AdvancedSettings
                 appSettings={appSettings}
                 setAppSettings={setAppSettings}

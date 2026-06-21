@@ -26,6 +26,7 @@ const GeneralDisplaySettings = () => {
   const [floatingIconPosition, setFloatingIconPosition] = useState('top-right');
   const [alwaysOpenOverviewTab, setAlwaysOpenOverviewTab] = useState(true);
   const [useColorfulTabs, setUseColorfulTabs] = useState(false);
+  const [enableCKMTab, setEnableCKMTab] = useState(false);
 
   // Load settings from storage
   useEffect(() => {
@@ -36,7 +37,8 @@ const GeneralDisplaySettings = () => {
       noteTextSize: 'small',
       floatingIconPosition: 'top-right',
       alwaysOpenOverviewTab: true,
-      useColorfulTabs: true
+      useColorfulTabs: true,
+      enableCKMTab: false,
     }, (items) => {
       setAutoOpenPage(items.autoOpenPage);
       setTitleTextSize(items.titleTextSize);
@@ -45,6 +47,7 @@ const GeneralDisplaySettings = () => {
       setFloatingIconPosition(items.floatingIconPosition);
       setAlwaysOpenOverviewTab(items.alwaysOpenOverviewTab);
       setUseColorfulTabs(items.useColorfulTabs);
+      setEnableCKMTab(items.enableCKMTab);
     });
   }, []);
 
@@ -69,7 +72,8 @@ const GeneralDisplaySettings = () => {
             noteTextSize: noteTextSize,
             floatingIconPosition: floatingIconPosition,
             alwaysOpenOverviewTab: alwaysOpenOverviewTab,
-            useColorfulTabs: useColorfulTabs
+            useColorfulTabs: useColorfulTabs,
+            enableCKMTab: enableCKMTab
           }
         });
       }
@@ -97,7 +101,8 @@ const GeneralDisplaySettings = () => {
             noteTextSize: noteTextSize,
             floatingIconPosition: floatingIconPosition,
             alwaysOpenOverviewTab: alwaysOpenOverviewTab,
-            useColorfulTabs: useColorfulTabs
+            useColorfulTabs: useColorfulTabs,
+            enableCKMTab: enableCKMTab
           }
         });
       }
@@ -125,7 +130,8 @@ const GeneralDisplaySettings = () => {
             noteTextSize: noteTextSize,
             floatingIconPosition: floatingIconPosition,
             alwaysOpenOverviewTab: alwaysOpenOverviewTab,
-            useColorfulTabs: useColorfulTabs
+            useColorfulTabs: useColorfulTabs,
+            enableCKMTab: enableCKMTab
           }
         });
       }
@@ -153,7 +159,8 @@ const GeneralDisplaySettings = () => {
             noteTextSize: newValue,
             floatingIconPosition: floatingIconPosition,
             alwaysOpenOverviewTab: alwaysOpenOverviewTab,
-            useColorfulTabs: useColorfulTabs
+            useColorfulTabs: useColorfulTabs,
+            enableCKMTab: enableCKMTab
           }
         });
       }
@@ -181,7 +188,8 @@ const GeneralDisplaySettings = () => {
             noteTextSize: noteTextSize,
             floatingIconPosition: newValue,
             alwaysOpenOverviewTab: alwaysOpenOverviewTab,
-            useColorfulTabs: useColorfulTabs
+            useColorfulTabs: useColorfulTabs,
+            enableCKMTab: enableCKMTab
           }
         });
       }
@@ -209,7 +217,8 @@ const GeneralDisplaySettings = () => {
             noteTextSize: noteTextSize,
             floatingIconPosition: floatingIconPosition,
             alwaysOpenOverviewTab: newValue,
-            useColorfulTabs: useColorfulTabs
+            useColorfulTabs: useColorfulTabs,
+            enableCKMTab: enableCKMTab
           }
         });
       }
@@ -237,7 +246,35 @@ const GeneralDisplaySettings = () => {
             noteTextSize: noteTextSize,
             floatingIconPosition: floatingIconPosition,
             alwaysOpenOverviewTab: alwaysOpenOverviewTab,
-            useColorfulTabs: newValue
+            useColorfulTabs: newValue,
+            enableCKMTab: enableCKMTab
+          }
+        });
+      }
+    });
+  };
+
+  const handleEnableCKMTabChange = (event) => {
+    const newValue = event.target.checked;
+    setEnableCKMTab(newValue);
+    chrome.storage.sync.set({ enableCKMTab: newValue });
+
+    chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+      if (tabs[0]) {
+        chrome.tabs.sendMessage(tabs[0].id, {
+          action: "settingChanged",
+          settingType: "generalDisplay",
+          setting: "enableCKMTab",
+          value: newValue,
+          allSettings: {
+            autoOpenPage: autoOpenPage,
+            titleTextSize: titleTextSize,
+            contentTextSize: contentTextSize,
+            noteTextSize: noteTextSize,
+            floatingIconPosition: floatingIconPosition,
+            alwaysOpenOverviewTab: alwaysOpenOverviewTab,
+            useColorfulTabs: useColorfulTabs,
+            enableCKMTab: newValue
           }
         });
       }

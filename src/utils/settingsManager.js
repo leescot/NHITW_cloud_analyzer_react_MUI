@@ -69,6 +69,8 @@ export const loadAllSettings = async () => {
       floatingIconPosition: DEFAULT_SETTINGS.general.floatingIconPosition,
       alwaysOpenOverviewTab: DEFAULT_SETTINGS.general.alwaysOpenOverviewTab,
       useColorfulTabs: DEFAULT_SETTINGS.general.useColorfulTabs,
+      enableCKMTab: DEFAULT_SETTINGS.general.enableCKMTab,
+      enableNephroReport: DEFAULT_SETTINGS.general.enableNephroReport,
 
       // Cloud data settings
       fetchAdultHealthCheck: DEFAULT_SETTINGS.cloud.fetchAdultHealthCheck,
@@ -134,6 +136,8 @@ export const loadAllSettings = async () => {
           floatingIconPosition: items.floatingIconPosition,
           alwaysOpenOverviewTab: items.alwaysOpenOverviewTab,
           useColorfulTabs: items.useColorfulTabs,
+          enableCKMTab: items.enableCKMTab,
+          enableNephroReport: items.enableNephroReport,
         },
         cloud: {
           fetchAdultHealthCheck: items.fetchAdultHealthCheck,
@@ -465,7 +469,9 @@ const handleGeneralDisplaySettingsChange = (event, updateGeneralDisplaySettings)
       noteTextSize: event.detail.allSettings.noteTextSize,
       floatingIconPosition: event.detail.allSettings.floatingIconPosition,
       alwaysOpenOverviewTab: event.detail.allSettings.alwaysOpenOverviewTab,
-      useColorfulTabs: event.detail.allSettings.useColorfulTabs
+      useColorfulTabs: event.detail.allSettings.useColorfulTabs,
+      enableCKMTab: event.detail.allSettings.enableCKMTab,
+      enableNephroReport: event.detail.allSettings.enableNephroReport,
     };
 
     // 更新設置

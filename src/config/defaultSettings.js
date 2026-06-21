@@ -113,6 +113,8 @@ export const DEFAULT_SETTINGS = {
     floatingIconPosition: "middle-right",
     alwaysOpenOverviewTab: true,
     useColorfulTabs: true,
+    enableCKMTab: false,
+    enableNephroReport: false,
   },
 
   // 雲端資料設定

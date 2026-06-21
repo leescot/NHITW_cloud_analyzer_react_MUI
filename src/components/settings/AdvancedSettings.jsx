@@ -13,6 +13,7 @@ import {
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import TuneIcon from "@mui/icons-material/Tune";
+import { FormHelperText, Divider } from "@mui/material";
 import { handleSettingChange } from "../../utils/settingsHelper";
 
 const AdvancedSettings = () => {
@@ -23,6 +24,8 @@ const AdvancedSettings = () => {
     enableLabCustomCopyFormat: false,
     enableLabCopyAll: false,
     labCopyAllOrder: 'newToOld',
+    enableCKMTab: false,
+    enableNephroReport: false,
   });
 
   useEffect(() => {
@@ -35,6 +38,8 @@ const AdvancedSettings = () => {
         enableLabCustomCopyFormat: false,
         enableLabCopyAll: false,
         labCopyAllOrder: 'newToOld',
+        enableCKMTab: false,
+        enableNephroReport: false,
       },
       (items) => {
         setSettings({
@@ -44,6 +49,8 @@ const AdvancedSettings = () => {
           enableLabCustomCopyFormat: items.enableLabCustomCopyFormat,
           enableLabCopyAll: items.enableLabCopyAll,
           labCopyAllOrder: items.labCopyAllOrder,
+          enableCKMTab: items.enableCKMTab,
+          enableNephroReport: items.enableNephroReport,
         });
       }
     );
@@ -243,6 +250,39 @@ const AdvancedSettings = () => {
               <FormControlLabel value="newToOld" control={<Radio size="small" />} label="由新到舊" />
               <FormControlLabel value="oldToNew" control={<Radio size="small" />} label="由舊到新" />
             </RadioGroup>
+          </Box>
+        )}
+
+        <Divider sx={{ my: 1.5 }} />
+
+        <FormControlLabel
+          control={
+            <Switch
+              checked={settings.enableCKMTab}
+              onChange={(e) => {
+                handleLocalSettingChange("enableCKMTab", e.target.checked);
+              }}
+            />
+          }
+          label="開啟 CKM 綜合頁面"
+        />
+        <FormHelperText>整合心血管-腎臟-代謝相關資料於獨立頁面顯示（需重新載入網頁）</FormHelperText>
+
+        {settings.enableCKMTab && (
+          <Box sx={{ ml: 4, mt: 0.5 }}>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={settings.enableNephroReport}
+                  onChange={(e) => {
+                    handleLocalSettingChange("enableNephroReport", e.target.checked);
+                  }}
+                  size="small"
+                />
+              }
+              label="開啟腎臟檢驗報告列印功能"
+            />
+            <FormHelperText>在 CKM 檢驗標題列顯示「腎臟報告」按鈕，可開新分頁列印</FormHelperText>
           </Box>
         )}
       </AccordionDetails>

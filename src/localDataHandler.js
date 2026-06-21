@@ -213,6 +213,19 @@ export async function processLocalData(jsonData, filename) {
       }
     }
 
+    // 讀取 JSON 頂層的使用者資訊（若有），供 FloatingIcon 顯示
+    window._localUserInfo = {
+      name: jsonData.UserName || '',
+      userId: jsonData.UserID || '',
+      gender: jsonData.UserSex || '',
+      birthday: jsonData.UserBirthday || '',
+    };
+    // 若 JSON 無任何使用者資訊，填入虛擬資料
+    if (!window._localUserInfo.name && !window._localUserInfo.userId) {
+      window._localUserInfo.name = '本地資料';
+      window._localUserInfo.userId = filename || 'local';
+    }
+
     // 更新資料狀態
     if (loadedTypes.length > 0) {
       localDataStatus = {

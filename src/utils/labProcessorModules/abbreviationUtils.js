@@ -105,10 +105,12 @@ const specialHandlers = new Map([
         itemName === "Microalbumin(U)" ||
         itemName === "ALB" ||
         itemName.toLowerCase().includes("micro-albumin(urine)") ||
-        (itemName.toLowerCase().includes("albumin") && itemName.toLowerCase().includes("urine"))) {
+        (itemName.toLowerCase().includes("albumin") && itemName.toLowerCase().includes("urine")) ||
+        /^微白蛋白/.test(itemName) ||
+        /^Microalbumin/i.test(itemName)) {
       return "Albumin(U)";
     }
-    
+
     return null;
   }],
   

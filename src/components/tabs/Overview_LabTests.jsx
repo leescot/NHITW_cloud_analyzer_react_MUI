@@ -17,6 +17,7 @@ import { styled } from '@mui/material/styles';
 import { formatDate, formatDateShort, isWithinLast90Days } from './Overview_utils';
 import { FALLBACK_LAB_TESTS, SPECIAL_LAB_CODES } from '../settings/OverviewSettings';
 import TypographySizeWrapper from "../utils/TypographySizeWrapper";
+import LabItemTrendPopover from "./lab/LabItemTrendPopover";
 
 const Overview_LabTests = ({ groupedLabs = [], labData, overviewSettings = {}, generalDisplaySettings, labSettings = { highlightAbnormalLab: true } }) => {
   // Get tracking days from overviewSettings, fall back to 90 days if not set
@@ -512,7 +513,62 @@ const Overview_LabTests = ({ groupedLabs = [], labData, overviewSettings = {}, g
               return a.localeCompare(b);
             });
 
-            // console.log("Debug - Sorted test types:", sortedTestTypes);
+            // Build trendItems from ALL effectiveLabData (not just tracking period)
+            const trendItems = {};
+            const trendDateSet = new Set();
+            matchingTests.forEach(test => {
+              const dateKey = `${test.date}_`;
+              trendDateSet.add(JSON.stringify({ date: test.date, hosp: '' }));
+              if (!trendItems[test.displayName]) trendItems[test.displayName] = { displayName: test.displayName, values: {} };
+              if (!trendItems[test.displayName].values[dateKey]) {
+                trendItems[test.displayName].values[dateKey] = {
+                  value: test.value || test.result || '',
+                  unit: test.unit || '',
+                  referenceMin: test.referenceMin != null ? test.referenceMin : null,
+                  referenceMax: test.referenceMax != null ? test.referenceMax : null,
+                };
+              }
+            });
+            // Also add data from outside the tracking period for trend charts
+            effectiveLabData.forEach(labGroup => {
+              if (!labGroup.labs || isWithinLastNDays(labGroup.date, trackingDays)) return;
+              labGroup.labs.forEach(lab => {
+                if (!targetOrderCodes.includes(lab.orderCode) && !isCBCCode(lab.orderCode)) return;
+                let dn = null;
+                // Classify lab item for trend data
+                const existing = Object.keys(trendItems);
+                if (lab.orderCode === '09015C') {
+                  const isNHI = lab.assayMethod === '健保署計算' || lab.abbrName === 'eGFR(健保署)';
+                  const isGFR = isNHI || lab.abbrName === 'eGFR' || lab.abbrName === 'eGFR(MDRD)' || (lab.itemName && (lab.itemName.includes('GFR') || lab.itemName.includes('腎絲球過濾率') || lab.itemName.includes('Ccr')));
+                  if (isNHI) dn = 'eGFR(健保署)';
+                  else if (isGFR) dn = 'eGFR';
+                  else dn = 'Cr';
+                } else if (lab.orderCode === '09040C') {
+                  if (lab.abbrName === 'UPCR' || (lab.itemName && (lab.itemName.includes('UPCR') || lab.itemName.includes('蛋白/肌酸酐') || lab.itemName.includes('protein/Creatinine')))) dn = 'UPCR';
+                } else if (lab.orderCode === '12111C') {
+                  if (lab.abbrName === 'UACR' || (lab.itemName && (lab.itemName.toLowerCase().includes('u-acr') || lab.itemName.toLowerCase().includes('albumin/creatinine') || lab.itemName.toLowerCase().includes('/cre')))) dn = 'UACR';
+                } else if (isCBCCode(lab.orderCode)) {
+                  const n = ((lab.itemName||'') + ' ' + (lab.abbrName||'')).toLowerCase();
+                  if (/\bwbc\b|白血球/.test(n)) dn = 'WBC';
+                  else if (/\bhb\b|hemoglobin|血色素/.test(n)) dn = 'Hb';
+                  else if (/platelet|plt|血小板/.test(n)) dn = 'PLT';
+                } else {
+                  dn = orderCodeToName[lab.orderCode];
+                }
+                if (!dn || !trendItems[dn]) return;
+                const dateKey = `${labGroup.date}_`;
+                trendDateSet.add(JSON.stringify({ date: labGroup.date, hosp: '' }));
+                if (!trendItems[dn].values[dateKey]) {
+                  trendItems[dn].values[dateKey] = {
+                    value: lab.value || lab.result || '',
+                    unit: lab.unit || '',
+                    referenceMin: lab.referenceMin != null ? lab.referenceMin : null,
+                    referenceMax: lab.referenceMax != null ? lab.referenceMax : null,
+                  };
+                }
+              });
+            });
+            const trendDates = [...trendDateSet].map(s => JSON.parse(s)).sort((a, b) => new Date(b.date) - new Date(a.date));
 
             // Return the final table component
             return (
@@ -552,9 +608,20 @@ const Overview_LabTests = ({ groupedLabs = [], labData, overviewSettings = {}, g
                             zIndex: 1
                           }}
                         >
-                          <TypographySizeWrapper variant="body2" generalDisplaySettings={generalDisplaySettings}>
-                            {displayName}
-                          </TypographySizeWrapper>
+                          {(() => {
+                            const ti = trendItems[displayName];
+                            const numericCount = ti ? Object.values(ti.values).filter(v => v && !isNaN(parseFloat(v.value))).length : 0;
+                            if (numericCount >= 2) {
+                              return (
+                                <LabItemTrendPopover item={ti} dates={trendDates}>
+                                  <TypographySizeWrapper variant="body2" generalDisplaySettings={generalDisplaySettings} sx={{ textDecoration: 'underline dotted', textDecorationColor: '#bdbdbd', cursor: 'pointer' }}>
+                                    {displayName}
+                                  </TypographySizeWrapper>
+                                </LabItemTrendPopover>
+                              );
+                            }
+                            return <TypographySizeWrapper variant="body2" generalDisplaySettings={generalDisplaySettings}>{displayName}</TypographySizeWrapper>;
+                          })()}
                         </TableCell>
                         {uniqueDates.map(date => {
                           const test = testsByTypeAndDate[displayName][date];
