@@ -1,0 +1,57 @@
+{
+  "manifest_version": 3,
+  "name": "更好的健保雲端 2.0",
+  "version": "25.1201.3",
+  "description": "幫忙醫療人員快速瀏覽「健保雲端系統2.0」資料",
+  "homepage_url": "https://github.com/leescot/NHITW_cloud_analyzer_react_MUI",
+  "permissions": [
+    "webRequest",
+    "storage",
+    "scripting",
+    "clipboardWrite"
+  ],
+  "host_permissions": [
+    "https://medcloud2.nhi.gov.tw/*",
+    "https://drugtw.com/*"
+  ],
+  "background": {
+    "service_worker": "background.js"
+  },
+  "icons": {
+    "16": "images/icon16.png",
+    "48": "images/icon48.png",
+    "128": "images/icon128.png"
+  },
+  "action": {
+    "default_popup": "popup.html",
+    "default_icon": {
+      "16": "images/icon16.png",
+      "19": "images/icon19.png",
+      "38": "images/icon38.png",
+      "48": "images/icon48.png",
+      "128": "images/icon128.png"
+    }
+  },
+  "content_scripts": [
+    {
+      "matches": [
+        "https://medcloud2.nhi.gov.tw/*"
+      ],
+      "js": [
+        "content.js"
+      ],
+      "run_at": "document_idle"
+    }
+  ],
+  "web_accessible_resources": [
+    {
+      "resources": [
+        "drug-images.html",
+        "drug-images.js"
+      ],
+      "matches": [
+        "https://medcloud2.nhi.gov.tw/*"
+      ]
+    }
+  ]
+}
