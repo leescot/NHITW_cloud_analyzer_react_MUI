@@ -71,3 +71,5 @@ zip/
 
 # Claude Code configuration
 CLAUDE.md
+.claude/
+.agents/
