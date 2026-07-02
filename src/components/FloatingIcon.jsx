@@ -35,7 +35,6 @@ import GrassIcon from "@mui/icons-material/Grass";
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import SettingsIcon from "@mui/icons-material/Settings";
 import FormatListBulletedIcon from "@mui/icons-material/FormatListBulleted";
-import FavoriteIcon from "@mui/icons-material/Favorite";
 
 // Import cloud icon
 import { cloud_icon } from "../assets/pic_cloud_icon.js";
@@ -76,7 +75,6 @@ import MedDaysData from "./tabs/MedDaysData";
 import LabTableView from "./tabs/LabTableView";
 import Instructions from "./tabs/Instructions";
 import AdvancedSettings from "./tabs/AdvancedSettings";
-import CKMData from "./tabs/CKMData";
 import { ckmProcessor } from "../utils/ckmProcessor";
 
 import MedicationIcon from "@mui/icons-material/Medication";
@@ -464,11 +462,9 @@ const FloatingIcon = () => {
   const gfrValue = extractGFRValue(patientSummaryData);
   const ckdStage = getCKDStage(gfrValue);
 
-  // 動態計算條件 Tab 的 index
-  const ckmTabEnabled = generalDisplaySettings.enableCKMTab;
-  const ckmTabIndex = ckmTabEnabled ? 7 : -1;
-  const helpTabIndex = ckmTabEnabled ? 8 : 7;
-  const advancedTabIndex = ckmTabEnabled ? 9 : 8;
+  // Tab index（CKM 已整合進 Overview，不再有獨立 Tab）
+  const helpTabIndex = 7;
+  const advancedTabIndex = 8;
 
   // Get position styles based on settings
   const getIconPositionStyle = () => {
@@ -732,20 +728,6 @@ const FloatingIcon = () => {
                     },
                   }}
                 />
-                {generalDisplaySettings.enableCKMTab && (
-                  <Tab
-                    label="CKM"
-                    icon={<FavoriteIcon sx={{ fontSize: "1rem" }} />}
-                    iconPosition="start"
-                    sx={{
-                      padding: "6px 10px",
-                      color: ckmData?.hasCKMData ? getTabColor(generalDisplaySettings, "ckm") : "#9e9e9e",
-                      "&.Mui-selected": {
-                        color: ckmData?.hasCKMData ? getTabSelectedColor(generalDisplaySettings, "ckm") : "#616161",
-                      },
-                    }}
-                  />
-                )}
                 <Tab
                   label="說明"
                   icon={<HelpOutlineIcon sx={{ fontSize: "1rem" }} />}
@@ -857,6 +839,9 @@ const FloatingIcon = () => {
               adultHealthCheckData={adultHealthCheckData}
               cancerScreeningData={cancerScreeningData}
               hbcvData={hbcvData}
+              ckmData={ckmData}
+              enableCKMTab={generalDisplaySettings.enableCKMTab}
+              userInfo={userInfo}
             />
           )}
 
@@ -932,19 +917,6 @@ const FloatingIcon = () => {
               generalDisplaySettings={generalDisplaySettings}
             />
           </TabPanel>
-
-          {/* CKM Tab */}
-          {ckmTabEnabled && (
-            <TabPanel value={tabValue} index={ckmTabIndex}>
-              <CKMData
-                ckmData={ckmData}
-                groupedLabs={groupedLabs}
-                labSettings={appSettings.lab}
-                generalDisplaySettings={generalDisplaySettings}
-                userInfo={userInfo}
-              />
-            </TabPanel>
-          )}
 
           {/* Instructions Tab */}
           <TabPanel value={tabValue} index={helpTabIndex}>
