@@ -24,5 +24,6 @@ await import('./test_dischargeProcessor.js');
 await import('./test_chineseMedProcessor.js');
 await import('./test_patientSummaryProcessor.js');
 await import('./test_ckmUtils.js');
+await import('./test_screeningIndicators.js');
 
 mocha.run();
