@@ -360,9 +360,10 @@ const Overview_RecentDiagnosis = ({
     // 如果此類別中沒有診斷，則不返回任何內容
     if (diagnoses.length === 0) return null;
 
-    // 顯示最多5個診斷，然後顯示更多提示
-    const visibleDiagnoses = diagnoses.slice(0, 5);
-    const hasMore = diagnoses.length > 5;
+    // 顯示最多N個診斷（門診 3 筆，其他 5 筆），然後顯示更多提示
+    const maxVisible = title === "門診" ? 3 : 5;
+    const visibleDiagnoses = diagnoses.slice(0, maxVisible);
+    const hasMore = diagnoses.length > maxVisible;
 
     // 從Map中獲取類別配置
     const config = categoryConfig.get(title) || categoryConfig.get("門診"); // 默認為門診配置
@@ -516,7 +517,7 @@ const Overview_RecentDiagnosis = ({
               <Tooltip
                 title={
                   <Box>
-                    {diagnoses.slice(5).map((diagnosis) => (
+                    {diagnoses.slice(maxVisible).map((diagnosis) => (
                       <Box key={diagnosis.key} sx={{ mb: 0.5 }}>
                         {isEnrollment ? (
                           <>{diagnosis.programName} {diagnosis.hospital}</>
@@ -543,7 +544,7 @@ const Overview_RecentDiagnosis = ({
                     generalDisplaySettings={generalDisplaySettings}
                     color="text.secondary"
                   >
-                    還有 {diagnoses.length - 5} 筆資料
+                    還有 {diagnoses.length - maxVisible} 筆資料
                   </TypographySizeWrapper>
                 </Box>
               </Tooltip>
