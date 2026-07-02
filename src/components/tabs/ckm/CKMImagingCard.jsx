@@ -55,7 +55,17 @@ const CKMImagingCard = ({ imaging, ekgAlerts, lvef, gds }) => {
                     <div dangerouslySetInnerHTML={{__html: highlightReport(img.reportFull || img.reportExcerpt)}} />
                   </Typography>
                 }
-                slotProps={{ tooltip: { sx: { maxWidth: 600 } } }}
+                slotProps={{
+                  tooltip: {
+                    sx: {
+                      maxWidth: 600,
+                      bgcolor: '#fff',
+                      color: 'rgba(0, 0, 0, 0.87)',
+                      border: '1px solid #e0e0e0',
+                      boxShadow: 3,
+                    },
+                  },
+                }}
               >
                 <IconButton size="small" color="primary" onClick={() => setReportDialog({
                   open: true,
