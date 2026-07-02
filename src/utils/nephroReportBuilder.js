@@ -205,7 +205,8 @@ export function renderNephroReportHTML(reportData) {
   const { dates, rows, userInfo, dateHospMap } = reportData;
   const name = userInfo?.name || '';
   const userId = userInfo?.userId || '';
-  const gender = userInfo?.gender || '';
+  const rawGender = userInfo?.gender || '';
+  const gender = rawGender === 'M' ? '男' : rawGender === 'F' ? '女' : rawGender;
   const age = userInfo?.age != null ? `${userInfo.age}歲` : '';
   const patientLine = [name, gender, age].filter(Boolean).join(' ');
 
