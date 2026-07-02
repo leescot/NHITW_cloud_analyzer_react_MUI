@@ -23,5 +23,6 @@ await import('./test_surgeryProcessor.js');
 await import('./test_dischargeProcessor.js');
 await import('./test_chineseMedProcessor.js');
 await import('./test_patientSummaryProcessor.js');
+await import('./test_ckmUtils.js');
 
 mocha.run();
