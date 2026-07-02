@@ -9,6 +9,7 @@ import {
   getTokenPayload,
   isTokenExpired,
 } from './utils/tokenUtils';
+import { DEFAULT_SETTINGS } from './config/defaultSettings';
 
 console.log("Content script loaded for NHI data extractor (Refactored Version)");
 
@@ -246,8 +247,11 @@ function shouldFetchSpecialData(dataType) {
   const key = settingKeyMap[dataType];
   if (!key) return Promise.resolve(true);
 
+  // fallback 對齊 defaultSettings.cloud（健檢/癌篩預設 false，hbcv 預設 true），
+  // 避免使用者從未進入設定頁時「抓了但不顯示」的不一致行為
+  const defaultVal = DEFAULT_SETTINGS.cloud[key];
   return new Promise((resolve) => {
-    chrome.storage.sync.get({ [key]: true }, (items) => {
+    chrome.storage.sync.get({ [key]: defaultVal }, (items) => {
       resolve(items[key]);
     });
   });

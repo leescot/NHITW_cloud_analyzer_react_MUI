@@ -115,6 +115,7 @@ export const DEFAULT_SETTINGS = {
     useColorfulTabs: true,
     enableCKMTab: false,
     enableNephroReport: false,
+    enableCKMScreening: false,
   },
 
   // 雲端資料設定

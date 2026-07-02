@@ -71,6 +71,7 @@ export const loadAllSettings = async () => {
       useColorfulTabs: DEFAULT_SETTINGS.general.useColorfulTabs,
       enableCKMTab: DEFAULT_SETTINGS.general.enableCKMTab,
       enableNephroReport: DEFAULT_SETTINGS.general.enableNephroReport,
+      enableCKMScreening: DEFAULT_SETTINGS.general.enableCKMScreening,
 
       // Cloud data settings
       fetchAdultHealthCheck: DEFAULT_SETTINGS.cloud.fetchAdultHealthCheck,
@@ -138,6 +139,7 @@ export const loadAllSettings = async () => {
           useColorfulTabs: items.useColorfulTabs,
           enableCKMTab: items.enableCKMTab,
           enableNephroReport: items.enableNephroReport,
+          enableCKMScreening: items.enableCKMScreening,
         },
         cloud: {
           fetchAdultHealthCheck: items.fetchAdultHealthCheck,
@@ -472,6 +474,7 @@ const handleGeneralDisplaySettingsChange = (event, updateGeneralDisplaySettings)
       useColorfulTabs: event.detail.allSettings.useColorfulTabs,
       enableCKMTab: event.detail.allSettings.enableCKMTab,
       enableNephroReport: event.detail.allSettings.enableNephroReport,
+      enableCKMScreening: event.detail.allSettings.enableCKMScreening,
     };
 
     // 更新設置

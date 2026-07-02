@@ -29,15 +29,41 @@ import TypographySizeWrapper from "../utils/TypographySizeWrapper";
 // Import default settings to use as fallbacks
 import { DEFAULT_SETTINGS } from "../../config/defaultSettings";
 import { DEFAULT_ATC5_GROUPS, DEFAULT_ATC5_COLOR_GROUPS } from "../../config/medicationGroups";
+import { getCKMMedicationGroups, buildMedKey } from "../../utils/ckmUtils";
+import { CKM_ATC_PREFIXES } from "../../config/ckmDefinitions";
 
 const Overview_ImportantMedications = ({
   groupedMedications = [],
   settings = {},
   overviewSettings = {},
-  generalDisplaySettings = { titleTextSize: 'medium', contentTextSize: 'medium', noteTextSize: 'small' }
+  generalDisplaySettings = { titleTextSize: 'medium', contentTextSize: 'medium', noteTextSize: 'small' },
+  enableCKMBadge = false
 }) => {
   // Get tracking days from overviewSettings, fall back to 90 days if not set
   const trackingDays = overviewSettings.medicationTrackingDays || 90;
+
+  // CKM 關鍵用藥區：不受 ATC5 群組設定限制，直接以 CKM_ATC_PREFIXES 篩選
+  const ckmGroups = enableCKMBadge
+    ? getCKMMedicationGroups(groupedMedications, trackingDays)
+    : { categories: {}, medKeySet: new Set() };
+  const hasCKMSection = enableCKMBadge &&
+    Object.values(ckmGroups.categories).some(arr => arr.length > 0);
+
+  // 依 CKM_ATC_PREFIXES 順序攤平為表格列（血糖/血壓/利尿/血脂/血栓/心臟）
+  // 同群組共用一個 rowSpan label
+  const ckmTableData = [];
+  if (hasCKMSection) {
+    for (const [cat, { label }] of Object.entries(CKM_ATC_PREFIXES)) {
+      const items = ckmGroups.categories[cat] || [];
+      items.forEach((med, i) => ckmTableData.push({
+        category: cat,
+        categoryLabel: label,
+        isFirst: i === 0,
+        span: items.length,
+        medication: med,
+      }));
+    }
+  }
 
   // Create a safe settings object with defaults if settings are corrupted
   const safeSettings = {
@@ -69,6 +95,11 @@ const Overview_ImportantMedications = ({
 
       // Using configurable tracking days instead of hardcoded 90
       if (isWithinLastNDays(dateToCheck, trackingDays)) {
+        // CKM 開啟時，已出現在 CKM 關鍵用藥區的藥物不重複列在 ATC5 色彩群組
+        if (enableCKMBadge && ckmGroups.medKeySet.has(buildMedKey(med, dateToCheck))) {
+          return;
+        }
+
         // Use the safeSettings object here
         const colorGroup = getMedicationColorGroup(med, safeSettings);
 
@@ -341,6 +372,18 @@ const Overview_ImportantMedications = ({
     );
   };
 
+  // CKM 治療群組配色：血糖藍 / 血壓紅 / 利尿青 / 血脂橘 / 血栓紫 / 心臟淡紅
+  const CKM_CATEGORY_COLORS = {
+    antidiabetic:     { light: alpha('#1565c0', 0.12), medium: '#1565c0', dark: '#0d47a1', name: '藍色' },
+    antihypertensive: { light: alpha('#c62828', 0.12), medium: '#c62828', dark: '#8e0000', name: '紅色' },
+    diuretic:         { light: alpha('#00897b', 0.12), medium: '#00897b', dark: '#005b4f', name: '青色' },
+    lipidLowering:    { light: alpha('#ef6c00', 0.15), medium: '#ef6c00', dark: '#b53d00', name: '橘色' },
+    antithrombotic:   { light: alpha('#6a1b9a', 0.12), medium: '#6a1b9a', dark: '#38006b', name: '紫色' },
+    cardiac:          { light: alpha('#ad1457', 0.12), medium: '#ad1457', dark: '#78002e', name: '淡紅' },
+  };
+  const getCKMColorInfo = (category) =>
+    CKM_CATEGORY_COLORS[category] || CKM_CATEGORY_COLORS.antidiabetic;
+
   // Add state for snackbar
   const [snackbarOpen, setSnackbarOpen] = React.useState(false);
   const [snackbarMessage, setSnackbarMessage] = React.useState("");
@@ -441,6 +484,150 @@ const Overview_ImportantMedications = ({
       <TypographySizeWrapper variant="h6" gutterBottom generalDisplaySettings={generalDisplaySettings}>
         關注西藥 - {trackingDays} 天內
       </TypographySizeWrapper>
+      {/* CKM 關鍵用藥區：按六大治療群組分類，關鍵藥物加 badge */}
+      {hasCKMSection && (
+        <TableContainer sx={{ mb: hasData || hasMedicationsButNoGroups ? 1.5 : 0 }}>
+          <Table size="small" stickyHeader>
+            <TableBody>
+              {ckmTableData.map((row, index) => {
+                const ckmColorInfo = getCKMColorInfo(row.category);
+                return (
+                <TableRow key={index}>
+                  {row.isFirst && (
+                    <TableCell
+                      align="center"
+                      rowSpan={row.span}
+                      sx={{
+                        backgroundColor: ckmColorInfo.light,
+                        width: '13%',
+                        padding: '4px 2px',
+                        verticalAlign: 'middle',
+                      }}
+                    >
+                      {getCategoryBadge(row.categoryLabel, ckmColorInfo)}
+                    </TableCell>
+                  )}
+                  <TableCell sx={{ py: 0.75 }}>
+                    <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+                      <TypographySizeWrapper
+                        variant="body2"
+                        sx={{ fontWeight: 'medium' }}
+                        generalDisplaySettings={generalDisplaySettings}
+                      >
+                        {formatMedicationName(row.medication.name)}
+                        {row.medication.keyDrugLabel && (
+                          <Chip
+                            label={row.medication.keyDrugLabel}
+                            size="small"
+                            sx={{ height: 16, fontSize: '0.6rem', ml: 0.5, bgcolor: ckmColorInfo.medium, color: '#fff', '& .MuiChip-label': { px: 0.4 } }}
+                          />
+                        )}
+                        {safeSettings.showExternalDrugImage && row.medication.drugcode && (
+                          <Tooltip title="查看藥物圖片">
+                            <IconButton
+                              size="small"
+                              onClick={() => handleDrugImageClick(row.medication.drugcode)}
+                              sx={{
+                                ml: 0.5,
+                                opacity: 0.5,
+                                padding: "2px",
+                                display: "inline-flex",
+                                verticalAlign: "text-top",
+                                '&:hover': { opacity: 1 }
+                              }}
+                            >
+                              <ImageIcon sx={{
+                                fontSize: generalDisplaySettings.contentTextSize === 'small'
+                                  ? "14px"
+                                  : generalDisplaySettings.contentTextSize === 'medium'
+                                    ? "16px"
+                                    : "18px"
+                              }} />
+                            </IconButton>
+                          </Tooltip>
+                        )}
+                      </TypographySizeWrapper>
+                      {row.medication.genericName && (
+                        <TypographySizeWrapper
+                          variant="caption"
+                          color="text.secondary"
+                          sx={{ mt: 0.25 }}
+                          style={{ fontSize: '0.7rem', lineHeight: 1.3 }}
+                          generalDisplaySettings={generalDisplaySettings}
+                        >
+                          {row.medication.genericName}
+                        </TypographySizeWrapper>
+                      )}
+                    </Box>
+                  </TableCell>
+                  <TableCell sx={{ py: 0.75, width: '36%' }}>
+                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                      {row.medication.prescriptions.slice(0, 3).map((prescription, i) => {
+                        const hasRemainingMed = prescription.drug_left > 0;
+                        return (
+                          <Tooltip
+                            key={i}
+                            title={
+                              <>
+                                {hasRemainingMed ? `餘藥 ${prescription.drug_left} 天` : ''}
+                                {prescription.days && (hasRemainingMed ? ' | ' : '') + `用藥 ${prescription.days} 天`}
+                              </>
+                            }
+                            placement="top"
+                          >
+                            <Chip
+                              size="small"
+                              label={
+                                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                  <span>{`${formatDate(prescription.date)}${prescription.hospital ? ` ${prescription.hospital}` : ''}`}</span>
+                                  {hasRemainingMed && (
+                                    <Box component="span" sx={{
+                                      display: 'inline-flex',
+                                      alignItems: 'center',
+                                      ml: 0.5,
+                                      fontSize: '0.65rem',
+                                      color: ckmColorInfo.dark
+                                    }}>
+                                      <LocalPharmacyIcon sx={{ fontSize: '0.75rem', mr: 0.2 }} />
+                                      {prescription.drug_left}天
+                                    </Box>
+                                  )}
+                                </Box>
+                              }
+                              sx={{
+                                fontSize: '0.7rem',
+                                height: 'auto',
+                                minHeight: '20px',
+                                bgcolor: hasRemainingMed ? ckmColorInfo.light : 'transparent',
+                                border: '1px solid',
+                                borderColor: hasRemainingMed ? ckmColorInfo.medium : 'grey.300',
+                                py: hasRemainingMed ? 0.2 : 0
+                              }}
+                            />
+                          </Tooltip>
+                        );
+                      })}
+                      {row.medication.prescriptions.length > 3 && (
+                        <Tooltip title={row.medication.prescriptions.slice(3).map(p => {
+                          const hasRemainingMed = p.drug_left > 0;
+                          return `${formatDate(p.date)}${p.hospital ? ` ${p.hospital}` : ''}${p.days ? ` | 用藥 ${p.days} 天` : ''}${hasRemainingMed ? ` | 餘藥 ${p.drug_left} 天` : ''}`;
+                        }).join('\n')}>
+                          <Chip
+                            size="small"
+                            label={`+${row.medication.prescriptions.length - 3}`}
+                            sx={{ fontSize: '0.7rem', height: '20px', bgcolor: 'grey.100' }}
+                          />
+                        </Tooltip>
+                      )}
+                    </Box>
+                  </TableCell>
+                </TableRow>
+                );
+              })}
+            </TableBody>
+          </Table>
+        </TableContainer>
+      )}
       {hasData ? (
         <TableContainer>
           <Table size="small" stickyHeader>
@@ -604,7 +791,7 @@ const Overview_ImportantMedications = ({
                                 size="small"
                                 label={
                                   <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                    <span>{`${formatDate(prescription.date)}${prescription.hospital ? ` (${prescription.hospital})` : ''}`}</span>
+                                    <span>{`${formatDate(prescription.date)}${prescription.hospital ? ` ${prescription.hospital}` : ''}`}</span>
                                     {hasRemainingMed && (
                                       <Box component="span" sx={{
                                         display: 'inline-flex',
@@ -635,7 +822,7 @@ const Overview_ImportantMedications = ({
                         {row.medication.prescriptions.length > 3 && (
                           <Tooltip title={row.medication.prescriptions.slice(3).map(p => {
                             const hasRemainingMed = p.drug_left > 0;
-                            return `${formatDate(p.date)}${p.hospital ? ` (${p.hospital})` : ''}${p.days ? ` | 用藥 ${p.days} 天` : ''}${hasRemainingMed ? ` | 餘藥 ${p.drug_left} 天` : ''}`;
+                            return `${formatDate(p.date)}${p.hospital ? ` ${p.hospital}` : ''}${p.days ? ` | 用藥 ${p.days} 天` : ''}${hasRemainingMed ? ` | 餘藥 ${p.drug_left} 天` : ''}`;
                           }).join('\n')}>
                             <Chip
                               size="small"
@@ -725,7 +912,7 @@ const Overview_ImportantMedications = ({
                           size="small"
                           label={
                             <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                              <span>{`${formatDate(med.date)}${med.hospital ? ` (${med.hospital})` : ''}`}</span>
+                              <span>{`${formatDate(med.date)}${med.hospital ? ` ${med.hospital}` : ''}`}</span>
                               {hasRemainingMed && (
                                 <Box component="span" sx={{
                                   display: 'inline-flex',
@@ -767,7 +954,7 @@ const Overview_ImportantMedications = ({
             </TypographySizeWrapper>
           )}
         </TableContainer>
-      ) : (
+      ) : hasCKMSection ? null : (
         <Box>
           <TypographySizeWrapper
             variant="caption"

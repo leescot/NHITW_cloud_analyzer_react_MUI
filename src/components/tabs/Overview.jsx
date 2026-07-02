@@ -28,6 +28,9 @@ import Overview_SurgeryRecords from "./Overview_SurgeryRecords";
 import Overview_DischargeRecords from "./Overview_DischargeRecords";
 import Overview_ImagingTests from "./Overview_ImagingTests";
 import Overview_IntegratedHealthData from "./Overview_IntegratedHealthData";
+import CKMSummaryBar from "./ckm/CKMSummaryBar";
+import CKMExtraLabCard from "./ckm/CKMExtraLabCard";
+import CKMImagingCard from "./ckm/CKMImagingCard";
 
 // 導入從配置文件中移出的常數
 import { DEFAULT_LAB_TESTS } from '../../config/labTests';
@@ -57,7 +60,10 @@ const Overview = ({
   },
   generalDisplaySettings = { titleTextSize: 'medium', contentTextSize: 'medium', noteTextSize: 'small' },
   labSettings = {},
-  cloudSettings = { fetchAdultHealthCheck: true, fetchCancerScreening: true, fetchHbcvdata: true }
+  cloudSettings = { fetchAdultHealthCheck: true, fetchCancerScreening: true, fetchHbcvdata: true },
+  ckmData = null,
+  enableCKMTab = false,
+  userInfo = null
 }) => {
   // Check if components have data
   const hasMedications = useMemo(() => groupedMedications && groupedMedications.length > 0, [groupedMedications]);
@@ -75,6 +81,16 @@ const Overview = ({
 
   return (
     <Box sx={{ p: 0 }}>
+      {/* CKM 摘要列：僅在 CKM 功能開啟且有 CKM 資料時顯示 */}
+      {enableCKMTab && ckmData?.hasCKMData && (
+        <CKMSummaryBar
+          summary={ckmData.summary}
+          medications={ckmData.medications}
+          groupedLabs={groupedLabs}
+          userInfo={userInfo}
+          gds={generalDisplaySettings}
+        />
+      )}
       <Grid container spacing={1}>
         {/* 三欄式布局 */}
         {/* 左欄 (1/3) - 包含診斷與重點藥物 */}
@@ -93,6 +109,7 @@ const Overview = ({
             settings={settings}
             overviewSettings={overviewSettings}
             generalDisplaySettings={generalDisplaySettings}
+            enableCKMBadge={enableCKMTab}
           />
         </Grid>
 
@@ -115,58 +132,114 @@ const Overview = ({
             overviewSettings={overviewSettings}
             generalDisplaySettings={generalDisplaySettings}
             labSettings={labSettings}
+            enableCKM={enableCKMTab}
+            userInfo={userInfo}
           />
         </Grid>
 
         {/* 右欄 (1/3) - 包含其他資訊的垂直堆疊 */}
         <Grid item xs={12} md={3}>
           <Grid container spacing={2} direction="column">
-            {/* 1. 影像檢查 */}
-            <Grid item>
-              <Overview_ImagingTests
-                imagingData={imagingData}
-                overviewSettings={overviewSettings}
-                generalDisplaySettings={generalDisplaySettings}
-              />
-            </Grid>
+            {enableCKMTab ? (
+              <>
+                {/* CKM 開啟：其他檢驗 + CKM 影像 + 手術/住院/過敏（各預設 3 筆，可展開）+ 病患摘要 */}
+                <Grid item>
+                  <CKMExtraLabCard groupedLabs={groupedLabs} gds={generalDisplaySettings} />
+                </Grid>
+                {ckmData && (
+                  <Grid item>
+                    <CKMImagingCard
+                      imaging={ckmData.imaging}
+                      ekgAlerts={ckmData.ekgAlerts}
+                      lvef={ckmData.summary?.lvef}
+                      gds={generalDisplaySettings}
+                    />
+                  </Grid>
+                )}
+                {hasSurgeryData && (
+                  <Grid item>
+                    <Overview_SurgeryRecords
+                      surgeryData={surgeryData}
+                      generalDisplaySettings={generalDisplaySettings}
+                      collapsedCount={3}
+                    />
+                  </Grid>
+                )}
+                {hasDischargeData && (
+                  <Grid item>
+                    <Overview_DischargeRecords
+                      dischargeData={dischargeData}
+                      generalDisplaySettings={generalDisplaySettings}
+                      collapsedCount={3}
+                    />
+                  </Grid>
+                )}
+                {hasAllergyData && (
+                  <Grid item>
+                    <Overview_AllergyRecords
+                      allergyData={allergyData}
+                      generalDisplaySettings={generalDisplaySettings}
+                      collapsedCount={3}
+                    />
+                  </Grid>
+                )}
+                <Grid item>
+                  <Overview_PatientSummary
+                    patientSummaryData={patientSummaryData}
+                    generalDisplaySettings={generalDisplaySettings}
+                  />
+                </Grid>
+              </>
+            ) : (
+              <>
+                {/* 1. 影像檢查 */}
+                <Grid item>
+                  <Overview_ImagingTests
+                    imagingData={imagingData}
+                    overviewSettings={overviewSettings}
+                    generalDisplaySettings={generalDisplaySettings}
+                  />
+                </Grid>
 
-            {/* 2. 手術紀錄 - only display if has data */}
-            {hasSurgeryData && (
-              <Grid item>
-                <Overview_SurgeryRecords
-                  surgeryData={surgeryData}
-                  generalDisplaySettings={generalDisplaySettings}
-                />
-              </Grid>
+                {/* 2. 手術紀錄 - only display if has data */}
+                {hasSurgeryData && (
+                  <Grid item>
+                    <Overview_SurgeryRecords
+                      surgeryData={surgeryData}
+                      generalDisplaySettings={generalDisplaySettings}
+                    />
+                  </Grid>
+                )}
+
+                {/* 3. 出院紀錄 - only display if has data */}
+                {hasDischargeData && (
+                  <Grid item>
+                    <Overview_DischargeRecords
+                      dischargeData={dischargeData}
+                      generalDisplaySettings={generalDisplaySettings}
+                    />
+                  </Grid>
+                )}
+
+                {/* 4. 過敏紀錄 - only display if has data */}
+                {hasAllergyData && (
+                  <Grid item>
+                    <Overview_AllergyRecords
+                      allergyData={allergyData}
+                      generalDisplaySettings={generalDisplaySettings}
+                    />
+                  </Grid>
+                )}
+
+                {/* 5. 病患摘要 */}
+                <Grid item>
+                  <Overview_PatientSummary
+                    patientSummaryData={patientSummaryData}
+                    generalDisplaySettings={generalDisplaySettings}
+                  />
+                </Grid>
+              </>
             )}
-
-            {/* 3. 出院紀錄 - only display if has data */}
-            {hasDischargeData && (
-              <Grid item>
-                <Overview_DischargeRecords
-                  dischargeData={dischargeData}
-                  generalDisplaySettings={generalDisplaySettings}
-                />
-              </Grid>
-            )}
-
-            {/* 4. 過敏紀錄 - only display if has data */}
-            {hasAllergyData && (
-              <Grid item>
-                <Overview_AllergyRecords
-                  allergyData={allergyData}
-                  generalDisplaySettings={generalDisplaySettings}
-                />
-              </Grid>
-            )}
-
-            {/* 5. 病患摘要 */}
-            <Grid item>
-              <Overview_PatientSummary
-                patientSummaryData={patientSummaryData}
-                generalDisplaySettings={generalDisplaySettings}
-              />
-            </Grid>
           </Grid>
         </Grid>
       </Grid>

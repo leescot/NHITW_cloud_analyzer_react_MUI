@@ -10,6 +10,7 @@ import {
   RadioGroup,
   Button,
   Box,
+  Chip,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import TuneIcon from "@mui/icons-material/Tune";
@@ -26,6 +27,7 @@ const AdvancedSettings = () => {
     labCopyAllOrder: 'newToOld',
     enableCKMTab: false,
     enableNephroReport: false,
+    enableCKMScreening: false,
   });
 
   useEffect(() => {
@@ -40,6 +42,7 @@ const AdvancedSettings = () => {
         labCopyAllOrder: 'newToOld',
         enableCKMTab: false,
         enableNephroReport: false,
+        enableCKMScreening: false,
       },
       (items) => {
         setSettings({
@@ -51,6 +54,7 @@ const AdvancedSettings = () => {
           labCopyAllOrder: items.labCopyAllOrder,
           enableCKMTab: items.enableCKMTab,
           enableNephroReport: items.enableNephroReport,
+          enableCKMScreening: items.enableCKMScreening,
         });
       }
     );
@@ -264,9 +268,9 @@ const AdvancedSettings = () => {
               }}
             />
           }
-          label="開啟 CKM 綜合頁面"
+          label="啟用 CKM 加強 Overview"
         />
-        <FormHelperText>整合心血管-腎臟-代謝相關資料於獨立頁面顯示（需重新載入網頁）</FormHelperText>
+        <FormHelperText>將心血管-腎臟-代謝（CKM）相關資料整合顯示於總覽頁面（需重新載入網頁）</FormHelperText>
 
         {settings.enableCKMTab && (
           <Box sx={{ ml: 4, mt: 0.5 }}>
@@ -282,7 +286,29 @@ const AdvancedSettings = () => {
               }
               label="開啟腎臟檢驗報告列印功能"
             />
-            <FormHelperText>在 CKM 檢驗標題列顯示「腎臟報告」按鈕，可開新分頁列印</FormHelperText>
+            <FormHelperText>在總覽「關注檢驗」標題列顯示列印按鈕，可開新分頁列印腎臟檢驗報告</FormHelperText>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={settings.enableCKMScreening}
+                  onChange={(e) => {
+                    handleLocalSettingChange("enableCKMScreening", e.target.checked);
+                  }}
+                  size="small"
+                />
+              }
+              label={
+                <Box component="span" sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5 }}>
+                  顯示篩檢指標（FIB-4/TyG/KFRE/HOMA-IR）
+                  <Chip
+                    label="β"
+                    size="small"
+                    sx={{ height: 16, fontSize: '0.6rem', bgcolor: '#f57c00', color: '#fff', '& .MuiChip-label': { px: 0.5 } }}
+                  />
+                </Box>
+              }
+            />
+            <FormHelperText>實驗性功能：在總覽 CKM 摘要列顯示肝腎心代謝篩檢指標（需重新載入網頁）</FormHelperText>
           </Box>
         )}
       </AccordionDetails>
