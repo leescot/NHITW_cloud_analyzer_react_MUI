@@ -1,10 +1,21 @@
-// CKM 頂部摘要列：90天內關鍵用藥 badge + CKD Stage / 近期檢驗 Chip
-import React from 'react';
+// CKM 頂部摘要列：90天內關鍵用藥 badge / 近期檢驗 Chip / 篩檢指標
+import React, { useMemo } from 'react';
 import { Box, Typography, Chip, Tooltip } from '@mui/material';
 import { getRecentKeyDrugs } from '../../../utils/ckmUtils';
+import { computeScreeningIndicators } from '../../../utils/screeningIndicators';
+
+const BAND_COLOR = { low: 'success', mid: 'warning', high: 'error' };
+const Sep = () => <Typography sx={{ mx: 0.5, color: '#bbb', fontSize: '0.9rem' }}>|</Typography>;
 
 // eslint-disable-next-line no-unused-vars
-const CKMSummaryBar = ({ summary, medications, gds }) => {
+const CKMSummaryBar = ({ summary, medications, groupedLabs, userInfo, gds }) => {
+  // hooks 必須在任何 early return 之前
+  const screening = useMemo(() => {
+    if (!gds?.enableCKMScreening) return [];
+    const r = computeScreeningIndicators({ groupedLabs, summary, userInfo });
+    return ['fib4', 'tyg', 'kfre', 'homaIr'].map(k => r[k]).filter(Boolean);
+  }, [gds, groupedLabs, summary, userInfo]);
+
   if (!summary) return null;
 
   const drugBadges = getRecentKeyDrugs(medications);
@@ -24,7 +35,14 @@ const CKMSummaryBar = ({ summary, medications, gds }) => {
   if (summary.latestUACR) tc('uacr', `UACR ${summary.latestUACR.value}`, summary.latestUACR, summary.latestUACR.value>30?'error':'success');
   if (summary.lvef) { const v = summary.lvef.value; tc('lvef', `LVEF ${v}%`, summary.lvef, v<40?'error':v<50?'warning':'success'); }
 
-  if (drugBadges.length === 0 && labChips.length === 0) return null;
+  if (drugBadges.length === 0 && labChips.length === 0 && screening.length === 0) return null;
+
+  const buildScreenTitle = (s) => (
+    <span style={{ whiteSpace: 'pre-line' }}>
+      {s.inputs.map(i => `${i.name} ${i.value}${i.date ? ` (${i.date})` : ''}`).join('\n')}
+      {'\n'}{s.note}
+    </span>
+  );
 
   return (
     <Box sx={{ display:'flex', alignItems:'center', justifyContent:'center', mb:0.5, p:0.5, bgcolor:'#f5f5f5', borderRadius:1, flexWrap:'wrap', gap:0.5 }}>
@@ -38,13 +56,22 @@ const CKMSummaryBar = ({ summary, medications, gds }) => {
           ))}
         </>
       )}
-      {drugBadges.length > 0 && labChips.length > 0 && (
-        <Typography sx={{ mx:0.5, color:'#bbb', fontSize:'0.9rem' }}>|</Typography>
-      )}
+      {drugBadges.length > 0 && labChips.length > 0 && <Sep />}
       {labChips.length > 0 && (
         <>
           <Typography variant="caption" sx={{ fontWeight:600, color:'text.secondary', mr:0.25 }}>近期檢驗 -</Typography>
           {labChips}
+        </>
+      )}
+      {(drugBadges.length > 0 || labChips.length > 0) && screening.length > 0 && <Sep />}
+      {screening.length > 0 && (
+        <>
+          <Typography variant="caption" sx={{ fontWeight:600, color:'text.secondary', mr:0.25 }}>篩檢 -</Typography>
+          {screening.map(s => (
+            <Tooltip key={s.label} title={buildScreenTitle(s)} arrow>
+              <Chip label={s.label} size="small" color={BAND_COLOR[s.band]} variant="outlined" sx={{ mr:0.25, height:22 }} />
+            </Tooltip>
+          ))}
         </>
       )}
     </Box>
