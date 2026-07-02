@@ -284,7 +284,7 @@ const CKMData = ({ ckmData, groupedLabs, labSettings, generalDisplaySettings, us
 
   return (
     <Box sx={{ p: 0.5 }}>
-      <CKMSummaryBar summary={ckmData.summary} medications={ckmData.medications} gds={gds} />
+      <CKMSummaryBar summary={ckmData.summary} medications={ckmData.medications} groupedLabs={groupedLabs} userInfo={userInfo} gds={gds} />
       <Grid container spacing={0.75}>
         <Grid item xs={12} md={4.5}>
           <DiagnosisCard diagnoses={ckmData.diagnoses} gds={gds} />

@@ -83,7 +83,13 @@ const Overview = ({
     <Box sx={{ p: 0 }}>
       {/* CKM 摘要列：僅在 CKM 功能開啟且有 CKM 資料時顯示 */}
       {enableCKMTab && ckmData?.hasCKMData && (
-        <CKMSummaryBar summary={ckmData.summary} medications={ckmData.medications} gds={generalDisplaySettings} />
+        <CKMSummaryBar
+          summary={ckmData.summary}
+          medications={ckmData.medications}
+          groupedLabs={groupedLabs}
+          userInfo={userInfo}
+          gds={generalDisplaySettings}
+        />
       )}
       <Grid container spacing={1}>
         {/* 三欄式布局 */}
