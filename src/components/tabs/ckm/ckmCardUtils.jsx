@@ -37,7 +37,9 @@ export function formatOrderName(name) {
   if (!name) return '';
   let f = name.replace(/\([^)]*\)/g, '').replace(/（[^）]*）/g, '');
   if (f.includes(';')) f = f.split(';')[0];
-  return f.trim();
+  // 移除未成對的殘留括號（例如「超音波心臟圖 )」）
+  f = f.replace(/[()（）]/g, ' ');
+  return f.replace(/\s{2,}/g, ' ').trim();
 }
 
 export const SectionTitle = ({ children }) => (

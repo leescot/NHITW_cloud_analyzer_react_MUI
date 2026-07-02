@@ -50,11 +50,18 @@ const Overview_ImportantMedications = ({
     Object.values(ckmGroups.categories).some(arr => arr.length > 0);
 
   // 依 CKM_ATC_PREFIXES 順序攤平為表格列（血糖/血壓/利尿/血脂/血栓/心臟）
+  // 同群組共用一個 rowSpan label
   const ckmTableData = [];
   if (hasCKMSection) {
     for (const [cat, { label }] of Object.entries(CKM_ATC_PREFIXES)) {
       const items = ckmGroups.categories[cat] || [];
-      items.forEach(med => ckmTableData.push({ categoryLabel: label, medication: med }));
+      items.forEach((med, i) => ckmTableData.push({
+        category: cat,
+        categoryLabel: label,
+        isFirst: i === 0,
+        span: items.length,
+        medication: med,
+      }));
     }
   }
 
@@ -365,13 +372,17 @@ const Overview_ImportantMedications = ({
     );
   };
 
-  // CKM 治療群組 badge 用色（固定藍色系）
-  const CKM_COLOR_INFO = {
-    light: alpha('#1565c0', 0.12),
-    medium: '#1565c0',
-    dark: '#0d47a1',
-    name: '藍色'
+  // CKM 治療群組配色：血糖藍 / 血壓紅 / 利尿青 / 血脂橘 / 血栓紫 / 心臟淡紅
+  const CKM_CATEGORY_COLORS = {
+    antidiabetic:     { light: alpha('#1565c0', 0.12), medium: '#1565c0', dark: '#0d47a1', name: '藍色' },
+    antihypertensive: { light: alpha('#c62828', 0.12), medium: '#c62828', dark: '#8e0000', name: '紅色' },
+    diuretic:         { light: alpha('#00897b', 0.12), medium: '#00897b', dark: '#005b4f', name: '青色' },
+    lipidLowering:    { light: alpha('#ef6c00', 0.15), medium: '#ef6c00', dark: '#b53d00', name: '橘色' },
+    antithrombotic:   { light: alpha('#6a1b9a', 0.12), medium: '#6a1b9a', dark: '#38006b', name: '紫色' },
+    cardiac:          { light: alpha('#ad1457', 0.12), medium: '#ad1457', dark: '#78002e', name: '淡紅' },
   };
+  const getCKMColorInfo = (category) =>
+    CKM_CATEGORY_COLORS[category] || CKM_CATEGORY_COLORS.antidiabetic;
 
   // Add state for snackbar
   const [snackbarOpen, setSnackbarOpen] = React.useState(false);
@@ -478,18 +489,25 @@ const Overview_ImportantMedications = ({
         <TableContainer sx={{ mb: hasData || hasMedicationsButNoGroups ? 1.5 : 0 }}>
           <Table size="small" stickyHeader>
             <TableBody>
-              {ckmTableData.map((row, index) => (
+              {ckmTableData.map((row, index) => {
+                const ckmColorInfo = getCKMColorInfo(row.category);
+                return (
                 <TableRow key={index}>
-                  <TableCell
-                    align="center"
-                    sx={{
-                      backgroundColor: CKM_COLOR_INFO.light,
-                      width: '15%',
-                      padding: '4px 1px',
-                    }}
-                  >
-                    {getCategoryBadge(row.categoryLabel, CKM_COLOR_INFO)}
-                  </TableCell>
+                  {row.isFirst && (
+                    <TableCell
+                      align="center"
+                      rowSpan={row.span}
+                      sx={{
+                        backgroundColor: ckmColorInfo.light,
+                        width: '13%',
+                        padding: '4px 2px',
+                        verticalAlign: 'top',
+                        pt: 1,
+                      }}
+                    >
+                      {getCategoryBadge(row.categoryLabel, ckmColorInfo)}
+                    </TableCell>
+                  )}
                   <TableCell sx={{ py: 0.75 }}>
                     <Box sx={{ display: 'flex', flexDirection: 'column' }}>
                       <TypographySizeWrapper
@@ -502,7 +520,7 @@ const Overview_ImportantMedications = ({
                           <Chip
                             label={row.medication.keyDrugLabel}
                             size="small"
-                            sx={{ height: 16, fontSize: '0.6rem', ml: 0.5, bgcolor: '#1565c0', color: '#fff', '& .MuiChip-label': { px: 0.4 } }}
+                            sx={{ height: 16, fontSize: '0.6rem', ml: 0.5, bgcolor: ckmColorInfo.medium, color: '#fff', '& .MuiChip-label': { px: 0.4 } }}
                           />
                         )}
                         {safeSettings.showExternalDrugImage && row.medication.drugcode && (
@@ -535,6 +553,7 @@ const Overview_ImportantMedications = ({
                           variant="caption"
                           color="text.secondary"
                           sx={{ mt: 0.25 }}
+                          style={{ fontSize: '0.7rem', lineHeight: 1.3 }}
                           generalDisplaySettings={generalDisplaySettings}
                         >
                           {row.medication.genericName}
@@ -542,7 +561,7 @@ const Overview_ImportantMedications = ({
                       )}
                     </Box>
                   </TableCell>
-                  <TableCell sx={{ py: 0.75 }}>
+                  <TableCell sx={{ py: 0.75, width: '36%' }}>
                     <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
                       {row.medication.prescriptions.slice(0, 3).map((prescription, i) => {
                         const hasRemainingMed = prescription.drug_left > 0;
@@ -568,7 +587,7 @@ const Overview_ImportantMedications = ({
                                       alignItems: 'center',
                                       ml: 0.5,
                                       fontSize: '0.65rem',
-                                      color: CKM_COLOR_INFO.dark
+                                      color: ckmColorInfo.dark
                                     }}>
                                       <LocalPharmacyIcon sx={{ fontSize: '0.75rem', mr: 0.2 }} />
                                       {prescription.drug_left}天
@@ -580,9 +599,9 @@ const Overview_ImportantMedications = ({
                                 fontSize: '0.7rem',
                                 height: 'auto',
                                 minHeight: '20px',
-                                bgcolor: hasRemainingMed ? CKM_COLOR_INFO.light : 'transparent',
+                                bgcolor: hasRemainingMed ? ckmColorInfo.light : 'transparent',
                                 border: '1px solid',
-                                borderColor: hasRemainingMed ? CKM_COLOR_INFO.medium : 'grey.300',
+                                borderColor: hasRemainingMed ? ckmColorInfo.medium : 'grey.300',
                                 py: hasRemainingMed ? 0.2 : 0
                               }}
                             />
@@ -604,7 +623,8 @@ const Overview_ImportantMedications = ({
                     </Box>
                   </TableCell>
                 </TableRow>
-              ))}
+                );
+              })}
             </TableBody>
           </Table>
         </TableContainer>

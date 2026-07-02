@@ -2,7 +2,7 @@
 import React, { useState, useMemo } from 'react';
 import {
   Paper, Typography, Tooltip, IconButton, List, ListItem, ListItemText,
-  Dialog, DialogTitle, DialogContent, DialogActions, Button,
+  Dialog, DialogTitle, DialogContent, DialogActions, Button, Box, Chip,
 } from '@mui/material';
 import DescriptionIcon from '@mui/icons-material/Description';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
@@ -52,9 +52,10 @@ const CKMImagingCard = ({ imaging, ekgAlerts, lvef, gds }) => {
               <Tooltip
                 title={
                   <Typography variant="caption" style={{whiteSpace:'pre-line'}}>
-                    <div dangerouslySetInnerHTML={{__html: highlightReport(img.reportExcerpt)}} />
+                    <div dangerouslySetInnerHTML={{__html: highlightReport(img.reportFull || img.reportExcerpt)}} />
                   </Typography>
                 }
+                slotProps={{ tooltip: { sx: { maxWidth: 600 } } }}
               >
                 <IconButton size="small" color="primary" onClick={() => setReportDialog({
                   open: true,
@@ -68,21 +69,23 @@ const CKMImagingCard = ({ imaging, ekgAlerts, lvef, gds }) => {
           >
             <ListItemText
               primary={
-                <TypographySizeWrapper textSizeType="content" generalDisplaySettings={gds}>
-                  {formatOrderName(img.orderName)}
-                </TypographySizeWrapper>
+                <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 0.5 }}>
+                  <TypographySizeWrapper textSizeType="content" generalDisplaySettings={gds}>
+                    {formatOrderName(img.orderName)}
+                  </TypographySizeWrapper>
+                  <Chip
+                    size="small"
+                    label={`${img.date}${img.hospital ? ` (${img.hospital})` : ''}`}
+                    sx={{ fontSize: '0.7rem', height: 'auto', minHeight: '20px', bgcolor: 'transparent', border: '1px solid', borderColor: 'grey.300' }}
+                  />
+                </Box>
               }
               secondary={
-                <>
-                  <TypographySizeWrapper textSizeType="note" generalDisplaySettings={gds} color="text.secondary">
-                    {img.date} {img.hospital}
+                notes.length > 0 ? (
+                  <TypographySizeWrapper textSizeType="note" generalDisplaySettings={gds} sx={{ display: 'block', color: 'text.primary' }}>
+                    {notes.join('；')}
                   </TypographySizeWrapper>
-                  {notes.length > 0 && (
-                    <TypographySizeWrapper textSizeType="note" generalDisplaySettings={gds} sx={{ display: 'block', color: 'text.primary' }}>
-                      {notes.join('；')}
-                    </TypographySizeWrapper>
-                  )}
-                </>
+                ) : null
               }
             />
           </ListItem>

@@ -136,7 +136,7 @@ const Overview = ({
           <Grid container spacing={2} direction="column">
             {enableCKMTab ? (
               <>
-                {/* CKM 開啟：其他檢驗 + CKM 影像 + 手術 + 病患摘要 */}
+                {/* CKM 開啟：其他檢驗 + CKM 影像 + 手術/住院/過敏（各預設 3 筆，可展開）+ 病患摘要 */}
                 <Grid item>
                   <CKMExtraLabCard groupedLabs={groupedLabs} gds={generalDisplaySettings} />
                 </Grid>
@@ -155,6 +155,25 @@ const Overview = ({
                     <Overview_SurgeryRecords
                       surgeryData={surgeryData}
                       generalDisplaySettings={generalDisplaySettings}
+                      collapsedCount={3}
+                    />
+                  </Grid>
+                )}
+                {hasDischargeData && (
+                  <Grid item>
+                    <Overview_DischargeRecords
+                      dischargeData={dischargeData}
+                      generalDisplaySettings={generalDisplaySettings}
+                      collapsedCount={3}
+                    />
+                  </Grid>
+                )}
+                {hasAllergyData && (
+                  <Grid item>
+                    <Overview_AllergyRecords
+                      allergyData={allergyData}
+                      generalDisplaySettings={generalDisplaySettings}
+                      collapsedCount={3}
                     />
                   </Grid>
                 )}

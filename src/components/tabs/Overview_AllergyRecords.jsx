@@ -9,7 +9,10 @@ import {
 } from "@mui/material";
 import TypographySizeWrapper from "../utils/TypographySizeWrapper";
 
-const Overview_AllergyRecords = ({ allergyData = [], generalDisplaySettings }) => {
+const Overview_AllergyRecords = ({ allergyData = [], generalDisplaySettings, collapsedCount = null }) => {
+  // collapsedCount 有值時預設只顯示前 N 筆，點擊可展開/收合
+  const [expanded, setExpanded] = React.useState(false);
+
   // Filter out duplicate drug names in allergyData
   const uniqueAllergyData = allergyData && allergyData.length > 0
     ? allergyData.reduce((unique, item) => {
@@ -37,7 +40,7 @@ const Overview_AllergyRecords = ({ allergyData = [], generalDisplaySettings }) =
       </TypographySizeWrapper>
       {uniqueAllergyData.length > 0 ? (
         <List dense disablePadding>
-          {uniqueAllergyData.map((item, index) => (
+          {(collapsedCount && !expanded ? uniqueAllergyData.slice(0, collapsedCount) : uniqueAllergyData).map((item, index) => (
             <ListItem key={index} sx={{ py: 0.5 }}>
               <ListItemText
                 primary={
@@ -69,6 +72,17 @@ const Overview_AllergyRecords = ({ allergyData = [], generalDisplaySettings }) =
           generalDisplaySettings={generalDisplaySettings}
         >
           暫無過敏紀錄
+        </TypographySizeWrapper>
+      )}
+      {collapsedCount && uniqueAllergyData.length > collapsedCount && (
+        <TypographySizeWrapper
+          variant="caption"
+          textSizeType="note"
+          generalDisplaySettings={generalDisplaySettings}
+          onClick={() => setExpanded(!expanded)}
+          sx={{ display: 'block', mt: 0.5, color: 'primary.main', cursor: 'pointer' }}
+        >
+          {expanded ? '收合' : `顯示全部（還有 ${uniqueAllergyData.length - collapsedCount} 筆）`}
         </TypographySizeWrapper>
       )}
     </Paper>

@@ -10,7 +10,14 @@ import {
 } from "@mui/material";
 import TypographySizeWrapper from "../utils/TypographySizeWrapper";
 
-const Overview_DischargeRecords = ({ dischargeData = [], generalDisplaySettings }) => {
+const Overview_DischargeRecords = ({ dischargeData = [], generalDisplaySettings, collapsedCount = null }) => {
+  // collapsedCount 有值時預設只顯示前 N 筆，點擊可展開/收合
+  const [expanded, setExpanded] = React.useState(false);
+  const visibleData = collapsedCount && !expanded
+    ? dischargeData.slice(0, collapsedCount)
+    : dischargeData;
+  const hiddenCount = dischargeData.length - visibleData.length;
+
   // 檢查日期是否在另一住院期間內（切帳情況）
   const isDateInOtherStayPeriod = (currentIndex, date) => {
     if (!date) return false;
@@ -104,7 +111,7 @@ const Overview_DischargeRecords = ({ dischargeData = [], generalDisplaySettings 
       </TypographySizeWrapper>
       {dischargeData && dischargeData.length > 0 ? (
         <List dense disablePadding>
-          {dischargeData.map((item, index) => (
+          {visibleData.map((item, index) => (
             <ListItem
               key={index}
               sx={{ py: 0.5 }}
@@ -153,6 +160,17 @@ const Overview_DischargeRecords = ({ dischargeData = [], generalDisplaySettings 
           color="text.secondary"
         >
           暫無出院紀錄
+        </TypographySizeWrapper>
+      )}
+      {collapsedCount && dischargeData.length > collapsedCount && (
+        <TypographySizeWrapper
+          variant="caption"
+          textSizeType="note"
+          generalDisplaySettings={generalDisplaySettings}
+          onClick={() => setExpanded(!expanded)}
+          sx={{ display: 'block', mt: 0.5, color: 'primary.main', cursor: 'pointer' }}
+        >
+          {expanded ? '收合' : `顯示全部（還有 ${hiddenCount} 筆）`}
         </TypographySizeWrapper>
       )}
     </Paper>
