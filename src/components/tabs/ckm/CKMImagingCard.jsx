@@ -75,7 +75,7 @@ const CKMImagingCard = ({ imaging, ekgAlerts, lvef, gds }) => {
                   </TypographySizeWrapper>
                   <Chip
                     size="small"
-                    label={`${img.date}${img.hospital ? ` (${img.hospital})` : ''}`}
+                    label={`${img.date}${img.hospital ? ` ${img.hospital}` : ''}`}
                     sx={{ fontSize: '0.7rem', height: 'auto', minHeight: '20px', bgcolor: 'transparent', border: '1px solid', borderColor: 'grey.300' }}
                   />
                 </Box>

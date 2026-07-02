@@ -501,8 +501,7 @@ const Overview_ImportantMedications = ({
                         backgroundColor: ckmColorInfo.light,
                         width: '13%',
                         padding: '4px 2px',
-                        verticalAlign: 'top',
-                        pt: 1,
+                        verticalAlign: 'middle',
                       }}
                     >
                       {getCategoryBadge(row.categoryLabel, ckmColorInfo)}
@@ -580,7 +579,7 @@ const Overview_ImportantMedications = ({
                               size="small"
                               label={
                                 <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                  <span>{`${formatDate(prescription.date)}${prescription.hospital ? ` (${prescription.hospital})` : ''}`}</span>
+                                  <span>{`${formatDate(prescription.date)}${prescription.hospital ? ` ${prescription.hospital}` : ''}`}</span>
                                   {hasRemainingMed && (
                                     <Box component="span" sx={{
                                       display: 'inline-flex',
@@ -611,7 +610,7 @@ const Overview_ImportantMedications = ({
                       {row.medication.prescriptions.length > 3 && (
                         <Tooltip title={row.medication.prescriptions.slice(3).map(p => {
                           const hasRemainingMed = p.drug_left > 0;
-                          return `${formatDate(p.date)}${p.hospital ? ` (${p.hospital})` : ''}${p.days ? ` | 用藥 ${p.days} 天` : ''}${hasRemainingMed ? ` | 餘藥 ${p.drug_left} 天` : ''}`;
+                          return `${formatDate(p.date)}${p.hospital ? ` ${p.hospital}` : ''}${p.days ? ` | 用藥 ${p.days} 天` : ''}${hasRemainingMed ? ` | 餘藥 ${p.drug_left} 天` : ''}`;
                         }).join('\n')}>
                           <Chip
                             size="small"
@@ -792,7 +791,7 @@ const Overview_ImportantMedications = ({
                                 size="small"
                                 label={
                                   <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                                    <span>{`${formatDate(prescription.date)}${prescription.hospital ? ` (${prescription.hospital})` : ''}`}</span>
+                                    <span>{`${formatDate(prescription.date)}${prescription.hospital ? ` ${prescription.hospital}` : ''}`}</span>
                                     {hasRemainingMed && (
                                       <Box component="span" sx={{
                                         display: 'inline-flex',
@@ -823,7 +822,7 @@ const Overview_ImportantMedications = ({
                         {row.medication.prescriptions.length > 3 && (
                           <Tooltip title={row.medication.prescriptions.slice(3).map(p => {
                             const hasRemainingMed = p.drug_left > 0;
-                            return `${formatDate(p.date)}${p.hospital ? ` (${p.hospital})` : ''}${p.days ? ` | 用藥 ${p.days} 天` : ''}${hasRemainingMed ? ` | 餘藥 ${p.drug_left} 天` : ''}`;
+                            return `${formatDate(p.date)}${p.hospital ? ` ${p.hospital}` : ''}${p.days ? ` | 用藥 ${p.days} 天` : ''}${hasRemainingMed ? ` | 餘藥 ${p.drug_left} 天` : ''}`;
                           }).join('\n')}>
                             <Chip
                               size="small"
@@ -913,7 +912,7 @@ const Overview_ImportantMedications = ({
                           size="small"
                           label={
                             <Box sx={{ display: 'flex', alignItems: 'center' }}>
-                              <span>{`${formatDate(med.date)}${med.hospital ? ` (${med.hospital})` : ''}`}</span>
+                              <span>{`${formatDate(med.date)}${med.hospital ? ` ${med.hospital}` : ''}`}</span>
                               {hasRemainingMed && (
                                 <Box component="span" sx={{
                                   display: 'inline-flex',
