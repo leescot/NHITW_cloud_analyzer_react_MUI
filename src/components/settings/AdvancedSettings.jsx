@@ -264,9 +264,9 @@ const AdvancedSettings = () => {
               }}
             />
           }
-          label="開啟 CKM 綜合頁面"
+          label="啟用 CKM 加強 Overview"
         />
-        <FormHelperText>整合心血管-腎臟-代謝相關資料於獨立頁面顯示（需重新載入網頁）</FormHelperText>
+        <FormHelperText>將心血管-腎臟-代謝（CKM）相關資料整合顯示於總覽頁面（需重新載入網頁）</FormHelperText>
 
         {settings.enableCKMTab && (
           <Box sx={{ ml: 4, mt: 0.5 }}>
@@ -282,7 +282,7 @@ const AdvancedSettings = () => {
               }
               label="開啟腎臟檢驗報告列印功能"
             />
-            <FormHelperText>在 CKM 檢驗標題列顯示「腎臟報告」按鈕，可開新分頁列印</FormHelperText>
+            <FormHelperText>在總覽「關注檢驗」標題列顯示列印按鈕，可開新分頁列印腎臟檢驗報告</FormHelperText>
           </Box>
         )}
       </AccordionDetails>
