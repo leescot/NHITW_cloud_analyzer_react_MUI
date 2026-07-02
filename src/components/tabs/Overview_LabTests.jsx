@@ -11,17 +11,31 @@ import {
   TableCell,
   TableContainer,
   TableHead,
-  TableRow
+  TableRow,
+  Tooltip,
+  IconButton
 } from "@mui/material";
 import { styled } from '@mui/material/styles';
+import PrintIcon from '@mui/icons-material/Print';
 import { formatDate, formatDateShort, isWithinLast90Days } from './Overview_utils';
 import { FALLBACK_LAB_TESTS, SPECIAL_LAB_CODES } from '../settings/OverviewSettings';
 import TypographySizeWrapper from "../utils/TypographySizeWrapper";
 import LabItemTrendPopover from "./lab/LabItemTrendPopover";
+import { CKM_LAB_ITEMS, CKM_SPECIAL_LAB_CODES, classifyLabItem } from "../../utils/ckmUtils";
+import { buildNephroReport, renderNephroReportHTML, attachNephroReportHandlers } from "../../utils/nephroReportBuilder";
 
-const Overview_LabTests = ({ groupedLabs = [], labData, overviewSettings = {}, generalDisplaySettings, labSettings = { highlightAbnormalLab: true } }) => {
-  // Get tracking days from overviewSettings, fall back to 90 days if not set
-  const trackingDays = overviewSettings.labTrackingDays || 90;
+const Overview_LabTests = ({
+  groupedLabs = [],
+  labData,
+  overviewSettings = {},
+  generalDisplaySettings,
+  labSettings = { highlightAbnormalLab: true },
+  enableCKM = false,
+  userInfo = null
+}) => {
+  // CKM 開啟時追蹤天數擴展為 180 天（取設定值與 180 的較大值）
+  const baseTrackingDays = overviewSettings.labTrackingDays || 90;
+  const trackingDays = enableCKM ? Math.max(baseTrackingDays, 180) : baseTrackingDays;
 
   // Helper function to check if date is within last N days
   function isWithinLastNDays(dateStr, days) {
@@ -53,6 +67,18 @@ const Overview_LabTests = ({ groupedLabs = [], labData, overviewSettings = {}, g
     return [];
   }, [groupedLabs, labData]);
 
+  // 腎臟報告：開新分頁顯示可列印的腎臟檢驗報告（沿用 CKM Tab 行為）
+  const handleOpenNephroReport = () => {
+    const report = buildNephroReport(effectiveLabData, userInfo);
+    if (!report) { alert('無腎臟相關檢驗資料'); return; }
+    const html = renderNephroReportHTML(report);
+    const win = window.open('', '_blank');
+    if (!win) { alert('彈出視窗被封鎖，請允許後再試'); return; }
+    win.document.write(html);
+    win.document.close();
+    attachNephroReportHandlers(win, report.dates.length);
+  };
+
   // 獲取狀態顏色
   const getStatusColor = (test, highlightAbnormal = true) => {
     if (!test || !highlightAbnormal) return "inherit";
@@ -81,9 +107,18 @@ const Overview_LabTests = ({ groupedLabs = [], labData, overviewSettings = {}, g
 
   return (
     <Paper sx={{ p: 2, height: "auto" }}>
-      <TypographySizeWrapper variant="h6" gutterBottom generalDisplaySettings={generalDisplaySettings}>
-        關注檢驗 - {trackingDays} 天內
-      </TypographySizeWrapper>
+      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+        <TypographySizeWrapper variant="h6" gutterBottom generalDisplaySettings={generalDisplaySettings}>
+          關注檢驗 - {trackingDays} 天內
+        </TypographySizeWrapper>
+        {enableCKM && generalDisplaySettings?.enableNephroReport && (
+          <Tooltip title="開新分頁顯示腎臟檢驗報告（可列印）">
+            <IconButton size="small" sx={{ color: '#1565c0' }} onClick={handleOpenNephroReport}>
+              <PrintIcon fontSize="small" />
+            </IconButton>
+          </Tooltip>
+        )}
+      </Box>
       {/* <TypographySizeWrapper variant="caption" color="text.secondary" generalDisplaySettings={generalDisplaySettings}>
         至多顯示七組資料
       </TypographySizeWrapper> */}
@@ -377,13 +412,48 @@ const Overview_LabTests = ({ groupedLabs = [], labData, overviewSettings = {}, g
 
           // console.log("Debug - Total matching tests found:", matchingTests.length);
 
-          if (matchingTests.length > 0) {
+          // === CKM 追加項目 ===
+          // 使用者 focusedLabTests 未涵蓋（以 orderCode 判斷）的 CKM_LAB_ITEMS 追加到表格底部
+          const ckmTests = [];
+          let ckmDisplayNames = [];
+          if (enableCKM) {
+            const enabledCodes = new Set(labTestsConfig.map(t => t.orderCode));
+            const extraItems = CKM_LAB_ITEMS.filter(item => !enabledCodes.has(item.orderCode));
+            const extraNames = new Set(extraItems.map(i => i.displayName));
+            const extraPlainCodes = new Set(extraItems.filter(i => !i.special && i.orderCode !== '08011C-Hb').map(i => i.orderCode));
+            const wantHb = extraItems.some(i => i.orderCode === '08011C-Hb');
+
+            recentLabs.forEach(labGroup => {
+              if (!labGroup.labs || !Array.isArray(labGroup.labs)) return;
+              labGroup.labs.forEach(lab => {
+                const code = lab.orderCode;
+                if (CKM_SPECIAL_LAB_CODES.includes(code)) {
+                  // Cr/eGFR/eGFR(健保署)、UPCR、UACR、Hb、BNP/NT-proBNP 需細分
+                  if (code === '08011C' && !wantHb) return;
+                  const dn = classifyLabItem(lab);
+                  if (!dn || !extraNames.has(dn)) return;
+                  ckmTests.push({ ...lab, date: labGroup.date, displayName: dn });
+                } else if (extraPlainCodes.has(code)) {
+                  const item = extraItems.find(i => i.orderCode === code && !i.special);
+                  if (item) ckmTests.push({ ...lab, date: labGroup.date, displayName: item.displayName });
+                }
+              });
+            });
+
+            // 依 CKM_LAB_ITEMS 順序排序追加列
+            const ckmOrder = {};
+            CKM_LAB_ITEMS.forEach((t, i) => { if (!(t.displayName in ckmOrder)) ckmOrder[t.displayName] = i; });
+            ckmDisplayNames = [...new Set(ckmTests.map(t => t.displayName))]
+              .sort((a, b) => (ckmOrder[a] ?? 999) - (ckmOrder[b] ?? 999));
+          }
+
+          if (matchingTests.length > 0 || ckmTests.length > 0) {
             // Get unique dates from the tests (sorted from newest to oldest)
             // const uniqueDates = [...new Set(matchingTests.map(test => test.date))].sort((a, b) =>
             //   new Date(b) - new Date(a)
             // ).slice(0, 7); // Show at most 5 most recent dates
 
-            const uniqueDates = [...new Set(matchingTests.map(test => test.date))].sort((a, b) =>
+            const uniqueDates = [...new Set([...matchingTests, ...ckmTests].map(test => test.date))].sort((a, b) =>
               new Date(b) - new Date(a)
             );
 
@@ -411,6 +481,20 @@ const Overview_LabTests = ({ groupedLabs = [], labData, overviewSettings = {}, g
               uniqueDates.forEach(date => {
                 testsByTypeAndDate[displayName][date] = null;
               });
+            });
+
+            // CKM 追加列初始化與填值（先到先贏，同名不覆蓋）
+            ckmDisplayNames.forEach(displayName => {
+              if (!testsByTypeAndDate[displayName]) {
+                testsByTypeAndDate[displayName] = {};
+                uniqueDates.forEach(date => { testsByTypeAndDate[displayName][date] = null; });
+              }
+            });
+            ckmTests.forEach(test => {
+              const slot = testsByTypeAndDate[test.displayName];
+              if (slot && uniqueDates.includes(test.date) && slot[test.date] === null) {
+                slot[test.date] = test;
+              }
             });
 
             // Fill in the data
@@ -496,8 +580,33 @@ const Overview_LabTests = ({ groupedLabs = [], labData, overviewSettings = {}, g
                 });
             }
 
+            // CKM 追加列獨立呈現在底部：以使用者啟用的 orderCode 推導出主列表名稱，
+            // 只有「使用者未涵蓋」的 CKM 名稱才進入底部 CKM 區
+            const userEnabledNames = new Set();
+            {
+              const specialNameMap = new Map([
+                ['08011C-WBC', ['WBC']],
+                ['08011C-Hb', ['Hb']],
+                ['08011C-Platelet', ['PLT']],
+                ['09015C', ['Cr', 'eGFR', 'eGFR(健保署)']],
+                ['09040C', ['UPCR']],
+                ['12111C', ['UACR']]
+              ]);
+              labTestsConfig.forEach(test => {
+                if (specialNameMap.has(test.orderCode)) {
+                  specialNameMap.get(test.orderCode).forEach(n => userEnabledNames.add(n));
+                } else {
+                  userEnabledNames.add(test.displayName);
+                }
+              });
+            }
+            const ckmRowNames = ckmDisplayNames.filter(n =>
+              nonEmptyTestTypes.includes(n) && !userEnabledNames.has(n)
+            );
+            const mainTestTypes = nonEmptyTestTypes.filter(n => !ckmRowNames.includes(n));
+
             // Sort test types based on user settings order, or alphabetically if no order defined
-            const sortedTestTypes = nonEmptyTestTypes.sort((a, b) => {
+            const sortedTestTypes = mainTestTypes.sort((a, b) => {
               // If both types have a defined order, use that
               if (displayOrder[a] !== undefined && displayOrder[b] !== undefined) {
                 return displayOrder[a] - displayOrder[b];
@@ -516,7 +625,7 @@ const Overview_LabTests = ({ groupedLabs = [], labData, overviewSettings = {}, g
             // Build trendItems from ALL effectiveLabData (not just tracking period)
             const trendItems = {};
             const trendDateSet = new Set();
-            matchingTests.forEach(test => {
+            [...matchingTests, ...ckmTests].forEach(test => {
               const dateKey = `${test.date}_`;
               trendDateSet.add(JSON.stringify({ date: test.date, hosp: '' }));
               if (!trendItems[test.displayName]) trendItems[test.displayName] = { displayName: test.displayName, values: {} };
@@ -650,6 +759,55 @@ const Overview_LabTests = ({ groupedLabs = [], labData, overviewSettings = {}, g
                                       })()
                                     : (test.value || test.result || '')
                                 ) : <span style={{ color: '#aaaaaa' }}>—</span>}
+                              </TypographySizeWrapper>
+                            </TableCell>
+                          );
+                        })}
+                      </TableRow>
+                    ))}
+                    {/* CKM 追加列：細分隔線 + 小標題「CKM」 */}
+                    {ckmRowNames.length > 0 && (
+                      <TableRow>
+                        <TableCell colSpan={uniqueDates.length + 1} sx={{ py: 0.2, px: 1, borderTop: '2px solid #90caf9', bgcolor: '#f5f9ff' }}>
+                          <TypographySizeWrapper variant="caption" generalDisplaySettings={generalDisplaySettings} sx={{ fontWeight: 700, color: '#1565c0' }}>
+                            CKM
+                          </TypographySizeWrapper>
+                        </TableCell>
+                      </TableRow>
+                    )}
+                    {ckmRowNames.map(displayName => (
+                      <TableRow key={displayName}>
+                        <TableCell
+                          component="th"
+                          scope="row"
+                          sx={{ py: 0.1, px: 1, position: 'sticky', left: 0, backgroundColor: 'background.paper', zIndex: 1 }}
+                        >
+                          {(() => {
+                            const ti = trendItems[displayName];
+                            const numericCount = ti ? Object.values(ti.values).filter(v => v && !isNaN(parseFloat(v.value))).length : 0;
+                            if (numericCount >= 2) {
+                              return (
+                                <LabItemTrendPopover item={ti} dates={trendDates}>
+                                  <TypographySizeWrapper variant="body2" generalDisplaySettings={generalDisplaySettings} sx={{ textDecoration: 'underline dotted', textDecorationColor: '#bdbdbd', cursor: 'pointer' }}>
+                                    {displayName}
+                                  </TypographySizeWrapper>
+                                </LabItemTrendPopover>
+                              );
+                            }
+                            return <TypographySizeWrapper variant="body2" generalDisplaySettings={generalDisplaySettings}>{displayName}</TypographySizeWrapper>;
+                          })()}
+                        </TableCell>
+                        {uniqueDates.map(date => {
+                          const test = testsByTypeAndDate[displayName][date];
+                          const cellStyles = {
+                            backgroundColor: test ? getStatusBackgroundColor(test, labSettings.highlightAbnormal) : 'inherit',
+                            color: test ? getStatusColor(test, labSettings.highlightAbnormal) : 'inherit',
+                            py: 0.1, px: 1
+                          };
+                          return (
+                            <TableCell key={date} align="right" sx={cellStyles}>
+                              <TypographySizeWrapper variant="body2" generalDisplaySettings={generalDisplaySettings}>
+                                {test ? (test.value || test.result || '') : <span style={{ color: '#aaaaaa' }}>—</span>}
                               </TypographySizeWrapper>
                             </TableCell>
                           );
