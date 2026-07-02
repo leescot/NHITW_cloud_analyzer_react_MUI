@@ -10,6 +10,7 @@ import {
   RadioGroup,
   Button,
   Box,
+  Chip,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import TuneIcon from "@mui/icons-material/Tune";
@@ -26,6 +27,7 @@ const AdvancedSettings = () => {
     labCopyAllOrder: 'newToOld',
     enableCKMTab: false,
     enableNephroReport: false,
+    enableCKMScreening: false,
   });
 
   useEffect(() => {
@@ -40,6 +42,7 @@ const AdvancedSettings = () => {
         labCopyAllOrder: 'newToOld',
         enableCKMTab: false,
         enableNephroReport: false,
+        enableCKMScreening: false,
       },
       (items) => {
         setSettings({
@@ -51,6 +54,7 @@ const AdvancedSettings = () => {
           labCopyAllOrder: items.labCopyAllOrder,
           enableCKMTab: items.enableCKMTab,
           enableNephroReport: items.enableNephroReport,
+          enableCKMScreening: items.enableCKMScreening,
         });
       }
     );
@@ -283,6 +287,28 @@ const AdvancedSettings = () => {
               label="開啟腎臟檢驗報告列印功能"
             />
             <FormHelperText>在總覽「關注檢驗」標題列顯示列印按鈕，可開新分頁列印腎臟檢驗報告</FormHelperText>
+            <FormControlLabel
+              control={
+                <Switch
+                  checked={settings.enableCKMScreening}
+                  onChange={(e) => {
+                    handleLocalSettingChange("enableCKMScreening", e.target.checked);
+                  }}
+                  size="small"
+                />
+              }
+              label={
+                <Box component="span" sx={{ display: 'inline-flex', alignItems: 'center', gap: 0.5 }}>
+                  顯示篩檢指標（FIB-4/TyG/KFRE/HOMA-IR）
+                  <Chip
+                    label="β"
+                    size="small"
+                    sx={{ height: 16, fontSize: '0.6rem', bgcolor: '#f57c00', color: '#fff', '& .MuiChip-label': { px: 0.5 } }}
+                  />
+                </Box>
+              }
+            />
+            <FormHelperText>實驗性功能：在總覽 CKM 摘要列顯示肝腎心代謝篩檢指標（需重新載入網頁）</FormHelperText>
           </Box>
         )}
       </AccordionDetails>
