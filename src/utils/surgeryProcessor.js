@@ -1,9 +1,9 @@
+import { debugLog } from './logger';
+
 export const surgeryProcessor = {
   processSurgeryData(data) {
-    // console.log('Starting to process surgery data:', data);
-
     if (!data || !data.rObject || !Array.isArray(data.rObject)) {
-      console.log('Invalid surgery data format:', data);
+      debugLog('Invalid surgery data format:', data);
       return [];
     }
 

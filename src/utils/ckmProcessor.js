@@ -6,6 +6,7 @@ import {
   TREND_ITEM_PATTERNS,
   CKM_IMAGING_REGEX,
 } from '../config/ckmDefinitions';
+import { debugLog } from './logger';
 
 function classifyICD(icdCode) {
   if (!icdCode) return null;
@@ -142,7 +143,7 @@ function parseAbnormalFlag(value, consultValue) {
 
 export const ckmProcessor = {
   processCKMData({ groupedMedications, rawLabData, imagingData, dischargeData }) {
-    console.log('[CKM] processCKMData called', {
+    debugLog('[CKM] processCKMData called', {
       groupedMedications: groupedMedications?.length,
       rawLabData: rawLabData?.rObject?.length,
       imagingData: imagingData ? (imagingData.withReport?.length || 0) + (imagingData.withoutReport?.length || 0) : 0,
@@ -396,7 +397,7 @@ export const ckmProcessor = {
       Object.values(result.labs).some(arr => arr.length > 0) ||
       result.imaging.length > 0;
 
-    console.log('[CKM] result', {
+    debugLog('[CKM] result', {
       hasCKMData: result.hasCKMData,
       diagnoses: Object.fromEntries(Object.entries(result.diagnoses).map(([k, v]) => [k, v.length])),
       medications: Object.fromEntries(Object.entries(result.medications).map(([k, v]) => [k, v.length])),

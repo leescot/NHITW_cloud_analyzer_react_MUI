@@ -3,6 +3,8 @@
  * 負責處理從本地上傳的 JSON 檔案，並將資料儲存到擴充功能變數中
  */
 
+import { debugLog } from './utils/logger';
+
 // 資料狀態追蹤
 let localDataStatus = {
   loaded: false,
@@ -64,8 +66,6 @@ function notifyExtensionDataLoaded(source, dataTypes) {
  * @param {Object} settings - 格式設定
  */
 function setGlobalMedicationFormatSettings(settings) {
-  // console.log("設置全局藥物格式設定:", settings);
-
   // 創建一個深度複製的全局格式設定
   window.medicationFormatSettings = {};
 
@@ -82,13 +82,6 @@ function setGlobalMedicationFormatSettings(settings) {
   // 驗證複製後的數組是否完整
   if (Array.isArray(settings.customMedicationHeaderCopyFormat) &&
     Array.isArray(settings.customMedicationDrugCopyFormat)) {
-    // console.log("驗證自定義格式數組設置後:", {
-    //   原始標題長度: settings.customMedicationHeaderCopyFormat.length,
-    //   複製後標題長度: window.medicationFormatSettings.customMedicationHeaderCopyFormat.length,
-    //   原始藥物長度: settings.customMedicationDrugCopyFormat.length,
-    //   複製後藥物長度: window.medicationFormatSettings.customMedicationDrugCopyFormat.length
-    // });
-
     // 直接存儲到全局變量，以防其他方式丟失
     window.customMedicationHeaderCopyFormat = JSON.parse(JSON.stringify(settings.customMedicationHeaderCopyFormat));
     window.customMedicationDrugCopyFormat = JSON.parse(JSON.stringify(settings.customMedicationDrugCopyFormat));
@@ -102,7 +95,7 @@ function setGlobalMedicationFormatSettings(settings) {
  * @returns {Object} - 處理結果 {success, message, loadedTypes}
  */
 export async function processLocalData(jsonData, filename) {
-  console.log('開始處理本地 JSON 資料:', filename);
+  debugLog('開始處理本地 JSON 資料:', filename);
 
   try {
     // 重置資料類型追蹤
@@ -113,7 +106,7 @@ export async function processLocalData(jsonData, filename) {
     if (jsonData.medication) {
       try {
         const settings = await loadCustomFormatSettings();
-        console.log('已加載自定義格式設定:', settings);
+        debugLog('已加載自定義格式設定:', settings);
         setGlobalMedicationFormatSettings(settings);
       } catch (error) {
         console.error('加載自定義格式設定時出錯:', error);
@@ -239,8 +232,6 @@ export async function processLocalData(jsonData, filename) {
 
       // 直接保存到 localStorage 並廣播資料
       try {
-        // console.log('將資料保存到 localStorage ...');
-
         // 先將數據保存到 localStorage
         const dataToShare = {
           medication: window.lastInterceptedMedicationData,
@@ -265,7 +256,6 @@ export async function processLocalData(jsonData, filename) {
 
         // 保存到 localStorage
         localStorage.setItem('NHITW_DATA', JSON.stringify(dataToShare));
-        // console.log('數據已保存到 localStorage');
 
         // 觸發 storage 事件，便於其他擴充功能監聽
         window.dispatchEvent(new Event('storage'));
@@ -279,7 +269,6 @@ export async function processLocalData(jsonData, filename) {
         //   // 直接發送自定義事件
         //   const event = new CustomEvent('NHITW_DATA_UPDATED', { detail: dataToShare });
         //   document.dispatchEvent(event);
-        //   console.log('直接發送自定義事件完成');
         // }
       } catch (error) {
         // console.error('保存資料到 localStorage 或廣播時發生錯誤:', error);
@@ -387,13 +376,13 @@ export const localDataHandler = {
       return localDataStatus;
     }
 
-    console.log(`開始處理本地 JSON 資料: ${filename}`);
+    debugLog(`開始處理本地 JSON 資料: ${filename}`);
 
     try {
       // 加載自定義格式設定
       try {
         const settings = await loadCustomFormatSettings();
-        console.log('已加載自定義格式設定:', settings);
+        debugLog('已加載自定義格式設定:', settings);
         setGlobalMedicationFormatSettings(settings);
       } catch (error) {
         console.error('加載自定義格式設定時出錯:', error);
@@ -414,7 +403,6 @@ export const localDataHandler = {
   async processJsonData(data, localDataStatus, filename) {
     try {
       const dataType = this.detectDataType(data, filename);
-      // console.log("檢測到資料類型:", dataType);
 
       if (dataType === "unknown") {
         localDataStatus.message = "無法識別的資料格式";

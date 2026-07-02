@@ -26,7 +26,6 @@ nhi-extractor-v08/
 
 - `package.json` - npm 套件配置文件，定義項目依賴與構建腳本
 - `vite.config.js` - Vite 打包工具的主要配置
-- `vite.extension.config.js` - Chrome Extension 特定的 Vite 配置
 - `eslint.config.js` - 代碼質量檢查工具配置
 - `index.html` - 應用入口 HTML 文件
 

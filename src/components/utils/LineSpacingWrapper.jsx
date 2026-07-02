@@ -1,6 +1,8 @@
 import React from 'react';
 import { Box } from '@mui/material';
 
+import { useGeneralDisplaySettings } from '../../contexts/SettingsContext';
+
 // Line spacing mapping for different display settings
 const LINE_SPACING = {
   narrow: '0.25rem', // 4px
@@ -18,16 +20,14 @@ const LINE_SPACING = {
  * @returns {JSX.Element} - The Box component with the correct margin bottom for line spacing
  */
 const LineSpacingWrapper = ({
-  generalDisplaySettings = { lineSpacingHeight: 'medium' },
   sx = {},
   children,
   ...rest
 }) => {
-  // Ensure generalDisplaySettings is defined
-  const settings = generalDisplaySettings || { lineSpacingHeight: 'medium' };
+  const generalDisplaySettings = useGeneralDisplaySettings();
 
   // Get the correct line spacing from the settings
-  const marginBottom = LINE_SPACING[settings.lineSpacingHeight || 'medium'];
+  const marginBottom = LINE_SPACING[generalDisplaySettings.lineSpacingHeight || 'medium'];
 
   // Merge the marginBottom into the existing sx prop
   const updatedSx = {

@@ -6,6 +6,7 @@ import {
   ELEMENT_SECTIONS
 } from './formatEditorConfig';
 import { handleSettingChange } from '../../../utils/settingsHelper';
+import { debugLog } from '../../../utils/logger';
 
 // Counter for generating unique IDs
 let idCounter = 0;
@@ -193,7 +194,7 @@ const useFormatEditorState = (appSettings, setAppSettings) => {
         }
       };
       
-      console.log('LabCustomFormatEditor: Reset to default formats');
+      debugLog('LabCustomFormatEditor: Reset to default formats');
       
       return newSettings;
     });
@@ -228,7 +229,7 @@ const useFormatEditorState = (appSettings, setAppSettings) => {
     const finalItemSeparator = String(itemSeparator || ',');
     
     // Log the itemSeparator for debugging
-    console.log(`Saving itemSeparator: "${finalItemSeparator}" (${typeof finalItemSeparator})`);
+    debugLog(`Saving itemSeparator: "${finalItemSeparator}" (${typeof finalItemSeparator})`);
     
     // Update settings - saving header and lab item formats separately
     handleSettingChange('enableLabCustomCopyFormat', true, null, null, 'lab');
@@ -256,7 +257,7 @@ const useFormatEditorState = (appSettings, setAppSettings) => {
       };
       
       // Log the updated section for debugging
-      console.log('Lab format settings updated:', {
+      debugLog('Lab format settings updated:', {
         section: 'lab',
         changes: newSettings.lab
       });

@@ -1,9 +1,9 @@
+import { debugLog } from './logger';
+
 export const patientSummaryProcessor = {
   processPatientSummaryData(data) {
-    // console.log('patientsummary - Processing data:', data);
-
     if (!data || !data.rObject || !Array.isArray(data.rObject)) {
-      console.log('patientsummary - Invalid format:', data);
+      debugLog('patientsummary - Invalid format:', data);
       return [];
     }
 
@@ -18,7 +18,6 @@ export const patientSummaryProcessor = {
         };
       });
 
-      // console.log('patientsummary - Processed data:', formattedData);
       return formattedData;
     } catch (error) {
       console.error('patientsummary - Error processing data:', error);

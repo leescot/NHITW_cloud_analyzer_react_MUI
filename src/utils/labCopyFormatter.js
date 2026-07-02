@@ -3,6 +3,8 @@
  * 處理檢驗報告的自定義複製格式功能
  */
 
+import { debugLog } from './logger';
+
 export const labCopyFormatter = {
   /**
    * 應用自定義格式到檢驗報告
@@ -11,26 +13,13 @@ export const labCopyFormatter = {
    * @returns {String} - 格式化後的文字
    */
   applyCustomFormat(labs, group, labSettings) {
-    // 記錄設定資訊以便調試
-    console.log("labCopyFormatter.applyCustomFormat 收到的設定:", JSON.stringify({
-      hasHeaderFormat: Array.isArray(labSettings.customLabHeaderCopyFormat),
-      headerFormatLength: labSettings.customLabHeaderCopyFormat?.length,
-      hasItemFormat: Array.isArray(labSettings.customLabItemCopyFormat),
-      itemFormatLength: labSettings.customLabItemCopyFormat?.length,
-      format: labSettings.copyLabFormat,
-      formatType: labSettings.formatType,
-      isHorizontal: labSettings.copyLabFormat === "customHorizontal",
-      enableCustomFormat: labSettings.enableLabCustomCopyFormat,
-      itemSeparator: labSettings.itemSeparator
-    }, null, 2));
-    
     // 定義驗證陣列是否有效的函數
     const isValidArray = (array) => Array.isArray(array) && array.length > 0;
     
     const { customLabHeaderCopyFormat, customLabItemCopyFormat } = labSettings;
     
     // 詳細檢查自定義格式設定
-    console.log("檢驗報告自定義格式數組檢查:", {
+    debugLog("檢驗報告自定義格式數組檢查:", {
       headerFormat: customLabHeaderCopyFormat,
       headerFormatType: typeof customLabHeaderCopyFormat,
       headerFormatIsArray: Array.isArray(customLabHeaderCopyFormat),
@@ -47,7 +36,7 @@ export const labCopyFormatter = {
     
     // 如果缺少格式定義，則記錄並回退到預設格式
     if (!hasHeaderFormat || !hasItemFormat) {
-      console.log("已選擇自定義格式但缺少格式定義:", {
+      debugLog("已選擇自定義格式但缺少格式定義:", {
         format: labSettings.copyLabFormat,
         hasHeaderFormat,
         hasItemFormat
@@ -128,7 +117,7 @@ export const labCopyFormatter = {
    * @returns {String} - 格式化後的文字
    */
   generateCustomTextOutput(labs, group, headerFormat, itemFormat, labSettings) {
-    console.log("generateCustomTextOutput 被調用，參數:", {
+    debugLog("generateCustomTextOutput 被調用，參數:", {
       labs: labs.length,
       headerFormatLength: Array.isArray(headerFormat) ? headerFormat.length : 0,
       itemFormatLength: Array.isArray(itemFormat) ? itemFormat.length : 0,
@@ -218,7 +207,7 @@ export const labCopyFormatter = {
       const itemSeparator = String(labSettings.itemSeparator || ', ');
       
       // 記錄使用的分隔符
-      console.log(`使用水平格式，項目分隔符: "${itemSeparator}" (${typeof itemSeparator})`);
+      debugLog(`使用水平格式，項目分隔符: "${itemSeparator}" (${typeof itemSeparator})`);
       
       // 水平格式：所有項目在一行，以定義的分隔符分隔
       labItemsText = labs.map((lab) => {
@@ -243,8 +232,8 @@ export const labCopyFormatter = {
     const separator = isHorizontal ? ' ' : '\n';
     const result = header + separator + labItemsText;
     
-    console.log(`檢驗報告格式: ${isHorizontal ? '水平' : '垂直'}, 項目間分隔符: "${labSettings.itemSeparator || ','}", 標題與項目分隔符: "${separator === '\n' ? '\\n' : separator}"`);
-    console.log("最終自定義格式結果:", result);
+    debugLog(`檢驗報告格式: ${isHorizontal ? '水平' : '垂直'}, 項目間分隔符: "${labSettings.itemSeparator || ','}", 標題與項目分隔符: "${separator === '\n' ? '\\n' : separator}"`);
+    debugLog("最終自定義格式結果:", result);
     return result;
   },
 
@@ -256,7 +245,7 @@ export const labCopyFormatter = {
    * @returns {String} - 格式化後的文字
    */
   applyVerticalFormat(labs, group, labSettings) {
-    console.log("應用預設垂直格式");
+    debugLog("應用預設垂直格式");
     
     const { showUnit, showReference } = labSettings;
     
@@ -296,7 +285,7 @@ export const labCopyFormatter = {
    * @returns {String} - 格式化後的文字
    */
   applyHorizontalFormat(labs, group, labSettings) {
-    console.log("應用預設水平格式");
+    debugLog("應用預設水平格式");
     
     const { showUnit, showReference } = labSettings;
     

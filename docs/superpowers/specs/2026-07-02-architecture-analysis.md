@@ -1,7 +1,7 @@
 # 程式架構分析與優化建議
 
 > 日期：2026-07-02
-> 狀態：分析完成，尚未動工
+> 狀態：分析完成；階段 1、2 已實作並 squash merge 回 feature-CKM（見 plans/2026-07-02-refactor-phase1-2.md，手動煙霧測試待執行）
 > 分支：feature-CKM
 > 範圍：全專案架構體檢（不含個別功能的正確性 review）
 

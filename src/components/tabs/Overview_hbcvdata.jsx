@@ -2,6 +2,8 @@ import React, { useEffect, useState } from "react";
 import { Paper, Typography, Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@mui/material";
 import VaccinesIcon from "@mui/icons-material/Vaccines";
 import { checkAbnormalValue, extractHospitalName } from "../../utils/hbcvdataProcessor.js";
+import { debugLog } from "../../utils/logger";
+import { useGeneralDisplaySettings } from "../../contexts/SettingsContext";
 
 /**
  * Component for displaying Hepatitis B & C data
@@ -10,7 +12,8 @@ import { checkAbnormalValue, extractHospitalName } from "../../utils/hbcvdataPro
  * @param {Object} generalDisplaySettings - Display settings like text sizes
  * @returns {JSX.Element} The component
  */
-const Overview_hbcvdata = ({ hbcvData, generalDisplaySettings = {} }) => {
+const Overview_hbcvdata = ({ hbcvData }) => {
+    const generalDisplaySettings = useGeneralDisplaySettings();
     // Extract display settings with defaults
     const { titleTextSize = 'medium', contentTextSize = 'medium' } = generalDisplaySettings;
 
@@ -19,20 +22,20 @@ const Overview_hbcvdata = ({ hbcvData, generalDisplaySettings = {} }) => {
 
     // Check for data in window global as fallback
     useEffect(() => {
-        console.log("[Overview_hbcvdata] hbcvData prop:", hbcvData);
-        console.log("[Overview_hbcvdata] window.hbcvData:", window.hbcvData);
+        debugLog("[Overview_hbcvdata] hbcvData prop:", hbcvData);
+        debugLog("[Overview_hbcvdata] window.hbcvData:", window.hbcvData);
 
         // If prop data exists, use it
         if (hbcvData) {
             setCombinedData(hbcvData);
-            console.log("[Overview_hbcvdata] Using prop data");
+            debugLog("[Overview_hbcvdata] Using prop data");
             return;
         }
 
         // Otherwise, try to get data from window global
         if (window.hbcvData) {
             setCombinedData(window.hbcvData);
-            console.log("[Overview_hbcvdata] Using window.hbcvData");
+            debugLog("[Overview_hbcvdata] Using window.hbcvData");
         }
     }, [hbcvData]);
 

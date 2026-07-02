@@ -1,9 +1,9 @@
+import { debugLog } from './logger';
+
 export const allergyProcessor = {
   processAllergyData(data) {
-    // console.log('Starting to process allergy data:', data);
-
     if (!data || !data.rObject || !Array.isArray(data.rObject)) {
-      console.log('Invalid allergy data format:', data);
+      debugLog('Invalid allergy data format:', data);
       return [];
     }
 

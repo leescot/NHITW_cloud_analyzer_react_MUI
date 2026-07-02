@@ -13,6 +13,7 @@ import { patientSummaryProcessor } from "./patientSummaryProcessor";
 import { cancerScreeningProcessor } from "./cancerScreeningProcessor";
 import { adultHealthCheckProcessor } from "./adultHealthCheckProcessor";
 import { hbcvdataProcessor } from "./hbcvdataProcessor";
+import { debugLog } from "./logger";
 
 /**
  * 安全調用setter，如果setter不存在則寫入window全局變量
@@ -181,20 +182,20 @@ export const handleAllData = async (dataSources, settings, setters) => {
       }],
       ['hbcvdata', {
         process: () => {
-          console.log("[dataManager] Processing hbcvdata, dataSources.hbcvdata:", dataSources.hbcvdata);
+          debugLog("[dataManager] Processing hbcvdata, dataSources.hbcvdata:", dataSources.hbcvdata);
           if (dataSources.hbcvdata) {
             const processedHbcvdata = hbcvdataProcessor.processHbcvdataData(
               dataSources.hbcvdata
             );
 
-            console.log("[dataManager] Processed hbcvdata:", processedHbcvdata);
-            console.log("[dataManager] Calling safeSetter with setHbcvData");
+            debugLog("[dataManager] Processed hbcvdata:", processedHbcvdata);
+            debugLog("[dataManager] Calling safeSetter with setHbcvData");
 
             // Use safeSetter to handle the case where the setter might not exist
             safeSetter(setters, 'setHbcvData', processedHbcvdata, 'hbcv');
             results.hbcvdata = processedHbcvdata;
           } else {
-            console.log("[dataManager] No hbcvdata in dataSources");
+            debugLog("[dataManager] No hbcvdata in dataSources");
           }
         }
       }]
@@ -233,7 +234,7 @@ export const collectDataSources = () => {
     chronicMed: window.lastInterceptedChronicMedData
   };
 
-  console.log("[dataManager] collectDataSources - hbcvdata:", sources.hbcvdata);
+  debugLog("[dataManager] collectDataSources - hbcvdata:", sources.hbcvdata);
 
   return sources;
 };

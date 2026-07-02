@@ -10,8 +10,9 @@ import {
   isTokenExpired,
 } from './utils/tokenUtils';
 import { DEFAULT_SETTINGS } from './config/defaultSettings';
+import { debugLog } from './utils/logger';
 
-console.log("Content script loaded for NHI data extractor (Refactored Version)");
+debugLog("Content script loaded for NHI data extractor (Refactored Version)");
 
 // ===== 全域變數（供 React UI 透過 window.* 讀取） =====
 
@@ -155,7 +156,7 @@ function startTokenPolling() {
     }
 
     if (currentId !== lastPatientId) {
-      console.log("Token polling: 偵測到病患切換", lastPatientId, "→", currentId);
+      debugLog("Token polling: 偵測到病患切換", lastPatientId, "→", currentId);
       lastPatientId = currentId;
       clearAllData();
       fetchAllDataTypes();
@@ -174,7 +175,7 @@ function watchPatientSwitchButtons() {
 }
 
 function onPatientSwitchRequested() {
-  console.log("病患切換按鈕被點擊，開始等待新 token");
+  debugLog("病患切換按鈕被點擊，開始等待新 token");
   clearAllData();
   window.dispatchEvent(new CustomEvent("dataFetchCompleted", { detail: { switching: true } }));
 
@@ -186,7 +187,7 @@ function onPatientSwitchRequested() {
     if (newId && newId !== oldPatientId) {
       clearInterval(switchPollTimer);
       switchPollTimer = null;
-      console.log("偵測到新病患:", newId);
+      debugLog("偵測到新病患:", newId);
       lastPatientId = newId;
       fetchAllDataTypes();
     }

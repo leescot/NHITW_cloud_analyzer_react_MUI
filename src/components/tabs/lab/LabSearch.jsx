@@ -7,7 +7,6 @@ import TypographySizeWrapper from "../../utils/TypographySizeWrapper";
 const LabSearch = ({
   searchText,
   handleSearchChange,
-  generalDisplaySettings,
   labSettings,
   onCopyAll
 }) => {

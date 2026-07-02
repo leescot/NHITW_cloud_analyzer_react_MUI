@@ -28,6 +28,7 @@ import SortIcon from '@mui/icons-material/Sort';
 import FilterAltIcon from '@mui/icons-material/FilterAlt';
 import TextFormatIcon from '@mui/icons-material/TextFormat';
 import { elementGroups, ELEMENT_SECTIONS } from './formatEditorConfig';
+import { debugLog } from '../../../utils/logger';
 
 // Format element component
 const FormatElement = ({ 
@@ -211,7 +212,7 @@ const FormatElementsPanel = ({
   };
 
   const handleOpenSeparatorDialog = () => {
-    console.log(`FormatElementsPanel: Opening separator dialog. Current separator: "${itemSeparator || ', '}"`);
+    debugLog(`FormatElementsPanel: Opening separator dialog. Current separator: "${itemSeparator || ', '}"`);
     setTempSeparator(itemSeparator || ', ');
     setSeparatorDialogOpen(true);
   };
@@ -222,7 +223,7 @@ const FormatElementsPanel = ({
 
   const handleSaveSeparator = () => {
     if (setItemSeparator) {
-      console.log(`FormatElementsPanel: Updating itemSeparator from "${itemSeparator}" to "${tempSeparator}"`);
+      debugLog(`FormatElementsPanel: Updating itemSeparator from "${itemSeparator}" to "${tempSeparator}"`);
       
       // Ensure we're passing a string and use a default if empty
       const sanitizedSeparator = String(tempSeparator || ', ');
@@ -233,14 +234,14 @@ const FormatElementsPanel = ({
         .replace(/\r/g, '\\r')
         .replace(/\t/g, '\\t');
       
-      console.log(`FormatElementsPanel: Final sanitized separator: "${loggableSeparator}" (${typeof sanitizedSeparator})`);
+      debugLog(`FormatElementsPanel: Final sanitized separator: "${loggableSeparator}" (${typeof sanitizedSeparator})`);
       
       // Call the setter function
       setItemSeparator(sanitizedSeparator);
       
       // Verify the value was updated in the local state
       setTimeout(() => {
-        console.log(`FormatElementsPanel: After update, itemSeparator is now: "${itemSeparator}"`);
+        debugLog(`FormatElementsPanel: After update, itemSeparator is now: "${itemSeparator}"`);
       }, 0);
       
       // Close the dialog after saving

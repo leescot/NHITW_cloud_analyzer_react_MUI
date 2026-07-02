@@ -6,6 +6,7 @@ import {
   ELEMENT_SECTIONS
 } from './formatEditorConfig';
 import { handleSettingChange } from '../../../utils/settingsHelper';
+import { debugLog } from '../../../utils/logger';
 
 // Counter for generating unique IDs
 let idCounter = 0;
@@ -204,7 +205,7 @@ const useFormatEditorState = (appSettings, setAppSettings) => {
         }
       };
       
-      console.log('MedicationCustomFormatEditor: Reset to default formats');
+      debugLog('MedicationCustomFormatEditor: Reset to default formats');
       
       return newSettings;
     });
@@ -261,7 +262,7 @@ const useFormatEditorState = (appSettings, setAppSettings) => {
       };
       
       // Log the updated section for debugging
-      console.log('Medication format settings updated:', {
+      debugLog('Medication format settings updated:', {
         section: 'western',
         changes: newSettings.western
       });
@@ -317,13 +318,6 @@ const useFormatEditorState = (appSettings, setAppSettings) => {
       medicationCopyFormat = formatType,
       drugSeparator: customDrugSeparator = drugSeparator,
     } = customSettings;
-    
-    // console.log('保存設置:', {
-    //   medicationCopyFormat,
-    //   drugSeparator: customDrugSeparator,
-    //   headerElements: headerFormat.length,
-    //   drugElements: drugFormat.length
-    // });
     
     // 保存當前格式類型
     setSavedFormatType(medicationCopyFormat);

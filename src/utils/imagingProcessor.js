@@ -5,8 +5,6 @@ export const imagingProcessor = {
       return { withReport: [], withoutReport: [] };
     }
 
-    // console.log('Processing imaging data:', data.rObject); // 添加調試信息
-
     // 處理影像檢查資料
     const withReport = [];
     const withoutReport = [];
@@ -41,8 +39,6 @@ export const imagingProcessor = {
         withoutReport.push(processedItem);
       }
     });
-
-    // console.log('Processed imaging data:', { withReport, withoutReport }); // 添加調試信息
 
     return {
       withReport: withReport,

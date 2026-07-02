@@ -6,6 +6,7 @@ import {
   Paper
 } from '@mui/material';
 import { renderElem, previewLabItems } from './formatEditorConfig';
+import { debugLog } from '../../../utils/logger';
 
 // Vertical (stacked) preview format
 const VerticalPreview = ({ headerFormat, itemFormat, sx }) => {
@@ -82,7 +83,7 @@ const FormatPreview = ({
 }) => {
   // 使用useEffect記錄formatType的變化以便調試
   useEffect(() => {
-    console.log(`FormatPreview: formatType changed to ${formatType}`);
+    debugLog(`FormatPreview: formatType changed to ${formatType}`);
   }, [formatType]);
   
   // Format type map for easier management

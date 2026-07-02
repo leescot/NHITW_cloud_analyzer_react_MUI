@@ -93,8 +93,7 @@ const consolidateImagingRecords = (records) => {
 
 const Overview_ImagingTests = ({
   imagingData = { withReport: [], withoutReport: [] },
-  overviewSettings = { imageTrackingDays: 90, focusedImageTests: DEFAULT_IMAGE_TESTS },
-  generalDisplaySettings = { titleTextSize: 'medium', contentTextSize: 'medium', noteTextSize: 'small' }
+  overviewSettings = { imageTrackingDays: 90, focusedImageTests: DEFAULT_IMAGE_TESTS }
 }) => {
   // Add state for report dialog
   const [reportDialog, setReportDialog] = useState({ open: false, content: '', title: '' });
@@ -225,7 +224,6 @@ const Overview_ImagingTests = ({
         {/* <ImageIcon color="primary" sx={{ mr: 1 }} /> */}
         <TypographySizeWrapper
           variant="h6"
-          generalDisplaySettings={generalDisplaySettings}
           gutterBottom
         >
           關注影像 - {overviewSettings.imageTrackingDays || 90} 天內
@@ -329,7 +327,6 @@ const Overview_ImagingTests = ({
                 primary={
                   <TypographySizeWrapper
                     textSizeType="content"
-                    generalDisplaySettings={generalDisplaySettings}
                   >
                     {test.orderName}
                   </TypographySizeWrapper>
@@ -337,7 +334,6 @@ const Overview_ImagingTests = ({
                 secondary={
                   <TypographySizeWrapper
                     textSizeType="note"
-                    generalDisplaySettings={generalDisplaySettings}
                     color="text.secondary"
                   >
                     {test.date} {test.hosp}
@@ -350,7 +346,6 @@ const Overview_ImagingTests = ({
       ) : (
         <TypographySizeWrapper
           textSizeType="content"
-          generalDisplaySettings={generalDisplaySettings}
           color="text.secondary"
         >
           {overviewSettings.imageTrackingDays} 天內無關注的影像檢查
@@ -367,7 +362,6 @@ const Overview_ImagingTests = ({
         <DialogTitle>
           <TypographySizeWrapper
             textSizeType="title"
-            generalDisplaySettings={generalDisplaySettings}
           >
             {reportDialog.title}
           </TypographySizeWrapper>
@@ -375,7 +369,6 @@ const Overview_ImagingTests = ({
         <DialogContent dividers>
           <TypographySizeWrapper
             textSizeType="content"
-            generalDisplaySettings={generalDisplaySettings}
             style={{ whiteSpace: 'pre-line' }}
           >
             {(() => {

@@ -9,7 +9,6 @@ const LabHeader = ({
   index,
   settings,
   labSettings,
-  generalDisplaySettings,
   handleSectionLabData,
   handleCopyUserSelectedLabData,
   hasSelectedItems
@@ -21,7 +20,6 @@ const LabHeader = ({
       <TypographySizeWrapper
         variant="subtitle1"
         textSizeType="content"
-        generalDisplaySettings={generalDisplaySettings}
         color="primary"
         sx={{ flexGrow: 1 }}
       >
@@ -31,7 +29,6 @@ const LabHeader = ({
           <TypographySizeWrapper
             component="span"
             textSizeType="note"
-            generalDisplaySettings={generalDisplaySettings}
             sx={{
               color: "text.secondary",
               ml: 1,

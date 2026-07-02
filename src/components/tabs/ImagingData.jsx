@@ -247,7 +247,7 @@ const processImagingData = (data) => {
 };
 
 // ImagingTable 組件 - 處理待取報告
-const PendingImagingTable = ({ data, generalDisplaySettings }) => {
+const PendingImagingTable = ({ data }) => {
   return (
     <TableContainer component={Paper}>
       <Table size="small">
@@ -256,7 +256,6 @@ const PendingImagingTable = ({ data, generalDisplaySettings }) => {
             <TableCell>
               <TypographySizeWrapper
                 textSizeType="content"
-                generalDisplaySettings={generalDisplaySettings}
               >
                 日期
               </TypographySizeWrapper>
@@ -264,7 +263,6 @@ const PendingImagingTable = ({ data, generalDisplaySettings }) => {
             <TableCell>
               <TypographySizeWrapper
                 textSizeType="content"
-                generalDisplaySettings={generalDisplaySettings}
               >
                 檢查項目
               </TypographySizeWrapper>
@@ -272,7 +270,6 @@ const PendingImagingTable = ({ data, generalDisplaySettings }) => {
             <TableCell width="60px" align="center">
               <TypographySizeWrapper
                 textSizeType="content"
-                generalDisplaySettings={generalDisplaySettings}
               >
                 影像
               </TypographySizeWrapper>
@@ -290,14 +287,12 @@ const PendingImagingTable = ({ data, generalDisplaySettings }) => {
                     <TypographySizeWrapper
                       variant="body2"
                       textSizeType="content"
-                      generalDisplaySettings={generalDisplaySettings}
                     >
                       {item.date}
                     </TypographySizeWrapper>
                     <TypographySizeWrapper
                       variant="caption"
                       textSizeType="note"
-                      generalDisplaySettings={generalDisplaySettings}
                       color="text.secondary"
                     >
                       {item.hosp}
@@ -307,7 +302,6 @@ const PendingImagingTable = ({ data, generalDisplaySettings }) => {
                 <TableCell>
                   <TypographySizeWrapper
                     textSizeType="content"
-                    generalDisplaySettings={generalDisplaySettings}
                   >
                     {formattedName}
                   </TypographySizeWrapper>
@@ -316,7 +310,6 @@ const PendingImagingTable = ({ data, generalDisplaySettings }) => {
                     <TypographySizeWrapper
                       variant="caption"
                       textSizeType="note"
-                      generalDisplaySettings={generalDisplaySettings}
                       color="text.secondary"
                     >
                       {item.cure_path_name}
@@ -348,7 +341,7 @@ const PendingImagingTable = ({ data, generalDisplaySettings }) => {
 };
 
 // ImagingTable 組件 - 處理已有報告
-const ReportImagingTable = ({ data, generalDisplaySettings }) => {
+const ReportImagingTable = ({ data }) => {
   // 管理每個報告的展開/收合狀態
   const [expandedRows, setExpandedRows] = useState({});
 
@@ -368,7 +361,6 @@ const ReportImagingTable = ({ data, generalDisplaySettings }) => {
             <TableCell>
               <TypographySizeWrapper
                 textSizeType="content"
-                generalDisplaySettings={generalDisplaySettings}
               >
                 檢查資訊
               </TypographySizeWrapper>
@@ -376,7 +368,6 @@ const ReportImagingTable = ({ data, generalDisplaySettings }) => {
             <TableCell>
               <TypographySizeWrapper
                 textSizeType="content"
-                generalDisplaySettings={generalDisplaySettings}
               >
                 報告結果
               </TypographySizeWrapper>
@@ -384,7 +375,6 @@ const ReportImagingTable = ({ data, generalDisplaySettings }) => {
             <TableCell width="80px" align="center">
               <TypographySizeWrapper
                 textSizeType="content"
-                generalDisplaySettings={generalDisplaySettings}
               >
                 影像
               </TypographySizeWrapper>
@@ -420,14 +410,12 @@ const ReportImagingTable = ({ data, generalDisplaySettings }) => {
                     <TypographySizeWrapper
                       variant="body2"
                       textSizeType="content"
-                      generalDisplaySettings={generalDisplaySettings}
                     >
                       {item.date}
                     </TypographySizeWrapper>
                     <TypographySizeWrapper
                       variant="caption"
                       textSizeType="note"
-                      generalDisplaySettings={generalDisplaySettings}
                       color="text.secondary"
                     >
                       {item.hosp}
@@ -435,7 +423,6 @@ const ReportImagingTable = ({ data, generalDisplaySettings }) => {
                     <TypographySizeWrapper
                       variant="body2"
                       textSizeType="content"
-                      generalDisplaySettings={generalDisplaySettings}
                       sx={{ mt: 0.5 }}
                     >
                       {formattedName}
@@ -445,7 +432,6 @@ const ReportImagingTable = ({ data, generalDisplaySettings }) => {
                       <TypographySizeWrapper
                         variant="caption"
                         textSizeType="note"
-                        generalDisplaySettings={generalDisplaySettings}
                         color="text.secondary"
                       >
                         {item.cure_path_name}
@@ -474,7 +460,6 @@ const ReportImagingTable = ({ data, generalDisplaySettings }) => {
                     {/* 報告內容 */}
                     <TypographySizeWrapper
                       textSizeType="content"
-                      generalDisplaySettings={generalDisplaySettings}
                       sx={{ pr: isReportReduced ? 4 : 0 }}
                     >
                       {(() => {
@@ -542,7 +527,6 @@ const ReportImagingTable = ({ data, generalDisplaySettings }) => {
                                       <TypographySizeWrapper
                                         variant="caption"
                                         textSizeType="content"
-                                        generalDisplaySettings={generalDisplaySettings}
                                         sx={{ fontSize: '0.7rem', fontWeight: 'bold' }}
                                       >
                                         {imgIndex + 1}
@@ -580,7 +564,7 @@ const ReportImagingTable = ({ data, generalDisplaySettings }) => {
   );
 };
 
-const ImagingData = ({ imagingData, generalDisplaySettings }) => {
+const ImagingData = ({ imagingData }) => {
   // 確保資料存在
   const initialData = {
     withReport: imagingData?.withReport || [],
@@ -677,7 +661,6 @@ const ImagingData = ({ imagingData, generalDisplaySettings }) => {
         <TypographySizeWrapper
           variant="h6"
           textSizeType="title"
-          generalDisplaySettings={generalDisplaySettings}
           gutterBottom
         >
           待取報告 ({processedData.withoutReport.length})
@@ -685,7 +668,6 @@ const ImagingData = ({ imagingData, generalDisplaySettings }) => {
         {processedData.withoutReport.length === 0 ? (
           <TypographySizeWrapper
             textSizeType="content"
-            generalDisplaySettings={generalDisplaySettings}
             color="text.secondary"
           >
             無待取報告項目
@@ -693,7 +675,6 @@ const ImagingData = ({ imagingData, generalDisplaySettings }) => {
         ) : (
           <PendingImagingTable
             data={processedData.withoutReport}
-            generalDisplaySettings={generalDisplaySettings}
           />
         )}
       </Grid>
@@ -702,7 +683,6 @@ const ImagingData = ({ imagingData, generalDisplaySettings }) => {
           <TypographySizeWrapper
             variant="h6"
             textSizeType="title"
-            generalDisplaySettings={generalDisplaySettings}
             sx={{ mr: 2 }}
           >
             已有報告 ({filteredReportData.length})
@@ -722,7 +702,6 @@ const ImagingData = ({ imagingData, generalDisplaySettings }) => {
                 label={
                   <TypographySizeWrapper
                     textSizeType="content"
-                    generalDisplaySettings={generalDisplaySettings}
                   >
                     顯示所有
                   </TypographySizeWrapper>
@@ -743,7 +722,6 @@ const ImagingData = ({ imagingData, generalDisplaySettings }) => {
                   label={
                     <TypographySizeWrapper
                       textSizeType="content"
-                      generalDisplaySettings={generalDisplaySettings}
                     >
                       只顯示 CT & MRI
                     </TypographySizeWrapper>
@@ -765,7 +743,6 @@ const ImagingData = ({ imagingData, generalDisplaySettings }) => {
                   label={
                     <TypographySizeWrapper
                       textSizeType="content"
-                      generalDisplaySettings={generalDisplaySettings}
                     >
                       只顯示超音波
                     </TypographySizeWrapper>
@@ -779,7 +756,6 @@ const ImagingData = ({ imagingData, generalDisplaySettings }) => {
         {filteredReportData.length === 0 ? (
           <TypographySizeWrapper
             textSizeType="content"
-            generalDisplaySettings={generalDisplaySettings}
             color="text.secondary"
           >
             無報告項目
@@ -787,7 +763,6 @@ const ImagingData = ({ imagingData, generalDisplaySettings }) => {
         ) : (
           <ReportImagingTable
             data={filteredReportData}
-            generalDisplaySettings={generalDisplaySettings}
           />
         )}
       </Grid>

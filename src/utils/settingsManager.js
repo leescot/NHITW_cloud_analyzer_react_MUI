@@ -4,6 +4,7 @@
 import { DEFAULT_SETTINGS } from "../config/defaultSettings";
 import { DEFAULT_LAB_TESTS } from "../config/labTests";
 import { DEFAULT_IMAGE_TESTS } from "../config/imageTests";
+import { debugLog } from "./logger";
 
 /**
  * 從 Chrome storage 加載所有設置
@@ -254,7 +255,7 @@ const handleChineseMedSettingsChange = (event, currentSettings, updateCallback, 
  * 處理檢驗設置變更
  */
 const handleLabSettingsChange = (event, currentSettings, updateCallback, callbacks) => {
-  console.log("Lab settings change event:", event.detail);
+  debugLog("Lab settings change event:", event.detail);
 
   if (event.detail.allSettings) {
     // 更新所有檢驗設置
@@ -274,7 +275,7 @@ const handleLabSettingsChange = (event, currentSettings, updateCallback, callbac
       customLabItemCopyFormat: event.detail.allSettings.customLabItemCopyFormat,
     };
 
-    console.log("Updating all lab settings:", newLabSettings);
+    debugLog("Updating all lab settings:", newLabSettings);
 
     // 更新設置並重新處理數據
     updateCallback({
@@ -291,11 +292,11 @@ const handleLabSettingsChange = (event, currentSettings, updateCallback, callbac
     let updatedValue = event.detail.value;
     let settingKey = event.detail.setting;
 
-    console.log(`Updating single lab setting: ${settingKey} = ${JSON.stringify(updatedValue)}`);
+    debugLog(`Updating single lab setting: ${settingKey} = ${JSON.stringify(updatedValue)}`);
 
     // 特別處理 displayLabFormat
     if (settingKey === 'displayLabFormat') {
-      console.log(`Special handling for display format: ${updatedValue}`);
+      debugLog(`Special handling for display format: ${updatedValue}`);
 
       // 創建新的設置對象，確保 displayLabFormat 被正確設置
       const updatedSettings = {
@@ -303,7 +304,7 @@ const handleLabSettingsChange = (event, currentSettings, updateCallback, callbac
         displayLabFormat: updatedValue
       };
 
-      console.log("Updated lab settings with new display format:", updatedSettings);
+      debugLog("Updated lab settings with new display format:", updatedSettings);
 
       // 更新設置
       updateCallback({
@@ -321,7 +322,7 @@ const handleLabSettingsChange = (event, currentSettings, updateCallback, callbac
 
     // 特別處理 itemSeparator
     if (settingKey === 'itemSeparator') {
-      console.log(`Special handling for item separator: "${updatedValue}" (${typeof updatedValue})`);
+      debugLog(`Special handling for item separator: "${updatedValue}" (${typeof updatedValue})`);
 
       // 確保分隔符是字符串
       if (typeof updatedValue !== 'string') {
@@ -335,7 +336,7 @@ const handleLabSettingsChange = (event, currentSettings, updateCallback, callbac
         .replace(/\r/g, '\\r')
         .replace(/\t/g, '\\t');
 
-      console.log(`Sanitized itemSeparator: "${loggableSeparator}" (${typeof updatedValue})`);
+      debugLog(`Sanitized itemSeparator: "${loggableSeparator}" (${typeof updatedValue})`);
 
       // 創建新的設置對象，確保 itemSeparator 被正確設置
       const updatedSettings = {
@@ -343,7 +344,7 @@ const handleLabSettingsChange = (event, currentSettings, updateCallback, callbac
         itemSeparator: updatedValue
       };
 
-      console.log("Updated lab settings with new item separator:", updatedSettings);
+      debugLog("Updated lab settings with new item separator:", updatedSettings);
 
       // 更新設置
       updateCallback({
@@ -365,7 +366,7 @@ const handleLabSettingsChange = (event, currentSettings, updateCallback, callbac
       [settingKey]: updatedValue
     };
 
-    console.log("Updated lab settings:", updatedSettings);
+    debugLog("Updated lab settings:", updatedSettings);
 
     // 更新設置
     updateCallback({

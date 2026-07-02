@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Paper, Typography, Box } from "@mui/material";
 import BiotechIcon from "@mui/icons-material/Biotech";
+import { useGeneralDisplaySettings } from "../../contexts/SettingsContext";
 
 /**
  * Component for displaying Cancer Screening data
@@ -9,7 +10,8 @@ import BiotechIcon from "@mui/icons-material/Biotech";
  * @param {Object} generalDisplaySettings - Display settings like text sizes
  * @returns {JSX.Element} The component
  */
-const Overview_CancerScreening = ({ cancerScreeningData, generalDisplaySettings = {} }) => {
+const Overview_CancerScreening = ({ cancerScreeningData }) => {
+  const generalDisplaySettings = useGeneralDisplaySettings();
   // Extract display settings with defaults
   const { titleTextSize = 'medium', contentTextSize = 'medium' } = generalDisplaySettings;
 

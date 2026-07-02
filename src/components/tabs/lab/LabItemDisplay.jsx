@@ -10,7 +10,6 @@ const LabItemDisplay = ({
   labIndex,
   selectedLabItems,
   handleToggleLabItem,
-  generalDisplaySettings,
   labSettings
 }) => {
   const {
@@ -21,9 +20,6 @@ const LabItemDisplay = ({
     showReference,
     highlightAbnormal
   } = labSettings;
-
-  // Add debug logging
-  // console.log(`LabItemDisplay format: ${displayLabFormat}, enableLabChooseCopy: ${enableLabChooseCopy}`);
 
   const labId = `${groupIndex}-${labIndex}`;
   const isSelected = selectedLabItems[groupIndex]?.[labId] || false;
@@ -57,7 +53,6 @@ const LabItemDisplay = ({
             <TypographySizeWrapper
               variant="body2"
               textSizeType="content"
-              generalDisplaySettings={generalDisplaySettings}
               style={{
                 color: getStatusColor(lab, highlightAbnormal),
                 display: "inline-block",
@@ -99,7 +94,6 @@ const LabItemDisplay = ({
         <TypographySizeWrapper
           variant="body2"
           textSizeType="content"
-          generalDisplaySettings={generalDisplaySettings}
           style={{
             color: getStatusColor(lab, highlightAbnormal),
             display: "inline-block",

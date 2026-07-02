@@ -110,7 +110,6 @@ const labProcessor = {
 
       // 直接从源数据生成格式化的参考范围 - pass order_code and hosp
       const formattedReference = getReferenceRangeDisplayText(lab.consult_value, lab.order_code, lab.hosp);
-      // console.log(`${lab.assay_item_name} - formattedReference direct:`, formattedReference);
 
       // 檢查是否有自定義參考範圍
       let referenceMin, referenceMax;

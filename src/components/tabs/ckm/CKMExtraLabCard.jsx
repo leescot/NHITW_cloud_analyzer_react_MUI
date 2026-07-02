@@ -20,7 +20,7 @@ export const EXTRA_LAB_ITEMS = [
   { code: '12164B', name: 'Lp(a)' },
 ];
 
-const CKMExtraLabCard = ({ groupedLabs, gds }) => {
+const CKMExtraLabCard = ({ groupedLabs }) => {
   const items = useMemo(() => {
     if (!groupedLabs || groupedLabs.length === 0) return [];
     const codeSet = new Set(EXTRA_LAB_ITEMS.map(e => e.code));
@@ -57,16 +57,16 @@ const CKMExtraLabCard = ({ groupedLabs, gds }) => {
         {items.map((item, i) => (
           <TableRow key={i} sx={{ '&:last-child td': { borderBottom: 0 } }}>
             <TableCell sx={{ ...cs, color: 'text.secondary', width: '40%' }}>
-              <TypographySizeWrapper textSizeType="content" generalDisplaySettings={gds}>{item.displayName}</TypographySizeWrapper>
+              <TypographySizeWrapper textSizeType="content">{item.displayName}</TypographySizeWrapper>
             </TableCell>
             <TableCell sx={{ ...cs, fontWeight: (item.valueStatus === 'high' || item.valueStatus === 'low' || item.isAbnormal) ? 700 : 400, color: getStatusColor(item) }}>
-              <TypographySizeWrapper textSizeType="content" generalDisplaySettings={gds}>{item.value}</TypographySizeWrapper>
+              <TypographySizeWrapper textSizeType="content">{item.value}</TypographySizeWrapper>
             </TableCell>
             <TableCell sx={{ ...cs, color: 'text.secondary' }}>
-              <TypographySizeWrapper textSizeType="note" generalDisplaySettings={gds}>{item.unit}</TypographySizeWrapper>
+              <TypographySizeWrapper textSizeType="note">{item.unit}</TypographySizeWrapper>
             </TableCell>
             <TableCell sx={{ ...cs, color: 'text.secondary' }}>
-              <TypographySizeWrapper textSizeType="note" generalDisplaySettings={gds}>{sd(item.date)}</TypographySizeWrapper>
+              <TypographySizeWrapper textSizeType="note">{sd(item.date)}</TypographySizeWrapper>
             </TableCell>
           </TableRow>
         ))}

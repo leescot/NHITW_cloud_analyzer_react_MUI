@@ -1,7 +1,5 @@
 export const dashboardProcessor = {
   processDashboardData({ medicationData, chineseMedData }) {
-    // console.log('Starting to process dashboard data');
-
     const now = new Date();
     const ninetyDaysAgo = new Date(now.getTime() - (90 * 24 * 60 * 60 * 1000));
     const thirtyDaysAgo = new Date(now.getTime() - (30 * 24 * 60 * 60 * 1000));

@@ -9,7 +9,6 @@ const TypeBasedLayout = ({
   groupIndex,
   selectedLabItems,
   handleToggleLabItem,
-  generalDisplaySettings,
   labSettings
 }) => {
   // 先按類型分組
@@ -61,7 +60,6 @@ const TypeBasedLayout = ({
       <TypographySizeWrapper
         variant="subtitle2"
         textSizeType="content"
-        generalDisplaySettings={generalDisplaySettings}
         sx={{
           mb: 1,
           fontWeight: 'bold'
@@ -77,7 +75,6 @@ const TypeBasedLayout = ({
             labIndex={indexMap.get(lab) || lab.originalIndex || labIndex}
             selectedLabItems={selectedLabItems}
             handleToggleLabItem={handleToggleLabItem}
-            generalDisplaySettings={generalDisplaySettings}
             labSettings={labSettings}
           />
         </Box>

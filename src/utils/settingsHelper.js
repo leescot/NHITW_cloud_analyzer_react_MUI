@@ -1,7 +1,9 @@
+import { debugLog } from './logger';
+
 // 更新資料狀態的函數
 export const updateDataStatus = (setDataStatus) => {
   chrome.runtime.sendMessage({ action: "getDataStatus" }, (response) => {
-    console.log("DATA STATUS RESPONSE:", response);
+    debugLog("DATA STATUS RESPONSE:", response);
 
     if (response && response.dataStatus) {
       // Make a copy to avoid direct state mutation
@@ -20,7 +22,7 @@ export const updateDataStatus = (setDataStatus) => {
         }
       });
 
-      console.log("PROCESSED STATUS FOR UI:", updatedStatus);
+      debugLog("PROCESSED STATUS FOR UI:", updatedStatus);
       setDataStatus(updatedStatus);
     }
   });
@@ -50,7 +52,7 @@ const getStatusKeyFromStorageKey = (storageKey) => {
 export const handleSettingChange = (settingName, value, setLocalState, localStateProp, settingType) => {
   // Add special logging for displayLabFormat changes
   if (settingName === 'displayLabFormat') {
-    console.log(`CHANGING LAB DISPLAY FORMAT TO: ${value}`);
+    debugLog(`CHANGING LAB DISPLAY FORMAT TO: ${value}`);
   }
 
   // Update local component state
@@ -63,12 +65,12 @@ export const handleSettingChange = (settingName, value, setLocalState, localStat
 
   // Save to Chrome storage
   chrome.storage.sync.set({ [settingName]: value }, () => {
-    console.log(`Setting updated: ${settingName} = ${JSON.stringify(value)}`);
+    debugLog(`Setting updated: ${settingName} = ${JSON.stringify(value)}`);
 
     // Special logging for displayLabFormat
     if (settingName === 'displayLabFormat') {
       chrome.storage.sync.get('displayLabFormat', (items) => {
-        console.log(`Verified displayLabFormat in storage: ${items.displayLabFormat}`);
+        debugLog(`Verified displayLabFormat in storage: ${items.displayLabFormat}`);
       });
     }
 
@@ -87,7 +89,7 @@ export const handleSettingChange = (settingName, value, setLocalState, localStat
           }
         });
       } else {
-        console.log('chrome.tabs API not available, notification system disabled');
+        debugLog('chrome.tabs API not available, notification system disabled');
         // Mark that we've logged the warning
         handleSettingChange.hasLoggedTabsWarning = true;
       }
@@ -120,7 +122,7 @@ export const handleFetchData = (setDataStatus) => {
         chrome.tabs.sendMessage(tabs[0].id, { action: 'manualDataFetch' },
           (response) => {
             if (response && response.status === 'started') {
-              console.log('Manual data fetch initiated');
+              debugLog('Manual data fetch initiated');
 
               // Update status after a delay to allow fetch to complete
               setTimeout(() => {
@@ -132,7 +134,7 @@ export const handleFetchData = (setDataStatus) => {
       }
     });
   } else {
-    console.log('chrome.tabs API not available, skipping manual data fetch');
+    debugLog('chrome.tabs API not available, skipping manual data fetch');
   }
 };
 
@@ -153,7 +155,7 @@ export const handleClearData = (setDataStatus) => {
   ];
 
   chrome.storage.local.remove(dataKeysToRemove, () => {
-    console.log('All data cleared from storage');
+    debugLog('All data cleared from storage');
     updateDataStatus(setDataStatus);
 
     // Notify content script to clear data
@@ -164,7 +166,7 @@ export const handleClearData = (setDataStatus) => {
         }
       });
     } else {
-      console.log('chrome.tabs API not available, skipping clear data notification');
+      debugLog('chrome.tabs API not available, skipping clear data notification');
     }
   });
 };

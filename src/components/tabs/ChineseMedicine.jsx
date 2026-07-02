@@ -7,7 +7,6 @@ import { chineseMedProcessor } from "../../utils/chineseMedProcessor";
 const ChineseMedicine = ({
   groupedChineseMeds,
   chineseMedSettings,
-  generalDisplaySettings,
 }) => {
   // 添加 snackbar 狀態
   const [snackbarOpen, setSnackbarOpen] = useState(false);
@@ -43,7 +42,6 @@ const ChineseMedicine = ({
       {groupedChineseMeds.length === 0 ? (
         <TypographySizeWrapper
           textSizeType="content"
-          generalDisplaySettings={generalDisplaySettings}
           color="text.secondary"
         >
           沒有找到中藥資料
@@ -61,7 +59,6 @@ const ChineseMedicine = ({
                 <TypographySizeWrapper
                   variant="h6"
                   textSizeType="content"
-                  generalDisplaySettings={generalDisplaySettings}
                   color="primary"
                   gutterBottom={false}
                   sx={{ mb: 0 }}
@@ -73,7 +70,6 @@ const ChineseMedicine = ({
                   component="span"
                   textSizeType="content"
                   variant="h6"
-                  generalDisplaySettings={generalDisplaySettings}
                   sx={{
                     color: "text.primary",
                     ml: 1,
@@ -87,7 +83,6 @@ const ChineseMedicine = ({
                   <TypographySizeWrapper
                     component="span"
                     textSizeType="note"
-                    generalDisplaySettings={generalDisplaySettings}
                     sx={{
                       color: "secondary.light",
                       ml: 0.5
@@ -101,7 +96,6 @@ const ChineseMedicine = ({
                   <TypographySizeWrapper
                     component="span"
                     textSizeType="note"
-                    generalDisplaySettings={generalDisplaySettings}
                     sx={{
                       color: "text.secondary",
                       ml: 1,
@@ -131,7 +125,6 @@ const ChineseMedicine = ({
                   <TypographySizeWrapper
                     variant="body1"
                     textSizeType="content"
-                    generalDisplaySettings={generalDisplaySettings}
                     // 調整這裡的 mr 值可以改變藥名和劑量之間的間距
                     // mr: 1 表示很小的間距，mr: 10 表示很大的間距
                     // 目前設定為 mr: 10，可以根據需要調整
@@ -143,7 +136,6 @@ const ChineseMedicine = ({
                   <TypographySizeWrapper
                     component="span"
                     textSizeType="content"
-                    generalDisplaySettings={generalDisplaySettings}
                     sx={{ color: "text.secondary" }}
                   >
                     {chineseMedSettings.doseFormat === 'perDose' ? med.perDosage : med.dailyDosage}g
@@ -153,7 +145,6 @@ const ChineseMedicine = ({
                     <TypographySizeWrapper
                       component="span"
                       textSizeType="note"
-                      generalDisplaySettings={generalDisplaySettings}
                       sx={{
                         color: "info.main",
                         ml: 1,

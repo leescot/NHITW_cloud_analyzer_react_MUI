@@ -1,6 +1,7 @@
 import React, { useEffect, useState } from "react";
 import { Paper, Typography, Box } from "@mui/material";
 import HealthAndSafetyIcon from "@mui/icons-material/HealthAndSafety";
+import { useGeneralDisplaySettings } from "../../contexts/SettingsContext";
 
 /**
  * Component for displaying Adult Health Check data
@@ -9,7 +10,8 @@ import HealthAndSafetyIcon from "@mui/icons-material/HealthAndSafety";
  * @param {Object} generalDisplaySettings - Display settings like text sizes
  * @returns {JSX.Element} The component
  */
-const Overview_AdultHealthCheck = ({ adultHealthCheckData, generalDisplaySettings = {} }) => {
+const Overview_AdultHealthCheck = ({ adultHealthCheckData }) => {
+  const generalDisplaySettings = useGeneralDisplaySettings();
   // Extract display settings with defaults
   const { titleTextSize = 'medium', contentTextSize = 'medium' } = generalDisplaySettings;
 

@@ -16,6 +16,8 @@ import {
 import SaveIcon from '@mui/icons-material/Save';
 import RestoreIcon from '@mui/icons-material/Restore';
 
+import { debugLog } from '../../utils/logger';
+
 // Import local components
 import FormatElementsPanel from './labCopyFormat/FormatElementsPanel';
 import FormatPreview from './labCopyFormat/FormatPreview';
@@ -23,7 +25,7 @@ import useFormatEditorState from './labCopyFormat/useFormatEditorState';
 import { createHeaderLabHandlers, createItemLabHandlers } from './labCopyFormat/dragDropHandlers';
 
 // 檢驗報告自訂格式編輯器組件
-const LabCustomFormatEditor = ({ appSettings, setAppSettings, generalDisplaySettings }) => {
+const LabCustomFormatEditor = ({ appSettings, setAppSettings }) => {
   // 響應式布局
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
@@ -83,19 +85,19 @@ const LabCustomFormatEditor = ({ appSettings, setAppSettings, generalDisplaySett
       }
       
       // Log the current itemSeparator from settings
-      console.log(`LabCustomFormatEditor: Initial itemSeparator from settings: "${appSettings.lab.itemSeparator || ','}"`);
+      debugLog(`LabCustomFormatEditor: Initial itemSeparator from settings: "${appSettings.lab.itemSeparator || ','}"`);
     }
   }, [appSettings.lab]);
 
   // Effect to track itemSeparator changes
   useEffect(() => {
-    console.log(`LabCustomFormatEditor: itemSeparator changed to: "${itemSeparator}"`);
+    debugLog(`LabCustomFormatEditor: itemSeparator changed to: "${itemSeparator}"`);
   }, [itemSeparator]);
 
   // Handle format type change
   const handleFormatTypeChange = (event) => {
     const newFormatType = event.target ? event.target.value : event;
-    console.log("LabCustomFormatEditor: Format type changed to:", newFormatType);
+    debugLog("LabCustomFormatEditor: Format type changed to:", newFormatType);
     setFormatType(newFormatType);
     
     // We no longer immediately update settings here - will be saved with saveChanges
@@ -127,32 +129,11 @@ const LabCustomFormatEditor = ({ appSettings, setAppSettings, generalDisplaySett
     //   console.warn('LabCustomFormatEditor: Closing bracket missing from header format!');
     // }
     
-    // Log the current itemSeparator before saving
-    // console.log(`LabCustomFormatEditor: Current itemSeparator before saving: "${itemSeparator}" (${typeof itemSeparator})`);
-    
     // Save with format type
     saveChanges({
       formatType // Pass the current format type for lab only
     });
-    
-    // Log final settings after saving
-    // console.log('LabCustomFormatEditor: Saved format settings:', {
-    //   header: headerFormat,
-    //   item: itemFormat,
-    //   formatType: formatType,
-    //   options: {
-    //     itemSeparator
-    //   }
-    // });
   };
-  
-  // For directly testing separator
-  // const testCurrentSeparator = () => {
-  //   console.log(`====== LAB SEPARATOR TEST ======`);
-  //   console.log(`Current itemSeparator value: "${itemSeparator}" (${typeof itemSeparator})`);
-  //   console.log(`appSettings.lab.itemSeparator: "${appSettings.lab?.itemSeparator}" (${typeof appSettings.lab?.itemSeparator})`);
-  //   console.log(`================================`);
-  // };
 
   return (
     <Box sx={{ pt: 0, px: 1, pb: 1 }}>
@@ -164,7 +145,7 @@ const LabCustomFormatEditor = ({ appSettings, setAppSettings, generalDisplaySett
             color="secondary"
             startIcon={<RestoreIcon />}
             onClick={() => {
-              console.log('LabCustomFormatEditor: Reset button clicked');
+              debugLog('LabCustomFormatEditor: Reset button clicked');
               resetToDefault();
             }}
             size="small"

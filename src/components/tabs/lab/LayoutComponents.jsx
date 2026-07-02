@@ -9,7 +9,6 @@ export const VerticalLayout = ({
   groupIndex,
   selectedLabItems,
   handleToggleLabItem,
-  generalDisplaySettings,
   labSettings
 }) => {
   return (
@@ -30,7 +29,6 @@ export const VerticalLayout = ({
             labIndex={labIndex}
             selectedLabItems={selectedLabItems}
             handleToggleLabItem={handleToggleLabItem}
-            generalDisplaySettings={generalDisplaySettings}
             labSettings={labSettings}
           />
         </Box>
@@ -43,7 +41,6 @@ export const VerticalLayout = ({
 export const HorizontalLayout = ({
   labs,
   groupIndex,
-  generalDisplaySettings,
   labSettings
 }) => {
   const { enableLabAbbrev, showUnit, showReference, highlightAbnormal } = labSettings;
@@ -69,7 +66,6 @@ export const HorizontalLayout = ({
       <TypographySizeWrapper
         variant="body2"
         textSizeType="content"
-        generalDisplaySettings={generalDisplaySettings}
       >
         <div style={{ display: 'flex', flexWrap: 'wrap' }}>
           {labs.map((lab, labIndex) => {
@@ -119,7 +115,6 @@ export const MultiColumnLayout = ({
   groupIndex,
   selectedLabItems,
   handleToggleLabItem,
-  generalDisplaySettings,
   labSettings
 }) => {
   // 計算每欄要顯示的項目數
@@ -151,7 +146,6 @@ export const MultiColumnLayout = ({
                     labIndex={startIndex + labIndex}
                     selectedLabItems={selectedLabItems}
                     handleToggleLabItem={handleToggleLabItem}
-                    generalDisplaySettings={generalDisplaySettings}
                     labSettings={labSettings}
                   />
                 </Box>

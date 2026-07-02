@@ -20,8 +20,10 @@ import {
 } from "@mui/material";
 import ImageIcon from "@mui/icons-material/Image";
 import TypographySizeWrapper from "../utils/TypographySizeWrapper";
+import { useGeneralDisplaySettings } from "../../contexts/SettingsContext";
 
-const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings }) => {
+const MedicationTable = ({ groupedMedications, settings }) => {
+  const generalDisplaySettings = useGeneralDisplaySettings();
   // 添加過濾選項的狀態
   const [dayFilter, setDayFilter] = useState("gte14"); // 默認顯示>=14天藥物
   // 追蹤是否有 ATC5 顏色藥物
@@ -438,7 +440,7 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
   };
 
   // 藥物劑量顯示 Cell 組件 - 封裝單個劑量顯示邏輯
-  const MedicationDosageCell = ({ medData, shouldDisplay, generalDisplaySettings }) => {
+  const MedicationDosageCell = ({ medData, shouldDisplay }) => {
     if (!shouldDisplay) {
       return null;
     }
@@ -468,7 +470,6 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
         <TypographySizeWrapper
           variant="caption"
           textSizeType="content"
-          generalDisplaySettings={generalDisplaySettings}
           sx={{
             display: "block",
             color: "text.secondary",
@@ -479,7 +480,6 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
             <TypographySizeWrapper
               component="span"
               textSizeType="note"
-              generalDisplaySettings={generalDisplaySettings}
               sx={{ color: "#1976d2" }}
             >
               {` (餘${medData.drug_left})`}
@@ -513,7 +513,6 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
         <TypographySizeWrapper
           variant="body2"
           textSizeType="content"
-          generalDisplaySettings={generalDisplaySettings}
           sx={{ whiteSpace: "nowrap" }}
         >
           {renderDosage()}
@@ -538,7 +537,6 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
       {groupedMedications.length === 0 ? (
         <TypographySizeWrapper
           textSizeType="content"
-          generalDisplaySettings={generalDisplaySettings}
           color="text.secondary"
         >
           沒有找到用藥資料
@@ -560,7 +558,6 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
                   label={
                     <TypographySizeWrapper
                       textSizeType="content"
-                      generalDisplaySettings={generalDisplaySettings}
                     >
                       顯示所有藥物
                     </TypographySizeWrapper>
@@ -573,7 +570,6 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
                   label={
                     <TypographySizeWrapper
                       textSizeType="content"
-                      generalDisplaySettings={generalDisplaySettings}
                     >
                       只顯示≤7天藥物
                     </TypographySizeWrapper>
@@ -586,7 +582,6 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
                   label={
                     <TypographySizeWrapper
                       textSizeType="content"
-                      generalDisplaySettings={generalDisplaySettings}
                     >
                       顯示≥7天藥物
                     </TypographySizeWrapper>
@@ -599,7 +594,6 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
                   label={
                     <TypographySizeWrapper
                       textSizeType="content"
-                      generalDisplaySettings={generalDisplaySettings}
                     >
                       只顯示≥14天藥物
                     </TypographySizeWrapper>
@@ -613,7 +607,6 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
                     label={
                       <TypographySizeWrapper
                         textSizeType="content"
-                        generalDisplaySettings={generalDisplaySettings}
                       >
                         只顯示ATC5顏色藥物
                       </TypographySizeWrapper>
@@ -663,7 +656,6 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
                   >
                     <TypographySizeWrapper
                       textSizeType="content"
-                      generalDisplaySettings={generalDisplaySettings}
                     >
                       藥品名稱
                     </TypographySizeWrapper>
@@ -687,7 +679,6 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
                         <TypographySizeWrapper
                           variant="body2"
                           textSizeType="content"
-                          generalDisplaySettings={generalDisplaySettings}
                           sx={{ fontWeight: "medium" }}
                         >
                           {date}
@@ -696,7 +687,6 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
                           <TypographySizeWrapper
                             variant="caption"
                             textSizeType="note"
-                            generalDisplaySettings={generalDisplaySettings}
                             sx={{
                               display: "block",
                               color: "text.secondary",
@@ -733,7 +723,6 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
                         <Box sx={{ display: 'flex', alignItems: 'center' }}>
                           <TypographySizeWrapper
                             textSizeType="content"
-                            generalDisplaySettings={generalDisplaySettings}
                             sx={{
                               color: medicationColor?.color || 'inherit',
                               fontWeight: isBold ? 'bold' : 'normal'
@@ -783,7 +772,6 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
                             <MedicationDosageCell 
                               medData={medData} 
                               shouldDisplay={shouldDisplay} 
-                              generalDisplaySettings={generalDisplaySettings} 
                             />
                           </TableCell>
                         );

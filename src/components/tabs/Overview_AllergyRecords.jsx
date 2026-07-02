@@ -9,7 +9,7 @@ import {
 } from "@mui/material";
 import TypographySizeWrapper from "../utils/TypographySizeWrapper";
 
-const Overview_AllergyRecords = ({ allergyData = [], generalDisplaySettings, collapsedCount = null }) => {
+const Overview_AllergyRecords = ({ allergyData = [], collapsedCount = null }) => {
   // collapsedCount 有值時預設只顯示前 N 筆，點擊可展開/收合
   const [expanded, setExpanded] = React.useState(false);
 
@@ -35,7 +35,7 @@ const Overview_AllergyRecords = ({ allergyData = [], generalDisplaySettings, col
 
   return (
     <Paper sx={{ p: 2 }}>
-      <TypographySizeWrapper variant="h6" gutterBottom generalDisplaySettings={generalDisplaySettings}>
+      <TypographySizeWrapper variant="h6" gutterBottom>
         過敏紀錄
       </TypographySizeWrapper>
       {uniqueAllergyData.length > 0 ? (
@@ -48,14 +48,12 @@ const Overview_AllergyRecords = ({ allergyData = [], generalDisplaySettings, col
                     <TypographySizeWrapper
                       variant="body1"
                       component="span"
-                      generalDisplaySettings={generalDisplaySettings}
                     >
                       {item.drugName || "藥物未知"}
                     </TypographySizeWrapper>
                     <TypographySizeWrapper
                       variant="caption"
                       component="span"
-                      generalDisplaySettings={generalDisplaySettings}
                     >
                       {item.symptoms || "症狀未知"}
                     </TypographySizeWrapper>
@@ -69,7 +67,6 @@ const Overview_AllergyRecords = ({ allergyData = [], generalDisplaySettings, col
         <TypographySizeWrapper
           variant="body1"
           color="text.secondary"
-          generalDisplaySettings={generalDisplaySettings}
         >
           暫無過敏紀錄
         </TypographySizeWrapper>
@@ -78,7 +75,6 @@ const Overview_AllergyRecords = ({ allergyData = [], generalDisplaySettings, col
         <TypographySizeWrapper
           variant="caption"
           textSizeType="note"
-          generalDisplaySettings={generalDisplaySettings}
           onClick={() => setExpanded(!expanded)}
           sx={{ display: 'block', mt: 0.5, color: 'primary.main', cursor: 'pointer' }}
         >

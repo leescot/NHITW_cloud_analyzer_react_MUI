@@ -1,6 +1,6 @@
-import {assert} from './lib/chai.js';
+import { describe, it, assert } from 'vitest';
 
-import {dischargeProcessor} from './src/utils/dischargeProcessor.js';
+import {dischargeProcessor} from '../src/utils/dischargeProcessor.js';
 
 describe('utils/dischargeProcessor', function () {
   describe('.processDischargeData', function () {

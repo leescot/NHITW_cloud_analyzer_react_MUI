@@ -33,7 +33,6 @@ const Overview_RecentDiagnosis = ({
   groupedMedications = [],
   groupedChineseMeds = [],
   patientSummaryData = [],
-  generalDisplaySettings = {},
   trackingDays = 180
 }) => {
   // 處理來自藥物和中藥記錄的診斷數據
@@ -401,7 +400,6 @@ const Overview_RecentDiagnosis = ({
           >
             <TypographySizeWrapper
               textSizeType="content"
-              generalDisplaySettings={generalDisplaySettings}
               sx={{ fontSize: '0.85rem', fontWeight: 'bold', lineHeight: 1 }}
             >
               {shortTitle}
@@ -448,7 +446,6 @@ const Overview_RecentDiagnosis = ({
 
                 <TypographySizeWrapper
                   textSizeType="content"
-                  generalDisplaySettings={generalDisplaySettings}
                   sx={{ mr: 1, display: 'flex', alignItems: 'center' }}
                 >
                   {isEnrollment ? (
@@ -541,7 +538,6 @@ const Overview_RecentDiagnosis = ({
                   <InfoIcon fontSize="small" color="action" sx={{ mr: 0.5 }} />
                   <TypographySizeWrapper
                     textSizeType="note"
-                    generalDisplaySettings={generalDisplaySettings}
                     color="text.secondary"
                   >
                     還有 {diagnoses.length - maxVisible} 筆資料
@@ -561,7 +557,6 @@ const Overview_RecentDiagnosis = ({
         <TypographySizeWrapper
           variant="h6"
           textSizeType="title"
-          generalDisplaySettings={generalDisplaySettings}
           gutterBottom
         >
           就醫診斷與收案
@@ -570,7 +565,6 @@ const Overview_RecentDiagnosis = ({
         {!hasDiagnoses ? (
           <TypographySizeWrapper
             textSizeType="content"
-            generalDisplaySettings={generalDisplaySettings}
             color="text.secondary"
           >
             無近期診斷資料

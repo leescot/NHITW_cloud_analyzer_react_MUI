@@ -10,7 +10,7 @@ import {
 } from "@mui/material";
 import TypographySizeWrapper from "../utils/TypographySizeWrapper";
 
-const MedDaysData = ({ medDaysData, generalDisplaySettings }) => {
+const MedDaysData = ({ medDaysData }) => {
   return (
     <TableContainer component={Paper}>
       <Table size="small">
@@ -19,7 +19,6 @@ const MedDaysData = ({ medDaysData, generalDisplaySettings }) => {
             <TableCell>
               <TypographySizeWrapper
                 textSizeType="content"
-                generalDisplaySettings={generalDisplaySettings}
               >
                 藥品名稱
               </TypographySizeWrapper>
@@ -27,7 +26,6 @@ const MedDaysData = ({ medDaysData, generalDisplaySettings }) => {
             <TableCell align="right">
               <TypographySizeWrapper
                 textSizeType="content"
-                generalDisplaySettings={generalDisplaySettings}
               >
                 剩餘天數
               </TypographySizeWrapper>
@@ -35,7 +33,6 @@ const MedDaysData = ({ medDaysData, generalDisplaySettings }) => {
             <TableCell>
               <TypographySizeWrapper
                 textSizeType="content"
-                generalDisplaySettings={generalDisplaySettings}
               >
                 到期日
               </TypographySizeWrapper>
@@ -48,7 +45,6 @@ const MedDaysData = ({ medDaysData, generalDisplaySettings }) => {
               <TableCell colSpan={3} align="center">
                 <TypographySizeWrapper
                   textSizeType="content"
-                  generalDisplaySettings={generalDisplaySettings}
                   color="text.secondary"
                 >
                   沒有找到餘藥資料
@@ -61,7 +57,6 @@ const MedDaysData = ({ medDaysData, generalDisplaySettings }) => {
                 <TableCell>
                   <TypographySizeWrapper
                     textSizeType="content"
-                    generalDisplaySettings={generalDisplaySettings}
                   >
                     {item.drugName}
                   </TypographySizeWrapper>
@@ -69,7 +64,6 @@ const MedDaysData = ({ medDaysData, generalDisplaySettings }) => {
                 <TableCell align="right">
                   <TypographySizeWrapper
                     textSizeType="content"
-                    generalDisplaySettings={generalDisplaySettings}
                   >
                     {item.remainingDays}
                   </TypographySizeWrapper>
@@ -77,7 +71,6 @@ const MedDaysData = ({ medDaysData, generalDisplaySettings }) => {
                 <TableCell>
                   <TypographySizeWrapper
                     textSizeType="content"
-                    generalDisplaySettings={generalDisplaySettings}
                   >
                     {item.expiryDate}
                   </TypographySizeWrapper>

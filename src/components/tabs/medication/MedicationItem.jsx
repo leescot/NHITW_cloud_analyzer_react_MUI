@@ -3,14 +3,15 @@ import { Box, Tooltip, IconButton, Chip } from "@mui/material";
 import ImageIcon from "@mui/icons-material/Image";
 import TypographySizeWrapper from "../../utils/TypographySizeWrapper";
 import { getMedicationColor, shouldBeBold, handleDrugImageClick } from "./MedicationHelpers";
+import { useGeneralDisplaySettings } from "../../../contexts/SettingsContext";
 
 const MedicationItem = ({
   med,
   settings,
-  generalDisplaySettings,
   setSnackbarMessage,
   setSnackbarOpen
 }) => {
+  const generalDisplaySettings = useGeneralDisplaySettings();
   // 獲取藥物的顏色
   const medicationColor = getMedicationColor(med, settings);
   // 檢查藥物是否應該以粗體顯示
@@ -21,7 +22,6 @@ const MedicationItem = ({
       <TypographySizeWrapper
         variant="body2"
         textSizeType="content"
-        generalDisplaySettings={generalDisplaySettings}
         sx={{
           color: medicationColor ? medicationColor.color : 'inherit',
           fontWeight: isBold ? 'bold' : 'normal'
@@ -36,7 +36,6 @@ const MedicationItem = ({
           <TypographySizeWrapper
             component="span"
             textSizeType="note"
-            generalDisplaySettings={generalDisplaySettings}
             sx={{
               color: medicationColor ? medicationColor.color : "text.secondary",
               fontStyle: "italic",
@@ -52,7 +51,6 @@ const MedicationItem = ({
           <TypographySizeWrapper
             component="span"
             textSizeType="note"
-            generalDisplaySettings={generalDisplaySettings}
             sx={{
               color: medicationColor ? medicationColor.color : "text.secondary",
               ml: 0.5,
@@ -67,7 +65,6 @@ const MedicationItem = ({
           <TypographySizeWrapper
             component="span"
             textSizeType="note"
-            generalDisplaySettings={generalDisplaySettings}
             sx={{
               color: "secondary.light",
               ml: 0.5

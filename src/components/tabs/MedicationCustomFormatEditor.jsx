@@ -21,9 +21,10 @@ import FormatElementsPanel from './medicationCopyFormat/FormatElementsPanel';
 import FormatPreview from './medicationCopyFormat/FormatPreview';
 import useFormatEditorState from './medicationCopyFormat/useFormatEditorState';
 import { createHeaderDragHandlers, createDrugDragHandlers } from './medicationCopyFormat/dragDropHandlers';
+import { debugLog } from '../../utils/logger';
 
 // 西藥自訂格式編輯器組件
-const MedicationCustomFormatEditor = ({ appSettings, setAppSettings, generalDisplaySettings }) => {
+const MedicationCustomFormatEditor = ({ appSettings, setAppSettings }) => {
   // 響應式布局
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
@@ -87,7 +88,7 @@ const MedicationCustomFormatEditor = ({ appSettings, setAppSettings, generalDisp
   // Handle format type change
   const handleFormatTypeChange = (event) => {
     const newFormatType = event.target ? event.target.value : event;
-    console.log("Format type changed to:", newFormatType);
+    debugLog("Format type changed to:", newFormatType);
     setFormatType(newFormatType);
   };
 
@@ -123,7 +124,7 @@ const MedicationCustomFormatEditor = ({ appSettings, setAppSettings, generalDisp
     });
     
     // Log final settings after saving
-    console.log('MedicationCustomFormatEditor: Saved format settings:', {
+    debugLog('MedicationCustomFormatEditor: Saved format settings:', {
       header: headerFormat,
       drug: drugFormat,
       formatType: formatType,
@@ -143,7 +144,7 @@ const MedicationCustomFormatEditor = ({ appSettings, setAppSettings, generalDisp
             color="secondary"
             startIcon={<RestoreIcon />}
             onClick={() => {
-              console.log('MedicationCustomFormatEditor: Reset button clicked');
+              debugLog('MedicationCustomFormatEditor: Reset button clicked');
               resetToDefault();
             }}
             size="small"

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, { useState, useEffect, useRef } from "react";
 import {
   Dialog,
   DialogTitle,
@@ -26,12 +26,10 @@ import {
   Tooltip,
   Fab,
 } from "@mui/material";
-// import CloseIcon from "@mui/icons-material/Close";
 import LocalHospitalIcon from "@mui/icons-material/LocalHospital";
 import WarningAmberIcon from "@mui/icons-material/WarningAmber";
 import HealingIcon from "@mui/icons-material/Healing";
 import GrassIcon from "@mui/icons-material/Grass";
-// import ReportRoundedIcon from '@mui/icons-material/ReportRounded';
 import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
 import SettingsIcon from "@mui/icons-material/Settings";
 import FormatListBulletedIcon from "@mui/icons-material/FormatListBulleted";
@@ -56,10 +54,9 @@ import {
 // 引入標籤顏色工具函數
 import { getTabColor, getTabSelectedColor } from "../utils/tabColorUtils";
 
-// import ContentCopyIcon from "@mui/icons-material/ContentCopy";
+import { SettingsProvider } from "../contexts/SettingsContext";
+
 import Snackbar from "@mui/material/Snackbar";
-// import VisibilityIcon from '@mui/icons-material/Visibility';
-// import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
 import { DEFAULT_LAB_TESTS } from "../config/labTests";
 import { DEFAULT_IMAGE_TESTS } from "../config/imageTests";
 
@@ -76,6 +73,7 @@ import LabTableView from "./tabs/LabTableView";
 import Instructions from "./tabs/Instructions";
 import AdvancedSettings from "./tabs/AdvancedSettings";
 import { ckmProcessor } from "../utils/ckmProcessor";
+import { buildUserInfoFromLocal } from "../utils/ageUtils";
 
 import MedicationIcon from "@mui/icons-material/Medication";
 import ScienceIcon from "@mui/icons-material/Science";
@@ -113,9 +111,6 @@ import {
   extractUserInfoFromToken,
   formatUserInfoDisplay,
 } from "../utils/userInfoUtils";
-
-// 刪除未使用的組件和函數，或移動到實際使用它們的地方
-// ImagingTable, getLabStatusColor, getLabValueColor
 
 // Add a global flag to prevent multiple openings
 window.isFloatingIconOpening = false;
@@ -162,6 +157,14 @@ const FloatingIcon = () => {
   const [snackbarOpen, setSnackbarOpen] = useState(false);
   const [snackbarMessage, setSnackbarMessage] = useState("");
   const [patientSummaryData, setPatientSummaryData] = useState([]);
+
+  // 以 ref 保存最新值,供掛載時註冊的 listener 讀取(修復 stale closure)
+  const openRef = useRef(open);
+  const appSettingsRef = useRef(appSettings);
+  useEffect(() => {
+    openRef.current = open;
+    appSettingsRef.current = appSettings;
+  });
 
   // 新增響應式布局檢測
   const theme = useTheme();
@@ -237,11 +240,11 @@ const FloatingIcon = () => {
       // 處理切換到自訂設定標籤的消息
       if (message.action === "switchToCustomFormatTab") {
         // 如果對話框未打開，先打開它
-        if (!open) {
+        if (!openRef.current) {
           setOpen(true);
         }
         // 只有當自訂設定已啟用時才切換到指定的標籤
-        if (typeof message.tabIndex === 'number' && appSettings.western.enableMedicationCustomCopyFormat) {
+        if (typeof message.tabIndex === 'number' && appSettingsRef.current.western.enableMedicationCustomCopyFormat) {
           setTabValue(message.tabIndex);
         }
       }
@@ -249,31 +252,31 @@ const FloatingIcon = () => {
       // 處理切換到檢驗自訂格式編輯器的消息
       if (message.action === "switchToLabCustomFormatTab") {
         // 如果對話框未打開，先打開它
-        if (!open) {
+        if (!openRef.current) {
           setOpen(true);
         }
         // 只有當自訂設定已啟用時才切換到指定的標籤
-        if (typeof message.tabIndex === 'number' && appSettings.lab.enableLabCustomCopyFormat) {
+        if (typeof message.tabIndex === 'number' && appSettingsRef.current.lab.enableLabCustomCopyFormat) {
           setTabValue(message.tabIndex);
         }
       }
 
       // 處理打開自訂格式編輯器的消息
       if (message.action === "openCustomFormatEditor") {
-        if (!open) {
+        if (!openRef.current) {
           setOpen(true);
         }
-        if (appSettings.western.enableMedicationCustomCopyFormat) {
+        if (appSettingsRef.current.western.enableMedicationCustomCopyFormat) {
           setTabValue(advancedTabIndex);
         }
       }
 
       // 處理打開檢驗自訂格式編輯器的消息
       if (message.action === "openLabCustomFormatEditor") {
-        if (!open) {
+        if (!openRef.current) {
           setOpen(true);
         }
-        if (appSettings.lab.enableLabCustomCopyFormat) {
+        if (appSettingsRef.current.lab.enableLabCustomCopyFormat) {
           setTabValue(advancedTabIndex);
         }
       }
@@ -307,7 +310,7 @@ const FloatingIcon = () => {
           // 使用設置管理器處理設置變更
           handleDataFetchCompletedSettingsChange(
             event,
-            appSettings,
+            appSettingsRef.current,
             setAppSettings,
             callbacks
           );
@@ -349,7 +352,7 @@ const FloatingIcon = () => {
     };
 
     // 使用dataManager處理所有資料
-    const results = await handleAllData(dataSources, appSettings, setters);
+    const results = await handleAllData(dataSources, appSettingsRef.current, setters);
 
     // CKM 資料處理（跨資料源篩選，不受設定開關影響，UI 層條件渲染）
     try {
@@ -366,18 +369,7 @@ const FloatingIcon = () => {
 
     // 本地 JSON 匯入時重新取得使用者資訊
     if (!userInfo && window._localUserInfo) {
-      const local = window._localUserInfo;
-      let age = null;
-      if (local.birthday && local.birthday.length === 7) {
-        const rocYear = parseInt(local.birthday.substring(0, 3), 10);
-        const month = parseInt(local.birthday.substring(3, 5), 10);
-        const day = parseInt(local.birthday.substring(5, 7), 10);
-        const birthDate = new Date(rocYear + 1911, month - 1, day);
-        const today = new Date();
-        age = today.getFullYear() - birthDate.getFullYear();
-        if (today.getMonth() < month - 1 || (today.getMonth() === month - 1 && today.getDate() < day)) age--;
-      }
-      setUserInfo({ name: local.name, userId: local.userId, gender: local.gender, birthday: local.birthday, age });
+      setUserInfo(buildUserInfoFromLocal(window._localUserInfo));
     }
   };
 
@@ -417,18 +409,7 @@ const FloatingIcon = () => {
       let info = extractUserInfoFromToken();
       // Fallback: 本地 JSON 匯入的使用者資訊
       if (!info && window._localUserInfo) {
-        const local = window._localUserInfo;
-        let age = null;
-        if (local.birthday && local.birthday.length === 7) {
-          const rocYear = parseInt(local.birthday.substring(0, 3), 10);
-          const month = parseInt(local.birthday.substring(3, 5), 10);
-          const day = parseInt(local.birthday.substring(5, 7), 10);
-          const birthDate = new Date(rocYear + 1911, month - 1, day);
-          const today = new Date();
-          age = today.getFullYear() - birthDate.getFullYear();
-          if (today.getMonth() < month - 1 || (today.getMonth() === month - 1 && today.getDate() < day)) age--;
-        }
-        info = { name: local.name, userId: local.userId, gender: local.gender, birthday: local.birthday, age };
+        info = buildUserInfoFromLocal(window._localUserInfo);
       }
       setUserInfo(info);
     }
@@ -492,7 +473,7 @@ const FloatingIcon = () => {
   };
 
   return (
-    <>
+    <SettingsProvider appSettings={appSettings} generalDisplaySettings={generalDisplaySettings}>
       <IconButton style={getIconPositionStyle()} onClick={handleClick}>
         <img
           src={cloud_icon}
@@ -833,7 +814,6 @@ const FloatingIcon = () => {
                 atc5ColorGroups: appSettings.atc5.colorGroups,
               }}
               overviewSettings={appSettings.overview}
-              generalDisplaySettings={generalDisplaySettings}
               labSettings={appSettings.lab}
               cloudSettings={appSettings.cloud}
               adultHealthCheckData={adultHealthCheckData}
@@ -856,7 +836,6 @@ const FloatingIcon = () => {
                 atc5ColorGroups: appSettings.atc5.colorGroups,
               }}
               copyFormat={appSettings.western.medicationCopyFormat}
-              generalDisplaySettings={generalDisplaySettings}
             />
           </TabPanel>
 
@@ -870,7 +849,6 @@ const FloatingIcon = () => {
                 atc5Groups: appSettings.atc5.groups,
                 atc5ColorGroups: appSettings.atc5.colorGroups,
               }}
-              generalDisplaySettings={generalDisplaySettings}
             />
           </TabPanel>
 
@@ -879,7 +857,6 @@ const FloatingIcon = () => {
             <ChineseMedicine
               groupedChineseMeds={groupedChineseMeds}
               chineseMedSettings={appSettings.chinese}
-              generalDisplaySettings={generalDisplaySettings}
             />
           </TabPanel>
 
@@ -889,7 +866,6 @@ const FloatingIcon = () => {
               groupedLabs={groupedLabs}
               settings={appSettings.western}
               labSettings={appSettings.lab}
-              generalDisplaySettings={generalDisplaySettings}
             />
           </TabPanel>
 
@@ -898,7 +874,6 @@ const FloatingIcon = () => {
             <LabTableView
               groupedLabs={groupedLabs}
               labSettings={appSettings.lab}
-              generalDisplaySettings={generalDisplaySettings}
             />
           </TabPanel>
 
@@ -906,7 +881,6 @@ const FloatingIcon = () => {
           <TabPanel value={tabValue} index={5}>
             <ImagingData
               imagingData={imagingData}
-              generalDisplaySettings={generalDisplaySettings}
             />
           </TabPanel>
 
@@ -914,13 +888,12 @@ const FloatingIcon = () => {
           <TabPanel value={tabValue} index={6}>
             <MedDaysData
               medDaysData={medDaysData}
-              generalDisplaySettings={generalDisplaySettings}
             />
           </TabPanel>
 
           {/* Instructions Tab */}
           <TabPanel value={tabValue} index={helpTabIndex}>
-            <Instructions generalDisplaySettings={generalDisplaySettings} />
+            <Instructions />
           </TabPanel>
 
           {/* Advanced Settings Tab */}
@@ -929,7 +902,6 @@ const FloatingIcon = () => {
               <AdvancedSettings
                 appSettings={appSettings}
                 setAppSettings={setAppSettings}
-                generalDisplaySettings={generalDisplaySettings}
               />
             </TabPanel>
           )}
@@ -942,7 +914,7 @@ const FloatingIcon = () => {
         message={snackbarMessage}
         anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
       />
-    </>
+    </SettingsProvider>
   );
 };
 

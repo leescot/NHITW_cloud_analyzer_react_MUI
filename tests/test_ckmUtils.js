@@ -1,4 +1,4 @@
-import {assert} from './lib/chai.js';
+import { describe, it, assert } from 'vitest';
 
 import {
   getKeyDrugLabel,
@@ -6,7 +6,7 @@ import {
   classifyLabItem,
   getCKMMedicationGroups,
   buildMedKey,
-} from './src/utils/ckmUtils.js';
+} from '../src/utils/ckmUtils.js';
 
 // 產生 N 天前的 YYYY/MM/DD 字串（測試相對日期用）
 function daysAgo(n) {

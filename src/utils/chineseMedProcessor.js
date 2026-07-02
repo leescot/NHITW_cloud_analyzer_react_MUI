@@ -1,3 +1,5 @@
+import { debugLog } from './logger';
+
 export const chineseMedProcessor = {
   // 處理中藥資料的主要函數
   processChineseMedData(data) {
@@ -129,7 +131,7 @@ export const chineseMedProcessor = {
     const freqMatch = frequency.match(freqRegex);
 
     if (!freqMatch) {
-      console.log('無法識別的頻次:', frequency);
+      debugLog('無法識別的頻次:', frequency);
       return 'SPECIAL';
     }
 

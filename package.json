@@ -18,7 +18,9 @@
     "build": "vite build && node scripts/build.js",
     "build:zip": "vite build && node scripts/build.js --zip",
     "build:alpha": "vite build && node scripts/build.js --alpha",
-    "test": "vite build && node scripts/build.js --test && node tests/serve.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:manual": "vite build && node scripts/build.js --test && node tests/serve.js",
     "dev": "vite",
     "preview": "vite preview",
     "lint": "eslint",
@@ -39,6 +41,7 @@
   },
   "devDependencies": {
     "@stylistic/eslint-plugin": "^4.2.0",
+    "@testing-library/react": "^16.3.2",
     "@types/react": "^19.0.8",
     "@types/react-dom": "^19.0.3",
     "eslint": "^9.19.0",
@@ -46,6 +49,8 @@
     "eslint-plugin-react-hooks": "^5.0.0",
     "eslint-plugin-react-refresh": "^0.4.18",
     "globals": "^15.14.0",
-    "mime-types": "^3.0.1"
+    "jsdom": "^29.1.1",
+    "mime-types": "^3.0.1",
+    "vitest": "^4.1.9"
   }
 }

@@ -11,7 +11,7 @@ import LabSearch from "./lab/LabSearch";
 import { formatLabItemForCopy, formatDate } from "../utils/lab/LabUtilities";
 import { labCopyFormatter } from "../../utils/labCopyFormatter";
 
-const LabData = ({ groupedLabs, settings, labSettings, generalDisplaySettings }) => {
+const LabData = ({ groupedLabs, settings, labSettings }) => {
   // 添加搜尋功能狀態
   const [searchText, setSearchText] = useState("");
   const [filteredGroupedLabs, setFilteredGroupedLabs] = useState(groupedLabs);
@@ -303,7 +303,6 @@ const LabData = ({ groupedLabs, settings, labSettings, generalDisplaySettings })
         groupIndex={index}
         selectedLabItems={selectedLabItems}
         handleToggleLabItem={handleToggleLabItem}
-        generalDisplaySettings={generalDisplaySettings}
         labSettings={completeLabSettings}
       />
     )],
@@ -311,7 +310,6 @@ const LabData = ({ groupedLabs, settings, labSettings, generalDisplaySettings })
       <HorizontalLayout
         labs={group.labs}
         groupIndex={index}
-        generalDisplaySettings={generalDisplaySettings}
         labSettings={completeLabSettings}
       />
     )],
@@ -322,7 +320,6 @@ const LabData = ({ groupedLabs, settings, labSettings, generalDisplaySettings })
         groupIndex={index}
         selectedLabItems={selectedLabItems}
         handleToggleLabItem={handleToggleLabItem}
-        generalDisplaySettings={generalDisplaySettings}
         labSettings={completeLabSettings}
       />
     )],
@@ -333,7 +330,6 @@ const LabData = ({ groupedLabs, settings, labSettings, generalDisplaySettings })
         groupIndex={index}
         selectedLabItems={selectedLabItems}
         handleToggleLabItem={handleToggleLabItem}
-        generalDisplaySettings={generalDisplaySettings}
         labSettings={completeLabSettings}
       />
     )],
@@ -343,7 +339,6 @@ const LabData = ({ groupedLabs, settings, labSettings, generalDisplaySettings })
         groupIndex={index}
         selectedLabItems={selectedLabItems}
         handleToggleLabItem={handleToggleLabItem}
-        generalDisplaySettings={generalDisplaySettings}
         labSettings={completeLabSettings}
       />
     )]
@@ -367,7 +362,6 @@ const LabData = ({ groupedLabs, settings, labSettings, generalDisplaySettings })
       <LabSearch
         searchText={searchText}
         handleSearchChange={handleSearchChange}
-        generalDisplaySettings={generalDisplaySettings}
         labSettings={completeLabSettings}
         onCopyAll={handleCopyAllLabData}
       />
@@ -377,7 +371,6 @@ const LabData = ({ groupedLabs, settings, labSettings, generalDisplaySettings })
           color="text.secondary"
           variant="body2"
           textSizeType="content"
-          generalDisplaySettings={generalDisplaySettings}
         >
           {searchText.trim() !== "" ? "沒有找到符合搜尋條件的檢驗資料" : "沒有找到檢驗資料"}
         </TypographySizeWrapper>
@@ -390,7 +383,6 @@ const LabData = ({ groupedLabs, settings, labSettings, generalDisplaySettings })
               index={index}
               settings={settings}
               labSettings={completeLabSettings}
-              generalDisplaySettings={generalDisplaySettings}
               handleSectionLabData={handleSectionLabData}
               handleCopyUserSelectedLabData={handleCopyUserSelectedLabData}
               hasSelectedItems={hasSelectedItems}

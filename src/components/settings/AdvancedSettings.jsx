@@ -16,6 +16,7 @@ import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import TuneIcon from "@mui/icons-material/Tune";
 import { FormHelperText, Divider } from "@mui/material";
 import { handleSettingChange } from "../../utils/settingsHelper";
+import { debugLog } from "../../utils/logger";
 
 const AdvancedSettings = () => {
   const [settings, setSettings] = useState({
@@ -76,7 +77,7 @@ const AdvancedSettings = () => {
     chrome.storage.sync.set({ 
       [key]: value 
     }, () => {
-      console.log(`Updated ${key} to ${value}`);
+      debugLog(`Updated ${key} to ${value}`);
       
       // Notify content script of setting change for both western and general
       chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
