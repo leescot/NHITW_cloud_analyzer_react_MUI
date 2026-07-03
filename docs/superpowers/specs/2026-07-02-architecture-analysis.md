@@ -1,7 +1,7 @@
 # 程式架構分析與優化建議
 
 > 日期：2026-07-02
-> 狀態：分析完成；階段 1-5 已實作（各階段見 plans/ 對應文件）
+> 狀態：分析完成；階段 1-6 已實作（各階段見 plans/ 對應文件；階段 6 = plans/2026-07-03-refactor-phase6.md）
 > 分支：feature-CKM
 > 範圍：全專案架構體檢（不含個別功能的正確性 review）
 
@@ -72,7 +72,7 @@
 
 - **`dataManager.js` 樣板重複**：`handleAllData` 內 12 個 processor 的 `process` 寫法幾乎相同，Map-of-objects 沒有帶來價值。可改成宣告式註冊表 `[{ key, processor, setterName, needsSettings }]`，新增資料型別從「改三處」變成「加一行」。
 - **183 個 `console.log`** 散落 src，含 `dataManager` 熱路徑上的 debug log（如 hbcvdata 處理，184-197 行）。建議做 `debugLog` util，由設定或 build flag 控制。
-- **`legacyContent.js` 名不符實**：它是核心的 API 攔截層（550 行），不是 legacy。建議改名（如 `apiInterceptor.js`）並模組化，避免後人不敢碰。
+- **`legacyContent.js` 名不符實**：它是核心的 API 攔截層（550 行），不是 legacy。建議改名（如 `apiInterceptor.js`）並模組化，避免後人不敢碰。✅ 已完成（階段 6）：改名為 `src/apiInterceptor/index.js`，並拆出 `apiPathMap.js` / `permissionMap.js` / `responseNormalizer.js` / `authorization.js` / `messageHandlers.js`。
 - **測試只能在瀏覽器跑**：現有 Mocha 測試需開 `http://localhost:5173/test.html` 手動執行。processor 都是純函數，適合遷移到 Vitest headless，即可上 CI。
 - **死碼**：`vite.extension.config.js`（CLAUDE.md 已註明未使用）、`FloatingIcon.jsx` 內大量註解掉的 import。
 - **無型別**：資料結構（processor 輸出、settings shape）完全無型別描述，新功能只能靠通靈或讀 code。
@@ -81,13 +81,13 @@
 
 前提：這是臨床在用的工具，採**漸進式重構**，每一步可獨立出貨。先建安全網再動核心。
 
-| 階段 | 內容 | 規模 | 風險 |
-|------|------|------|------|
-| 1 | 安全網 + 清理：現有測試遷移 Vitest headless、清 console.log、刪死碼 | 小 | 低 |
-| 2 | `SettingsContext` 消除 prop drilling，順手修 FloatingIcon stale closure | 中 | 低 |
-| 3 | `dataStore` 取代 window 全域，資料流變成可測的單向流 | 中大 | 中 |
-| 4 | 拆 `FloatingIcon`（2、3 完成後自然瘦身，再拆容易） | 中 | 中 |
-| 5 | 合併 copyFormat 編輯器、dataManager 宣告式化 | 中 | 低 |
-| 6 | （選配）JSDoc typedef 或漸進 TypeScript，至少給 processor 輸出定型別 | 中 | 低 |
+| 階段 | 內容 | 規模 | 風險 | 狀態 |
+|------|------|------|------|------|
+| 1 | 安全網 + 清理：現有測試遷移 Vitest headless、清 console.log、刪死碼 | 小 | 低 | ✅ 已完成 |
+| 2 | `SettingsContext` 消除 prop drilling，順手修 FloatingIcon stale closure | 中 | 低 | ✅ 已完成 |
+| 3 | `dataStore` 取代 window 全域，資料流變成可測的單向流 | 中大 | 中 | ✅ 已完成 |
+| 4 | 拆 `FloatingIcon`（2、3 完成後自然瘦身，再拆容易） | 中 | 中 | ✅ 已完成 |
+| 5 | 合併 copyFormat 編輯器、dataManager 宣告式化 | 中 | 低 | ✅ 已完成 |
+| 6 | （選配）JSDoc typedef 或漸進 TypeScript，至少給 processor 輸出定型別 | 中 | 低 | ✅ 已完成 |
 
 **不建議**：整案重寫、引入大型狀態管理框架（Redux 等）。此 app 的資料流是「一次載入、多分頁展示」，輕量 store + Context 已足夠。

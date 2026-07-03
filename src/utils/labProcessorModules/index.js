@@ -71,6 +71,11 @@ const labProcessor = {
   prepareLabTableData,
 
   // 處理檢驗資料的主要函數
+  /**
+   * @param {object} labData 健保 labdata API 原始回應（含 rObject）
+   * @param {object} [settings]
+   * @returns {import('../../types/processors.js').LabGroup[]}
+   */
   processLabData(labData, settings = {}) {
     if (!labData || !labData.rObject || !Array.isArray(labData.rObject)) {
       console.error('Invalid lab data format:', labData);

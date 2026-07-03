@@ -1,6 +1,10 @@
 import { debugLog } from './logger';
 
 export const allergyProcessor = {
+  /**
+   * @param {object} data 健保 allergy API 原始回應（含 rObject）
+   * @returns {import('../types/processors.js').AllergyItem[]}
+   */
   processAllergyData(data) {
     if (!data || !data.rObject || !Array.isArray(data.rObject)) {
       debugLog('Invalid allergy data format:', data);

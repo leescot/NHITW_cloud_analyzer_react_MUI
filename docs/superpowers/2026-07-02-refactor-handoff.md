@@ -1,7 +1,7 @@
-# 交班文件:架構優化階段 1+2+3+4+5(2026-07-02 起,2026-07-03 更新)
+# 交班文件:架構優化階段 1+2+3+4+5+6(2026-07-02 起,2026-07-03 更新)
 
 > 用途:重啟對話 / context compact 後接手工作的完整狀態快照。
-> 相關文件:規格 `specs/2026-07-02-architecture-analysis.md`、計畫 `plans/2026-07-02-refactor-phase1-2.md`、`plans/2026-07-02-refactor-phase3-datastore.md`、`plans/2026-07-02-refactor-phase4-floatingicon.md`、`plans/2026-07-03-refactor-phase5.md`(各含逐 task 進度與後續追蹤清單)
+> 相關文件:規格 `specs/2026-07-02-architecture-analysis.md`、計畫 `plans/2026-07-02-refactor-phase1-2.md`、`plans/2026-07-02-refactor-phase3-datastore.md`、`plans/2026-07-02-refactor-phase4-floatingicon.md`、`plans/2026-07-03-refactor-phase5.md`、`plans/2026-07-03-refactor-phase6.md`(各含逐 task 進度與後續追蹤清單)
 
 ## 目前狀態(TL;DR)
 
@@ -9,9 +9,11 @@
 - **階段 3 已完成**,在分支 `refactor-phase3`(13 commits,head `b50056b`),**尚未 merge、尚未 push**。
 - **階段 4 已完成**,在分支 **`refactor-phase4`**(疊在 `refactor-phase3` 上),**尚未 merge、尚未 push**。
 - **階段 5 已完成**,在分支 **`refactor-phase5`**(疊在 `refactor-phase4` 上),**尚未 merge、尚未 push**。
+- **階段 6 已完成**,在分支 **`refactor-phase6`**(疊在 `refactor-phase5` 上),**尚未 merge、尚未 push**。Part A:`jsconfig.json` + `typescript` devDep + `npm run type-check`(`tsc -p jsconfig.json --noEmit`)安全網、`src/types/processors.js` 集中 typedef、12 個 processor 主方法補 `@returns`。Part B:`src/legacyContent.js` 改名/拆解為 `src/apiInterceptor/`(`index.js` + `apiPathMap.js`/`permissionMap.js`/`responseNormalizer.js`/`authorization.js`/`messageHandlers.js`),新增 `tests/test_responseNormalizer.js`、`tests/test_authorization.js`;病患切換 debug log(`onPatientSwitchRequested` 的「偵測到新病患」)改用既有 `maskPatientId()` 遮罩,不再印出完整身分證號。
 - 階段 4 驗證:Vitest **152/152 全綠**(19 檔)、build 成功、ESLint 未新增問題;`FloatingIcon.jsx` 925 → 349 行。
 - 階段 5 驗證:Vitest **189/189 全綠**(22 檔)、build 成功、全 repo ESLint 由 2,118 降到 1,373。
-- **未完成項:階段 2、3、4、5 的手動煙霧測試**(清單見下方、phase3 計畫文件 Task 7 Step 3、phase4 計畫文件 Task 8 Step 3、phase5 計畫文件 Task 7「階段 5 手動煙霧測試清單」),通過後依序 squash merge 回 `feature-CKM`(各階段可一起 squash 或分次,由維護者決定),再考慮 push / release。
+- 階段 6 驗證:`npm run type-check` 0 errors、Vitest 全綠(新增 normalizer/authorization 測試)、build 成功(詳細數字見 phase6 計畫文件 Task 8.4 執行紀錄)。
+- **未完成項:階段 2、3、4、5、6 的手動煙霧測試**(清單見下方、phase3 計畫文件 Task 7 Step 3、phase4 計畫文件 Task 8 Step 3、phase5 計畫文件 Task 7「階段 5 手動煙霧測試清單」、phase6 計畫文件 Step 8.5),通過後依序 squash merge 回 `feature-CKM`(各階段可一起 squash 或分次,由維護者決定),再考慮 push / release。
 - **⚠️ 下游 extension 需適配**:`NHITW_DATA` 已統一為單一格式(`patientSummary` 駝峰、timestamp 最前),原本讀 `patientsummary`(小寫)的消費端要改 key。
 
 ## 階段 3 摘要(dataStore)
@@ -79,7 +81,7 @@
 2. `userInfoUtils.js` 有與 `ageUtils` 近似的年齡計算(比較邏輯用 Date rollover 後的值,非純複製),值得整併
 3. ~~`Overview_AdultHealthCheck / CancerScreening / hbcvdata` 三檔為死碼(被 `Overview_IntegratedHealthData` 取代),可刪~~ **已於階段 5 刪除**
 4. `CKMSummaryBar` 遷移到 hook 後,可一併移除 `CKMData.jsx:289` 與 `Overview.jsx:93` 的 `gds={...}`
-5. debug log 含病患身分證號(`legacyContent.js` 病患切換 log),可考慮遮罩
+5. ~~debug log 含病患身分證號(`legacyContent.js` 病患切換 log),可考慮遮罩~~ **已於階段 6 修復**(`src/apiInterceptor/index.js` 的 `onPatientSwitchRequested` 改用既有 `maskPatientId()`)
 6. `FloatingIcon.handleData` 內 `userInfo` 仍有既存 stale read(僅多餘 re-render,無正確性問題)
 7. ~~`LineSpacingWrapper.jsx` 無人使用(死碼);其 fallback 引用不存在的 `lineSpacingHeight` 設定鍵~~ **已於階段 5 刪除**
 
@@ -91,9 +93,9 @@
 4. 本地匯入 → 清除 → 再抓取
 5. `NHITW_DATA` 新格式檢查 + **下游 extension 改讀 `patientSummary` 後實測**
 
-### 4. 階段 6+ 候選項目(已盤點,尚未規畫)
-階段 1-5 審查累積的清理目標與規格順序表的後續項目:
-- JSDoc typedef / 漸進 TypeScript(選配),至少給 processor 輸出定型別
+### 4. 階段 7+ 候選項目(已盤點,尚未規畫)
+階段 1-6 審查累積的清理目標與規格順序表的後續項目:
+- ~~JSDoc typedef / 漸進 TypeScript(選配),至少給 processor 輸出定型別~~ **已於階段 6 完成**(`src/types/processors.js` + `npm run type-check`)
 - `CKMSummaryBar` 遷移到 `SettingsContext` hook(目前仍以 `gds` prop 接收顯示設定,見上方「審查累積的既存問題」#4)
 - `userInfoUtils.js` 與 `ageUtils.js` 年齡計算邏輯整併(近似但非純複製,比較邏輯用 Date rollover 後的值)
 - 階段 5 審查累積追蹤清單(詳見 phase5 計畫文件「審查累積追蹤項目」節):`medicationConfig.jsx`/`labConfig.jsx` 的 elementButton/customTextField 重複約 60 行,可抽共用 util(選配);`settingsManager.js` 的 settingType map 無 `'western'` 條目屬既存設計(西藥設定走 `chrome.storage.onChanged` 傳播),非 bug,記錄以免誤判
@@ -111,7 +113,10 @@
 ## Git 快照(2026-07-03 更新)
 
 ```
-refactor-phase5(目前所在,疊在 refactor-phase4 上,8 commits:a28248a…3936626,未 merge、未 push)
+refactor-phase6(目前所在,疊在 refactor-phase5 上,8+ commits:3afb89b…f5e3d3f,未 merge、未 push)
+└─ 階段 6:processor 輸出 typedef + type-check 安全網 + legacyContent.js → apiInterceptor/ 改名模組化 + 病患 ID debug log 遮罩 + 文件
+
+refactor-phase5(疊在 refactor-phase4 上,8 commits:a28248a…3936626,未 merge、未 push)
 └─ 階段 5:LabData snackbar bug 修復 + 死碼清理 + dataManager 宣告式化 + medicationFormatSettings 側通道移除 + copyFormat 編輯器合併 + 文件
 
 refactor-phase4(疊在 refactor-phase3 上,10 commits:a1a8ef3…e236e79,未 merge、未 push)
@@ -127,4 +132,4 @@ feature-CKM(領先 origin 23 commit,未 push)
 refactor-phase1-2(保留,16 commits:b612caf…2b8e15c)
 ```
 
-流程慣例:煙霧測試通過 → `refactor-phase3`、`refactor-phase4`、`refactor-phase5` 依序(或合併)squash merge 回 `feature-CKM`(保留分支、不 push;各階段可一起 squash 或分次,由維護者決定)。
+流程慣例:煙霧測試通過 → `refactor-phase3`、`refactor-phase4`、`refactor-phase5`、`refactor-phase6` 依序(或合併)squash merge 回 `feature-CKM`(保留分支、不 push;各階段可一起 squash 或分次,由維護者決定)。

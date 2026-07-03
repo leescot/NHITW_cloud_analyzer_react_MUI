@@ -1,6 +1,14 @@
-// legacyContent.js — 重構版
+// apiInterceptor/index.js — 健保 API 攔截與資料抓取層（前身 legacyContent.js）
 // 純主動抓取架構，移除被動攔截（XHR/fetch monkey-patch）
 
+import { API_PATH_MAP } from './apiPathMap.js';
+import { normalizeResponseData } from './responseNormalizer.js';
+import {
+  getAuthorizedDataTypes,
+  shouldFetchSpecialData,
+  SPECIAL_DATA_TYPE_SETTING_KEYS,
+} from './authorization.js';
+import { setupMessageListeners } from './messageHandlers.js';
 import {
   getAuthToken,
   getPatientId,
@@ -8,48 +16,15 @@ import {
   getApiHeaders,
   getTokenPayload,
   isTokenExpired,
-} from './utils/tokenUtils';
-import { DEFAULT_SETTINGS } from './config/defaultSettings';
-import { debugLog } from './utils/logger';
-import { dataStore } from './store/dataStore';
-import { buildShareData, writeShareDataToLocalStorage } from './store/nhitwExport';
+} from '../utils/tokenUtils';
+import { DEFAULT_SETTINGS } from '../config/defaultSettings';
+import { debugLog } from '../utils/logger';
+import { dataStore } from '../store/dataStore';
+import { buildShareData, writeShareDataToLocalStorage } from '../store/nhitwExport';
 
 debugLog("Content script loaded for NHI data extractor (Refactored Version)");
 
 // ===== 常數定義 =====
-
-const API_PATH_MAP = new Map([
-  ["medication", "imue0008/imue0008s02/get-data"],
-  ["labdata", "imue0060/imue0060s02/get-data"],
-  ["labdraw", "imue0060/imue0060s03/get-data"],
-  ["chinesemed", "imue0090/imue0090s02/get-data"],
-  ["imaging", "imue0130/imue0130s02/get-data"],
-  ["allergy", "imue0040/imue0040s02/get-data"],
-  ["surgery", "imue0020/imue0020s02/get-data"],
-  ["discharge", "imue0070/imue0070s02/get-data"],
-  ["medDays", "imue0120/imue0120s01/pres-med-day"],
-  ["patientsummary", "imue2000/imue2000s01/get-summary"],
-  ["adultHealthCheck", "imue0140/imue0140s01/hpa-data"],
-  ["cancerScreening", "imue0150/imue0150s01/hpa-data"],
-  ["hbcvdata", "imue0180/imue0180s01/hbcv-data"],
-  ["chronicMed", "imue0008/imue0008s05/get-data"],
-]);
-
-const NODE_TO_DATA_TYPE = {
-  '1.1': ['patientsummary'],
-  '1.2': ['hbcvdata'],
-  '2.1': ['medication'],
-  '2.3': ['chronicMed'],
-  '2.4': ['medDays'],
-  '3.1': ['chinesemed'],
-  '5.1': ['allergy'],
-  '6.1': ['labdata', 'labdraw'],
-  '6.2': ['imaging'],
-  '6.3': ['adultHealthCheck'],
-  '6.4': ['cancerScreening'],
-  '7.1': ['surgery'],
-  '8.1': ['discharge'],
-};
 
 // ===== 狀態管理 =====
 
@@ -70,7 +45,13 @@ function initialize() {
   // 不論在哪個頁面都啟動 URL 輪詢和訊息監聽，
   // 因為 content script 可能在登入頁載入，之後頁面導航到目標頁時需要偵測到。
   observeUrlChanges();
-  setupMessageListeners();
+  setupMessageListeners({
+    fetchAllDataTypes,
+    clearAllData,
+    getTokenPayload,
+    dataStore,
+    API_PATH_MAP,
+  });
 
   if (isOnLoginPage()) {
     return;
@@ -110,6 +91,13 @@ function isOnTargetPage() {
 
 // ===== 病患切換偵測 =====
 
+// debug log 用途：遮罩病患 ID（身分證號），僅保留頭尾避免完整 PII 落入 console。
+function maskPatientId(id) {
+  if (!id || typeof id !== 'string') return id;
+  if (id.length <= 4) return '****';
+  return id.slice(0, 3) + '****' + id.slice(-1);
+}
+
 function startTokenPolling() {
   if (tokenPollingStarted) return;
   tokenPollingStarted = true;
@@ -123,7 +111,12 @@ function startTokenPolling() {
     }
 
     if (currentId !== lastPatientId) {
-      debugLog("Token polling: 偵測到病患切換", lastPatientId, "→", currentId);
+      debugLog(
+        "Token polling: 偵測到病患切換",
+        maskPatientId(lastPatientId),
+        "→",
+        maskPatientId(currentId)
+      );
       lastPatientId = currentId;
       clearAllData();
       fetchAllDataTypes();
@@ -154,7 +147,7 @@ function onPatientSwitchRequested() {
     if (newId && newId !== oldPatientId) {
       clearInterval(switchPollTimer);
       switchPollTimer = null;
-      debugLog("偵測到新病患:", newId);
+      debugLog("偵測到新病患:", maskPatientId(newId));
       lastPatientId = newId;
       fetchAllDataTypes();
     }
@@ -191,36 +184,19 @@ function observeUrlChanges() {
   }, 1000);
 }
 
-// ===== 授權檢查 =====
+// ===== 授權檢查（純計算已抽至 apiInterceptor/authorization.js，這裡只負責取得輸入） =====
 
-function getAuthorizedDataTypes() {
-  const permissions = getPermissions();
-  const authorized = new Set();
-  for (const node of permissions) {
-    const types = NODE_TO_DATA_TYPE[node];
-    if (types) {
-      types.forEach(t => authorized.add(t));
-    }
-  }
-  authorized.add('chronicMed');
-  return authorized;
-}
+// 取得指定特殊資料型別對應的 cloud 設定值（chrome.storage.sync 讀取，含 fallback 預設值）。
+// fallback 對齊 defaultSettings.cloud（健檢/癌篩預設 false，hbcv 預設 true），
+// 避免使用者從未進入設定頁時「抓了但不顯示」的不一致行為。
+function getCloudSettingsForType(dataType) {
+  const key = SPECIAL_DATA_TYPE_SETTING_KEYS[dataType];
+  if (!key) return Promise.resolve({});
 
-function shouldFetchSpecialData(dataType) {
-  const settingKeyMap = {
-    adultHealthCheck: 'fetchAdultHealthCheck',
-    cancerScreening: 'fetchCancerScreening',
-    hbcvdata: 'fetchHbcvdata',
-  };
-  const key = settingKeyMap[dataType];
-  if (!key) return Promise.resolve(true);
-
-  // fallback 對齊 defaultSettings.cloud（健檢/癌篩預設 false，hbcv 預設 true），
-  // 避免使用者從未進入設定頁時「抓了但不顯示」的不一致行為
   const defaultVal = DEFAULT_SETTINGS.cloud[key];
   return new Promise((resolve) => {
     chrome.storage.sync.get({ [key]: defaultVal }, (items) => {
-      resolve(items[key]);
+      resolve(items);
     });
   });
 }
@@ -243,7 +219,8 @@ function fetchAllDataTypes() {
 
   isBatchFetchInProgress = true;
 
-  const authorized = getAuthorizedDataTypes();
+  const permissions = getPermissions();
+  const authorized = getAuthorizedDataTypes(permissions);
 
   const regularTypes = [
     "medication", "labdata", "chinesemed", "imaging",
@@ -263,7 +240,8 @@ function fetchAllDataTypes() {
 
   const specialTypes = ["adultHealthCheck", "cancerScreening", "hbcvdata", "labdraw"];
   const specialPromises = specialTypes.map(type => {
-    return shouldFetchSpecialData(type).then(shouldFetch => {
+    return getCloudSettingsForType(type).then(cloudSettings => {
+      const shouldFetch = shouldFetchSpecialData(type, cloudSettings);
       if (shouldFetch && authorized.has(type)) {
         return fetchSingleDataType(type).catch(err => {
           console.error(`獲取 ${type} 資料時發生錯誤:`, err);
@@ -340,28 +318,6 @@ function fetchSingleDataType(dataType) {
     });
 }
 
-function normalizeResponseData(data, dataType) {
-  const recordsArray = data.rObject || data.robject;
-
-  if (dataType === "medDays" || dataType === "labdraw") {
-    return { rObject: Array.isArray(data) ? data : [data] };
-  }
-
-  if (dataType === "patientsummary") {
-    return { rObject: Array.isArray(recordsArray) ? recordsArray : (recordsArray ? [recordsArray] : []) };
-  }
-
-  if (dataType === "chronicMed") {
-    return { rObject: [data] };
-  }
-
-  if (dataType === "adultHealthCheck" || dataType === "cancerScreening" || dataType === "hbcvdata") {
-    return { rObject: recordsArray ? [recordsArray] : [] };
-  }
-
-  return { rObject: Array.isArray(recordsArray) ? recordsArray : [] };
-}
-
 // ===== 資料管理 =====
 
 function clearAllData() {
@@ -378,114 +334,6 @@ function createEmptyDataResult(dataType) {
 
 function saveToLocalStorage() {
   writeShareDataToLocalStorage(buildShareData());
-}
-
-// ===== 訊息監聽（popup 互動） =====
-
-function setupMessageListeners() {
-  chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
-    if (message.action === "manualFetchData") {
-      fetchAllDataTypes();
-      sendResponse({ status: "fetching" });
-      return true;
-    }
-
-    if (message.action === "dataCleared") {
-      clearAllData();
-      sendResponse({ status: "cleared" });
-      return true;
-    }
-
-    if (message.action === "openDashboard") {
-      const floatingIcon = document.querySelector("#nhi-floating-root button");
-      if (floatingIcon) {
-        floatingIcon.click();
-        sendResponse({ status: "opened" });
-      } else {
-        sendResponse({ status: "error", message: "Dashboard component not found" });
-      }
-      return true;
-    }
-
-    if (message.action === "settingChanged") {
-      const isMedicationSetting = [
-        "simplifyMedicineName", "showDiagnosis", "showGenericName",
-        "enableATC5Coloring", "copyFormat",
-      ].includes(message.setting);
-
-      const isChineseMedSetting = [
-        "chineseMedShowDiagnosis", "chineseMedShowEffectName",
-        "chineseMedDoseFormat", "chineseMedCopyFormat",
-      ].includes(message.setting);
-
-      if (isMedicationSetting || isChineseMedSetting) {
-        setTimeout(() => {
-          window.dispatchEvent(new CustomEvent("dataFetchCompleted", {
-            detail: {
-              settingsChanged: true,
-              settingType: isMedicationSetting ? "medication" : "chinesemed",
-              setting: message.setting,
-              value: message.value,
-              allSettings: message.allSettings,
-            },
-          }));
-        }, 100);
-      }
-      sendResponse({ status: "setting_updated" });
-      return true;
-    }
-
-    if (message.action === "getPatientData") {
-      try {
-        const payload = getTokenPayload();
-        const patientData = {
-          UserName: payload?.UserName || '',
-          UserID: payload?.UserID || '',
-          UserSex: payload?.UserSex || '',
-          UserBirthday: payload?.UserBirthday || '',
-          ClientTime: new Date().toISOString(),
-        };
-        for (const dataType of API_PATH_MAP.keys()) {
-          const key = dataType === 'labdata' ? 'lab' : dataType;
-          patientData[key] = dataStore.getData(dataType);
-        }
-        patientData.masterMenu = dataStore.getData('masterMenu');
-
-        const hasAnyData = Object.values(patientData).some(value => {
-          return value?.rObject && Array.isArray(value.rObject) && value.rObject.length > 0;
-        });
-
-        if (hasAnyData) {
-          const date = new Date();
-          const ts = `${date.getFullYear()}${String(date.getMonth() + 1).padStart(2, "0")}${String(date.getDate()).padStart(2, "0")}_${String(date.getHours()).padStart(2, "0")}${String(date.getMinutes()).padStart(2, "0")}`;
-          const uid = patientData.UserID || 'unknown';
-          const fileName = `${ts}_${uid}.json`;
-          const jsonString = JSON.stringify(patientData, null, 2);
-          const blob = new Blob([jsonString], { type: "application/json" });
-          const url = URL.createObjectURL(blob);
-          const downloadLink = document.createElement("a");
-          downloadLink.href = url;
-          downloadLink.download = fileName;
-          downloadLink.style.display = "none";
-          document.body.appendChild(downloadLink);
-          downloadLink.click();
-          setTimeout(() => {
-            document.body.removeChild(downloadLink);
-            URL.revokeObjectURL(url);
-          }, 100);
-          sendResponse({ status: "success", message: "已直接處理下載", directDownload: true });
-        } else {
-          sendResponse({ error: "無法獲取病人資料", status: "error" });
-        }
-      } catch (err) {
-        sendResponse({ error: "處理下載時發生錯誤: " + err.message, status: "error" });
-      }
-      return true;
-    }
-
-    sendResponse({ status: "received" });
-    return true;
-  });
 }
 
 // ===== 匯出 =====

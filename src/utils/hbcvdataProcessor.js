@@ -83,7 +83,7 @@ export const extractHospitalName = (hospString) => {
 /**
  * 處理B、C肝炎專區資料
  * @param {Object} rawData - 原始資料
- * @returns {Object} - 處理後的資料
+ * @returns {import('../types/processors.js').HbcvResult}
  */
 export const processHbcvdataData = (rawData) => {
     debugLog("[hbcvdataProcessor] Processing hbcvdata:", rawData);

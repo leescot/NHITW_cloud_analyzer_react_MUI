@@ -1,4 +1,8 @@
 export const imagingProcessor = {
+  /**
+   * @param {object} data 健保 imaging API 原始回應（含 rObject）
+   * @returns {import('../types/processors.js').ImagingResult}
+   */
   processImagingData(data) {
     if (!data || !data.rObject) {
       console.error('Invalid imaging data:', data);

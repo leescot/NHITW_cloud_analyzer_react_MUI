@@ -21,7 +21,7 @@ function initializeExtension() {
       console.error("載入 React 元件時出錯:", error);
     });
 
-  import("./legacyContent.js")
+  import("./apiInterceptor/index.js")
     .then(() => {
       debugLog("Legacy content script loaded");
     })

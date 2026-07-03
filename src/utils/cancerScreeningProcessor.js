@@ -7,7 +7,7 @@ export const cancerScreeningProcessor = {
   /**
    * 處理癌症篩檢資料
    * @param {Object} rawData - 原始資料
-   * @returns {Object} - 處理後的資料
+   * @returns {import('../types/processors.js').CancerScreeningResult}
    */
   processCancerScreeningData(rawData) {
     try {

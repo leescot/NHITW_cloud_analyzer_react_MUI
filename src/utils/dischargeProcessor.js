@@ -1,6 +1,10 @@
 import { debugLog } from './logger';
 
 export const dischargeProcessor = {
+  /**
+   * @param {object} data 健保 discharge API 原始回應（含 rObject）
+   * @returns {import('../types/processors.js').DischargeItem[]}
+   */
   processDischargeData(data) {
     if (!data || !data.rObject || !Array.isArray(data.rObject)) {
       debugLog('Invalid discharge data format:', data);

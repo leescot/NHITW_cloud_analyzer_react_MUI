@@ -1,3 +1,5 @@
+> 本文件記錄 apiInterceptor 的執行流程與慢箋資料 schema;檔案原名 legacyContent.md。
+
 這個程式的執行流程主要分為三個關鍵部分：用戶識別(UserID)取得、授權令牌(Token)獲取和資料擷取。
 
 ## 用戶識別(UserID)流程

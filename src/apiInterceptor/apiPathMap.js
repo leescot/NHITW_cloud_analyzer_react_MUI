@@ -1,0 +1,16 @@
+export const API_PATH_MAP = new Map([
+  ["medication", "imue0008/imue0008s02/get-data"],
+  ["labdata", "imue0060/imue0060s02/get-data"],
+  ["labdraw", "imue0060/imue0060s03/get-data"],
+  ["chinesemed", "imue0090/imue0090s02/get-data"],
+  ["imaging", "imue0130/imue0130s02/get-data"],
+  ["allergy", "imue0040/imue0040s02/get-data"],
+  ["surgery", "imue0020/imue0020s02/get-data"],
+  ["discharge", "imue0070/imue0070s02/get-data"],
+  ["medDays", "imue0120/imue0120s01/pres-med-day"],
+  ["patientsummary", "imue2000/imue2000s01/get-summary"],
+  ["adultHealthCheck", "imue0140/imue0140s01/hpa-data"],
+  ["cancerScreening", "imue0150/imue0150s01/hpa-data"],
+  ["hbcvdata", "imue0180/imue0180s01/hbcv-data"],
+  ["chronicMed", "imue0008/imue0008s05/get-data"],
+]);

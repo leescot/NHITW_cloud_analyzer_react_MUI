@@ -1,6 +1,10 @@
 import { debugLog } from './logger';
 
 export const surgeryProcessor = {
+  /**
+   * @param {object} data 健保 surgery API 原始回應（含 rObject）
+   * @returns {import('../types/processors.js').SurgeryItem[]}
+   */
   processSurgeryData(data) {
     if (!data || !data.rObject || !Array.isArray(data.rObject)) {
       debugLog('Invalid surgery data format:', data);

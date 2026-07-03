@@ -2,6 +2,10 @@ import { debugLog } from './logger';
 
 export const chineseMedProcessor = {
   // 處理中藥資料的主要函數
+  /**
+   * @param {object} data 健保 chinesemed API 原始回應（含 rObject）
+   * @returns {import('../types/processors.js').ChineseMedGroup[]}
+   */
   processChineseMedData(data) {
     if (!data || !data.rObject || !Array.isArray(data.rObject)) {
       return [];

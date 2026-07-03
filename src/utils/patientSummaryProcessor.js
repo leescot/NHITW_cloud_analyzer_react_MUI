@@ -1,6 +1,10 @@
 import { debugLog } from './logger';
 
 export const patientSummaryProcessor = {
+  /**
+   * @param {object} data 健保 patientSummary API 原始回應（含 rObject）
+   * @returns {import('../types/processors.js').PatientSummaryItem[]}
+   */
   processPatientSummaryData(data) {
     if (!data || !data.rObject || !Array.isArray(data.rObject)) {
       debugLog('patientsummary - Invalid format:', data);

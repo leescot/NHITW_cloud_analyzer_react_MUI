@@ -433,6 +433,12 @@ export const medicationProcessor = {
   // 處理藥物資料的主要函數
   // formatSettings：呼叫端可直接傳入西藥格式設定（通常是 appSettings.western），
   // 傳入時優先使用；省略或傳 null 時退回原本的 chrome.storage.sync.get 讀取路徑。
+  /**
+   * @param {object} data 健保 medication API 原始回應（含 rObject）
+   * @param {object} [rawChronicMed] 慢箋原始資料
+   * @param {object|null} [formatSettings] 自訂複製格式設定
+   * @returns {Promise<import('../types/processors.js').MedicationGroup[]>}
+   */
   processMedicationData(data, rawChronicMed, formatSettings = null) {
     if (!data || !data.rObject || !Array.isArray(data.rObject)) {
       console.error("無效的藥物資料格式");

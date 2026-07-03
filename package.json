@@ -1,6 +1,6 @@
 {
   "name": "nhitw-cloud-analyzer",
-  "version": "26.0702.1",
+  "version": "26.0703.1",
   "description": "NHITW Cloud Analyzer - 更好的健保雲端 2.0",
   "license": "Apache-2.0",
   "author": "The NHITW Cloud Analyzer Project Authors",
@@ -24,7 +24,8 @@
     "dev": "vite",
     "preview": "vite preview",
     "lint": "eslint",
-    "lint:fix": "eslint --fix"
+    "lint:fix": "eslint --fix",
+    "type-check": "tsc -p jsconfig.json --noEmit"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -51,6 +52,7 @@
     "globals": "^15.14.0",
     "jsdom": "^29.1.1",
     "mime-types": "^3.0.1",
+    "typescript": "^5.9.3",
     "vitest": "^4.1.9"
   }
 }

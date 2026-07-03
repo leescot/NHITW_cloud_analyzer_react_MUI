@@ -1,0 +1,15 @@
+export const NODE_TO_DATA_TYPE = {
+  '1.1': ['patientsummary'],
+  '1.2': ['hbcvdata'],
+  '2.1': ['medication'],
+  '2.3': ['chronicMed'],
+  '2.4': ['medDays'],
+  '3.1': ['chinesemed'],
+  '5.1': ['allergy'],
+  '6.1': ['labdata', 'labdraw'],
+  '6.2': ['imaging'],
+  '6.3': ['adultHealthCheck'],
+  '6.4': ['cancerScreening'],
+  '7.1': ['surgery'],
+  '8.1': ['discharge'],
+};
