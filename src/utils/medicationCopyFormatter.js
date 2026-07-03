@@ -16,43 +16,10 @@ export const medicationCopyFormatter = {
   applyCustomFormat(medications, groupInfo) {
     // 定義驗證陣列是否有效的函數
     const isValidArray = (array) => Array.isArray(array) && array.length > 0;
-    
-    // 使用 Map 定義陣列處理器
-    const arrayHandlers = new Map([
-      ['header', {
-        isValid: (info) => isValidArray(info.customMedicationHeaderCopyFormat),
-        getBackup: () => window.customMedicationHeaderCopyFormat,
-        process: (info, backup) => {
-          if (!isValidArray(info.customMedicationHeaderCopyFormat) && 
-              isValidArray(backup)) {
-            debugLog("使用全局變量中的備份標題格式數組");
-            info.customMedicationHeaderCopyFormat = JSON.parse(JSON.stringify(backup));
-            return true;
-          }
-          return false;
-        }
-      }],
-      ['drug', {
-        isValid: (info) => isValidArray(info.customMedicationDrugCopyFormat),
-        getBackup: () => window.customMedicationDrugCopyFormat,
-        process: (info, backup) => {
-          if (!isValidArray(info.customMedicationDrugCopyFormat) && 
-              isValidArray(backup)) {
-            debugLog("使用全局變量中的備份藥物格式數組");
-            info.customMedicationDrugCopyFormat = JSON.parse(JSON.stringify(backup));
-            return true;
-          }
-          return false;
-        }
-      }]
-    ]);
-    
-    // 處理備份陣列
-    for (const [key, handler] of arrayHandlers.entries()) {
-      const backup = handler.getBackup();
-      handler.process(groupInfo, backup);
-    }
-    
+
+    // customMedicationHeaderCopyFormat / customMedicationDrugCopyFormat 完全由呼叫端
+    // （medicationProcessor.formatMedicationList）透過 groupInfo 傳入，缺漏時直接回退
+    // 到下方的 applyVerticalFormat，不再從 window 讀取備份值。
     const { customMedicationHeaderCopyFormat, customMedicationDrugCopyFormat } = groupInfo;
     
     // 詳細檢查自定義格式設定

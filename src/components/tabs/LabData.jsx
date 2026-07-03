@@ -86,6 +86,8 @@ const LabData = ({ groupedLabs, settings, labSettings }) => {
   const {
     snackbarOpen,
     snackbarMessage,
+    setSnackbarOpen,
+    setSnackbarMessage,
     handleSnackbarClose,
     handleSectionLabData: copySectionLabData,
     handleCopyUserSelectedLabData: copyUserSelectedLabData

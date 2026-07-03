@@ -41,7 +41,7 @@ Token 儲存在 `sessionStorage` key `"token"` 中，由 NHI 頁面登入流程�
    - 回應經 `normalizeResponseData()` 標準化為 `{ rObject: [...] }` 格式
    - 包含 race condition 防護：比對 `requestPatientId` 與 `lastPatientId`，病患已切換則丟棄
 3. 資料儲存：
-   - 更新 `window.lastIntercepted*Data` 全域變數（供 React UI 讀取）
+   - 寫入 `dataStore`（src/store/dataStore.js,單一真實來源,供 React UI 讀取）
    - 所有資料抓完後統一寫入 `localStorage('NHITW_DATA')`（跨擴充功能共享）
    - 透過 `chrome.runtime.sendMessage({ action: 'setBadge' })` 通知 background 設定 badge
 
@@ -116,7 +116,7 @@ adultHealthCheck、cancerScreening、hbcvdata 可透過 `chrome.storage.sync` �
 - 該 API 回應與其他端點不同，**沒有 `rObject` 欄位**，而是回傳 `{ chrDataN: [...], chrDataY: [...] }`：
   - `chrDataN`：`overdue === "N"`（**效期內**處方箋）
   - `chrDataY`：`overdue === "Y"`（**已逾期**處方箋）
-- 於 `normalizeResponseData` 中以「整包包成 `rObject: [data]`」處理；下游存取為 `window.lastInterceptedChronicMedData.rObject[0].chrDataN` / `.chrDataY`
+- 於 `normalizeResponseData` 中以「整包包成 `rObject: [data]`」處理；下游存取為 `dataStore.getData('chronicMed').rObject[0].chrDataN` / `.chrDataY`
 - **已整合進「西藥」(MedicationList) 與「西藥表格」(MedicationTable)** — 處理邏輯與顯示規則請見 `src/utils/medicationProcessor.js` 內的 helper 區塊（`parseChronicMedCycles` / `mergeChronicMedIntoGroups`）以及下方「慢箋資料 schema 與 cycle 偵測規則」一節。
 
 ## 慢箋資料 schema 與 cycle 偵測規則

@@ -11,26 +11,10 @@ import {
 } from './utils/tokenUtils';
 import { DEFAULT_SETTINGS } from './config/defaultSettings';
 import { debugLog } from './utils/logger';
+import { dataStore } from './store/dataStore';
+import { buildShareData, writeShareDataToLocalStorage } from './store/nhitwExport';
 
 debugLog("Content script loaded for NHI data extractor (Refactored Version)");
-
-// ===== 全域變數（供 React UI 透過 window.* 讀取） =====
-
-window.lastInterceptedMedicationData = null;
-window.lastInterceptedLabData = null;
-window.lastInterceptedLabDrawData = null;
-window.lastInterceptedChineseMedData = null;
-window.lastInterceptedImagingData = null;
-window.lastInterceptedAllergyData = null;
-window.lastInterceptedSurgeryData = null;
-window.lastInterceptedDischargeData = null;
-window.lastInterceptedMedDaysData = null;
-window.lastInterceptedPatientSummaryData = null;
-window.lastInterceptedMasterMenuData = null;
-window.lastInterceptedAdultHealthCheckData = null;
-window.lastInterceptedCancerScreeningData = null;
-window.lastInterceptedHbcvdata = null;
-window.lastInterceptedChronicMedData = null;
 
 // ===== 常數定義 =====
 
@@ -49,23 +33,6 @@ const API_PATH_MAP = new Map([
   ["cancerScreening", "imue0150/imue0150s01/hpa-data"],
   ["hbcvdata", "imue0180/imue0180s01/hbcv-data"],
   ["chronicMed", "imue0008/imue0008s05/get-data"],
-]);
-
-const DATA_VAR_MAP = new Map([
-  ["medication", "lastInterceptedMedicationData"],
-  ["labdata", "lastInterceptedLabData"],
-  ["labdraw", "lastInterceptedLabDrawData"],
-  ["chinesemed", "lastInterceptedChineseMedData"],
-  ["imaging", "lastInterceptedImagingData"],
-  ["allergy", "lastInterceptedAllergyData"],
-  ["surgery", "lastInterceptedSurgeryData"],
-  ["discharge", "lastInterceptedDischargeData"],
-  ["medDays", "lastInterceptedMedDaysData"],
-  ["patientsummary", "lastInterceptedPatientSummaryData"],
-  ["adultHealthCheck", "lastInterceptedAdultHealthCheckData"],
-  ["cancerScreening", "lastInterceptedCancerScreeningData"],
-  ["hbcvdata", "lastInterceptedHbcvdata"],
-  ["chronicMed", "lastInterceptedChronicMedData"],
 ]);
 
 const NODE_TO_DATA_TYPE = {
@@ -216,7 +183,7 @@ function observeUrlChanges() {
           lastPatientId = patientId;
           clearAllData();
           fetchAllDataTypes();
-        } else if (!window.lastInterceptedMedicationData?.rObject) {
+        } else if (!dataStore.getData('medication')?.rObject) {
           fetchAllDataTypes();
         }
       }
@@ -275,7 +242,6 @@ function fetchAllDataTypes() {
   }
 
   isBatchFetchInProgress = true;
-  window.nhiDataBeingFetched = true;
 
   const authorized = getAuthorizedDataTypes();
 
@@ -328,7 +294,6 @@ function fetchAllDataTypes() {
     })
     .finally(() => {
       isBatchFetchInProgress = false;
-      window.nhiDataBeingFetched = false;
     });
 }
 
@@ -364,10 +329,7 @@ function fetchSingleDataType(dataType) {
 
       const normalizedData = normalizeResponseData(data, dataType);
 
-      const varName = DATA_VAR_MAP.get(dataType);
-      if (varName) {
-        window[varName] = normalizedData;
-      }
+      dataStore.setData(dataType, normalizedData);
 
       return {
         status: "success",
@@ -403,35 +365,19 @@ function normalizeResponseData(data, dataType) {
 // ===== 資料管理 =====
 
 function clearAllData() {
-  for (const varName of DATA_VAR_MAP.values()) {
-    window[varName] = null;
-  }
-  window.lastInterceptedMasterMenuData = null;
+  dataStore.clearAll();
 
   chrome.runtime.sendMessage({ action: 'setBadge', text: '' });
 }
 
 function createEmptyDataResult(dataType) {
   const emptyData = { rObject: [] };
-  const varName = DATA_VAR_MAP.get(dataType);
-  if (varName) {
-    window[varName] = emptyData;
-  }
+  dataStore.setData(dataType, emptyData);
   return { status: "nodata", recordCount: 0, dataType, data: emptyData };
 }
 
 function saveToLocalStorage() {
-  try {
-    const dataToShare = { timestamp: Date.now() };
-    for (const [dataType, varName] of DATA_VAR_MAP.entries()) {
-      const storageKey = dataType === 'labdata' ? 'lab' : dataType;
-      dataToShare[storageKey] = window[varName];
-    }
-    localStorage.setItem('NHITW_DATA', JSON.stringify(dataToShare));
-    window.dispatchEvent(new Event('storage'));
-  } catch (error) {
-    console.error('保存資料到 localStorage 時出錯:', error);
-  }
+  writeShareDataToLocalStorage(buildShareData());
 }
 
 // ===== 訊息監聽（popup 互動） =====
@@ -499,11 +445,11 @@ function setupMessageListeners() {
           UserBirthday: payload?.UserBirthday || '',
           ClientTime: new Date().toISOString(),
         };
-        for (const [dataType, varName] of DATA_VAR_MAP.entries()) {
+        for (const dataType of API_PATH_MAP.keys()) {
           const key = dataType === 'labdata' ? 'lab' : dataType;
-          patientData[key] = window[varName];
+          patientData[key] = dataStore.getData(dataType);
         }
-        patientData.masterMenu = window.lastInterceptedMasterMenuData;
+        patientData.masterMenu = dataStore.getData('masterMenu');
 
         const hasAnyData = Object.values(patientData).some(value => {
           return value?.rObject && Array.isArray(value.rObject) && value.rObject.length > 0;
@@ -544,6 +490,8 @@ function setupMessageListeners() {
 
 // ===== 匯出 =====
 
+// 開發者 console 手動除錯用 hook(isolated world 內,頁面與其他 extension 不可見);
+// 無程式碼讀取,勿依賴。
 window.fetchNHI_Data = fetchAllDataTypes;
 window.getSessionData = () => {
   const payload = getTokenPayload();

@@ -173,6 +173,9 @@ const MedicationList = ({
       icd_code: group.icd_code,
       icd_name: group.icd_name,
       showDiagnosis: settings.showDiagnosis,
+      customMedicationHeaderCopyFormat: settings.customMedicationHeaderCopyFormat,
+      customMedicationDrugCopyFormat: settings.customMedicationDrugCopyFormat,
+      drugSeparator: settings.drugSeparator,
     };
 
     const formattedText = medicationProcessor.formatMedicationList(
@@ -213,6 +216,9 @@ const MedicationList = ({
         icd_code: group.icd_code,
         icd_name: group.icd_name,
         showDiagnosis: settings.showDiagnosis,
+        customMedicationHeaderCopyFormat: settings.customMedicationHeaderCopyFormat,
+        customMedicationDrugCopyFormat: settings.customMedicationDrugCopyFormat,
+        drugSeparator: settings.drugSeparator,
       };
 
       return medicationProcessor.formatMedicationList(

@@ -1,86 +1,64 @@
-import React, { useState, useEffect, useRef } from 'react';
+/* eslint-disable react/prop-types -- 專案未使用 PropTypes(全 repo 該規則有 ~2100 個未修告警,實質未執行) */
+import { useState, useEffect } from 'react';
 import {
   Typography,
   Box,
   Button,
   Snackbar,
-  Alert,
-  useTheme,
-  useMediaQuery,
-  FormControl,
-  FormControlLabel,
-  RadioGroup,
-  Radio
+  Alert
 } from '@mui/material';
 
 import SaveIcon from '@mui/icons-material/Save';
 import RestoreIcon from '@mui/icons-material/Restore';
 
-// Import local components
-import FormatElementsPanel from './medicationCopyFormat/FormatElementsPanel';
-import FormatPreview from './medicationCopyFormat/FormatPreview';
-import useFormatEditorState from './medicationCopyFormat/useFormatEditorState';
-import { createHeaderDragHandlers, createDrugDragHandlers } from './medicationCopyFormat/dragDropHandlers';
+// Import generic copy-format editor building blocks (階段5 Task 6)
+import FormatElementsPanel from './copyFormat/FormatElementsPanel';
+import FormatPreview from './copyFormat/FormatPreview';
+import useFormatEditorState from './copyFormat/useFormatEditorState';
+import { createDragHandlers } from './copyFormat/dragDropHandlers';
+import medicationConfig from './copyFormat/medicationConfig';
 import { debugLog } from '../../utils/logger';
 
 // 西藥自訂格式編輯器組件
 const MedicationCustomFormatEditor = ({ appSettings, setAppSettings }) => {
-  // 響應式布局
-  const theme = useTheme();
-  const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
-  const isTablet = useMediaQuery(theme.breakpoints.down('md'));
-  
-  // DOM ref for拖拉元素
-  const dragItem = useRef(null);
-  
   // Format type selection (horizontal or vertical)
-  const [formatType, setFormatType] = useState("customVertical");
-  
-  // Use the custom hook for state management - now with separate header and drug formats
+  const [formatType, setFormatType] = useState('customVertical');
+
+  // Use the generic hook for state management, driven by medicationConfig
   const {
     headerFormat,
     setHeaderFormat,
-    drugFormat,
-    setDrugFormat,
-    customTextValue,
-    setCustomTextValue,
+    itemFormat: drugFormat,
+    setItemFormat: setDrugFormat,
     snackbarOpen,
     setSnackbarOpen,
     snackbarMessage,
     snackbarSeverity,
-    drugSeparator,
-    setDrugSeparator,
+    separator: drugSeparator,
+    setSeparator: setDrugSeparator,
     availableElements,
     addHeaderItem,
-    addDrugItem,
+    addItemElement: addDrugItem,
     addHeaderCustomText,
-    addDrugCustomText,
+    addItemCustomText: addDrugCustomText,
     removeHeaderItem,
-    removeDrugItem,
+    removeItemElement: removeDrugItem,
     saveChanges,
     resetToDefault,
     addHeaderPresetGroup
-  } = useFormatEditorState(appSettings, setAppSettings);
+  } = useFormatEditorState(appSettings, setAppSettings, medicationConfig);
 
   // Create drag handlers
-  const headerDragHandlers = createHeaderDragHandlers(headerFormat, setHeaderFormat);
-  const drugDragHandlers = createDrugDragHandlers(drugFormat, setDrugFormat);
-
-  // Add extra debugging to track settings changes
-  useEffect(() => {
-    if (appSettings?.western?.customMedicationHeaderCopyFormat && appSettings?.western?.customMedicationDrugCopyFormat) {
-      // Monitoring both formats instead of a single customCopyFormat
-    }
-  }, [appSettings?.western?.customMedicationHeaderCopyFormat, appSettings?.western?.customMedicationDrugCopyFormat]);
+  const headerDragHandlers = createDragHandlers(headerFormat, setHeaderFormat);
+  const drugDragHandlers = createDragHandlers(drugFormat, setDrugFormat);
 
   // Initialize format type from settings
   useEffect(() => {
     if (appSettings.western) {
-      // Initialize format type
-      if (appSettings.western.medicationCopyFormat === "customHorizontal") {
-        setFormatType("customHorizontal");
+      if (appSettings.western.medicationCopyFormat === 'customHorizontal') {
+        setFormatType('customHorizontal');
       } else {
-        setFormatType("customVertical");
+        setFormatType('customVertical');
       }
     }
   }, [appSettings.western]);
@@ -88,7 +66,7 @@ const MedicationCustomFormatEditor = ({ appSettings, setAppSettings }) => {
   // Handle format type change
   const handleFormatTypeChange = (event) => {
     const newFormatType = event.target ? event.target.value : event;
-    debugLog("Format type changed to:", newFormatType);
+    debugLog('Format type changed to:', newFormatType);
     setFormatType(newFormatType);
   };
 
@@ -99,30 +77,30 @@ const MedicationCustomFormatEditor = ({ appSettings, setAppSettings }) => {
       ['header', new Set(['text'])],
       ['text', new Set()]
     ]);
-    
+
     // 檢查標題格式中是否有閉合括號 ']' #zh-TW
     const hasClosingBracket = headerFormat.some(item => {
       const baseId = item.id.split('_')[0];
       const secondPart = item.id.split('_')[1];
-      
+
       const isHeaderTextOrText = (
-        (headerElementTypeMap.has(baseId) && 
+        (headerElementTypeMap.has(baseId) &&
          (secondPart === undefined || headerElementTypeMap.get(baseId).has(secondPart))) ||
         (baseId === 'header' && secondPart === 'text')
       );
-      
+
       return isHeaderTextOrText && item.value === ']';
     });
-    
+
     if (!hasClosingBracket) {
       console.warn('MedicationCustomFormatEditor: Closing bracket missing from header format!');
     }
-    
+
     // Save with format type
     saveChanges({
       formatType // Pass the current format type for medication only
     });
-    
+
     // Log final settings after saving
     debugLog('MedicationCustomFormatEditor: Saved format settings:', {
       header: headerFormat,
@@ -162,7 +140,7 @@ const MedicationCustomFormatEditor = ({ appSettings, setAppSettings }) => {
           </Button>
         </Box>
       </Box>
-      
+
       {/* Preview section */}
       <Box sx={{ display: 'flex', flexDirection: 'column', bgcolor: '#f8f8f8', pt: 1, px: 2, pb: 1, borderRadius: 1, mb: 1 }}>
         <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
@@ -170,74 +148,59 @@ const MedicationCustomFormatEditor = ({ appSettings, setAppSettings }) => {
             格式類型選擇與預覽
           </Typography>
         </Box>
-        
-        <FormatPreview 
-          headerFormat={headerFormat} 
-          drugFormat={drugFormat} 
-          drugSeparator={drugSeparator}
+
+        <FormatPreview
+          headerFormat={headerFormat}
+          itemFormat={drugFormat}
+          separator={drugSeparator}
           formatType={formatType}
           onFormatTypeChange={handleFormatTypeChange}
+          config={medicationConfig}
         />
       </Box>
-      
+
       {/* Header format panel */}
       <FormatElementsPanel
         title="標題格式 (只顯示一次)"
         elements={headerFormat}
         formatClass="header-format-item"
         availableElements={availableElements('header')}
-        customTextValue=""
-        setCustomTextValue={() => {}}
         onAddItem={addHeaderItem}
         onRemoveItem={removeHeaderItem}
         onAddCustomText={(text) => addHeaderCustomText(text)}
         onAddPresetGroup={addHeaderPresetGroup}
         formatType="header"
         currentFormatType={formatType}
-        dragHandlers={{
-          handleDragStart: headerDragHandlers.handleHeaderDragStart,
-          handleDragEnter: headerDragHandlers.handleHeaderDragEnter,
-          handleDragOver: headerDragHandlers.handleHeaderDragOver,
-          handleDragLeave: headerDragHandlers.handleHeaderDragLeave,
-          handleDrop: headerDragHandlers.handleHeaderDrop,
-          handleDragEnd: headerDragHandlers.handleHeaderDragEnd
-        }}
+        dragHandlers={headerDragHandlers}
+        config={medicationConfig}
       />
-      
+
       {/* Drug format panel */}
       <FormatElementsPanel
         title="藥品格式 (每個藥品顯示一次)"
         elements={drugFormat}
         formatClass="drug-format-item"
-        availableElements={availableElements('drug')}
-        customTextValue=""
-        setCustomTextValue={() => {}}
+        availableElements={availableElements('item')}
         onAddItem={addDrugItem}
         onRemoveItem={removeDrugItem}
         onAddCustomText={(text) => addDrugCustomText(text)}
-        formatType="drug"
-        drugSeparator={drugSeparator}
-        setDrugSeparator={setDrugSeparator}
+        formatType="item"
+        separator={drugSeparator}
+        setSeparator={setDrugSeparator}
         currentFormatType={formatType}
-        dragHandlers={{
-          handleDragStart: drugDragHandlers.handleDrugDragStart,
-          handleDragEnter: drugDragHandlers.handleDrugDragEnter,
-          handleDragOver: drugDragHandlers.handleDrugDragOver,
-          handleDragLeave: drugDragHandlers.handleDrugDragLeave,
-          handleDrop: drugDragHandlers.handleDrugDrop,
-          handleDragEnd: drugDragHandlers.handleDragEnd
-        }}
+        dragHandlers={drugDragHandlers}
+        config={medicationConfig}
       />
-      
+
       {/* Notifications */}
-      <Snackbar 
-        open={snackbarOpen} 
-        autoHideDuration={3000} 
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={3000}
         onClose={() => setSnackbarOpen(false)}
         anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
       >
-        <Alert 
-          onClose={() => setSnackbarOpen(false)} 
+        <Alert
+          onClose={() => setSnackbarOpen(false)}
           severity={snackbarSeverity}
         >
           {snackbarMessage}
@@ -247,4 +210,4 @@ const MedicationCustomFormatEditor = ({ appSettings, setAppSettings }) => {
   );
 };
 
-export default MedicationCustomFormatEditor; 
+export default MedicationCustomFormatEditor;

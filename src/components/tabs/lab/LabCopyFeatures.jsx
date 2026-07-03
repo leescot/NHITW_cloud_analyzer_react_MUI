@@ -170,6 +170,8 @@ export const useCopyLabData = () => {
   return {
     snackbarOpen,
     snackbarMessage,
+    setSnackbarOpen,
+    setSnackbarMessage,
     handleSnackbarClose,
     handleSectionLabData,
     handleCopyUserSelectedLabData

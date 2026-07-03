@@ -431,7 +431,9 @@ export const medicationProcessor = {
   },
 
   // 處理藥物資料的主要函數
-  processMedicationData(data, rawChronicMed) {
+  // formatSettings：呼叫端可直接傳入西藥格式設定（通常是 appSettings.western），
+  // 傳入時優先使用；省略或傳 null 時退回原本的 chrome.storage.sync.get 讀取路徑。
+  processMedicationData(data, rawChronicMed, formatSettings = null) {
     if (!data || !data.rObject || !Array.isArray(data.rObject)) {
       console.error("無效的藥物資料格式");
       return Promise.resolve([]);
@@ -450,75 +452,9 @@ export const medicationProcessor = {
       drugSeparator: ",",
     };
 
-    // 從 Chrome storage 獲取使用者設定
-    return new Promise((resolve) => {
-      chrome.storage.sync.get(defaultSettings, (settings) => {
-        // 檢查全局格式設定（來自本地資料處理器）
-        if (window.medicationFormatSettings) {
-          // 建立深度複製以確保數組被正確複製
-          const deepCopiedSettings = {};
-          
-          // 直接複製基本值
-          Object.keys(window.medicationFormatSettings).forEach(key => {
-            if (!Array.isArray(window.medicationFormatSettings[key])) {
-              deepCopiedSettings[key] = window.medicationFormatSettings[key];
-            } else {
-              // 使用 JSON 深度複製數組
-              deepCopiedSettings[key] = JSON.parse(JSON.stringify(window.medicationFormatSettings[key]));
-            }
-          });
-
-          // 合併全局設定與獲取的設定
-          settings = {
-            ...settings,
-            ...deepCopiedSettings
-          };
-        } else {
-          debugLog("使用 Chrome storage 中的設定:", {
-            medicationCopyFormat: settings.medicationCopyFormat,
-            enableMedicationCustomCopyFormat: settings.enableMedicationCustomCopyFormat,
-            hasHeaderFormat: !!settings.customMedicationHeaderCopyFormat,
-            hasDrugFormat: !!settings.customMedicationDrugCopyFormat,
-            drugSeparator: settings.drugSeparator
-          });
-          
-          // 改進: 如果啟用了自定義格式但 Chrome storage 中沒有全局變量，設置全局變量
-          if (settings.enableMedicationCustomCopyFormat && 
-              (settings.customMedicationHeaderCopyFormat || settings.customMedicationDrugCopyFormat)) {
-
-            // 創建全局設定對象 (如果不存在)
-            if (!window.medicationFormatSettings) {
-              window.medicationFormatSettings = {};
-            }
-            
-            // 複製自定義格式設定到全局變量
-            if (settings.customMedicationHeaderCopyFormat) {
-              window.medicationFormatSettings.customMedicationHeaderCopyFormat = 
-                  JSON.parse(JSON.stringify(settings.customMedicationHeaderCopyFormat));
-              // 設置備份變量
-              window.customMedicationHeaderCopyFormat = 
-                  JSON.parse(JSON.stringify(settings.customMedicationHeaderCopyFormat));
-            }
-            
-            if (settings.customMedicationDrugCopyFormat) {
-              window.medicationFormatSettings.customMedicationDrugCopyFormat = 
-                  JSON.parse(JSON.stringify(settings.customMedicationDrugCopyFormat));
-              // 設置備份變量
-              window.customMedicationDrugCopyFormat = 
-                  JSON.parse(JSON.stringify(settings.customMedicationDrugCopyFormat));
-            }
-            
-            // 複製其他設定
-            window.medicationFormatSettings.enableMedicationCustomCopyFormat = 
-                settings.enableMedicationCustomCopyFormat;
-            window.medicationFormatSettings.medicationCopyFormat = 
-                settings.medicationCopyFormat;
-            window.medicationFormatSettings.drugSeparator =
-                settings.drugSeparator;
-          }
-        }
-        
-        try {
+    // 實際處理邏輯：settings 已備妥（無論來自參數或 chrome.storage）後執行
+    const runWithSettings = (settings, resolve) => {
+      try {
           // 預先建立 drug_code -> 藥品資訊 查表，給 chronicMed 合成紀錄回填使用
           const drugInfoMap = this.buildDrugInfoMap(data);
 
@@ -639,7 +575,25 @@ export const medicationProcessor = {
           console.error("錯誤詳情:", error.stack);
           resolve([]);
         }
-      });
+    };
+
+    return new Promise((resolve) => {
+      if (formatSettings) {
+        // 呼叫端已提供設定（例如 appSettings.western），直接使用，缺漏欄位補上預設值
+        debugLog("使用呼叫端傳入的西藥格式設定:", {
+          medicationCopyFormat: formatSettings.medicationCopyFormat,
+          enableMedicationCustomCopyFormat: formatSettings.enableMedicationCustomCopyFormat,
+          hasHeaderFormat: !!formatSettings.customMedicationHeaderCopyFormat,
+          hasDrugFormat: !!formatSettings.customMedicationDrugCopyFormat,
+          drugSeparator: formatSettings.drugSeparator
+        });
+        runWithSettings({ ...defaultSettings, ...formatSettings }, resolve);
+      } else {
+        // 後備路徑：呼叫端未傳入設定，維持原本從 chrome.storage.sync 讀取的行為
+        chrome.storage.sync.get(defaultSettings, (settings) => {
+          runWithSettings(settings, resolve);
+        });
+      }
     });
   },
 
@@ -649,89 +603,21 @@ export const medicationProcessor = {
       return "";
     }
     
-    // 建立分隔符獲取策略
-    const getSeparator = () => {
-      const sources = [
-        groupInfo.drugSeparator,
-        window.medicationFormatSettings?.drugSeparator,
-        window.customDrugSeparator,
-        ', ' // 預設值
-      ];
-      
-      // 使用第一個非空值
-      return sources.find(source => source !== undefined && source !== null) || ', ';
-    };
-    
-    const drugSeparatorFromSettings = getSeparator();
+    // 分隔符：groupInfo 由呼叫端（UI）從 settings.drugSeparator 帶入，缺省時用預設值
+    const drugSeparatorFromSettings = groupInfo.drugSeparator ?? ', ';
 
     // 確保 groupInfo 包含所有必要的設定
     const enhancedGroupInfo = {
       ...groupInfo,
-      // 確保自定義格式設定存在
+      // 確保自定義格式設定存在（皆由呼叫端經參數傳入，缺省時視為未設定）
       customMedicationHeaderCopyFormat: groupInfo.customMedicationHeaderCopyFormat || [],
       customMedicationDrugCopyFormat: groupInfo.customMedicationDrugCopyFormat || [],
-      // 確保分隔符設定存在，使用多重檢查確保我們有一個值
+      // 確保分隔符設定存在
       drugSeparator: drugSeparatorFromSettings
     };
 
-    // 定義驗證自定義格式配置的函數
-    const isValidArray = (array) => Array.isArray(array) && array.length > 0;
-
-    // 檢查自定義格式數組是否有效（非空）
-    let hasValidHeaderFormat = isValidArray(enhancedGroupInfo.customMedicationHeaderCopyFormat);
-    let hasValidDrugFormat = isValidArray(enhancedGroupInfo.customMedicationDrugCopyFormat);
-
-    // 建立格式數組來源映射
-    const formatArraySources = new Map([
-      ['header', {
-        validate: (config) => isValidArray(config.customMedicationHeaderCopyFormat),
-        sources: [
-          (config) => config.customMedicationHeaderCopyFormat,
-          () => window.medicationFormatSettings?.customMedicationHeaderCopyFormat,
-          () => window.customMedicationHeaderCopyFormat
-        ],
-        target: 'customMedicationHeaderCopyFormat'
-      }],
-      ['drug', {
-        validate: (config) => isValidArray(config.customMedicationDrugCopyFormat),
-        sources: [
-          (config) => config.customMedicationDrugCopyFormat,
-          () => window.medicationFormatSettings?.customMedicationDrugCopyFormat,
-          () => window.customMedicationDrugCopyFormat
-        ],
-        target: 'customMedicationDrugCopyFormat'
-      }]
-    ]);
-
     // 檢查是否需要並可以使用自定義格式
     const isCustomFormat = ['custom', 'customVertical', 'customHorizontal'].includes(format);
-    const needsCustomFormatArrays = isCustomFormat && (!hasValidHeaderFormat || !hasValidDrugFormat);
-
-    // 如果需要自定義格式但缺少必要的數組
-    if (needsCustomFormatArrays) {
-      // 處理自定義格式數組配置
-      for (const [key, configMeta] of formatArraySources.entries()) {
-        // 如果當前配置有效，跳過
-        if (configMeta.validate(enhancedGroupInfo)) continue;
-        
-        // 嘗試從可能的來源獲取有效配置
-        for (const sourceFunc of configMeta.sources) {
-          const source = sourceFunc(enhancedGroupInfo);
-          
-          if (isValidArray(source)) {
-            // 複製數組到 enhancedGroupInfo
-            enhancedGroupInfo[configMeta.target] = JSON.parse(JSON.stringify(source));
-            
-            // 更新驗證標記
-            if (key === 'header') hasValidHeaderFormat = true;
-            if (key === 'drug') hasValidDrugFormat = true;
-            
-            // 找到有效來源後跳出
-            break;
-          }
-        }
-      }
-    }
 
     // 格式化僅包含日期和醫院的標頭（移除了 visitType）
     let header = `${enhancedGroupInfo.date} - ${enhancedGroupInfo.hosp}`;

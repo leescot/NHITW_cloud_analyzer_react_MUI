@@ -121,6 +121,9 @@ export const handleCopyMedications = (medications, group, settings, setSnackbarM
     icd_code: group.icd_code,
     icd_name: group.icd_name,
     showDiagnosis: settings.showDiagnosis,
+    customMedicationHeaderCopyFormat: settings.customMedicationHeaderCopyFormat,
+    customMedicationDrugCopyFormat: settings.customMedicationDrugCopyFormat,
+    drugSeparator: settings.drugSeparator,
   };
 
   const formattedText = medicationProcessor.formatMedicationList(
