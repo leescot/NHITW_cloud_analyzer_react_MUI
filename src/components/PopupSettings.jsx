@@ -21,6 +21,7 @@ import VolunteerActivismIcon from '@mui/icons-material/VolunteerActivism';
 
 // 引入標籤顏色工具函數
 import { getTabColor, getTabSelectedColor } from '../utils/tabColorUtils';
+import { debugLog } from '../utils/logger';
 
 // 導入拆分出的組件
 // DataStatusTab 已隱藏（保留 dataStatus 狀態機，方便日後重啟）
@@ -252,7 +253,7 @@ const PopupSettings = () => {
 
   // 組件掛載時初始化
   useEffect(() => {
-    console.log('PopupSettings 組件已掛載');
+    debugLog('PopupSettings 組件已掛載');
 
     // 立即更新資料狀態
     updateDataStatus(setDataStatus);
@@ -309,7 +310,7 @@ const PopupSettings = () => {
 
     // 清理監聽器和間隔
     return () => {
-      console.log('清理 PopupSettings 組件');
+      debugLog('清理 PopupSettings 組件');
       chrome.runtime.onMessage.removeListener(handleMessage);
       chrome.storage.onChanged.removeListener(handleStorageChange);
       clearInterval(intervalId);

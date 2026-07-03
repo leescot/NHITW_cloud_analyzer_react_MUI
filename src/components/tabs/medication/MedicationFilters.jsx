@@ -10,7 +10,6 @@ const MedicationFilters = ({
   selectedVisitType,
   handleVisitTypeChange,
   availableVisitTypes,
-  generalDisplaySettings,
   settings,
   onCopyAll
 }) => {
@@ -59,7 +58,6 @@ const MedicationFilters = ({
             label={
               <TypographySizeWrapper
                 textSizeType="content"
-                generalDisplaySettings={generalDisplaySettings}
               >
                 {label}
               </TypographySizeWrapper>

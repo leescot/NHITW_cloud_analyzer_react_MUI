@@ -9,7 +9,7 @@ import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import TypographySizeWrapper from '../../utils/TypographySizeWrapper';
 import { SectionTitle, highlightReport, formatOrderName } from './ckmCardUtils';
 
-const CKMImagingCard = ({ imaging, ekgAlerts, lvef, gds }) => {
+const CKMImagingCard = ({ imaging, ekgAlerts, lvef }) => {
   const [reportDialog, setReportDialog] = useState({ open: false, content: '', title: '' });
   const [copySuccess, setCopySuccess] = useState(false);
 
@@ -80,7 +80,7 @@ const CKMImagingCard = ({ imaging, ekgAlerts, lvef, gds }) => {
             <ListItemText
               primary={
                 <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 0.5 }}>
-                  <TypographySizeWrapper textSizeType="content" generalDisplaySettings={gds}>
+                  <TypographySizeWrapper textSizeType="content">
                     {formatOrderName(img.orderName)}
                   </TypographySizeWrapper>
                   <Chip
@@ -92,7 +92,7 @@ const CKMImagingCard = ({ imaging, ekgAlerts, lvef, gds }) => {
               }
               secondary={
                 notes.length > 0 ? (
-                  <TypographySizeWrapper textSizeType="note" generalDisplaySettings={gds} sx={{ display: 'block', color: 'text.primary' }}>
+                  <TypographySizeWrapper textSizeType="note" sx={{ display: 'block', color: 'text.primary' }}>
                     {notes.join('；')}
                   </TypographySizeWrapper>
                 ) : null
@@ -105,10 +105,10 @@ const CKMImagingCard = ({ imaging, ekgAlerts, lvef, gds }) => {
 
       <Dialog open={reportDialog.open} onClose={() => setReportDialog({...reportDialog, open:false})} maxWidth="md" fullWidth>
         <DialogTitle>
-          <TypographySizeWrapper textSizeType="title" generalDisplaySettings={gds}>{reportDialog.title}</TypographySizeWrapper>
+          <TypographySizeWrapper textSizeType="title">{reportDialog.title}</TypographySizeWrapper>
         </DialogTitle>
         <DialogContent dividers>
-          <TypographySizeWrapper textSizeType="content" generalDisplaySettings={gds} style={{whiteSpace:'pre-line'}}>
+          <TypographySizeWrapper textSizeType="content" style={{whiteSpace:'pre-line'}}>
             <div dangerouslySetInnerHTML={{__html: highlightReport(reportDialog.content)}} />
           </TypographySizeWrapper>
         </DialogContent>

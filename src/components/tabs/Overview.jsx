@@ -35,6 +35,8 @@ import CKMImagingCard from "./ckm/CKMImagingCard";
 // 導入從配置文件中移出的常數
 import { DEFAULT_LAB_TESTS } from '../../config/labTests';
 import { DEFAULT_IMAGE_TESTS } from '../../config/imageTests';
+import { debugLog } from '../../utils/logger';
+import { useGeneralDisplaySettings } from '../../contexts/SettingsContext';
 
 const Overview = ({
   dashboardData,
@@ -58,13 +60,13 @@ const Overview = ({
     focusedLabTests: DEFAULT_LAB_TESTS,
     focusedImageTests: DEFAULT_IMAGE_TESTS
   },
-  generalDisplaySettings = { titleTextSize: 'medium', contentTextSize: 'medium', noteTextSize: 'small' },
   labSettings = {},
   cloudSettings = { fetchAdultHealthCheck: true, fetchCancerScreening: true, fetchHbcvdata: true },
   ckmData = null,
   enableCKMTab = false,
   userInfo = null
 }) => {
+  const generalDisplaySettings = useGeneralDisplaySettings();
   // Check if components have data
   const hasMedications = useMemo(() => groupedMedications && groupedMedications.length > 0, [groupedMedications]);
   const hasAllergyData = useMemo(() => allergyData && allergyData.length > 0, [allergyData]);
@@ -73,10 +75,10 @@ const Overview = ({
 
 
   useEffect(() => {
-    console.log("[Overview] adultHealthCheckData prop:", adultHealthCheckData);
-    console.log("[Overview] cancerScreeningData prop:", cancerScreeningData);
-    console.log("[Overview] hbcvData prop:", hbcvData);
-    console.log("[Overview] cloudSettings:", cloudSettings);
+    debugLog("[Overview] adultHealthCheckData prop:", adultHealthCheckData);
+    debugLog("[Overview] cancerScreeningData prop:", cancerScreeningData);
+    debugLog("[Overview] hbcvData prop:", hbcvData);
+    debugLog("[Overview] cloudSettings:", cloudSettings);
   }, [adultHealthCheckData, cancerScreeningData, hbcvData, cloudSettings]);
 
   return (
@@ -100,7 +102,6 @@ const Overview = ({
             groupedMedications={groupedMedications}
             groupedChineseMeds={groupedChineseMeds}
             patientSummaryData={patientSummaryData}
-            generalDisplaySettings={generalDisplaySettings}
           />
 
           {/* 重點藥物 */}
@@ -108,7 +109,6 @@ const Overview = ({
             groupedMedications={groupedMedications}
             settings={settings}
             overviewSettings={overviewSettings}
-            generalDisplaySettings={generalDisplaySettings}
             enableCKMBadge={enableCKMTab}
           />
         </Grid>
@@ -121,7 +121,6 @@ const Overview = ({
             cancerScreeningData={cancerScreeningData}
             hbcvData={hbcvData}
             cloudSettings={cloudSettings}
-            generalDisplaySettings={generalDisplaySettings}
           />
 
 
@@ -130,7 +129,6 @@ const Overview = ({
             groupedLabs={groupedLabs}
             labData={labData}
             overviewSettings={overviewSettings}
-            generalDisplaySettings={generalDisplaySettings}
             labSettings={labSettings}
             enableCKM={enableCKMTab}
             userInfo={userInfo}
@@ -144,7 +142,7 @@ const Overview = ({
               <>
                 {/* CKM 開啟：其他檢驗 + CKM 影像 + 手術/住院/過敏（各預設 3 筆，可展開）+ 病患摘要 */}
                 <Grid item>
-                  <CKMExtraLabCard groupedLabs={groupedLabs} gds={generalDisplaySettings} />
+                  <CKMExtraLabCard groupedLabs={groupedLabs} />
                 </Grid>
                 {ckmData && (
                   <Grid item>
@@ -152,7 +150,6 @@ const Overview = ({
                       imaging={ckmData.imaging}
                       ekgAlerts={ckmData.ekgAlerts}
                       lvef={ckmData.summary?.lvef}
-                      gds={generalDisplaySettings}
                     />
                   </Grid>
                 )}
@@ -160,7 +157,6 @@ const Overview = ({
                   <Grid item>
                     <Overview_SurgeryRecords
                       surgeryData={surgeryData}
-                      generalDisplaySettings={generalDisplaySettings}
                       collapsedCount={3}
                     />
                   </Grid>
@@ -169,7 +165,6 @@ const Overview = ({
                   <Grid item>
                     <Overview_DischargeRecords
                       dischargeData={dischargeData}
-                      generalDisplaySettings={generalDisplaySettings}
                       collapsedCount={3}
                     />
                   </Grid>
@@ -178,7 +173,6 @@ const Overview = ({
                   <Grid item>
                     <Overview_AllergyRecords
                       allergyData={allergyData}
-                      generalDisplaySettings={generalDisplaySettings}
                       collapsedCount={3}
                     />
                   </Grid>
@@ -186,7 +180,6 @@ const Overview = ({
                 <Grid item>
                   <Overview_PatientSummary
                     patientSummaryData={patientSummaryData}
-                    generalDisplaySettings={generalDisplaySettings}
                   />
                 </Grid>
               </>
@@ -197,7 +190,6 @@ const Overview = ({
                   <Overview_ImagingTests
                     imagingData={imagingData}
                     overviewSettings={overviewSettings}
-                    generalDisplaySettings={generalDisplaySettings}
                   />
                 </Grid>
 
@@ -206,7 +198,6 @@ const Overview = ({
                   <Grid item>
                     <Overview_SurgeryRecords
                       surgeryData={surgeryData}
-                      generalDisplaySettings={generalDisplaySettings}
                     />
                   </Grid>
                 )}
@@ -216,7 +207,6 @@ const Overview = ({
                   <Grid item>
                     <Overview_DischargeRecords
                       dischargeData={dischargeData}
-                      generalDisplaySettings={generalDisplaySettings}
                     />
                   </Grid>
                 )}
@@ -226,7 +216,6 @@ const Overview = ({
                   <Grid item>
                     <Overview_AllergyRecords
                       allergyData={allergyData}
-                      generalDisplaySettings={generalDisplaySettings}
                     />
                   </Grid>
                 )}
@@ -235,7 +224,6 @@ const Overview = ({
                 <Grid item>
                   <Overview_PatientSummary
                     patientSummaryData={patientSummaryData}
-                    generalDisplaySettings={generalDisplaySettings}
                   />
                 </Grid>
               </>

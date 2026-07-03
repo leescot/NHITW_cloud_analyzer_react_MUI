@@ -18,8 +18,7 @@ import { labProcessor } from '../../utils/labProcessor';
 import TypographySizeWrapper from "../utils/TypographySizeWrapper";
 import LabItemTrendPopover from "./lab/LabItemTrendPopover";
 
-const LabTableView = ({ groupedLabs, labSettings, generalDisplaySettings }) => {
-  // console.log("LabTableView rendering with lab settings:", labSettings);
+const LabTableView = ({ groupedLabs, labSettings }) => {
   // 獲取所有可用的檢驗類型
   const allLabTypes = labProcessor.getAllLabTypes(groupedLabs);
 
@@ -72,7 +71,6 @@ const LabTableView = ({ groupedLabs, labSettings, generalDisplaySettings }) => {
           <TypographySizeWrapper
             variant="caption"
             textSizeType="note"
-            generalDisplaySettings={generalDisplaySettings}
             color="text.secondary"
             display="block"
           >
@@ -81,7 +79,6 @@ const LabTableView = ({ groupedLabs, labSettings, generalDisplaySettings }) => {
           <TypographySizeWrapper
             variant="body2"
             textSizeType="content"
-            generalDisplaySettings={generalDisplaySettings}
           >
             {month}/{day}
           </TypographySizeWrapper>
@@ -155,7 +152,6 @@ const LabTableView = ({ groupedLabs, labSettings, generalDisplaySettings }) => {
                 label={
                   <TypographySizeWrapper
                     textSizeType="content"
-                    generalDisplaySettings={generalDisplaySettings}
                   >
                     {option.label}
                   </TypographySizeWrapper>
@@ -166,7 +162,6 @@ const LabTableView = ({ groupedLabs, labSettings, generalDisplaySettings }) => {
         </FormControl>
         <TypographySizeWrapper
           textSizeType="content"
-          generalDisplaySettings={generalDisplaySettings}
           color="text.secondary"
           sx={{ m: 2 }}
         >
@@ -195,7 +190,6 @@ const LabTableView = ({ groupedLabs, labSettings, generalDisplaySettings }) => {
               label={
                 <TypographySizeWrapper
                   textSizeType="content"
-                  generalDisplaySettings={generalDisplaySettings}
                 >
                   {option.label.replace(/檢查/g, '')}
                 </TypographySizeWrapper>
@@ -241,7 +235,6 @@ const LabTableView = ({ groupedLabs, labSettings, generalDisplaySettings }) => {
               >
                 <TypographySizeWrapper
                   textSizeType="content"
-                  generalDisplaySettings={generalDisplaySettings}
                 >
                   檢驗項目
                 </TypographySizeWrapper>
@@ -288,7 +281,6 @@ const LabTableView = ({ groupedLabs, labSettings, generalDisplaySettings }) => {
                           <TypographySizeWrapper
                             variant="body2"
                             textSizeType="content"
-                            generalDisplaySettings={generalDisplaySettings}
                             fontWeight="medium"
                             sx={{ textDecoration: 'underline dotted', textDecorationColor: '#bdbdbd', cursor: 'pointer' }}
                           >
@@ -301,7 +293,6 @@ const LabTableView = ({ groupedLabs, labSettings, generalDisplaySettings }) => {
                       <TypographySizeWrapper
                         variant="body2"
                         textSizeType="content"
-                        generalDisplaySettings={generalDisplaySettings}
                         fontWeight="medium"
                       >
                         {item.displayName}
@@ -335,7 +326,6 @@ const LabTableView = ({ groupedLabs, labSettings, generalDisplaySettings }) => {
                           <TypographySizeWrapper
                             variant="body2"
                             textSizeType="content"
-                            generalDisplaySettings={generalDisplaySettings}
                             sx={{
                               color: getStatusColor(value.valueStatus, labSettings.highlightAbnormal),
                             }}
@@ -345,7 +335,6 @@ const LabTableView = ({ groupedLabs, labSettings, generalDisplaySettings }) => {
                               <TypographySizeWrapper
                                 component="span"
                                 textSizeType="note"
-                                generalDisplaySettings={generalDisplaySettings}
                                 sx={{ color: "gray" }}
                               >
                                 {` ${value.unit}`}
@@ -356,7 +345,6 @@ const LabTableView = ({ groupedLabs, labSettings, generalDisplaySettings }) => {
                                 <TypographySizeWrapper
                                   component="span"
                                   textSizeType="note"
-                                  generalDisplaySettings={generalDisplaySettings}
                                   sx={{ color: "gray" }}
                                 >
                                   {` (${value.formattedReference})`}
@@ -365,7 +353,6 @@ const LabTableView = ({ groupedLabs, labSettings, generalDisplaySettings }) => {
                                 <TypographySizeWrapper
                                   component="span"
                                   textSizeType="note"
-                                  generalDisplaySettings={generalDisplaySettings}
                                   sx={{ color: "gray" }}
                                 >
                                   {` (${value.referenceMin}${
@@ -381,7 +368,6 @@ const LabTableView = ({ groupedLabs, labSettings, generalDisplaySettings }) => {
                         <TypographySizeWrapper
                           variant="body2"
                           textSizeType="content"
-                          generalDisplaySettings={generalDisplaySettings}
                           color="text.disabled"
                         >
                           —

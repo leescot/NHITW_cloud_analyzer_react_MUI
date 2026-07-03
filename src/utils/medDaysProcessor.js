@@ -1,9 +1,13 @@
-export const medDaysProcessor = {
-  processMedDaysData(data) {
-    // console.log('Starting to process medication days data:', data);
+import { debugLog } from './logger';
 
+export const medDaysProcessor = {
+  /**
+   * @param {object} data 健保 medDays API 原始回應（含 rObject）
+   * @returns {import('../types/processors.js').MedDaysItem[]}
+   */
+  processMedDaysData(data) {
     if (!data || !data.rObject || !Array.isArray(data.rObject)) {
-      console.log('Invalid medication days data format:', data);
+      debugLog('Invalid medication days data format:', data);
       return [];
     }
 

@@ -17,10 +17,13 @@ import MedicationIcon from '@mui/icons-material/Medication';
 import ScienceIcon from '@mui/icons-material/Science';
 // Other icons can be imported for future settings pages
 
+import { useGeneralDisplaySettings } from '../../contexts/SettingsContext';
+
 /**
  * 進階設定主組件 - 管理多個設定頁面
  */
-const AdvancedSettings = ({ appSettings, setAppSettings, generalDisplaySettings }) => {
+const AdvancedSettings = ({ appSettings, setAppSettings }) => {
+  const generalDisplaySettings = useGeneralDisplaySettings();
   // 當前選擇的設定頁面索引
   const [settingsTabIndex, setSettingsTabIndex] = useState(0);
   // 是否啟用實驗室自訂複製格式
@@ -120,7 +123,6 @@ const AdvancedSettings = ({ appSettings, setAppSettings, generalDisplaySettings 
           <MedicationCustomFormatEditor 
             appSettings={appSettings} 
             setAppSettings={setAppSettings} 
-            generalDisplaySettings={generalDisplaySettings} 
           />
         )}
       </Box>
@@ -132,7 +134,6 @@ const AdvancedSettings = ({ appSettings, setAppSettings, generalDisplaySettings 
             <LabCustomFormatEditor 
               appSettings={appSettings} 
               setAppSettings={setAppSettings} 
-              generalDisplaySettings={generalDisplaySettings} 
             />
           )}
         </Box>

@@ -10,7 +10,7 @@ import {
 } from "@mui/material";
 import TypographySizeWrapper from "../utils/TypographySizeWrapper";
 
-const Overview_DischargeRecords = ({ dischargeData = [], generalDisplaySettings, collapsedCount = null }) => {
+const Overview_DischargeRecords = ({ dischargeData = [], collapsedCount = null }) => {
   // collapsedCount 有值時預設只顯示前 N 筆，點擊可展開/收合
   const [expanded, setExpanded] = React.useState(false);
   const visibleData = collapsedCount && !expanded
@@ -104,7 +104,6 @@ const Overview_DischargeRecords = ({ dischargeData = [], generalDisplaySettings,
       <TypographySizeWrapper
         variant="h6"
         textSizeType="title"
-        generalDisplaySettings={generalDisplaySettings}
         gutterBottom
       >
         出院紀錄
@@ -135,7 +134,6 @@ const Overview_DischargeRecords = ({ dischargeData = [], generalDisplaySettings,
                 primary={
                   <TypographySizeWrapper
                     textSizeType="content"
-                    generalDisplaySettings={generalDisplaySettings}
                   >
                     {`${formatDateRange(item.in_date, item.out_date, index)} ${item.hospital || item.hosp?.split(';')[0] || '醫院未知'}`}
                   </TypographySizeWrapper>
@@ -143,7 +141,6 @@ const Overview_DischargeRecords = ({ dischargeData = [], generalDisplaySettings,
                 secondary={
                   <TypographySizeWrapper
                     textSizeType="note"
-                    generalDisplaySettings={generalDisplaySettings}
                     color="text.secondary"
                   >
                     {`${item.icd_code || '無代碼'} ${item.icd_cname || '無診斷'}`}
@@ -156,7 +153,6 @@ const Overview_DischargeRecords = ({ dischargeData = [], generalDisplaySettings,
       ) : (
         <TypographySizeWrapper
           textSizeType="content"
-          generalDisplaySettings={generalDisplaySettings}
           color="text.secondary"
         >
           暫無出院紀錄
@@ -166,7 +162,6 @@ const Overview_DischargeRecords = ({ dischargeData = [], generalDisplaySettings,
         <TypographySizeWrapper
           variant="caption"
           textSizeType="note"
-          generalDisplaySettings={generalDisplaySettings}
           onClick={() => setExpanded(!expanded)}
           sx={{ display: 'block', mt: 0.5, color: 'primary.main', cursor: 'pointer' }}
         >

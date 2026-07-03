@@ -1,67 +1,18 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect, useRef } from "react";
 import {
   Dialog,
   DialogTitle,
   DialogContent,
   IconButton,
-  Typography,
-  Box,
-  Divider,
-  Tabs,
-  Tab,
-  Paper,
-  Table,
-  TableBody,
-  TableCell,
-  TableContainer,
-  TableHead,
-  TableRow,
-  Grid,
-  List,
-  ListItem,
-  ListItemText,
-  Chip,
-  useTheme,
-  useMediaQuery,
-  Tooltip,
-  Fab,
 } from "@mui/material";
-// import CloseIcon from "@mui/icons-material/Close";
-import LocalHospitalIcon from "@mui/icons-material/LocalHospital";
-import WarningAmberIcon from "@mui/icons-material/WarningAmber";
-import HealingIcon from "@mui/icons-material/Healing";
-import GrassIcon from "@mui/icons-material/Grass";
-// import ReportRoundedIcon from '@mui/icons-material/ReportRounded';
-import HelpOutlineIcon from "@mui/icons-material/HelpOutline";
-import SettingsIcon from "@mui/icons-material/Settings";
-import FormatListBulletedIcon from "@mui/icons-material/FormatListBulleted";
 
 // Import cloud icon
 import { cloud_icon } from "../assets/pic_cloud_icon.js";
 
-// 導入數據和設置管理模組
-import {
-  collectDataSources,
-  handleAllData,
-  reprocessData,
-} from "../utils/dataManager";
-import {
-  loadAllSettings,
-  listenForSettingsChanges,
-  listenForMessages,
-  listenForDataFetchCompletion,
-  handleDataFetchCompletedSettingsChange,
-} from "../utils/settingsManager";
+import { SettingsProvider } from "../contexts/SettingsContext";
 
-// 引入標籤顏色工具函數
-import { getTabColor, getTabSelectedColor } from "../utils/tabColorUtils";
-
-// import ContentCopyIcon from "@mui/icons-material/ContentCopy";
-import Snackbar from "@mui/material/Snackbar";
-// import VisibilityIcon from '@mui/icons-material/Visibility';
-// import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
-import { DEFAULT_LAB_TESTS } from "../config/labTests";
-import { DEFAULT_IMAGE_TESTS } from "../config/imageTests";
+// Import header component (tabs Paper + status indicators)
+import MainDialogHeader from "./MainDialogHeader";
 
 // Import tab components
 import TabPanel from "./tabs/TabPanel";
@@ -75,317 +26,60 @@ import MedDaysData from "./tabs/MedDaysData";
 import LabTableView from "./tabs/LabTableView";
 import Instructions from "./tabs/Instructions";
 import AdvancedSettings from "./tabs/AdvancedSettings";
-import { ckmProcessor } from "../utils/ckmProcessor";
-
-import MedicationIcon from "@mui/icons-material/Medication";
-import ScienceIcon from "@mui/icons-material/Science";
-import ImageIcon from "@mui/icons-material/Image";
-import InventoryIcon from "@mui/icons-material/Inventory";
-
-import TableChartIcon from "@mui/icons-material/TableChart";
-import TableViewIcon from "@mui/icons-material/TableView";
-import MonitorHeartIcon from "@mui/icons-material/MonitorHeart";
-import BiotechIcon from "@mui/icons-material/Biotech";
-
-// Import new tools
-import {
-  extractGFRValue,
-  getCKDStage,
-  hasRecentCTScan,
-  hasRecentMRIScan,
-} from "../utils/indicatorUtils";
-import {
-  TITLE_TEXT_SIZES,
-  CONTENT_TEXT_SIZES,
-  NOTE_TEXT_SIZES,
-} from "../utils/textSizeUtils";
-
-// Import new indicators
-import StatusIndicator from "./indicators/StatusIndicator";
-import KidneyStatusIndicator from "./indicators/KidneyStatusIndicator";
-
-// Import new settings
-import { DEFAULT_SETTINGS } from "../config/defaultSettings";
-import { DEFAULT_ATC5_GROUPS } from "../config/medicationGroups";
 
 // Import user info utilities
-import {
-  extractUserInfoFromToken,
-  formatUserInfoDisplay,
-} from "../utils/userInfoUtils";
-
-// 刪除未使用的組件和函數，或移動到實際使用它們的地方
-// ImagingTable, getLabStatusColor, getLabValueColor
+import { useUserInfo } from "../hooks/useUserInfo";
+import { useNhiDataState } from "../hooks/useNhiDataState";
+import { useSettingsState } from "../hooks/useSettingsState";
 
 // Add a global flag to prevent multiple openings
 window.isFloatingIconOpening = false;
 
 const FloatingIcon = () => {
   const [open, setOpen] = useState(false);
+  const { userInfo, setUserInfo } = useUserInfo(open);
   const [tabValue, setTabValue] = useState(false);
-  const [groupedMedications, setGroupedMedications] = useState([]);
-  const [userInfo, setUserInfo] = useState(null);
-  const [groupedLabs, setGroupedLabs] = useState([]);
-  const [groupedChineseMeds, setGroupedChineseMeds] = useState([]);
-  const [imagingData, setImagingData] = useState({
-    withReport: [],
-    withoutReport: [],
+
+  // Tab index（CKM 已整合進 Overview，不再有獨立 Tab）
+  const helpTabIndex = 7;
+  const advancedTabIndex = 8;
+
+  // nhiDataRef：見 useSettingsState.js 檔頭註解，解決 useSettingsState 與
+  // useNhiDataState 互相依賴的問題。FloatingIcon 建立空 ref 傳入 useSettingsState，
+  // 待 useNhiDataState 執行完成後於本次 render 賦值，listener 皆於非同步事件觸發時
+  // 透過 .current 讀取，時序與既有的 openRef/appSettingsRef pattern 相同。
+  const nhiDataRef = useRef(null);
+  const { appSettings, setAppSettings, generalDisplaySettings, appSettingsRef } =
+    useSettingsState({ open, setOpen, setTabValue, advancedTabIndex, nhiDataRef });
+
+  const nhiData = useNhiDataState({
+    appSettingsRef,
+    labSettings: appSettings.lab,
+    userInfo,
+    setUserInfo,
   });
-  const [allergyData, setAllergyData] = useState([]);
-  const [surgeryData, setSurgeryData] = useState([]);
-  const [dischargeData, setDischargeData] = useState([]);
-  const [medDaysData, setMedDaysData] = useState([]);
-  const [dashboardData, setDashboardData] = useState({
-    visitCount: 0,
-    diagnoses: [],
-    recentMedications: { western: [], chinese: [] },
-    labSummary: {},
-  });
-  const [adultHealthCheckData, setAdultHealthCheckData] = useState(null);
-  const [cancerScreeningData, setCancerScreeningData] = useState(null);
-  const [hbcvData, setHbcvData] = useState(null);
-  const [ckmData, setCkmData] = useState(null);
-  const [generalDisplaySettings, setGeneralDisplaySettings] = useState(
-    DEFAULT_SETTINGS.general
-  );
+  nhiDataRef.current = nhiData;
+  const {
+    groupedMedications,
+    groupedLabs,
+    groupedChineseMeds,
+    imagingData,
+    allergyData,
+    surgeryData,
+    dischargeData,
+    medDaysData,
+    dashboardData,
+    adultHealthCheckData,
+    cancerScreeningData,
+    hbcvData,
+    ckmData,
+    patientSummaryData,
+  } = nhiData;
 
-  // Use the cached default value as the initial state
-  const [appSettings, setAppSettings] = useState({
-    western: DEFAULT_SETTINGS.western,
-    atc5: DEFAULT_SETTINGS.atc5,
-    chinese: DEFAULT_SETTINGS.chinese,
-    lab: DEFAULT_SETTINGS.lab,
-    overview: DEFAULT_SETTINGS.overview,
-    display: DEFAULT_SETTINGS.display,
-  });
-
-  const [snackbarOpen, setSnackbarOpen] = useState(false);
-  const [snackbarMessage, setSnackbarMessage] = useState("");
-  const [patientSummaryData, setPatientSummaryData] = useState([]);
-
-  // 新增響應式布局檢測
-  const theme = useTheme();
-  const isNarrowScreen = useMediaQuery(theme.breakpoints.down("lg"));
-
-  // 統一初始化設置和監聽器
-  useEffect(() => {
-    // 初始化所有設置
-    const initializeSettings = async () => {
-      const allSettings = await loadAllSettings();
-      setAppSettings({
-        western: allSettings.western,
-        atc5: allSettings.atc5,
-        chinese: allSettings.chinese,
-        lab: allSettings.lab,
-        overview: allSettings.overview,
-        display: allSettings.display,
-        cloud: allSettings.cloud,
-      });
-      setGeneralDisplaySettings(allSettings.general);
-    };
-
-    initializeSettings();
-
-    // 設置變更監聽處理函數
-    const removeSettingsListener = listenForSettingsChanges((newSettings) => {
-      // 更新所有設置狀態
-      setAppSettings({
-        western: newSettings.western,
-        atc5: newSettings.atc5,
-        chinese: newSettings.chinese,
-        lab: newSettings.lab,
-        overview: newSettings.overview,
-        display: newSettings.display,
-        cloud: newSettings.cloud,
-      });
-      setGeneralDisplaySettings(newSettings.general);
-
-      // 根據需要重新處理各種數據
-      if (window.lastInterceptedLabData) {
-        reprocessData(
-          "lab",
-          window.lastInterceptedLabData,
-          newSettings.lab,
-          setGroupedLabs
-        );
-      }
-      if (window.lastInterceptedMedicationData?.rObject) {
-        reprocessData(
-          "medication",
-          window.lastInterceptedMedicationData,
-          newSettings.western,
-          setGroupedMedications
-        );
-      }
-      if (window.lastInterceptedChineseMedData) {
-        reprocessData(
-          "chinesemed",
-          window.lastInterceptedChineseMedData,
-          newSettings.chinese,
-          setGroupedChineseMeds
-        );
-      }
-    });
-
-    // 消息監聽處理函數
-    const removeMessageListener = listenForMessages((message) => {
-      if (message.action === "settingChanged" && message.allSettings) {
-        // 觸發設置重新加載
-        initializeSettings();
-      }
-
-      // 處理切換到自訂設定標籤的消息
-      if (message.action === "switchToCustomFormatTab") {
-        // 如果對話框未打開，先打開它
-        if (!open) {
-          setOpen(true);
-        }
-        // 只有當自訂設定已啟用時才切換到指定的標籤
-        if (typeof message.tabIndex === 'number' && appSettings.western.enableMedicationCustomCopyFormat) {
-          setTabValue(message.tabIndex);
-        }
-      }
-
-      // 處理切換到檢驗自訂格式編輯器的消息
-      if (message.action === "switchToLabCustomFormatTab") {
-        // 如果對話框未打開，先打開它
-        if (!open) {
-          setOpen(true);
-        }
-        // 只有當自訂設定已啟用時才切換到指定的標籤
-        if (typeof message.tabIndex === 'number' && appSettings.lab.enableLabCustomCopyFormat) {
-          setTabValue(message.tabIndex);
-        }
-      }
-
-      // 處理打開自訂格式編輯器的消息
-      if (message.action === "openCustomFormatEditor") {
-        if (!open) {
-          setOpen(true);
-        }
-        if (appSettings.western.enableMedicationCustomCopyFormat) {
-          setTabValue(advancedTabIndex);
-        }
-      }
-
-      // 處理打開檢驗自訂格式編輯器的消息
-      if (message.action === "openLabCustomFormatEditor") {
-        if (!open) {
-          setOpen(true);
-        }
-        if (appSettings.lab.enableLabCustomCopyFormat) {
-          setTabValue(advancedTabIndex);
-        }
-      }
-    });
-
-    // 數據加載完成事件監聽處理函數
-    const removeDataFetchCompletionListener = listenForDataFetchCompletion(
-      (event) => {
-        // 處理設置變更
-        if (event.detail?.settingsChanged) {
-          // 準備回調函數
-          const callbacks = {
-            reprocessMedication: (data, settings) =>
-              reprocessData(
-                "medication",
-                data,
-                settings,
-                setGroupedMedications
-              ),
-            reprocessLab: (data, settings) =>
-              reprocessData("lab", data, settings, setGroupedLabs),
-            reprocessChineseMed: (data, settings) =>
-              reprocessData(
-                "chinesemed",
-                data,
-                settings,
-                setGroupedChineseMeds
-              ),
-          };
-
-          // 使用設置管理器處理設置變更
-          handleDataFetchCompletedSettingsChange(
-            event,
-            appSettings,
-            setAppSettings,
-            callbacks
-          );
-        } else {
-          // 非設置相關事件，重新處理所有數據
-          handleData();
-        }
-      }
-    );
-
-    // 清理函數
-    return () => {
-      removeSettingsListener();
-      removeMessageListener();
-      removeDataFetchCompletionListener();
-    };
-  }, []);
-
-  // 在組件載入時處理資料
-  const handleData = async () => {
-    // 使用dataManager收集資料來源
-    const dataSources = collectDataSources();
-
-    // 創建所有setter函數的對象
-    const setters = {
-      setGroupedMedications,
-      setGroupedLabs,
-      setGroupedChineseMeds,
-      setImagingData,
-      setAllergyData,
-      setSurgeryData,
-      setDischargeData,
-      setMedDaysData,
-      setPatientSummaryData,
-      setDashboardData,
-      setAdultHealthCheckData,
-      setCancerScreeningData,
-      setHbcvData,
-    };
-
-    // 使用dataManager處理所有資料
-    const results = await handleAllData(dataSources, appSettings, setters);
-
-    // CKM 資料處理（跨資料源篩選，不受設定開關影響，UI 層條件渲染）
-    try {
-      const ckm = ckmProcessor.processCKMData({
-        groupedMedications: results?.medications || [],
-        rawLabData: dataSources.labData,
-        imagingData: results?.imaging || { withReport: [], withoutReport: [] },
-        dischargeData: results?.discharge || [],
-      });
-      setCkmData(ckm);
-    } catch (e) {
-      console.error('[CKM] processCKMData error', e);
-    }
-
-    // 本地 JSON 匯入時重新取得使用者資訊
-    if (!userInfo && window._localUserInfo) {
-      const local = window._localUserInfo;
-      let age = null;
-      if (local.birthday && local.birthday.length === 7) {
-        const rocYear = parseInt(local.birthday.substring(0, 3), 10);
-        const month = parseInt(local.birthday.substring(3, 5), 10);
-        const day = parseInt(local.birthday.substring(5, 7), 10);
-        const birthDate = new Date(rocYear + 1911, month - 1, day);
-        const today = new Date();
-        age = today.getFullYear() - birthDate.getFullYear();
-        if (today.getMonth() < month - 1 || (today.getMonth() === month - 1 && today.getDate() < day)) age--;
-      }
-      setUserInfo({ name: local.name, userId: local.userId, gender: local.gender, birthday: local.birthday, age });
-    }
-  };
-
-  // 初始數據加載
-  useEffect(() => {
-    // 初次執行
-    handleData();
-  }, [appSettings.lab]); // 保留對 lab 設置的依賴，以便在 lab 設置變更時重新處理數據
+  // 是否顯示「進階」Tab；同時控制 MainDialogHeader 的頁籤與下方 TabPanel
+  const showAdvancedTab =
+    appSettings.western.enableMedicationCustomCopyFormat ||
+    appSettings.lab.enableLabCustomCopyFormat;
 
   // Add a function to be exposed globally for auto-opening
   useEffect(() => {
@@ -411,29 +105,6 @@ const FloatingIcon = () => {
     };
   }, [open, generalDisplaySettings]);
 
-  // Extract user information when the dialog opens or data changes
-  useEffect(() => {
-    if (open) {
-      let info = extractUserInfoFromToken();
-      // Fallback: 本地 JSON 匯入的使用者資訊
-      if (!info && window._localUserInfo) {
-        const local = window._localUserInfo;
-        let age = null;
-        if (local.birthday && local.birthday.length === 7) {
-          const rocYear = parseInt(local.birthday.substring(0, 3), 10);
-          const month = parseInt(local.birthday.substring(3, 5), 10);
-          const day = parseInt(local.birthday.substring(5, 7), 10);
-          const birthDate = new Date(rocYear + 1911, month - 1, day);
-          const today = new Date();
-          age = today.getFullYear() - birthDate.getFullYear();
-          if (today.getMonth() < month - 1 || (today.getMonth() === month - 1 && today.getDate() < day)) age--;
-        }
-        info = { name: local.name, userId: local.userId, gender: local.gender, birthday: local.birthday, age };
-      }
-      setUserInfo(info);
-    }
-  }, [open]);
-
   const handleClick = () => {
     setOpen(true);
 
@@ -453,18 +124,6 @@ const FloatingIcon = () => {
   const handleOverviewClick = () => {
     setTabValue(false);
   };
-
-  const handleSnackbarClose = () => {
-    setSnackbarOpen(false);
-  };
-
-  // Calculate CKD stage
-  const gfrValue = extractGFRValue(patientSummaryData);
-  const ckdStage = getCKDStage(gfrValue);
-
-  // Tab index（CKM 已整合進 Overview，不再有獨立 Tab）
-  const helpTabIndex = 7;
-  const advancedTabIndex = 8;
 
   // Get position styles based on settings
   const getIconPositionStyle = () => {
@@ -492,7 +151,7 @@ const FloatingIcon = () => {
   };
 
   return (
-    <>
+    <SettingsProvider appSettings={appSettings} generalDisplaySettings={generalDisplaySettings}>
       <IconButton style={getIconPositionStyle()} onClick={handleClick}>
         <img
           src={cloud_icon}
@@ -538,279 +197,22 @@ const FloatingIcon = () => {
             zIndex: 1,
           }}
         >
-          <Box
-            sx={{
-              display: "flex",
-              flexDirection: isNarrowScreen ? "column" : "row",
-              justifyContent: "space-between",
-              alignItems: isNarrowScreen ? "stretch" : "center",
-            }}
-          >
-            {/* 頁籤區域 */}
-            <Paper
-              sx={{
-                flex: "1 1 auto",
-                width: "100%",
-                backgroundColor: "#f5f9ff", // Light blue background
-                borderRadius: "8px",
-                boxShadow: "0 2px 4px rgba(0,0,0,0.08)",
-                display: "flex",
-                alignItems: "center",
-              }}
-            >
-              {/* User Info Display - clickable to show overview */}
-              {userInfo && formatUserInfoDisplay(userInfo) && (
-                <Box
-                  onClick={handleOverviewClick}
-                  sx={{
-                    display: "flex",
-                    alignItems: "center",
-                    px: 2,
-                    py: 0.75,
-                    fontWeight: "bold",
-                    color: tabValue === false ? "#0d47a1" : "#1976d2",
-                    fontSize:
-                      (generalDisplaySettings &&
-                        generalDisplaySettings.contentTextSize &&
-                        CONTENT_TEXT_SIZES[
-                        generalDisplaySettings.contentTextSize
-                        ]) ||
-                      CONTENT_TEXT_SIZES["medium"],
-                    borderRight: "1px solid #e0e0e0",
-                    borderBottom: tabValue === false ? "2px solid #1976d2" : "2px solid transparent",
-                    flexShrink: 0,
-                    cursor: "pointer",
-                    "&:hover": {
-                      color: "#0d47a1",
-                      backgroundColor: "rgba(25, 118, 210, 0.04)",
-                    },
-                  }}
-                >
-                  {formatUserInfoDisplay(userInfo)}
-                </Box>
-              )}
-              <Tabs
-                value={tabValue}
-                onChange={handleTabChange}
-                indicatorColor="primary"
-                textColor="primary"
-                variant="scrollable"
-                scrollButtons="auto"
-                TabIndicatorProps={{
-                  style: {
-                    backgroundColor: "#1976d2", // Primary blue for the indicator
-                    height: 2, // Thinner indicator
-                  },
-                }}
-                sx={{
-                  minHeight: "36px", // Reduced from default 48px
-                  flex: 1,
-                  "& .MuiTab-root": {
-                    minHeight: "36px", // Reduced tab height
-                    padding: "6px 12px", // Reduced padding
-                    fontSize:
-                      (generalDisplaySettings &&
-                        generalDisplaySettings.contentTextSize &&
-                        CONTENT_TEXT_SIZES[
-                        generalDisplaySettings.contentTextSize
-                        ]) ||
-                      CONTENT_TEXT_SIZES["medium"], // Use contentTextSize with fallback
-                    fontWeight: "medium",
-                    "&:hover": {
-                      opacity: 1,
-                      color: "#0d47a1", // Darker blue on hover for all tabs
-                    },
-                    "&.Mui-selected": {
-                      fontWeight: "bold",
-                    },
-                  },
-                }}
-              >
-                <Tab
-                  label={`西藥 (${groupedMedications.length})`}
-                  icon={<MedicationIcon sx={{ fontSize: "1rem" }} />}
-                  iconPosition="start"
-                  sx={{
-                    padding: "6px 10px",
-                    color:
-                      groupedMedications.length > 0 ? getTabColor(generalDisplaySettings, "medication") : "#9e9e9e",
-                    "&.Mui-selected": {
-                      color:
-                        groupedMedications.length > 0 ? getTabSelectedColor(generalDisplaySettings, "medication") : "#616161",
-                    },
-                  }}
-                />
-                <Tab
-                  icon={<TableChartIcon sx={{ fontSize: "1.125rem" }} />}
-                  aria-label="西藥表格檢視"
-                  sx={{
-                    minWidth: "60px", // Narrower width for icon-only tab
-                    padding: "6px 6px",
-                    color:
-                      groupedMedications.length > 0 ? getTabColor(generalDisplaySettings, "medication") : "#9e9e9e",
-                    "&.Mui-selected": {
-                      color:
-                        groupedMedications.length > 0 ? getTabSelectedColor(generalDisplaySettings, "medication") : "#616161",
-                    },
-                  }}
-                />
-                <Tab
-                  label={`中藥 (${groupedChineseMeds.length})`}
-                  icon={<GrassIcon sx={{ fontSize: "1rem" }} />}
-                  iconPosition="start"
-                  sx={{
-                    padding: "6px 10px",
-                    color:
-                      groupedChineseMeds.length > 0 ? getTabColor(generalDisplaySettings, "chineseMed") : "#9e9e9e",
-                    "&.Mui-selected": {
-                      color:
-                        groupedChineseMeds.length > 0 ? getTabSelectedColor(generalDisplaySettings, "chineseMed") : "#616161",
-                    },
-                  }}
-                />
-                <Tab
-                  label={`檢驗 (${groupedLabs.length})`}
-                  icon={<ScienceIcon sx={{ fontSize: "1rem" }} />}
-                  iconPosition="start"
-                  sx={{
-                    padding: "6px 10px",
-                    color: groupedLabs.length > 0 ? getTabColor(generalDisplaySettings, "lab") : "#9e9e9e",
-                    "&.Mui-selected": {
-                      color: groupedLabs.length > 0 ? getTabSelectedColor(generalDisplaySettings, "lab") : "#616161",
-                    },
-                  }}
-                />
-                <Tab
-                  icon={<TableViewIcon sx={{ fontSize: "1.125rem" }} />}
-                  aria-label="檢驗表格檢視"
-                  sx={{
-                    minWidth: "60px", // Narrower width for icon-only tab
-                    padding: "6px 6px",
-                    color: groupedLabs.length > 0 ? getTabColor(generalDisplaySettings, "lab") : "#9e9e9e",
-                    "&.Mui-selected": {
-                      color: groupedLabs.length > 0 ? getTabSelectedColor(generalDisplaySettings, "lab") : "#616161",
-                    },
-                  }}
-                />
-                <Tab
-                  label={`影像 (${imagingData.withReport.length +
-                    imagingData.withoutReport.length
-                    })`}
-                  icon={<ImageIcon sx={{ fontSize: "1rem" }} />}
-                  iconPosition="start"
-                  sx={{
-                    padding: "6px 10px",
-                    color:
-                      imagingData.withReport.length +
-                        imagingData.withoutReport.length >
-                        0
-                        ? getTabColor(generalDisplaySettings, "imaging")
-                        : "#9e9e9e",
-                    "&.Mui-selected": {
-                      color:
-                        imagingData.withReport.length +
-                          imagingData.withoutReport.length >
-                          0
-                          ? getTabSelectedColor(generalDisplaySettings, "imaging")
-                          : "#616161",
-                    },
-                  }}
-                />
-                <Tab
-                  label={`餘藥 (${medDaysData.length})`}
-                  icon={<InventoryIcon sx={{ fontSize: "1rem" }} />}
-                  iconPosition="start"
-                  sx={{
-                    padding: "6px 10px",
-                    color: medDaysData.length > 0 ? getTabColor(generalDisplaySettings, "medDays") : "#9e9e9e",
-                    "&.Mui-selected": {
-                      color: medDaysData.length > 0 ? getTabSelectedColor(generalDisplaySettings, "medDays") : "#616161",
-                    },
-                  }}
-                />
-                <Tab
-                  label="說明"
-                  icon={<HelpOutlineIcon sx={{ fontSize: "1rem" }} />}
-                  iconPosition="start"
-                  sx={{
-                    padding: "6px 10px",
-                    color: getTabColor(generalDisplaySettings, "help"),
-                    "&.Mui-selected": {
-                      color: getTabSelectedColor(generalDisplaySettings, "help"),
-                    },
-                  }}
-                />
-                {(appSettings.western.enableMedicationCustomCopyFormat || appSettings.lab.enableLabCustomCopyFormat) && (
-                  <Tab
-                    label="進階"
-                    icon={<SettingsIcon sx={{ fontSize: "1rem" }} />}
-                    iconPosition="start"
-                    sx={{
-                      padding: "6px 10px",
-                      color: getTabColor(generalDisplaySettings, "settings"),
-                      "&.Mui-selected": {
-                        color: getTabSelectedColor(generalDisplaySettings, "settings"),
-                      },
-                    }}
-                  />
-                )}
-              </Tabs>
-            </Paper>
-
-            {/* 狀態指示器區域 - 使用導入的指示器組件 */}
-            <Box
-              sx={{
-                display: "flex",
-                mt: isNarrowScreen ? 1 : 0,
-                ml: isNarrowScreen ? 0 : 2,
-                justifyContent: isNarrowScreen ? "flex-end" : "flex-start",
-                flexWrap: "wrap",
-              }}
-            >
-              {ckdStage && (
-                <KidneyStatusIndicator
-                  stage={ckdStage}
-                  fontSize={generalDisplaySettings.noteTextSize}
-                />
-              )}
-              {hasRecentCTScan(imagingData) && (
-                <StatusIndicator
-                  label="CT"
-                  hasData={true}
-                  icon={MonitorHeartIcon}
-                  fontSize={generalDisplaySettings.noteTextSize}
-                  tooltipTitle="90天內有CT檢查"
-                />
-              )}
-              {hasRecentMRIScan(imagingData) && (
-                <StatusIndicator
-                  label="MRI"
-                  hasData={true}
-                  icon={BiotechIcon}
-                  fontSize={generalDisplaySettings.noteTextSize}
-                  tooltipTitle="90天內有MRI檢查"
-                />
-              )}
-              <StatusIndicator
-                label="過敏"
-                hasData={allergyData && allergyData.length > 0}
-                icon={WarningAmberIcon}
-                fontSize={generalDisplaySettings.noteTextSize}
-              />
-              <StatusIndicator
-                label="手術"
-                hasData={surgeryData && surgeryData.length > 0}
-                icon={HealingIcon}
-                fontSize={generalDisplaySettings.noteTextSize}
-              />
-              <StatusIndicator
-                label="出院"
-                hasData={dischargeData && dischargeData.length > 0}
-                icon={LocalHospitalIcon}
-                fontSize={generalDisplaySettings.noteTextSize}
-              />
-            </Box>
-          </Box>
+          <MainDialogHeader
+            tabValue={tabValue}
+            onTabChange={handleTabChange}
+            onOverviewClick={handleOverviewClick}
+            userInfo={userInfo}
+            groupedMedications={groupedMedications}
+            groupedChineseMeds={groupedChineseMeds}
+            groupedLabs={groupedLabs}
+            imagingData={imagingData}
+            medDaysData={medDaysData}
+            allergyData={allergyData}
+            surgeryData={surgeryData}
+            dischargeData={dischargeData}
+            patientSummaryData={patientSummaryData}
+            showAdvancedTab={showAdvancedTab}
+          />
         </DialogTitle>
         <DialogContent sx={{ flex: 1, overflow: "auto", minHeight: 0 }}>
           {/* Overview - shown when no tab is selected (clicking patient name) */}
@@ -833,7 +235,6 @@ const FloatingIcon = () => {
                 atc5ColorGroups: appSettings.atc5.colorGroups,
               }}
               overviewSettings={appSettings.overview}
-              generalDisplaySettings={generalDisplaySettings}
               labSettings={appSettings.lab}
               cloudSettings={appSettings.cloud}
               adultHealthCheckData={adultHealthCheckData}
@@ -856,7 +257,6 @@ const FloatingIcon = () => {
                 atc5ColorGroups: appSettings.atc5.colorGroups,
               }}
               copyFormat={appSettings.western.medicationCopyFormat}
-              generalDisplaySettings={generalDisplaySettings}
             />
           </TabPanel>
 
@@ -870,7 +270,6 @@ const FloatingIcon = () => {
                 atc5Groups: appSettings.atc5.groups,
                 atc5ColorGroups: appSettings.atc5.colorGroups,
               }}
-              generalDisplaySettings={generalDisplaySettings}
             />
           </TabPanel>
 
@@ -879,7 +278,6 @@ const FloatingIcon = () => {
             <ChineseMedicine
               groupedChineseMeds={groupedChineseMeds}
               chineseMedSettings={appSettings.chinese}
-              generalDisplaySettings={generalDisplaySettings}
             />
           </TabPanel>
 
@@ -889,7 +287,6 @@ const FloatingIcon = () => {
               groupedLabs={groupedLabs}
               settings={appSettings.western}
               labSettings={appSettings.lab}
-              generalDisplaySettings={generalDisplaySettings}
             />
           </TabPanel>
 
@@ -898,7 +295,6 @@ const FloatingIcon = () => {
             <LabTableView
               groupedLabs={groupedLabs}
               labSettings={appSettings.lab}
-              generalDisplaySettings={generalDisplaySettings}
             />
           </TabPanel>
 
@@ -906,7 +302,6 @@ const FloatingIcon = () => {
           <TabPanel value={tabValue} index={5}>
             <ImagingData
               imagingData={imagingData}
-              generalDisplaySettings={generalDisplaySettings}
             />
           </TabPanel>
 
@@ -914,35 +309,26 @@ const FloatingIcon = () => {
           <TabPanel value={tabValue} index={6}>
             <MedDaysData
               medDaysData={medDaysData}
-              generalDisplaySettings={generalDisplaySettings}
             />
           </TabPanel>
 
           {/* Instructions Tab */}
           <TabPanel value={tabValue} index={helpTabIndex}>
-            <Instructions generalDisplaySettings={generalDisplaySettings} />
+            <Instructions />
           </TabPanel>
 
           {/* Advanced Settings Tab */}
-          {(appSettings.western.enableMedicationCustomCopyFormat || appSettings.lab.enableLabCustomCopyFormat) && (
+          {showAdvancedTab && (
             <TabPanel value={tabValue} index={advancedTabIndex}>
               <AdvancedSettings
                 appSettings={appSettings}
                 setAppSettings={setAppSettings}
-                generalDisplaySettings={generalDisplaySettings}
               />
             </TabPanel>
           )}
         </DialogContent>
       </Dialog>
-      <Snackbar
-        open={snackbarOpen}
-        autoHideDuration={2000}
-        onClose={handleSnackbarClose}
-        message={snackbarMessage}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
-      />
-    </>
+    </SettingsProvider>
   );
 };
 

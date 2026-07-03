@@ -7,7 +7,7 @@ export const adultHealthCheckProcessor = {
   /**
    * 處理成人預防保健資料
    * @param {Object} rawData - 原始資料
-   * @returns {Object} - 處理後的資料
+   * @returns {import('../types/processors.js').AdultHealthCheckResult}
    */
   processAdultHealthCheckData(rawData) {
     try {

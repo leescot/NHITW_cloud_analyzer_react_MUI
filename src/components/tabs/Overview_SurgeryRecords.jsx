@@ -7,7 +7,7 @@ import {
 } from "@mui/material";
 import TypographySizeWrapper from "../utils/TypographySizeWrapper";
 
-const Overview_SurgeryRecords = ({ surgeryData = [], generalDisplaySettings, collapsedCount = null }) => {
+const Overview_SurgeryRecords = ({ surgeryData = [], collapsedCount = null }) => {
   // collapsedCount 有值時預設只顯示前 N 筆，點擊可展開/收合
   const [expanded, setExpanded] = React.useState(false);
   const visibleData = collapsedCount && !expanded
@@ -20,7 +20,6 @@ const Overview_SurgeryRecords = ({ surgeryData = [], generalDisplaySettings, col
       <TypographySizeWrapper
         variant="h6"
         textSizeType="title"
-        generalDisplaySettings={generalDisplaySettings}
         gutterBottom
       >
         手術紀錄
@@ -33,7 +32,6 @@ const Overview_SurgeryRecords = ({ surgeryData = [], generalDisplaySettings, col
                 primary={
                   <TypographySizeWrapper
                     textSizeType="content"
-                    generalDisplaySettings={generalDisplaySettings}
                   >
                     {`${item.date || '日期未知'} ${item.hospital || '醫院未知'}`}
                   </TypographySizeWrapper>
@@ -41,7 +39,6 @@ const Overview_SurgeryRecords = ({ surgeryData = [], generalDisplaySettings, col
                 secondary={
                   <TypographySizeWrapper
                     textSizeType="note"
-                    generalDisplaySettings={generalDisplaySettings}
                     color="text.secondary"
                   >
                     {item.diagnosis || "診斷未知"}
@@ -54,7 +51,6 @@ const Overview_SurgeryRecords = ({ surgeryData = [], generalDisplaySettings, col
       ) : (
         <TypographySizeWrapper
           textSizeType="content"
-          generalDisplaySettings={generalDisplaySettings}
           color="text.secondary"
         >
           暫無手術紀錄
@@ -64,7 +60,6 @@ const Overview_SurgeryRecords = ({ surgeryData = [], generalDisplaySettings, col
         <TypographySizeWrapper
           variant="caption"
           textSizeType="note"
-          generalDisplaySettings={generalDisplaySettings}
           onClick={() => setExpanded(!expanded)}
           sx={{ display: 'block', mt: 0.5, color: 'primary.main', cursor: 'pointer' }}
         >

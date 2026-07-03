@@ -30,6 +30,7 @@ import CategoryIcon from '@mui/icons-material/Category';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { handleSettingChange } from '../../utils/settingsHelper';
 import { DEFAULT_LAB_COPY_ITEMS } from '../../config/labTests';
+import { debugLog } from '../../utils/logger';
 
 /**
  * 重置用戶的檢驗複製項目設定為預設值
@@ -319,15 +320,15 @@ const LabSettings = () => {
             label="檢驗報告呈現方式"
             onChange={(e) => {
               const newValue = e.target.value;
-              console.log(`Changing displayLabFormat to: ${newValue}`);
-              
+              debugLog(`Changing displayLabFormat to: ${newValue}`);
+
               // Call the handleSettingChange with detailed logging
               handleSettingChange('displayLabFormat', newValue, setSettings, 'displayLabFormat', 'labsettings');
-              
+
               // Verify the change was saved in storage
               setTimeout(() => {
                 chrome.storage.sync.get(['displayLabFormat'], (items) => {
-                  console.log('Verification check - displayLabFormat in storage:', items.displayLabFormat);
+                  debugLog('Verification check - displayLabFormat in storage:', items.displayLabFormat);
                 });
               }, 500);
             }}

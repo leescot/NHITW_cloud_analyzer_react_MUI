@@ -9,7 +9,6 @@ const MedicationGroup = ({
   group,
   settings,
   medicationCopyFormat,
-  generalDisplaySettings,
   isLast,
   setSnackbarMessage,
   setSnackbarOpen
@@ -24,7 +23,6 @@ const MedicationGroup = ({
         <TypographySizeWrapper
           variant="subtitle1"
           textSizeType="content"
-          generalDisplaySettings={generalDisplaySettings}
           color={getVisitTypeColor(group.visitType)}
           gutterBottom
         >
@@ -48,7 +46,6 @@ const MedicationGroup = ({
             <TypographySizeWrapper
               component="span"
               textSizeType="note"
-              generalDisplaySettings={generalDisplaySettings}
               sx={{
                 color: "text.secondary",
                 ml: 1,
@@ -78,7 +75,6 @@ const MedicationGroup = ({
           key={medIndex}
           med={med}
           settings={settings}
-          generalDisplaySettings={generalDisplaySettings}
           setSnackbarMessage={setSnackbarMessage}
           setSnackbarOpen={setSnackbarOpen}
         />

@@ -4,6 +4,7 @@ import ReactMarkdown from 'react-markdown';
 
 // 導入的 JSON 圖片數據，目前選用壓縮率高的 webp 格式，轉為 base64 放進 JSON 中
 import imagesData from '../../assets/instruction_image.json';
+import { useGeneralDisplaySettings } from '../../contexts/SettingsContext';
 const images = imagesData;
 
 // 文檔數據結構 - 每個文檔都有一個 ID, title(顯示在左側的標題) 和 內容
@@ -518,7 +519,8 @@ IMAGE_PLACEHOLDER(icon_status, 狀態指示器)
   },
 ];
 
-const Instructions = ({ generalDisplaySettings }) => {
+const Instructions = () => {
+  const generalDisplaySettings = useGeneralDisplaySettings();
   // 當前選中的文檔 ID
   const [selectedDocId, setSelectedDocId] = useState(documents[0].id);
   // 處理後的 markdown 內容

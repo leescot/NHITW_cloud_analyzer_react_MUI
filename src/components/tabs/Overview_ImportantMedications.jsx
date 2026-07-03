@@ -25,6 +25,7 @@ import HealthAndSafetyIcon from '@mui/icons-material/HealthAndSafety';
 import ImageIcon from '@mui/icons-material/Image';
 import { isWithinLast90Days, getMedicationColorGroup, formatDate } from "./Overview_utils";
 import TypographySizeWrapper from "../utils/TypographySizeWrapper";
+import { useGeneralDisplaySettings } from "../../contexts/SettingsContext";
 
 // Import default settings to use as fallbacks
 import { DEFAULT_SETTINGS } from "../../config/defaultSettings";
@@ -36,9 +37,9 @@ const Overview_ImportantMedications = ({
   groupedMedications = [],
   settings = {},
   overviewSettings = {},
-  generalDisplaySettings = { titleTextSize: 'medium', contentTextSize: 'medium', noteTextSize: 'small' },
   enableCKMBadge = false
 }) => {
+  const generalDisplaySettings = useGeneralDisplaySettings();
   // Get tracking days from overviewSettings, fall back to 90 days if not set
   const trackingDays = overviewSettings.medicationTrackingDays || 90;
 
@@ -76,10 +77,6 @@ const Overview_ImportantMedications = ({
     atc5Groups: settings.atc5Groups || DEFAULT_ATC5_GROUPS,
     atc5ColorGroups: settings.atc5ColorGroups || DEFAULT_ATC5_COLOR_GROUPS
   };
-
-  // For debugging
-  // console.log('Settings passed:', settings);
-  // console.log('Safe settings created:', safeSettings);
 
   // Filter out medications from the past tracking days, by color groups, and consolidate same medications
   // Step 1: Extract all medications within the tracking period with their color groups
@@ -438,7 +435,6 @@ const Overview_ImportantMedications = ({
               key={i}
               component="span"
               textSizeType="note"
-              generalDisplaySettings={generalDisplaySettings}
               sx={{
                 color: "text.secondary",
               }}
@@ -455,7 +451,6 @@ const Overview_ImportantMedications = ({
 
   // Add handler for drug image click
   const handleDrugImageClick = (drugcode) => {
-    // console.log("Opening drug image for drugcode:", drugcode);
     if (!drugcode) {
       setSnackbarMessage("無法獲取藥品代碼");
       setSnackbarOpen(true);
@@ -481,7 +476,7 @@ const Overview_ImportantMedications = ({
 
   return (
     <Paper sx={{ p: 2, height: "auto" }}>
-      <TypographySizeWrapper variant="h6" gutterBottom generalDisplaySettings={generalDisplaySettings}>
+      <TypographySizeWrapper variant="h6" gutterBottom>
         關注西藥 - {trackingDays} 天內
       </TypographySizeWrapper>
       {/* CKM 關鍵用藥區：按六大治療群組分類，關鍵藥物加 badge */}
@@ -512,7 +507,6 @@ const Overview_ImportantMedications = ({
                       <TypographySizeWrapper
                         variant="body2"
                         sx={{ fontWeight: 'medium' }}
-                        generalDisplaySettings={generalDisplaySettings}
                       >
                         {formatMedicationName(row.medication.name)}
                         {row.medication.keyDrugLabel && (
@@ -553,7 +547,6 @@ const Overview_ImportantMedications = ({
                           color="text.secondary"
                           sx={{ mt: 0.25 }}
                           style={{ fontSize: '0.7rem', lineHeight: 1.3 }}
-                          generalDisplaySettings={generalDisplaySettings}
                         >
                           {row.medication.genericName}
                         </TypographySizeWrapper>
@@ -634,17 +627,17 @@ const Overview_ImportantMedications = ({
             {/* <TableHead>
               <TableRow>
                 <TableCell sx={{ fontWeight: 'bold', width: '15%', textAlign: 'center' }}>
-                  <TypographySizeWrapper variant="body1" generalDisplaySettings={generalDisplaySettings}>
+                  <TypographySizeWrapper variant="body1">
 
                   </TypographySizeWrapper>
                 </TableCell>
                 <TableCell sx={{ fontWeight: 'bold', width: '32%' }}>
-                  <TypographySizeWrapper variant="body1" generalDisplaySettings={generalDisplaySettings}>
+                  <TypographySizeWrapper variant="body1">
                     藥物
                   </TypographySizeWrapper>
                 </TableCell>
                 <TableCell sx={{ fontWeight: 'bold', width: '48%' }}>
-                  <TypographySizeWrapper variant="body1" generalDisplaySettings={generalDisplaySettings}>
+                  <TypographySizeWrapper variant="body1">
                     日期+院所
                   </TypographySizeWrapper>
                 </TableCell>
@@ -712,7 +705,6 @@ const Overview_ImportantMedications = ({
                         <TypographySizeWrapper
                           variant="body2"
                           sx={{ fontWeight: 'medium' }}
-                          generalDisplaySettings={generalDisplaySettings}
                         >
                           {formatMedicationName(row.medication.name)}
                           {safeSettings.showExternalDrugImage && row.medication.drugcode && (
@@ -747,7 +739,6 @@ const Overview_ImportantMedications = ({
                             variant="caption"
                             color="text.secondary"
                             sx={{ mt: 0.25 }}
-                            generalDisplaySettings={generalDisplaySettings}
                           >
                             {row.medication.genericName}
                           </TypographySizeWrapper>
@@ -864,7 +855,6 @@ const Overview_ImportantMedications = ({
                         <TypographySizeWrapper
                           variant="body2"
                           sx={{ fontWeight: 'medium' }}
-                          generalDisplaySettings={generalDisplaySettings}
                         >
                           {formatMedicationName(med.name)}
                           {safeSettings.showExternalDrugImage && med.drugcode && (
@@ -899,7 +889,6 @@ const Overview_ImportantMedications = ({
                             variant="caption"
                             color="text.secondary"
                             sx={{ mt: 0.25 }}
-                            generalDisplaySettings={generalDisplaySettings}
                           >
                             {med.days}天
                           </TypographySizeWrapper>
@@ -948,7 +937,6 @@ const Overview_ImportantMedications = ({
             <TypographySizeWrapper
               variant="caption"
               color="text.secondary"
-              generalDisplaySettings={generalDisplaySettings}
             >
               還有 {simplifiedMedList.length - 10} 筆資料未顯示
             </TypographySizeWrapper>
@@ -959,14 +947,12 @@ const Overview_ImportantMedications = ({
           <TypographySizeWrapper
             variant="caption"
             color="text.secondary"
-            generalDisplaySettings={generalDisplaySettings}
           >
             暫無資料
           </TypographySizeWrapper>
           {/* <TypographySizeWrapper
             variant="caption"
             color="text.secondary"
-            generalDisplaySettings={generalDisplaySettings}
             sx={{ display: 'block', mt: 1 }}
           >
             Debug Info: Input medications: {groupedMedications.length}, Recent: {recentMedications.length},

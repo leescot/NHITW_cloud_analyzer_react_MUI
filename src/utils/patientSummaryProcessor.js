@@ -1,9 +1,13 @@
-export const patientSummaryProcessor = {
-  processPatientSummaryData(data) {
-    // console.log('patientsummary - Processing data:', data);
+import { debugLog } from './logger';
 
+export const patientSummaryProcessor = {
+  /**
+   * @param {object} data 健保 patientSummary API 原始回應（含 rObject）
+   * @returns {import('../types/processors.js').PatientSummaryItem[]}
+   */
+  processPatientSummaryData(data) {
     if (!data || !data.rObject || !Array.isArray(data.rObject)) {
-      console.log('patientsummary - Invalid format:', data);
+      debugLog('patientsummary - Invalid format:', data);
       return [];
     }
 
@@ -18,7 +22,6 @@ export const patientSummaryProcessor = {
         };
       });
 
-      // console.log('patientsummary - Processed data:', formattedData);
       return formattedData;
     } catch (error) {
       console.error('patientsummary - Error processing data:', error);

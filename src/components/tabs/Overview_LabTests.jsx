@@ -23,16 +23,17 @@ import TypographySizeWrapper from "../utils/TypographySizeWrapper";
 import LabItemTrendPopover from "./lab/LabItemTrendPopover";
 import { CKM_LAB_ITEMS, CKM_SPECIAL_LAB_CODES, classifyLabItem } from "../../utils/ckmUtils";
 import { buildNephroReport, renderNephroReportHTML, attachNephroReportHandlers } from "../../utils/nephroReportBuilder";
+import { useGeneralDisplaySettings } from "../../contexts/SettingsContext";
 
 const Overview_LabTests = ({
   groupedLabs = [],
   labData,
   overviewSettings = {},
-  generalDisplaySettings,
   labSettings = { highlightAbnormalLab: true },
   enableCKM = false,
   userInfo = null
 }) => {
+  const generalDisplaySettings = useGeneralDisplaySettings();
   // CKM 開啟時追蹤天數擴展為 180 天（取設定值與 180 的較大值）
   const baseTrackingDays = overviewSettings.labTrackingDays || 90;
   const trackingDays = enableCKM ? Math.max(baseTrackingDays, 180) : baseTrackingDays;
@@ -49,21 +50,17 @@ const Overview_LabTests = ({
   // Check if we need to use an alternative lab data source
   const effectiveLabData = useMemo(() => {
     if (groupedLabs && groupedLabs.length > 0) {
-      // console.log("Debug - Using groupedLabs");
       return groupedLabs;
     } else if (labData && typeof labData === 'object') {
-      // console.log("Debug - Using alternative labData source");
       // Try to convert alternative source to compatible format if needed
       if (Array.isArray(labData)) {
         return labData;
       } else if (labData.rObject && Array.isArray(labData.rObject)) {
         // Try to process raw lab data
-        // console.log("Debug - Converting raw lab data format");
         // Return empty array for now, this would need implementation of lab processor
         return [];
       }
     }
-    // console.log("Debug - No usable lab data source found");
     return [];
   }, [groupedLabs, labData]);
 
@@ -108,7 +105,7 @@ const Overview_LabTests = ({
   return (
     <Paper sx={{ p: 2, height: "auto" }}>
       <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
-        <TypographySizeWrapper variant="h6" gutterBottom generalDisplaySettings={generalDisplaySettings}>
+        <TypographySizeWrapper variant="h6" gutterBottom>
           關注檢驗 - {trackingDays} 天內
         </TypographySizeWrapper>
         {enableCKM && generalDisplaySettings?.enableNephroReport && (
@@ -119,13 +116,10 @@ const Overview_LabTests = ({
           </Tooltip>
         )}
       </Box>
-      {/* <TypographySizeWrapper variant="caption" color="text.secondary" generalDisplaySettings={generalDisplaySettings}>
+      {/* <TypographySizeWrapper variant="caption" color="text.secondary">
         至多顯示七組資料
       </TypographySizeWrapper> */}
       {(() => {
-        // console.log("Debug - Lab section rendering, data available:",
-          // effectiveLabData && effectiveLabData.length > 0);
-
         if (effectiveLabData && effectiveLabData.length > 0) {
           // Use focusedLabTests from overviewSettings if available, otherwise use default config
           const labTestsConfig = (() => {
@@ -185,29 +179,12 @@ const Overview_LabTests = ({
             isWithinLastNDays(labGroup.date, trackingDays)
           );
 
-          // DEBUG: Log a sample of the lab data structure to understand available properties
-          if (recentLabs.length > 0 && recentLabs[0].labs && recentLabs[0].labs.length > 0) {
-            // console.log("Debug - Sample lab structure:", recentLabs[0].labs[0]);
-
-            // Find and log any 08011C labs for debugging
-            const sample08011C = recentLabs.flatMap(group =>
-              group.labs.filter(lab => lab.orderCode === '08011C')
-            );
-            if (sample08011C.length > 0) {
-              // console.log("Debug - Found 08011C labs:", sample08011C);
-            } else {
-              // console.log("Debug - No 08011C labs found in data");
-            }
-          }
-
           // Find all tests matching our target order codes
           const matchingTests = [];
 
           // First, try to find any CBC (08011C) related tests specifically
           const cbcItems = targetOrderCodes.filter(code => code.startsWith('08011C-'));
           if (cbcItems.length > 0) {
-            // console.log("Debug - Looking for CBC items:", cbcItems);
-
             // Scan all lab data for CBC-related items
             recentLabs.forEach(labGroup => {
               if (labGroup.labs && Array.isArray(labGroup.labs)) {
@@ -219,8 +196,6 @@ const Overview_LabTests = ({
                         lab.itemName.toLowerCase().includes('complete blood count') ||
                         lab.itemName.toLowerCase().includes('血球計數')
                       ))) {
-
-                    // console.log("Debug - Found CBC lab item:", lab);
 
                     // Process based on the item details using our helper functions
                     processSpecialCBCItem(lab, labGroup.date, targetOrderCodes, matchingTests);
@@ -410,8 +385,6 @@ const Overview_LabTests = ({
             }
           });
 
-          // console.log("Debug - Total matching tests found:", matchingTests.length);
-
           // === CKM 追加項目 ===
           // 使用者 focusedLabTests 未涵蓋（以 orderCode 判斷）的 CKM_LAB_ITEMS 追加到表格底部
           const ckmTests = [];
@@ -457,8 +430,6 @@ const Overview_LabTests = ({
               new Date(b) - new Date(a)
             );
 
-            // console.log("Debug - Unique dates for table:", uniqueDates);
-
             // Create a mapping of tests by test type and date
             const testsByTypeAndDate = {};
 
@@ -471,9 +442,6 @@ const Overview_LabTests = ({
                 .map(test => test.displayName),
               'eGFR', 'eGFR(健保署)', 'Cr', 'UPCR', 'UACR', 'WBC', 'Hb', 'PLT'
             ];
-
-            // Debug the display names being used
-            // console.log("Debug - allDisplayNames:", allDisplayNames);
 
             // Initialize the structure
             allDisplayNames.forEach(displayName => {
@@ -502,11 +470,6 @@ const Overview_LabTests = ({
               const displayName = test.displayName;
               const date = test.date;
 
-              // Log CBC items specifically to debug
-              if (displayName === 'WBC' || displayName === 'Hb' || displayName === 'PLT') {
-                // console.log(`Debug - Processing CBC item: ${displayName} for date ${date}`, test);
-              }
-
               // Only process if this test type and date should be shown
               if (testsByTypeAndDate[displayName] && uniqueDates.includes(date)) {
                 const existing = testsByTypeAndDate[displayName][date];
@@ -520,17 +483,8 @@ const Overview_LabTests = ({
                            test.timestamp > existing.timestamp) {
                   testsByTypeAndDate[displayName][date] = test;
                 }
-              } else {
-                // console.log(`Debug - Test type not processed: ${displayName} - exists in structure: ${!!testsByTypeAndDate[displayName]}, date valid: ${uniqueDates.includes(date)}`);
               }
             });
-
-            // After all processing, log the final organized data
-            // console.log("Debug - testsByTypeAndDate:", testsByTypeAndDate);
-            // Specifically check for our CBC tests
-            // console.log("Debug - WBC data:", testsByTypeAndDate['WBC']);
-            // console.log("Debug - Hb data:", testsByTypeAndDate['Hb']);
-            // console.log("Debug - PLT data:", testsByTypeAndDate['PLT']);
 
             // Filter out test types with no data
             const nonEmptyTestTypes = Object.keys(testsByTypeAndDate).filter(type => {
@@ -723,13 +677,13 @@ const Overview_LabTests = ({
                             if (numericCount >= 2) {
                               return (
                                 <LabItemTrendPopover item={ti} dates={trendDates}>
-                                  <TypographySizeWrapper variant="body2" generalDisplaySettings={generalDisplaySettings} sx={{ textDecoration: 'underline dotted', textDecorationColor: '#bdbdbd', cursor: 'pointer' }}>
+                                  <TypographySizeWrapper variant="body2" sx={{ textDecoration: 'underline dotted', textDecorationColor: '#bdbdbd', cursor: 'pointer' }}>
                                     {displayName}
                                   </TypographySizeWrapper>
                                 </LabItemTrendPopover>
                               );
                             }
-                            return <TypographySizeWrapper variant="body2" generalDisplaySettings={generalDisplaySettings}>{displayName}</TypographySizeWrapper>;
+                            return <TypographySizeWrapper variant="body2">{displayName}</TypographySizeWrapper>;
                           })()}
                         </TableCell>
                         {uniqueDates.map(date => {
@@ -747,7 +701,7 @@ const Overview_LabTests = ({
                               align="right"
                               sx={cellStyles}
                             >
-                              <TypographySizeWrapper variant="body2" generalDisplaySettings={generalDisplaySettings}>
+                              <TypographySizeWrapper variant="body2">
                                 {test ? (
                                   (displayName === 'eGFR' && test.hasMultipleValues && test.valueRange)
                                     ? (() => {
@@ -769,7 +723,7 @@ const Overview_LabTests = ({
                     {ckmRowNames.length > 0 && (
                       <TableRow>
                         <TableCell colSpan={uniqueDates.length + 1} sx={{ py: 0.2, px: 1, borderTop: '2px solid #90caf9', bgcolor: '#f5f9ff' }}>
-                          <TypographySizeWrapper variant="caption" generalDisplaySettings={generalDisplaySettings} sx={{ fontWeight: 700, color: '#1565c0' }}>
+                          <TypographySizeWrapper variant="caption" sx={{ fontWeight: 700, color: '#1565c0' }}>
                             CKM
                           </TypographySizeWrapper>
                         </TableCell>
@@ -788,13 +742,13 @@ const Overview_LabTests = ({
                             if (numericCount >= 2) {
                               return (
                                 <LabItemTrendPopover item={ti} dates={trendDates}>
-                                  <TypographySizeWrapper variant="body2" generalDisplaySettings={generalDisplaySettings} sx={{ textDecoration: 'underline dotted', textDecorationColor: '#bdbdbd', cursor: 'pointer' }}>
+                                  <TypographySizeWrapper variant="body2" sx={{ textDecoration: 'underline dotted', textDecorationColor: '#bdbdbd', cursor: 'pointer' }}>
                                     {displayName}
                                   </TypographySizeWrapper>
                                 </LabItemTrendPopover>
                               );
                             }
-                            return <TypographySizeWrapper variant="body2" generalDisplaySettings={generalDisplaySettings}>{displayName}</TypographySizeWrapper>;
+                            return <TypographySizeWrapper variant="body2">{displayName}</TypographySizeWrapper>;
                           })()}
                         </TableCell>
                         {uniqueDates.map(date => {
@@ -806,7 +760,7 @@ const Overview_LabTests = ({
                           };
                           return (
                             <TableCell key={date} align="right" sx={cellStyles}>
-                              <TypographySizeWrapper variant="body2" generalDisplaySettings={generalDisplaySettings}>
+                              <TypographySizeWrapper variant="body2">
                                 {test ? (test.value || test.result || '') : <span style={{ color: '#aaaaaa' }}>—</span>}
                               </TypographySizeWrapper>
                             </TableCell>

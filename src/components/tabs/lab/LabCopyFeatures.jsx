@@ -1,6 +1,7 @@
 import { useState } from 'react';
 import { formatLabItemForCopy, formatDate } from '../../utils/lab/LabUtilities';
 import { labCopyFormatter } from '../../../utils/labCopyFormatter';
+import { debugLog } from '../../../utils/logger';
 
 // Custom hook for handling copy functionality
 export const useCopyLabData = () => {
@@ -23,14 +24,14 @@ export const useCopyLabData = () => {
       hasHeaderFormat: Array.isArray(labSettings.customLabHeaderCopyFormat) && labSettings.customLabHeaderCopyFormat.length > 0,
       hasItemFormat: Array.isArray(labSettings.customLabItemCopyFormat) && labSettings.customLabItemCopyFormat.length > 0,
     };
-    console.log("LabCopyFeatures: 處理格式設定:", customSettingsInfo);
+    debugLog("LabCopyFeatures: 處理格式設定:", customSettingsInfo);
 
     // 檢查是否為自定義格式
     if (copyLabFormat === "customVertical" || copyLabFormat === "customHorizontal") {
       // 使用自定義格式處理器來生成格式化文本
       try {
         // 確保 itemSeparator 值被使用
-        console.log("使用的項目分隔符:", labSettings.itemSeparator || ', ');
+        debugLog("使用的項目分隔符:", labSettings.itemSeparator || ', ');
         formattedText = labCopyFormatter.applyCustomFormat(group.labs, group, labSettings);
       } catch (error) {
         console.error("應用自定義格式時出錯:", error);
@@ -127,14 +128,14 @@ export const useCopyLabData = () => {
       hasHeaderFormat: Array.isArray(labSettings.customLabHeaderCopyFormat) && labSettings.customLabHeaderCopyFormat.length > 0,
       hasItemFormat: Array.isArray(labSettings.customLabItemCopyFormat) && labSettings.customLabItemCopyFormat.length > 0,
     };
-    console.log("LabCopyFeatures (selected): 處理格式設定:", customSettingsInfo);
+    debugLog("LabCopyFeatures (selected): 處理格式設定:", customSettingsInfo);
 
     // 檢查是否為自定義格式
     if (copyLabFormat === "customVertical" || copyLabFormat === "customHorizontal") {
       // 使用自定義格式處理器來生成格式化文本
       try {
         // 確保 itemSeparator 值被使用
-        console.log("使用的項目分隔符 (選擇複製):", labSettings.itemSeparator || ', ');
+        debugLog("使用的項目分隔符 (選擇複製):", labSettings.itemSeparator || ', ');
         formattedText = labCopyFormatter.applyCustomFormat(filteredLabs, group, labSettings);
       } catch (error) {
         console.error("應用自定義格式時出錯:", error);
@@ -169,6 +170,8 @@ export const useCopyLabData = () => {
   return {
     snackbarOpen,
     snackbarMessage,
+    setSnackbarOpen,
+    setSnackbarMessage,
     handleSnackbarClose,
     handleSectionLabData,
     handleCopyUserSelectedLabData

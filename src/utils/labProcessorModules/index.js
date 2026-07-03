@@ -71,6 +71,11 @@ const labProcessor = {
   prepareLabTableData,
 
   // 處理檢驗資料的主要函數
+  /**
+   * @param {object} labData 健保 labdata API 原始回應（含 rObject）
+   * @param {object} [settings]
+   * @returns {import('../../types/processors.js').LabGroup[]}
+   */
   processLabData(labData, settings = {}) {
     if (!labData || !labData.rObject || !Array.isArray(labData.rObject)) {
       console.error('Invalid lab data format:', labData);
@@ -110,7 +115,6 @@ const labProcessor = {
 
       // 直接从源数据生成格式化的参考范围 - pass order_code and hosp
       const formattedReference = getReferenceRangeDisplayText(lab.consult_value, lab.order_code, lab.hosp);
-      // console.log(`${lab.assay_item_name} - formattedReference direct:`, formattedReference);
 
       // 檢查是否有自定義參考範圍
       let referenceMin, referenceMax;

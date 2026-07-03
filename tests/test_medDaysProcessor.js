@@ -1,6 +1,6 @@
-import {assert} from './lib/chai.js';
+import { describe, it, assert } from 'vitest';
 
-import {medDaysProcessor} from './src/utils/medDaysProcessor.js';
+import {medDaysProcessor} from '../src/utils/medDaysProcessor.js';
 
 describe('utils/medDaysProcessor', function () {
   describe('.processMedDaysData', function () {

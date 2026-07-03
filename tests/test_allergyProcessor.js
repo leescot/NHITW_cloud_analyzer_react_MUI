@@ -1,6 +1,6 @@
-import {assert} from './lib/chai.js';
+import { describe, it, assert } from 'vitest';
 
-import {allergyProcessor} from './src/utils/allergyProcessor.js';
+import { allergyProcessor } from '../src/utils/allergyProcessor.js';
 
 describe('utils/allergyProcessor', function () {
   describe('.processAllergyData', function () {

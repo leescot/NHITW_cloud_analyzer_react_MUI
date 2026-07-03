@@ -1,9 +1,13 @@
-export const dischargeProcessor = {
-  processDischargeData(data) {
-    // console.log('Starting to process discharge data:', data);
+import { debugLog } from './logger';
 
+export const dischargeProcessor = {
+  /**
+   * @param {object} data 健保 discharge API 原始回應（含 rObject）
+   * @returns {import('../types/processors.js').DischargeItem[]}
+   */
+  processDischargeData(data) {
     if (!data || !data.rObject || !Array.isArray(data.rObject)) {
-      console.log('Invalid discharge data format:', data);
+      debugLog('Invalid discharge data format:', data);
       return [];
     }
 

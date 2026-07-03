@@ -7,15 +7,11 @@ import { hasCustomReferenceRange, getCustomReferenceRange } from './customRefere
 
 // 格式化單筆檢驗資料
 const formatLabData = (lab) => {
-  // console.log('Processing lab item:', lab.assay_item_name, 'consult_value:', lab.consult_value);
-
   // 處理參考值範圍
   const consultValue = parseReferenceRange(lab.consult_value, lab.order_code, lab.hosp);
-  // console.log('parsed consultValue:', consultValue);
 
   // 格式化參考值範圍用於顯示
   const formattedReference = getReferenceRangeDisplayText(lab.consult_value, lab.order_code, lab.hosp);
-  // console.log('formattedReference:', formattedReference);
 
   // 檢查是否有自定義參考範圍
   let referenceMin, referenceMax;
@@ -35,13 +31,6 @@ const formatLabData = (lab) => {
     referenceMax = consultValue ? consultValue.max : null;
     lab._usingCustomRange = false;
   }
-
-  // console.log('Final reference values:', {
-  //   referenceMin,
-  //   referenceMax,
-  //   formattedReference,
-  //   _usingCustomRange: lab._usingCustomRange
-  // });
 
   // 獲取縮寫名稱 - 傳入 itemName
   const abbrName = getAbbreviation(lab.order_code, lab.unit_data, lab.assay_item_name);

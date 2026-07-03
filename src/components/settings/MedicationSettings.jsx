@@ -38,6 +38,7 @@ import ColorLensIcon from "@mui/icons-material/ColorLens";
 import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
 import FormatListBulletedIcon from "@mui/icons-material/FormatListBulleted";
 import { handleSettingChange } from "../../utils/settingsHelper";
+import { debugLog } from "../../utils/logger";
 
 // 导入默认配置
 import { DEFAULT_ATC5_GROUPS, DEFAULT_ATC5_COLOR_GROUPS } from "../../config/medicationGroups";
@@ -75,7 +76,7 @@ const MedicationSettings = () => {
 
   // Monitor when enableMedicationCustomCopyFormat changes
   useEffect(() => {
-    console.log("MedicationSettings: enableMedicationCustomCopyFormat changed to:", settings.enableMedicationCustomCopyFormat);
+    debugLog("MedicationSettings: enableMedicationCustomCopyFormat changed to:", settings.enableMedicationCustomCopyFormat);
   }, [settings.enableMedicationCustomCopyFormat]);
 
   // 统一的 ATC5 分组对话框
@@ -424,8 +425,8 @@ const MedicationSettings = () => {
     }
   };
 
-  console.log("Render - medicationCopyFormat:", settings.medicationCopyFormat);
-  console.log("Render - enableMedicationCustomCopyFormat:", settings.enableMedicationCustomCopyFormat);
+  debugLog("Render - medicationCopyFormat:", settings.medicationCopyFormat);
+  debugLog("Render - enableMedicationCustomCopyFormat:", settings.enableMedicationCustomCopyFormat);
 
   return (
     <Accordion>
@@ -554,7 +555,7 @@ const MedicationSettings = () => {
             value={settings.medicationCopyFormat}
             label="藥物複製格式"
             onChange={(e) => {
-              console.log("Select onChange triggered. Value:", e.target.value);
+              debugLog("Select onChange triggered. Value:", e.target.value);
               handleLocalSettingChange("medicationCopyFormat", e.target.value);
             }}
           >

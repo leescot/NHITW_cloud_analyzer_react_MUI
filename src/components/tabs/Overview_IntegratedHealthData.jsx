@@ -3,6 +3,7 @@ import { Paper, Typography, Box, Table, TableBody, TableCell, TableContainer, Ta
 import { alpha } from "@mui/material/styles";
 import HealthAndSafetyIcon from "@mui/icons-material/HealthAndSafety";
 import { checkAbnormalValue, extractHospitalName } from "../../utils/hbcvdataProcessor.js";
+import { useGeneralDisplaySettings } from "../../contexts/SettingsContext";
 
 /**
  * Integrated component for displaying Adult Health Check, Cancer Screening, and Hepatitis B & C data
@@ -18,9 +19,9 @@ const Overview_IntegratedHealthData = ({
     adultHealthCheckData,
     cancerScreeningData,
     hbcvData,
-    cloudSettings = {},
-    generalDisplaySettings = {}
+    cloudSettings = {}
 }) => {
+    const generalDisplaySettings = useGeneralDisplaySettings();
     // Extract display settings with defaults
     const { titleTextSize = 'medium', contentTextSize = 'medium' } = generalDisplaySettings;
 

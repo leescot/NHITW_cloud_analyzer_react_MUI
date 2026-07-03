@@ -8,7 +8,6 @@ const MedicationTermGroups = ({
   shortTermMeds,
   settings,
   medicationCopyFormat,
-  generalDisplaySettings,
   setSnackbarMessage,
   setSnackbarOpen
 }) => {
@@ -20,7 +19,6 @@ const MedicationTermGroups = ({
           <TypographySizeWrapper
             variant="h6"
             textSizeType="content"
-            generalDisplaySettings={generalDisplaySettings}
             color="primary.main"
             gutterBottom
           >
@@ -31,7 +29,6 @@ const MedicationTermGroups = ({
             <TypographySizeWrapper
               variant="body2"
               textSizeType="content"
-              generalDisplaySettings={generalDisplaySettings}
               color="text.secondary"
             >
               無長期用藥
@@ -43,7 +40,6 @@ const MedicationTermGroups = ({
                 group={group}
                 settings={settings}
                 copyFormat={medicationCopyFormat}
-                generalDisplaySettings={generalDisplaySettings}
                 isLast={index === longTermMeds.length - 1}
                 setSnackbarMessage={setSnackbarMessage}
                 setSnackbarOpen={setSnackbarOpen}
@@ -59,7 +55,6 @@ const MedicationTermGroups = ({
           <TypographySizeWrapper
             variant="h6"
             textSizeType="content"
-            generalDisplaySettings={generalDisplaySettings}
             color="primary.main"
             gutterBottom
           >
@@ -70,7 +65,6 @@ const MedicationTermGroups = ({
             <TypographySizeWrapper
               variant="body2"
               textSizeType="content"
-              generalDisplaySettings={generalDisplaySettings}
               color="text.secondary"
             >
               無短期用藥
@@ -82,7 +76,6 @@ const MedicationTermGroups = ({
                 group={group}
                 settings={settings}
                 copyFormat={medicationCopyFormat}
-                generalDisplaySettings={generalDisplaySettings}
                 isLast={index === shortTermMeds.length - 1}
                 setSnackbarMessage={setSnackbarMessage}
                 setSnackbarOpen={setSnackbarOpen}

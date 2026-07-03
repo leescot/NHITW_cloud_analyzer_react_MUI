@@ -4,6 +4,8 @@
 import { DEFAULT_SETTINGS } from "../config/defaultSettings";
 import { DEFAULT_LAB_TESTS } from "../config/labTests";
 import { DEFAULT_IMAGE_TESTS } from "../config/imageTests";
+import { debugLog } from "./logger";
+import { dataStore } from "../store/dataStore";
 
 /**
  * 從 Chrome storage 加載所有設置
@@ -244,8 +246,9 @@ const handleChineseMedSettingsChange = (event, currentSettings, updateCallback, 
     });
 
     // 重新處理中藥數據
-    if (window.lastInterceptedChineseMedData && callbacks.reprocessChineseMed) {
-      callbacks.reprocessChineseMed(window.lastInterceptedChineseMedData, newChineseMedSettings);
+    const chinesemedData = dataStore.getData('chinesemed');
+    if (chinesemedData && callbacks.reprocessChineseMed) {
+      callbacks.reprocessChineseMed(chinesemedData, newChineseMedSettings);
     }
   }
 };
@@ -254,7 +257,7 @@ const handleChineseMedSettingsChange = (event, currentSettings, updateCallback, 
  * 處理檢驗設置變更
  */
 const handleLabSettingsChange = (event, currentSettings, updateCallback, callbacks) => {
-  console.log("Lab settings change event:", event.detail);
+  debugLog("Lab settings change event:", event.detail);
 
   if (event.detail.allSettings) {
     // 更新所有檢驗設置
@@ -269,12 +272,13 @@ const handleLabSettingsChange = (event, currentSettings, updateCallback, callbac
       labChooseCopyItems: event.detail.allSettings.labChooseCopyItems,
       enableLabCustomCopyFormat: event.detail.allSettings.enableLabCustomCopyFormat,
       enableLabCopyAll: event.detail.allSettings.enableLabCopyAll,
+      labCopyAllOrder: event.detail.allSettings.labCopyAllOrder || 'newToOld',
       itemSeparator: event.detail.allSettings.itemSeparator || ',',
       customLabHeaderCopyFormat: event.detail.allSettings.customLabHeaderCopyFormat,
       customLabItemCopyFormat: event.detail.allSettings.customLabItemCopyFormat,
     };
 
-    console.log("Updating all lab settings:", newLabSettings);
+    debugLog("Updating all lab settings:", newLabSettings);
 
     // 更新設置並重新處理數據
     updateCallback({
@@ -283,19 +287,20 @@ const handleLabSettingsChange = (event, currentSettings, updateCallback, callbac
     });
 
     // 重新處理檢驗數據
-    if (window.lastInterceptedLabData && callbacks.reprocessLab) {
-      callbacks.reprocessLab(window.lastInterceptedLabData, newLabSettings);
+    const labData = dataStore.getData('labdata');
+    if (labData && callbacks.reprocessLab) {
+      callbacks.reprocessLab(labData, newLabSettings);
     }
   } else {
     // 單一設置變更
     let updatedValue = event.detail.value;
     let settingKey = event.detail.setting;
 
-    console.log(`Updating single lab setting: ${settingKey} = ${JSON.stringify(updatedValue)}`);
+    debugLog(`Updating single lab setting: ${settingKey} = ${JSON.stringify(updatedValue)}`);
 
     // 特別處理 displayLabFormat
     if (settingKey === 'displayLabFormat') {
-      console.log(`Special handling for display format: ${updatedValue}`);
+      debugLog(`Special handling for display format: ${updatedValue}`);
 
       // 創建新的設置對象，確保 displayLabFormat 被正確設置
       const updatedSettings = {
@@ -303,7 +308,7 @@ const handleLabSettingsChange = (event, currentSettings, updateCallback, callbac
         displayLabFormat: updatedValue
       };
 
-      console.log("Updated lab settings with new display format:", updatedSettings);
+      debugLog("Updated lab settings with new display format:", updatedSettings);
 
       // 更新設置
       updateCallback({
@@ -312,8 +317,9 @@ const handleLabSettingsChange = (event, currentSettings, updateCallback, callbac
       });
 
       // 重新處理檢驗數據
-      if (window.lastInterceptedLabData && callbacks.reprocessLab) {
-        callbacks.reprocessLab(window.lastInterceptedLabData, updatedSettings);
+      const labDataForDisplayFormat = dataStore.getData('labdata');
+      if (labDataForDisplayFormat && callbacks.reprocessLab) {
+        callbacks.reprocessLab(labDataForDisplayFormat, updatedSettings);
       }
 
       return; // 提前返回，不執行後面的代碼
@@ -321,7 +327,7 @@ const handleLabSettingsChange = (event, currentSettings, updateCallback, callbac
 
     // 特別處理 itemSeparator
     if (settingKey === 'itemSeparator') {
-      console.log(`Special handling for item separator: "${updatedValue}" (${typeof updatedValue})`);
+      debugLog(`Special handling for item separator: "${updatedValue}" (${typeof updatedValue})`);
 
       // 確保分隔符是字符串
       if (typeof updatedValue !== 'string') {
@@ -335,7 +341,7 @@ const handleLabSettingsChange = (event, currentSettings, updateCallback, callbac
         .replace(/\r/g, '\\r')
         .replace(/\t/g, '\\t');
 
-      console.log(`Sanitized itemSeparator: "${loggableSeparator}" (${typeof updatedValue})`);
+      debugLog(`Sanitized itemSeparator: "${loggableSeparator}" (${typeof updatedValue})`);
 
       // 創建新的設置對象，確保 itemSeparator 被正確設置
       const updatedSettings = {
@@ -343,7 +349,7 @@ const handleLabSettingsChange = (event, currentSettings, updateCallback, callbac
         itemSeparator: updatedValue
       };
 
-      console.log("Updated lab settings with new item separator:", updatedSettings);
+      debugLog("Updated lab settings with new item separator:", updatedSettings);
 
       // 更新設置
       updateCallback({
@@ -352,8 +358,9 @@ const handleLabSettingsChange = (event, currentSettings, updateCallback, callbac
       });
 
       // 重新處理檢驗數據
-      if (window.lastInterceptedLabData && callbacks.reprocessLab) {
-        callbacks.reprocessLab(window.lastInterceptedLabData, updatedSettings);
+      const labDataForItemSeparator = dataStore.getData('labdata');
+      if (labDataForItemSeparator && callbacks.reprocessLab) {
+        callbacks.reprocessLab(labDataForItemSeparator, updatedSettings);
       }
 
       return; // 提前返回，不執行後面的代碼
@@ -365,7 +372,7 @@ const handleLabSettingsChange = (event, currentSettings, updateCallback, callbac
       [settingKey]: updatedValue
     };
 
-    console.log("Updated lab settings:", updatedSettings);
+    debugLog("Updated lab settings:", updatedSettings);
 
     // 更新設置
     updateCallback({
@@ -374,8 +381,9 @@ const handleLabSettingsChange = (event, currentSettings, updateCallback, callbac
     });
 
     // 重新處理檢驗數據
-    if (window.lastInterceptedLabData && callbacks.reprocessLab) {
-      callbacks.reprocessLab(window.lastInterceptedLabData, updatedSettings);
+    const labDataForGeneralSetting = dataStore.getData('labdata');
+    if (labDataForGeneralSetting && callbacks.reprocessLab) {
+      callbacks.reprocessLab(labDataForGeneralSetting, updatedSettings);
     }
   }
 };
@@ -401,8 +409,9 @@ const handleOverviewSettingsChange = (event, currentSettings, updateCallback, ca
     });
 
     // 當追蹤天數變更時，重新處理藥物數據
-    if (window.lastInterceptedMedicationData?.rObject && callbacks.reprocessMedication) {
-      callbacks.reprocessMedication(window.lastInterceptedMedicationData, currentSettings.western);
+    const medicationData = dataStore.getData('medication');
+    if (medicationData?.rObject && callbacks.reprocessMedication) {
+      callbacks.reprocessMedication(medicationData, currentSettings.western);
     }
   } else {
     // 單一設置變更
@@ -418,10 +427,11 @@ const handleOverviewSettingsChange = (event, currentSettings, updateCallback, ca
     });
 
     // 處理特定設置變更
+    const medicationDataForSingleSetting = dataStore.getData('medication');
     if (event.detail.setting === "medicationTrackingDays" &&
-      window.lastInterceptedMedicationData?.rObject &&
+      medicationDataForSingleSetting?.rObject &&
       callbacks.reprocessMedication) {
-      callbacks.reprocessMedication(window.lastInterceptedMedicationData, currentSettings.western);
+      callbacks.reprocessMedication(medicationDataForSingleSetting, currentSettings.western);
     }
   }
 };

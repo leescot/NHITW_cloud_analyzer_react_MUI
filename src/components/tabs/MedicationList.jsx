@@ -10,7 +10,6 @@ const MedicationList = ({
   groupedMedications,
   settings,
   medicationCopyFormat,
-  generalDisplaySettings,
 }) => {
   // 添加 snackbar 狀態
   const [snackbarOpen, setSnackbarOpen] = useState(false);
@@ -174,6 +173,9 @@ const MedicationList = ({
       icd_code: group.icd_code,
       icd_name: group.icd_name,
       showDiagnosis: settings.showDiagnosis,
+      customMedicationHeaderCopyFormat: settings.customMedicationHeaderCopyFormat,
+      customMedicationDrugCopyFormat: settings.customMedicationDrugCopyFormat,
+      drugSeparator: settings.drugSeparator,
     };
 
     const formattedText = medicationProcessor.formatMedicationList(
@@ -214,6 +216,9 @@ const MedicationList = ({
         icd_code: group.icd_code,
         icd_name: group.icd_name,
         showDiagnosis: settings.showDiagnosis,
+        customMedicationHeaderCopyFormat: settings.customMedicationHeaderCopyFormat,
+        customMedicationDrugCopyFormat: settings.customMedicationDrugCopyFormat,
+        drugSeparator: settings.drugSeparator,
       };
 
       return medicationProcessor.formatMedicationList(
@@ -368,7 +373,6 @@ const MedicationList = ({
         <TypographySizeWrapper
           variant="body2"
           textSizeType="content"
-          generalDisplaySettings={generalDisplaySettings}
           color="text.secondary"
         >
           沒有找到用藥資料
@@ -382,7 +386,6 @@ const MedicationList = ({
             selectedVisitType={selectedVisitType}
             handleVisitTypeChange={handleVisitTypeChange}
             availableVisitTypes={availableVisitTypes}
-            generalDisplaySettings={generalDisplaySettings}
             settings={settings}
             onCopyAll={handleCopyAllMedications}
           />
@@ -391,7 +394,6 @@ const MedicationList = ({
             <TypographySizeWrapper
               variant="body2"
               textSizeType="content"
-              generalDisplaySettings={generalDisplaySettings}
               color="text.secondary"
             >
               沒有找到符合條件的用藥資料
@@ -404,7 +406,6 @@ const MedicationList = ({
                 shortTermMeds={shortTermMeds}
                 settings={settings}
                 copyFormat={medicationCopyFormat}
-                generalDisplaySettings={generalDisplaySettings}
                 setSnackbarMessage={setSnackbarMessage}
                 setSnackbarOpen={setSnackbarOpen}
               />
@@ -416,7 +417,6 @@ const MedicationList = ({
                   group={group}
                   settings={settings}
                   copyFormat={medicationCopyFormat}
-                  generalDisplaySettings={generalDisplaySettings}
                   isLast={index === filteredMedications.length - 1}
                   setSnackbarMessage={setSnackbarMessage}
                   setSnackbarOpen={setSnackbarOpen}

@@ -13,6 +13,7 @@ import { patientSummaryProcessor } from "./patientSummaryProcessor";
 import { cancerScreeningProcessor } from "./cancerScreeningProcessor";
 import { adultHealthCheckProcessor } from "./adultHealthCheckProcessor";
 import { hbcvdataProcessor } from "./hbcvdataProcessor";
+import { dataStore } from "../store/dataStore";
 
 /**
  * 安全調用setter，如果setter不存在則寫入window全局變量
@@ -33,6 +34,119 @@ const safeSetter = (setters, setterName, data, dataName) => {
 };
 
 /**
+ * 資料處理註冊表：每個項目描述「用什麼資料、跑哪個 processor、
+ * 結果寫到哪個 setter / results key」，handleAllData 用單一迴圈依序執行。
+ * 新增資料型別時，只需在此陣列加一筆設定，不須修改迴圈本體。
+ *
+ * - guard: 決定是否執行該項目。
+ *   - 'rObject'：dataSources[sourceKey]?.rObject 存在才執行（多數型別）。
+ *   - 'truthy'：dataSources[sourceKey] 存在即執行（cancerScreening / adultHealthCheck / hbcvdata）。
+ *   - function(dataSources)：自訂判斷（patientSummary 的大小寫 key 後備邏輯）。
+ * - getInput(dataSources)：取得要傳給 process() 的主要資料（預設為 dataSources[sourceKey]）。
+ * - run(input, dataSources, settings)：實際呼叫 processor，可回傳值或 Promise。
+ * - setterName / resultKey：setter 名稱與 results 物件要寫入的 key。
+ * - useSafeSetter：true 時透過 safeSetter（setter 不存在則寫入 window[safeSetterDataName + 'Data']）。
+ */
+const PROCESSOR_REGISTRY = [
+  {
+    sourceKey: 'medication',
+    guard: 'rObject',
+    run: (input, dataSources, settings) =>
+      medicationProcessor.processMedicationData(input, dataSources.chronicMed, settings.western),
+    setterName: 'setGroupedMedications',
+    resultKey: 'medications',
+  },
+  {
+    sourceKey: 'labData',
+    guard: 'rObject',
+    run: (input, dataSources, settings) => labProcessor.processLabData(input, settings.lab),
+    setterName: 'setGroupedLabs',
+    resultKey: 'labs',
+  },
+  {
+    sourceKey: 'chinesemed',
+    guard: 'rObject',
+    run: (input) => chineseMedProcessor.processChineseMedData(input),
+    setterName: 'setGroupedChineseMeds',
+    resultKey: 'chineseMeds',
+  },
+  {
+    sourceKey: 'imaging',
+    guard: 'rObject',
+    run: (input) => imagingProcessor.processImagingData(input),
+    setterName: 'setImagingData',
+    resultKey: 'imaging',
+  },
+  {
+    sourceKey: 'allergy',
+    guard: 'rObject',
+    run: (input) => allergyProcessor.processAllergyData(input),
+    setterName: 'setAllergyData',
+    resultKey: 'allergy',
+  },
+  {
+    sourceKey: 'surgery',
+    guard: 'rObject',
+    run: (input) => surgeryProcessor.processSurgeryData(input),
+    setterName: 'setSurgeryData',
+    resultKey: 'surgery',
+  },
+  {
+    sourceKey: 'discharge',
+    guard: 'rObject',
+    run: (input) => dischargeProcessor.processDischargeData(input),
+    setterName: 'setDischargeData',
+    resultKey: 'discharge',
+  },
+  {
+    sourceKey: 'medDays',
+    guard: 'rObject',
+    run: (input) => medDaysProcessor.processMedDaysData(input),
+    setterName: 'setMedDaysData',
+    resultKey: 'medDays',
+  },
+  {
+    // 原碼優先讀 dataSources.patientsummary(小寫s)，不存在才後備讀
+    // dataSources.patientSummary(大寫S)；兩者共用同一個 setter/resultKey。
+    sourceKey: 'patientSummary',
+    guard: (dataSources) =>
+      Boolean(dataSources.patientsummary?.rObject || dataSources.patientSummary?.rObject),
+    getInput: (dataSources) =>
+      dataSources.patientsummary?.rObject ? dataSources.patientsummary : dataSources.patientSummary,
+    run: (input) => patientSummaryProcessor.processPatientSummaryData(input),
+    setterName: 'setPatientSummaryData',
+    resultKey: 'patientSummary',
+  },
+  {
+    sourceKey: 'cancerScreening',
+    guard: 'truthy',
+    run: (input) => cancerScreeningProcessor.processCancerScreeningData(input),
+    setterName: 'setCancerScreeningData',
+    resultKey: 'cancerScreening',
+    useSafeSetter: true,
+    safeSetterDataName: 'cancerScreening',
+  },
+  {
+    sourceKey: 'adultHealthCheck',
+    guard: 'truthy',
+    run: (input) => adultHealthCheckProcessor.processAdultHealthCheckData(input),
+    setterName: 'setAdultHealthCheckData',
+    resultKey: 'adultHealthCheck',
+    useSafeSetter: true,
+    safeSetterDataName: 'adultHealthCheck',
+  },
+  {
+    sourceKey: 'hbcvdata',
+    guard: 'truthy',
+    run: (input) => hbcvdataProcessor.processHbcvdataData(input),
+    setterName: 'setHbcvData',
+    resultKey: 'hbcvdata',
+    useSafeSetter: true,
+    safeSetterDataName: 'hbcv',
+  },
+];
+
+/**
  * 處理所有資料來源並回傳處理結果
  * @param {Object} dataSources - 所有資料來源的對象
  * @param {Object} settings - 應用設置對象
@@ -43,166 +157,38 @@ export const handleAllData = async (dataSources, settings, setters) => {
   const results = {};
 
   try {
-    // 建立資料處理映射
-    const dataProcessors = new Map([
-      ['medication', {
-        process: async () => {
-          if (dataSources.medication?.rObject) {
-            const processedMedications = await medicationProcessor.processMedicationData(
-              dataSources.medication,
-              dataSources.chronicMed
-            );
-            setters.setGroupedMedications(processedMedications);
-            results.medications = processedMedications;
-          }
-        }
-      }],
-      ['labData', {
-        process: () => {
-          if (dataSources.labData?.rObject) {
-            const processedLabs = labProcessor.processLabData(
-              dataSources.labData,
-              settings.lab
-            );
-            setters.setGroupedLabs(processedLabs);
-            results.labs = processedLabs;
-          }
-        }
-      }],
-      ['chinesemed', {
-        process: () => {
-          if (dataSources.chinesemed?.rObject) {
-            const processedChineseMeds = chineseMedProcessor.processChineseMedData(
-              dataSources.chinesemed
-            );
-            setters.setGroupedChineseMeds(processedChineseMeds);
-            results.chineseMeds = processedChineseMeds;
-          }
-        }
-      }],
-      ['imaging', {
-        process: () => {
-          if (dataSources.imaging?.rObject) {
-            const processedImaging = imagingProcessor.processImagingData(
-              dataSources.imaging
-            );
-            setters.setImagingData(processedImaging);
-            results.imaging = processedImaging;
-          }
-        }
-      }],
-      ['allergy', {
-        process: () => {
-          if (dataSources.allergy?.rObject) {
-            const processedAllergy = allergyProcessor.processAllergyData(
-              dataSources.allergy
-            );
-            setters.setAllergyData(processedAllergy);
-            results.allergy = processedAllergy;
-          }
-        }
-      }],
-      ['surgery', {
-        process: () => {
-          if (dataSources.surgery?.rObject) {
-            const processedSurgery = surgeryProcessor.processSurgeryData(
-              dataSources.surgery
-            );
-            setters.setSurgeryData(processedSurgery);
-            results.surgery = processedSurgery;
-          }
-        }
-      }],
-      ['discharge', {
-        process: () => {
-          if (dataSources.discharge?.rObject) {
-            const processedDischarge = dischargeProcessor.processDischargeData(
-              dataSources.discharge
-            );
-            setters.setDischargeData(processedDischarge);
-            results.discharge = processedDischarge;
-          }
-        }
-      }],
-      ['medDays', {
-        process: () => {
-          if (dataSources.medDays?.rObject) {
-            const processedMedDays = medDaysProcessor.processMedDaysData(
-              dataSources.medDays
-            );
-            setters.setMedDaysData(processedMedDays);
-            results.medDays = processedMedDays;
-          }
-        }
-      }],
-      ['patientSummary', {
-        process: () => {
-          if (dataSources.patientsummary?.rObject) {
-            const processedPatientSummary = patientSummaryProcessor.processPatientSummaryData(
-              dataSources.patientsummary
-            );
-            setters.setPatientSummaryData(processedPatientSummary);
-            results.patientSummary = processedPatientSummary;
-          } else if (dataSources.patientSummary?.rObject) {
-            // 嘗試使用大寫S作為後備
-            const processedPatientSummary = patientSummaryProcessor.processPatientSummaryData(
-              dataSources.patientSummary
-            );
-            setters.setPatientSummaryData(processedPatientSummary);
-            results.patientSummary = processedPatientSummary;
-          }
-        }
-      }],
-      ['cancerScreening', {
-        process: () => {
-          if (dataSources.cancerScreening) {
-            const processedCancerScreening = cancerScreeningProcessor.processCancerScreeningData(
-              dataSources.cancerScreening
-            );
+    for (const entry of PROCESSOR_REGISTRY) {
+      const {
+        sourceKey,
+        guard,
+        getInput,
+        run,
+        setterName,
+        resultKey,
+        useSafeSetter,
+        safeSetterDataName,
+      } = entry;
 
-            // Use safeSetter to handle the case where the setter might not exist
-            safeSetter(setters, 'setCancerScreeningData', processedCancerScreening, 'cancerScreening');
-            results.cancerScreening = processedCancerScreening;
-          }
-        }
-      }],
-      ['adultHealthCheck', {
-        process: () => {
-          if (dataSources.adultHealthCheck) {
-            const processedAdultHealthCheck = adultHealthCheckProcessor.processAdultHealthCheckData(
-              dataSources.adultHealthCheck
-            );
+      const shouldRun =
+        typeof guard === 'function'
+          ? guard(dataSources)
+          : guard === 'truthy'
+            ? Boolean(dataSources[sourceKey])
+            : Boolean(dataSources[sourceKey]?.rObject);
 
-            // Use safeSetter to handle the case where the setter might not exist
-            safeSetter(setters, 'setAdultHealthCheckData', processedAdultHealthCheck, 'adultHealthCheck');
-            results.adultHealthCheck = processedAdultHealthCheck;
-          }
-        }
-      }],
-      ['hbcvdata', {
-        process: () => {
-          console.log("[dataManager] Processing hbcvdata, dataSources.hbcvdata:", dataSources.hbcvdata);
-          if (dataSources.hbcvdata) {
-            const processedHbcvdata = hbcvdataProcessor.processHbcvdataData(
-              dataSources.hbcvdata
-            );
+      if (!shouldRun) {
+        continue;
+      }
 
-            console.log("[dataManager] Processed hbcvdata:", processedHbcvdata);
-            console.log("[dataManager] Calling safeSetter with setHbcvData");
+      const input = getInput ? getInput(dataSources) : dataSources[sourceKey];
+      const processed = await run(input, dataSources, settings);
 
-            // Use safeSetter to handle the case where the setter might not exist
-            safeSetter(setters, 'setHbcvData', processedHbcvdata, 'hbcv');
-            results.hbcvdata = processedHbcvdata;
-          } else {
-            console.log("[dataManager] No hbcvdata in dataSources");
-          }
-        }
-      }]
-    ]);
-
-    // 處理每個資料類型
-    for (const [dataType, { process }] of dataProcessors) {
-      await process();
+      if (useSafeSetter) {
+        safeSetter(setters, setterName, processed, safeSetterDataName);
+      } else {
+        setters[setterName](processed);
+      }
+      results[resultKey] = processed;
     }
 
     return results;
@@ -217,25 +203,21 @@ export const handleAllData = async (dataSources, settings, setters) => {
  * @returns {Object} - 包含所有數據源的對象
  */
 export const collectDataSources = () => {
-  const sources = {
-    medication: window.lastInterceptedMedicationData,
-    labData: window.lastInterceptedLabData,
-    chinesemed: window.lastInterceptedChineseMedData,
-    imaging: window.lastInterceptedImagingData,
-    allergy: window.lastInterceptedAllergyData,
-    surgery: window.lastInterceptedSurgeryData,
-    discharge: window.lastInterceptedDischargeData,
-    medDays: window.lastInterceptedMedDaysData,
-    patientSummary: window.lastInterceptedPatientSummaryData,
-    cancerScreening: window.lastInterceptedCancerScreeningData,
-    adultHealthCheck: window.lastInterceptedAdultHealthCheckData,
-    hbcvdata: window.lastInterceptedHbcvdata,
-    chronicMed: window.lastInterceptedChronicMedData
+  return {
+    medication: dataStore.getData('medication'),
+    labData: dataStore.getData('labdata'),
+    chinesemed: dataStore.getData('chinesemed'),
+    imaging: dataStore.getData('imaging'),
+    allergy: dataStore.getData('allergy'),
+    surgery: dataStore.getData('surgery'),
+    discharge: dataStore.getData('discharge'),
+    medDays: dataStore.getData('medDays'),
+    patientSummary: dataStore.getData('patientsummary'),
+    cancerScreening: dataStore.getData('cancerScreening'),
+    adultHealthCheck: dataStore.getData('adultHealthCheck'),
+    hbcvdata: dataStore.getData('hbcvdata'),
+    chronicMed: dataStore.getData('chronicMed'),
   };
-
-  console.log("[dataManager] collectDataSources - hbcvdata:", sources.hbcvdata);
-
-  return sources;
 };
 
 /**
@@ -250,10 +232,11 @@ export const reprocessData = async (dataType, data, settings, setter) => {
 
   try {
     const processors = new Map([
-      ['medication', async (data) => {
+      ['medication', async (data, settings) => {
         return await medicationProcessor.processMedicationData(
           data,
-          window.lastInterceptedChronicMedData
+          dataStore.getData('chronicMed'),
+          settings
         );
       }],
       ['lab', (data, settings) => {

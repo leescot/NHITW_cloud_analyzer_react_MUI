@@ -1,14 +1,22 @@
-# 本地測試
+# 測試
 
-## 測試擴充功能
-1. 終端機下進入專案目錄，執行 `npm install` 安裝所有相依套件。
-2. 執行 `npm run test` 建構測試套件及啟動測試伺服器。
-3. 瀏覽器進入擴充功能管理頁面，開啟「開發人員模式」載入 `dist` 資料夾以安裝之。
-4. 瀏覽器進入 `http://localhost:5173/` ，即可人工測試此擴充功能。
-5. 更改程式碼後，須存檔並重新執行步驟 2~3，再重新整理頁面，以測試新的程式。
+## 單元測試(Vitest)
 
-## 單元測試
-1. 終端機下進入專案目錄，執行 `npm install` 安裝所有相依套件。
-2. 執行 `npm run test` 建構測試套件及啟動測試伺服器。
-3. 瀏覽器進入 `http://localhost:5173/test.html` 頁面，即會開始執行單元測試。
-4. 更改程式碼後，存檔並重新整理頁面，即可重跑測試。
+```bash
+npm test          # 跑全部單元測試
+npm run test:watch  # watch 模式
+npx vitest run tests/test_labProcessor.js  # 跑單檔
+```
+
+測試檔:`tests/test_*.js`(processor 純函數測試)、`tests/*.test.{js,jsx}`(util 與 React hook 測試)。
+chrome API 的最小 stub 在 `tests/vitest.setup.js`。
+
+## 手動測試(瀏覽器)
+
+```bash
+npm run test:manual
+```
+
+以 TEST 模式建置擴充功能到 `dist/`(host permissions 加入 localhost)並起本機 server。
+Chrome 載入 `dist/` 未封裝擴充功能後,開 `http://localhost:5173/`,
+用 popup 的「載入本地資料」上傳 `tests/test_data/` 內的 JSON 進行手動驗證。

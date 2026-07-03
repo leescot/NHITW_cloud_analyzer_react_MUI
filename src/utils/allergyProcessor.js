@@ -1,9 +1,13 @@
-export const allergyProcessor = {
-  processAllergyData(data) {
-    // console.log('Starting to process allergy data:', data);
+import { debugLog } from './logger';
 
+export const allergyProcessor = {
+  /**
+   * @param {object} data 健保 allergy API 原始回應（含 rObject）
+   * @returns {import('../types/processors.js').AllergyItem[]}
+   */
+  processAllergyData(data) {
     if (!data || !data.rObject || !Array.isArray(data.rObject)) {
-      console.log('Invalid allergy data format:', data);
+      debugLog('Invalid allergy data format:', data);
       return [];
     }
 

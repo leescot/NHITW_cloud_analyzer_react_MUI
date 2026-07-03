@@ -16,7 +16,6 @@ export default [
   {
     ignores: [
       'dist',
-      'tests/lib/**/*.js',
     ],
   },
   {
@@ -80,6 +79,7 @@ export default [
         'warn',
         { allowConstantExport: true },
       ],
+      'no-console': ['error', { allow: ['warn', 'error'] }],
     },
   },
   {
@@ -99,7 +99,6 @@ export default [
     languageOptions: {
       globals: {
         ...globals.browser,
-        ...globals.mocha,
       },
     },
   },

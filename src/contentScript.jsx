@@ -1,7 +1,9 @@
-console.log("Content script loaded");
+import { debugLog } from "./utils/logger";
+
+debugLog("Content script loaded");
 
 function initializeExtension() {
-  console.log("Content script initializing");
+  debugLog("Content script initializing");
 
   const rootDiv = document.createElement("div");
   rootDiv.id = "nhi-floating-root";
@@ -19,9 +21,9 @@ function initializeExtension() {
       console.error("載入 React 元件時出錯:", error);
     });
 
-  import("./legacyContent.js")
+  import("./apiInterceptor/index.js")
     .then(() => {
-      console.log("Legacy content script loaded");
+      debugLog("Legacy content script loaded");
     })
     .catch((error) => {
       console.error("載入舊版內容時出錯:", error);
@@ -29,7 +31,7 @@ function initializeExtension() {
 
   import("./localDataHandler.js")
     .then((localDataHandler) => {
-      console.log("本地資料處理器已載入");
+      debugLog("本地資料處理器已載入");
 
       const messageHandlers = new Map([
         ["loadLocalData", async (message, sendResponse) => {

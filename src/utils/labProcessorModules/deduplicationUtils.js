@@ -102,7 +102,6 @@ const deduplicateLabData = (labArray) => {
       // 如果在 09040C 或 12111C 中找到相同的項目，則刪除這個 09016C 項目
       if (mennonoLabsMap[key]) {
         // 記錄一下替換情況，便於調試
-        // console.log(`門諾醫院資料: 刪除 09016C 項目，保留 ${mennonoLabsMap[key]} 項目，項目名稱: ${itemName}, 數值: ${value}`);
         return false;
       }
 

@@ -14,13 +14,14 @@ import { SectionTitle, cs, sd, getStatusColor, getStatusBg } from './ckm/ckmCard
 import CKMSummaryBar from './ckm/CKMSummaryBar';
 import CKMExtraLabCard from './ckm/CKMExtraLabCard';
 import CKMImagingCard from './ckm/CKMImagingCard';
+import { useGeneralDisplaySettings } from '../../contexts/SettingsContext';
 
 const CATEGORY_LABELS = { cardiovascular: '心血', kidney: '腎臟', metabolic: '代謝' };
 const CATEGORY_COLORS = { cardiovascular: '#c62828', kidney: '#e65100', metabolic: '#1565c0' };
 
 const TRACKING_DAYS = 180;
 
-const DiagnosisCard = ({ diagnoses, gds }) => {
+const DiagnosisCard = ({ diagnoses }) => {
   const rows = [];
   for (const [cat, label] of Object.entries(CATEGORY_LABELS)) {
     const items = diagnoses[cat];
@@ -36,14 +37,14 @@ const DiagnosisCard = ({ diagnoses, gds }) => {
           <TableRow key={i}>
             {r.isFirst && (
               <TableCell rowSpan={r.span} sx={{...cs, fontWeight:600, color:CATEGORY_COLORS[r.cat], borderRight:'1px solid #eee', width:36, textAlign:'center', verticalAlign:'top'}}>
-                <TypographySizeWrapper textSizeType="note" generalDisplaySettings={gds}>{r.label}</TypographySizeWrapper>
+                <TypographySizeWrapper textSizeType="note">{r.label}</TypographySizeWrapper>
               </TableCell>
             )}
             <TableCell sx={{...cs, color:'text.secondary', width:40}}>
-              <TypographySizeWrapper textSizeType="note" generalDisplaySettings={gds}>{sd(r.date)}</TypographySizeWrapper>
+              <TypographySizeWrapper textSizeType="note">{sd(r.date)}</TypographySizeWrapper>
             </TableCell>
             <TableCell sx={cs}>
-              <TypographySizeWrapper textSizeType="content" generalDisplaySettings={gds}>
+              <TypographySizeWrapper textSizeType="content">
                 <strong>{r.icdCode}</strong> {r.icdName}
               </TypographySizeWrapper>
             </TableCell>
@@ -54,7 +55,7 @@ const DiagnosisCard = ({ diagnoses, gds }) => {
   );
 };
 
-const MedicationCard = ({ medications, gds }) => {
+const MedicationCard = ({ medications }) => {
   const rows = [];
   for (const [cat, {label}] of Object.entries(CKM_ATC_PREFIXES)) {
     const items = medications[cat];
@@ -70,28 +71,28 @@ const MedicationCard = ({ medications, gds }) => {
           <TableRow key={i}>
             {r.isFirst && (
               <TableCell rowSpan={r.span} sx={{...cs, fontWeight:600, color:'#555', borderRight:'1px solid #eee', width:38, textAlign:'center', verticalAlign:'top'}}>
-                <TypographySizeWrapper textSizeType="note" generalDisplaySettings={gds}>{r.label}</TypographySizeWrapper>
+                <TypographySizeWrapper textSizeType="note">{r.label}</TypographySizeWrapper>
               </TableCell>
             )}
             <TableCell sx={cs}>
-              <TypographySizeWrapper textSizeType="content" generalDisplaySettings={gds}>
+              <TypographySizeWrapper textSizeType="content">
                 {r.drugName}
                 {(() => { const kl = getKeyDrugLabel(r.atcCode); return kl ? <Chip label={kl} size="small" sx={{height:16, fontSize:'0.55rem', ml:0.5, bgcolor:'#1565c0', color:'#fff', '& .MuiChip-label':{px:0.4}}}/> : null; })()}
                 {r.drugLeft > 0 && <Chip label={`餘${r.drugLeft}`} size="small" color="info" variant="outlined" sx={{height:16, fontSize:'0.6rem', ml:0.5, '& .MuiChip-label':{px:0.3}}}/>}
               </TypographySizeWrapper>
               {r.ingredient && (
-                <TypographySizeWrapper textSizeType="note" generalDisplaySettings={gds} sx={{color:'text.secondary', display:'block'}}>
+                <TypographySizeWrapper textSizeType="note" sx={{color:'text.secondary', display:'block'}}>
                   {r.ingredient}
                 </TypographySizeWrapper>
               )}
             </TableCell>
             <TableCell sx={{...cs, color:'text.secondary', whiteSpace:'nowrap', width:95}}>
-              <TypographySizeWrapper textSizeType="note" generalDisplaySettings={gds}>
+              <TypographySizeWrapper textSizeType="note">
                 {r.dosage&&`${r.dosage}# `}{r.frequency} {r.days}天
               </TypographySizeWrapper>
             </TableCell>
             <TableCell sx={{...cs, color:'text.secondary', width:38}}>
-              <TypographySizeWrapper textSizeType="note" generalDisplaySettings={gds}>{sd(r.date)}</TypographySizeWrapper>
+              <TypographySizeWrapper textSizeType="note">{sd(r.date)}</TypographySizeWrapper>
             </TableCell>
           </TableRow>
         ))}
@@ -100,7 +101,7 @@ const MedicationCard = ({ medications, gds }) => {
   );
 };
 
-const CKMLabTable = ({ groupedLabs, labSettings, gds, enableNephroReport, userInfo }) => {
+const CKMLabTable = ({ groupedLabs, labSettings, enableNephroReport, userInfo }) => {
   const handleOpenNephroReport = () => {
     const report = buildNephroReport(groupedLabs, userInfo);
     if (!report) { alert('無腎臟相關檢驗資料'); return; }
@@ -223,11 +224,11 @@ const CKMLabTable = ({ groupedLabs, labSettings, gds, enableNephroReport, userIn
           <TableHead>
             <TableRow>
               <TableCell sx={{ position:'sticky', left:0, bgcolor:'background.paper', zIndex:2, ...cs }}>
-                <TypographySizeWrapper textSizeType="content" generalDisplaySettings={gds} sx={{fontWeight:600}}>項目</TypographySizeWrapper>
+                <TypographySizeWrapper textSizeType="content" sx={{fontWeight:600}}>項目</TypographySizeWrapper>
               </TableCell>
               {uniqueDates.map(date => (
                 <TableCell key={date} align="right" sx={{...cs, whiteSpace:'nowrap'}}>
-                  <TypographySizeWrapper textSizeType="note" generalDisplaySettings={gds}>{sd(date)}</TypographySizeWrapper>
+                  <TypographySizeWrapper textSizeType="note">{sd(date)}</TypographySizeWrapper>
                 </TableCell>
               ))}
             </TableRow>
@@ -242,13 +243,13 @@ const CKMLabTable = ({ groupedLabs, labSettings, gds, enableNephroReport, userIn
                     if (numericCount >= 2) {
                       return (
                         <LabItemTrendPopover item={ti} dates={trendDates}>
-                          <TypographySizeWrapper textSizeType="content" generalDisplaySettings={gds} sx={{ textDecoration: 'underline dotted', textDecorationColor: '#bdbdbd', cursor: 'pointer' }}>
+                          <TypographySizeWrapper textSizeType="content" sx={{ textDecoration: 'underline dotted', textDecorationColor: '#bdbdbd', cursor: 'pointer' }}>
                             {displayName}
                           </TypographySizeWrapper>
                         </LabItemTrendPopover>
                       );
                     }
-                    return <TypographySizeWrapper textSizeType="content" generalDisplaySettings={gds}>{displayName}</TypographySizeWrapper>;
+                    return <TypographySizeWrapper textSizeType="content">{displayName}</TypographySizeWrapper>;
                   })()}
                 </TableCell>
                 {uniqueDates.map(date => {
@@ -259,7 +260,7 @@ const CKMLabTable = ({ groupedLabs, labSettings, gds, enableNephroReport, userIn
                       color: highlightAbnormal ? getStatusColor(test) : 'inherit',
                       bgcolor: highlightAbnormal ? getStatusBg(test) : 'inherit',
                     }}>
-                      <TypographySizeWrapper textSizeType="content" generalDisplaySettings={gds}>
+                      <TypographySizeWrapper textSizeType="content">
                         {test ? (test.value || test.result || '') : <span style={{color:'#ccc'}}>—</span>}
                       </TypographySizeWrapper>
                     </TableCell>
@@ -274,7 +275,8 @@ const CKMLabTable = ({ groupedLabs, labSettings, gds, enableNephroReport, userIn
   );
 };
 
-const CKMData = ({ ckmData, groupedLabs, labSettings, generalDisplaySettings, userInfo }) => {
+const CKMData = ({ ckmData, groupedLabs, labSettings, userInfo }) => {
+  const generalDisplaySettings = useGeneralDisplaySettings();
   if (!ckmData || !ckmData.hasCKMData) {
     return <Box sx={{p:2,textAlign:'center'}}><Typography color="text.secondary">無 CKM 相關資料</Typography></Box>;
   }
@@ -287,15 +289,15 @@ const CKMData = ({ ckmData, groupedLabs, labSettings, generalDisplaySettings, us
       <CKMSummaryBar summary={ckmData.summary} medications={ckmData.medications} groupedLabs={groupedLabs} userInfo={userInfo} gds={gds} />
       <Grid container spacing={0.75}>
         <Grid item xs={12} md={4.5}>
-          <DiagnosisCard diagnoses={ckmData.diagnoses} gds={gds} />
-          <MedicationCard medications={ckmData.medications} gds={gds} />
-          <CKMExtraLabCard groupedLabs={groupedLabs} gds={gds} />
+          <DiagnosisCard diagnoses={ckmData.diagnoses} />
+          <MedicationCard medications={ckmData.medications} />
+          <CKMExtraLabCard groupedLabs={groupedLabs} />
         </Grid>
         <Grid item xs={12} md={4.5}>
-          <CKMLabTable groupedLabs={groupedLabs} labSettings={labSettings} gds={gds} enableNephroReport={enableNephroReport} userInfo={userInfo} />
+          <CKMLabTable groupedLabs={groupedLabs} labSettings={labSettings} enableNephroReport={enableNephroReport} userInfo={userInfo} />
         </Grid>
         <Grid item xs={12} md={3}>
-          <CKMImagingCard imaging={ckmData.imaging} ekgAlerts={ckmData.ekgAlerts} lvef={ckmData.summary.lvef} gds={gds} />
+          <CKMImagingCard imaging={ckmData.imaging} ekgAlerts={ckmData.ekgAlerts} lvef={ckmData.summary.lvef} />
         </Grid>
       </Grid>
     </Box>

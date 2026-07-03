@@ -1,11 +1,13 @@
 export const imagingProcessor = {
+  /**
+   * @param {object} data 健保 imaging API 原始回應（含 rObject）
+   * @returns {import('../types/processors.js').ImagingResult}
+   */
   processImagingData(data) {
     if (!data || !data.rObject) {
       console.error('Invalid imaging data:', data);
       return { withReport: [], withoutReport: [] };
     }
-
-    // console.log('Processing imaging data:', data.rObject); // 添加調試信息
 
     // 處理影像檢查資料
     const withReport = [];
@@ -41,8 +43,6 @@ export const imagingProcessor = {
         withoutReport.push(processedItem);
       }
     });
-
-    // console.log('Processed imaging data:', { withReport, withoutReport }); // 添加調試信息
 
     return {
       withReport: withReport,

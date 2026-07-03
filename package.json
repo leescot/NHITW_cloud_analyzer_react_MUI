@@ -1,6 +1,6 @@
 {
   "name": "nhitw-cloud-analyzer",
-  "version": "26.0702.1",
+  "version": "26.0703.1",
   "description": "NHITW Cloud Analyzer - 更好的健保雲端 2.0",
   "license": "Apache-2.0",
   "author": "The NHITW Cloud Analyzer Project Authors",
@@ -18,11 +18,14 @@
     "build": "vite build && node scripts/build.js",
     "build:zip": "vite build && node scripts/build.js --zip",
     "build:alpha": "vite build && node scripts/build.js --alpha",
-    "test": "vite build && node scripts/build.js --test && node tests/serve.js",
+    "test": "vitest run",
+    "test:watch": "vitest",
+    "test:manual": "vite build && node scripts/build.js --test && node tests/serve.js",
     "dev": "vite",
     "preview": "vite preview",
     "lint": "eslint",
-    "lint:fix": "eslint --fix"
+    "lint:fix": "eslint --fix",
+    "type-check": "tsc -p jsconfig.json --noEmit"
   },
   "dependencies": {
     "@emotion/react": "^11.14.0",
@@ -39,6 +42,7 @@
   },
   "devDependencies": {
     "@stylistic/eslint-plugin": "^4.2.0",
+    "@testing-library/react": "^16.3.2",
     "@types/react": "^19.0.8",
     "@types/react-dom": "^19.0.3",
     "eslint": "^9.19.0",
@@ -46,6 +50,9 @@
     "eslint-plugin-react-hooks": "^5.0.0",
     "eslint-plugin-react-refresh": "^0.4.18",
     "globals": "^15.14.0",
-    "mime-types": "^3.0.1"
+    "jsdom": "^29.1.1",
+    "mime-types": "^3.0.1",
+    "typescript": "^5.9.3",
+    "vitest": "^4.1.9"
   }
 }
