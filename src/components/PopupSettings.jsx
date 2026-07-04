@@ -32,6 +32,9 @@ import AdvancedSettings from './settings/AdvancedSettings';
 import CloudDataSettings from './settings/CloudDataSettings';
 import { updateDataStatus } from '../utils/settingsHelper';
 import LoadDataTab from './settings/LoadDataTab';
+import { storageDefaultsForSection } from '../config/settingsSchema';
+
+const GENERAL_DEFAULTS = storageDefaultsForSection('general');
 
 const PopupSettings = () => {
   const [, setDataStatus] = useState({
@@ -49,15 +52,7 @@ const PopupSettings = () => {
   });
 
   // 添加一般顯示設定狀態
-  const [generalDisplaySettings, setGeneralDisplaySettings] = useState({
-    useColorfulTabs: false,
-    titleTextSize: 'medium',
-    contentTextSize: 'medium',
-    noteTextSize: 'small',
-    floatingIconPosition: 'top-right',
-    alwaysOpenOverviewTab: true,
-    autoOpenPage: false
-  });
+  const [generalDisplaySettings, setGeneralDisplaySettings] = useState(GENERAL_DEFAULTS);
 
   // 新增通知
   const [snackbar, setSnackbar] = useState({
@@ -255,15 +250,7 @@ const PopupSettings = () => {
     updateDataStatus(setDataStatus);
 
     // 加載一般顯示設定
-    chrome.storage.sync.get({
-      useColorfulTabs: false,
-      titleTextSize: 'medium',
-      contentTextSize: 'medium',
-      noteTextSize: 'small',
-      floatingIconPosition: 'top-right',
-      alwaysOpenOverviewTab: true,
-      autoOpenPage: false
-    }, (items) => {
+    chrome.storage.sync.get(GENERAL_DEFAULTS, (items) => {
       setGeneralDisplaySettings(items);
     });
 

@@ -16,30 +16,24 @@ import {
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import DisplaySettingsIcon from '@mui/icons-material/DisplaySettings';
+import { storageDefaultsForSection } from '../../config/settingsSchema';
+
+const GENERAL_DEFAULTS = storageDefaultsForSection('general');
 
 const GeneralDisplaySettings = () => {
   // Define state variables for settings
-  const [autoOpenPage, setAutoOpenPage] = useState(false);
-  const [titleTextSize, setTitleTextSize] = useState('medium');
-  const [contentTextSize, setContentTextSize] = useState('medium');
-  const [noteTextSize, setNoteTextSize] = useState('small');
-  const [floatingIconPosition, setFloatingIconPosition] = useState('top-right');
-  const [alwaysOpenOverviewTab, setAlwaysOpenOverviewTab] = useState(true);
-  const [useColorfulTabs, setUseColorfulTabs] = useState(false);
-  const [enableCKMTab, setEnableCKMTab] = useState(false);
+  const [autoOpenPage, setAutoOpenPage] = useState(GENERAL_DEFAULTS.autoOpenPage);
+  const [titleTextSize, setTitleTextSize] = useState(GENERAL_DEFAULTS.titleTextSize);
+  const [contentTextSize, setContentTextSize] = useState(GENERAL_DEFAULTS.contentTextSize);
+  const [noteTextSize, setNoteTextSize] = useState(GENERAL_DEFAULTS.noteTextSize);
+  const [floatingIconPosition, setFloatingIconPosition] = useState(GENERAL_DEFAULTS.floatingIconPosition);
+  const [alwaysOpenOverviewTab, setAlwaysOpenOverviewTab] = useState(GENERAL_DEFAULTS.alwaysOpenOverviewTab);
+  const [useColorfulTabs, setUseColorfulTabs] = useState(GENERAL_DEFAULTS.useColorfulTabs);
+  const [enableCKMTab, setEnableCKMTab] = useState(GENERAL_DEFAULTS.enableCKMTab);
 
   // Load settings from storage
   useEffect(() => {
-    chrome.storage.sync.get({
-      autoOpenPage: false,
-      titleTextSize: 'medium',
-      contentTextSize: 'medium',
-      noteTextSize: 'small',
-      floatingIconPosition: 'top-right',
-      alwaysOpenOverviewTab: true,
-      useColorfulTabs: true,
-      enableCKMTab: false,
-    }, (items) => {
+    chrome.storage.sync.get(GENERAL_DEFAULTS, (items) => {
       setAutoOpenPage(items.autoOpenPage);
       setTitleTextSize(items.titleTextSize);
       setContentTextSize(items.contentTextSize);

@@ -30,6 +30,7 @@ import ImageIcon from '@mui/icons-material/Image';
 // 導入從配置文件中移出的常數
 import { DEFAULT_LAB_TESTS } from '../../config/labTests';
 import { DEFAULT_IMAGE_TESTS } from '../../config/imageTests';
+import { storageDefaultsForSection } from '../../config/settingsSchema';
 
 /**
  * FALLBACK_LAB_TESTS - 極簡版的檢驗項目配置
@@ -140,13 +141,7 @@ const OverviewSettings = () => {
 
   // 加載設定
   useEffect(() => {
-    chrome.storage.sync.get({
-      medicationTrackingDays: 100,
-      labTrackingDays: 180,
-      imageTrackingDays: 180,
-      focusedLabTests: DEFAULT_LAB_TESTS,
-      focusedImageTests: DEFAULT_IMAGE_TESTS
-    }, (items) => {
+    chrome.storage.sync.get(storageDefaultsForSection('overview'), (items) => {
       setMedicationTrackingDays(items.medicationTrackingDays);
       setLabTrackingDays(items.labTrackingDays);
       setImageTrackingDays(items.imageTrackingDays);

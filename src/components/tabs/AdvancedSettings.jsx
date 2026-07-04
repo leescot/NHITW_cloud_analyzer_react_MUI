@@ -16,6 +16,7 @@ import MedicationIcon from '@mui/icons-material/Medication';
 import ScienceIcon from '@mui/icons-material/Science';
 // Other icons can be imported for future settings pages
 
+import { storageDefaultsForSection } from '../../config/settingsSchema';
 import { useGeneralDisplaySettings } from '../../contexts/SettingsContext';
 
 /**
@@ -32,7 +33,7 @@ const AdvancedSettings = ({ appSettings, setAppSettings }) => {
   useEffect(() => {
     chrome.storage.sync.get(
       {
-        enableLabCustomCopyFormat: false
+        enableLabCustomCopyFormat: storageDefaultsForSection('lab').enableLabCustomCopyFormat
       },
       (items) => {
         setEnableLabCustomFormat(items.enableLabCustomCopyFormat);
