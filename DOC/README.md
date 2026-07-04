@@ -10,6 +10,7 @@
 | [`04_技術債追蹤.md`](./04_技術債追蹤.md) | 各階段重構審查累積、尚未處理的已知問題清單 |
 | [`05_Roadmap.md`](./05_Roadmap.md) | 已完成的六階段重構一覽、未來候選方向(非承諾) |
 | [`06_API資料對照與擷取流程.md`](./06_API資料對照與擷取流程.md) | NHI API 端點與資料類型對照表、抓取/授權流程、慢箋 schema(原 legacyContent.md) |
+| [`Settings.md`](./Settings.md) | 設定系統:settingsSchema 單一事實來源、新增設定 SOP、歷史改名鍵與 falsy 退回行為 |
 
 ## 與其他文件的分工
 

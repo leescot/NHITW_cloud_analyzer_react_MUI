@@ -1,5 +1,7 @@
 # Issue #68 四點意見處理 Implementation Plan
 
+> **狀態:已全數完成(2026-07-04)**。實際執行紀錄與計畫的差異:Task 3+4 合併為單一 commit(變更互相交織);CI 兩次紅燈修正(package-lock.json 在 .gitignore 改用 npm install;UTC runner 暴露既有時區脆弱測試,CI 明訂 TZ=Asia/Taipei);esbuild(scripts/build.js)的 target 一併對齊 chrome109。
+
 > **For agentic workers:** REQUIRED SUB-SKILL: Use superpowers:subagent-driven-development (recommended) or superpowers:executing-plans to implement this plan task-by-task. Steps use checkbox (`- [ ]`) syntax for tracking.
 
 **Goal:** 在單一 branch `issue-68-quality` 上依序解決 issue #68 的四點:lint 清零+CI gate、minimum_chrome_version+build target、settings schema 化(先測試後重構)、並以「先測試後重構」紀律執行第 3 點。
