@@ -103,6 +103,7 @@ export default [
     languageOptions: {
       globals: {
         ...globals.browser,
+        chrome: false,  // 由 tests/vitest.setup.js 提供 stub
       },
     },
   },
