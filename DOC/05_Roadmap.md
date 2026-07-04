@@ -43,4 +43,3 @@
 - **大量資料情境下的 processor 記憶體/效能**:目前所有 processor 皆為一次性同步(或單一 `await`)處理完整 `rObject` 陣列,病患資料量大(長期慢性病史、大量檢驗記錄)時的記憶體佔用與處理耗時尚未有系統性量測或優化(如分頁處理、virtualization)。與上述「NHITW_DATA 大小監控」是同一資料量成長趨勢下的兩個面向。
 - **exhaustive-deps 8 個 warnings 修復**(issue #68 遺留):每個都涉及 effect 觸發時機的行為變更,需逐一補行為測試後個別處理,不可 `--fix` 或機械式補依賴。
 - **真瀏覽器自動化測試**(danny 第 2 點的理想型):Playwright persistent context 載入套件的自動煙霧測試,可鎖定舊版 Chromium(如 1.29 綁 109)。等出現老瀏覽器使用者的實際回報再投資;在那之前以「宣告底線 + 一次性手動驗證」為足。
-- **package-lock.json 入版控**:可重現建置 + CI 改回 `npm ci`。屬專案慣例變更,由維護者決定(見 `04_技術債追蹤.md` #5c)。

@@ -16,8 +16,8 @@ jobs:
       - uses: actions/setup-node@v4
         with:
           node-version: 22
-      # 專案的 package-lock.json 在 .gitignore 中,故用 npm install 而非 npm ci
-      - run: npm install
+          cache: npm
+      - run: npm ci
       - run: npm run lint
       - run: npm run type-check
       - run: npm test
