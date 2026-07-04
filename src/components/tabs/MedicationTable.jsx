@@ -1,6 +1,5 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
-  Typography,
   TableContainer,
   Paper,
   Table,
@@ -82,7 +81,7 @@ const MedicationTable = ({ groupedMedications, settings }) => {
     }
 
     // 檢查藥物的 ATC5 代碼是否屬於任何群組
-    const group = Object.entries(settings.atc5Groups).find(([groupName, codes]) => {
+    const group = Object.entries(settings.atc5Groups).find(([, codes]) => {
       const match = codes.some(code => {
         if (code.length === 7) {
           return atc5Code === code; // Exact match for 7-character codes
@@ -158,7 +157,7 @@ const MedicationTable = ({ groupedMedications, settings }) => {
     }
 
     // 檢查藥物的 ATC5 代碼是否屬於任何群組
-    const group = Object.entries(settings.atc5Groups).find(([groupName, codes]) => {
+    const group = Object.entries(settings.atc5Groups).find(([, codes]) => {
       return codes.some(code => {
         if (code.length === 7) {
           return atc5Code === code; // Exact match for 7-character codes

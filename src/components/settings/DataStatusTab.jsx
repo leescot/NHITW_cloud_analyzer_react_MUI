@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import {
   Grid,
   Paper,
@@ -17,20 +17,20 @@ import SummarizeIcon from '@mui/icons-material/Summarize';
 import GrassIcon from '@mui/icons-material/Grass';
 
 const DataStatusTab = ({ dataStatus }) => {
-  const [isLoading, setIsLoading] = useState(false);
+  const [, setIsLoading] = useState(false);
 
   // Helper function to get the appropriate icon for each data type
   const getDataTypeIcon = (key) => {
     const icons = new Map([
-      ['medication', <LocalPharmacyIcon fontSize="large" />],
-      ['labData', <ScienceIcon fontSize="large" />],
-      ['chineseMed', <GrassIcon fontSize="large" />],
-      ['imaging', <ImageIcon fontSize="large" />],
-      ['allergy', <WarningIcon fontSize="large" />],
-      ['surgery', <MedicalServicesIcon fontSize="large" />],
-      ['discharge', <DescriptionIcon fontSize="large" />],
-      ['medDays', <AccessTimeIcon fontSize="large" />],
-      ['patientSummary', <SummarizeIcon fontSize="large" />]
+      ['medication', <LocalPharmacyIcon key="medication" fontSize="large" />],
+      ['labData', <ScienceIcon key="labData" fontSize="large" />],
+      ['chineseMed', <GrassIcon key="chineseMed" fontSize="large" />],
+      ['imaging', <ImageIcon key="imaging" fontSize="large" />],
+      ['allergy', <WarningIcon key="allergy" fontSize="large" />],
+      ['surgery', <MedicalServicesIcon key="surgery" fontSize="large" />],
+      ['discharge', <DescriptionIcon key="discharge" fontSize="large" />],
+      ['medDays', <AccessTimeIcon key="medDays" fontSize="large" />],
+      ['patientSummary', <SummarizeIcon key="patientSummary" fontSize="large" />]
     ]);
 
     return icons.get(key) || <DescriptionIcon fontSize="large" />;

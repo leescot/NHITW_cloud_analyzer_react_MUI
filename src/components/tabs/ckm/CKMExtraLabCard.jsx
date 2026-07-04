@@ -1,5 +1,5 @@
 // 其他檢驗卡片（TSH、FT4、iPTH、Lp(a) 等）— 由 CKMData.jsx 抽出
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { Paper, Table, TableBody, TableCell, TableRow } from '@mui/material';
 import TypographySizeWrapper from '../../utils/TypographySizeWrapper';
 import { SectionTitle, cs, sd, getStatusColor } from './ckmCardUtils';

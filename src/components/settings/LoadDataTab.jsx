@@ -1,22 +1,16 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   Box,
   Typography,
   Button,
   CircularProgress,
-  Divider,
   Paper,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
   Chip,
   Alert
 } from '@mui/material';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import FolderOpenIcon from '@mui/icons-material/FolderOpen';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import DeleteIcon from '@mui/icons-material/Delete';
 import DownloadIcon from '@mui/icons-material/Download';
 
 // 資料類型對照表

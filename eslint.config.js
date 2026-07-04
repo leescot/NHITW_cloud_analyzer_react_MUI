@@ -27,7 +27,7 @@ export default [
       // ref: https://eslint.org/docs/latest/rules/
       ...js.configs.recommended.rules,
       // 允許以 _ 前綴標示刻意未用的參數；catch(e) 未用 e 不報錯
-      "no-unused-vars": ["error", { argsIgnorePattern: "^_", caughtErrors: "none" }],
+      "no-unused-vars": ["error", { argsIgnorePattern: "^_", caughtErrors: "none", ignoreRestSiblings: true }],
 
       // 引用客製化推薦程式碼風格規則，及做一些微調
       // ref: https://eslint.style/rules

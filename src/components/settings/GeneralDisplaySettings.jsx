@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Box,
   Typography,
@@ -248,33 +248,6 @@ const GeneralDisplaySettings = () => {
             alwaysOpenOverviewTab: alwaysOpenOverviewTab,
             useColorfulTabs: newValue,
             enableCKMTab: enableCKMTab
-          }
-        });
-      }
-    });
-  };
-
-  const handleEnableCKMTabChange = (event) => {
-    const newValue = event.target.checked;
-    setEnableCKMTab(newValue);
-    chrome.storage.sync.set({ enableCKMTab: newValue });
-
-    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
-      if (tabs[0]) {
-        chrome.tabs.sendMessage(tabs[0].id, {
-          action: "settingChanged",
-          settingType: "generalDisplay",
-          setting: "enableCKMTab",
-          value: newValue,
-          allSettings: {
-            autoOpenPage: autoOpenPage,
-            titleTextSize: titleTextSize,
-            contentTextSize: contentTextSize,
-            noteTextSize: noteTextSize,
-            floatingIconPosition: floatingIconPosition,
-            alwaysOpenOverviewTab: alwaysOpenOverviewTab,
-            useColorfulTabs: useColorfulTabs,
-            enableCKMTab: newValue
           }
         });
       }

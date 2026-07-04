@@ -1,8 +1,6 @@
-import React from "react";
 import { Box, TextField, InputAdornment, Button } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
-import TypographySizeWrapper from "../../utils/TypographySizeWrapper";
 
 const LabSearch = ({
   searchText,

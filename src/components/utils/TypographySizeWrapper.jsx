@@ -1,4 +1,3 @@
-import React from 'react';
 import { Typography } from '@mui/material';
 
 import { useGeneralDisplaySettings } from '../../contexts/SettingsContext';

@@ -1,17 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Box,
   Typography,
   AppBar,
-  Toolbar,
   Button,
   Tabs,
   Tab,
-  CircularProgress,
   Snackbar,
   Alert,
-  IconButton,
-  Tooltip
 } from '@mui/material';
 import SettingsIcon from '@mui/icons-material/Settings';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
@@ -38,7 +34,7 @@ import { updateDataStatus } from '../utils/settingsHelper';
 import LoadDataTab from './settings/LoadDataTab';
 
 const PopupSettings = () => {
-  const [dataStatus, setDataStatus] = useState({
+  const [, setDataStatus] = useState({
     medication: { status: 'none', count: 0 },
     labData: { status: 'none', count: 0 },
     chineseMed: { status: 'none', count: 0 },
@@ -91,7 +87,7 @@ const PopupSettings = () => {
   // 「雲端」是動作鍵（開啟外部 NHI 頁面），不對應內容 map。
   const tabContentMap = new Map([
     [0, (
-      <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+      <Box key="tab-settings" sx={{ display: 'flex', flexDirection: 'column' }}>
         <GeneralDisplaySettings />
         <CloudDataSettings />
         <OverviewSettings />
@@ -102,12 +98,12 @@ const PopupSettings = () => {
       </Box>
     )],
     [1, (
-      <Box>
+      <Box key="tab-about">
         <AboutTab />
       </Box>
     )],
     [2, (
-      <Box>
+      <Box key="tab-sponsor">
         <Typography variant="h6" align="center" gutterBottom>贊助我們</Typography>
         <Typography paragraph align="center">
           感謝您使用「更好的健保雲端2.0」</Typography><Typography paragraph align="center">
@@ -133,7 +129,7 @@ const PopupSettings = () => {
       </Box>
     )],
     [3, (
-      <Box>
+      <Box key="tab-dev">
         <LoadDataTab
           localDataStatus={localDataStatus}
           setSnackbar={setSnackbar}

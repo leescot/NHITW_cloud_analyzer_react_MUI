@@ -1,5 +1,5 @@
 // CKM 頂部摘要列：90天內關鍵用藥 badge / 近期檢驗 Chip / 篩檢指標
-import React, { useMemo } from 'react';
+import { useMemo } from 'react';
 import { Box, Typography, Chip, Tooltip } from '@mui/material';
 import { getRecentKeyDrugs } from '../../../utils/ckmUtils';
 import { computeScreeningIndicators } from '../../../utils/screeningIndicators';

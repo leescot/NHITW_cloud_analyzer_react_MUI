@@ -376,7 +376,7 @@ export const ckmProcessor = {
       result.ekgAlerts = ekgAlerts;
 
       // LVEF 提取：從 echo 報告文字中 regex 抓取
-      const lvefPattern = /(?:LVEF|(?<![A-Za-z])EF)\s*[=:：]?\s*(\d{1,2}(?:\.\d+)?)\s*(?:[%％]|(?=\s*[\(（]))/i;
+      const lvefPattern = /(?:LVEF|(?<![A-Za-z])EF)\s*[=:：]?\s*(\d{1,2}(?:\.\d+)?)\s*(?:[%％]|(?=\s*[(（]))/i;
       for (const img of result.imaging) {
         if (!img.reportFull) continue;
         const match = img.reportFull.match(lvefPattern);

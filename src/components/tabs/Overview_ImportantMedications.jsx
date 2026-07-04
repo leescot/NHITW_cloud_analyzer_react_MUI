@@ -1,9 +1,6 @@
-import React, { useEffect } from "react";
+import React from "react";
 import {
-  Typography,
   Paper,
-  List,
-  ListItem,
   Box,
   Chip,
   Tooltip,
@@ -18,12 +15,9 @@ import {
   Snackbar,
 } from "@mui/material";
 // Import icons for medication categories
-import MedicationIcon from '@mui/icons-material/Medication';
 import LocalPharmacyIcon from '@mui/icons-material/LocalPharmacy';
-import HealingIcon from '@mui/icons-material/Healing';
-import HealthAndSafetyIcon from '@mui/icons-material/HealthAndSafety';
 import ImageIcon from '@mui/icons-material/Image';
-import { isWithinLast90Days, getMedicationColorGroup, formatDate } from "./Overview_utils";
+import { getMedicationColorGroup, formatDate } from "./Overview_utils";
 import TypographySizeWrapper from "../utils/TypographySizeWrapper";
 import { useGeneralDisplaySettings } from "../../contexts/SettingsContext";
 
@@ -318,19 +312,6 @@ const Overview_ImportantMedications = ({
       dark: '#757575',
       name: '灰色'
     };
-  };
-
-  // 修改 getCategoryIcon 函數，使用 Map 代替 if-else
-  const getCategoryIcon = (groupName) => {
-    const iconMap = new Map([
-      ['NSAID', <MedicationIcon fontSize="small" sx={{ fontSize: '0.85rem' }} />],
-      ['ACEI', <LocalPharmacyIcon fontSize="small" sx={{ fontSize: '0.85rem' }} />],
-      ['ARB', <HealingIcon fontSize="small" sx={{ fontSize: '0.85rem' }} />],
-      ['STATIN', <HealthAndSafetyIcon fontSize="small" sx={{ fontSize: '0.85rem' }} />]
-    ]);
-
-    // 返回對應圖標或預設藥物圖標
-    return iconMap.get(groupName) || <MedicationIcon fontSize="small" sx={{ fontSize: '0.85rem' }} />;
   };
 
   // Helper function to create category badge

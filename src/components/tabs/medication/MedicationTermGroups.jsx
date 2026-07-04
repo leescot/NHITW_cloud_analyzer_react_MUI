@@ -1,4 +1,3 @@
-import React from "react";
 import { Grid, Paper } from "@mui/material";
 import TypographySizeWrapper from "../../utils/TypographySizeWrapper";
 import MedicationGroup from "./MedicationGroup";

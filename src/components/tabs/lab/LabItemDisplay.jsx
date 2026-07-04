@@ -1,4 +1,3 @@
-import React from "react";
 import { Box, Checkbox, FormControlLabel } from "@mui/material";
 import TypographySizeWrapper from "../../utils/TypographySizeWrapper";
 import { getStatusColor, formatReferenceRange } from "../../utils/lab/LabUtilities";

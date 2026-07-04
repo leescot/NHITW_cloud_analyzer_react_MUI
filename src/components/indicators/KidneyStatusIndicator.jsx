@@ -1,4 +1,3 @@
-import React from 'react';
 import { Chip, Tooltip } from "@mui/material";
 import ReportRoundedIcon from '@mui/icons-material/ReportRounded';
 import { NOTE_TEXT_SIZES } from "../../utils/textSizeUtils";

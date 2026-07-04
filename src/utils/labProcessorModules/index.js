@@ -76,15 +76,13 @@ const labProcessor = {
    * @param {object} [settings]
    * @returns {import('../../types/processors.js').LabGroup[]}
    */
-  processLabData(labData, settings = {}) {
+  processLabData(labData, _settings = {}) {
     if (!labData || !labData.rObject || !Array.isArray(labData.rObject)) {
       console.error('Invalid lab data format:', labData);
       return [];
     }
 
     // Extract settings with defaults
-    const showLabReference = settings.showLabReference !== undefined ? settings.showLabReference : true;
-    const highlightAbnormal = settings.highlightAbnormalLab !== undefined ? settings.highlightAbnormalLab : true;
 
     // First, deduplicate the lab data with new rules
     const dedupedLabData = this.deduplicateLabData(labData.rObject);

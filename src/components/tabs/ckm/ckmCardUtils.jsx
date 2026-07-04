@@ -1,5 +1,4 @@
 // CKM 卡片共用的展示 helpers（由 CKMData.jsx 抽出）
-import React from 'react';
 import { Box, Typography } from '@mui/material';
 
 export const cs = { py: 0.25, px: 0.5 };

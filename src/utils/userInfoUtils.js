@@ -1,4 +1,4 @@
-import { getRawToken, getTokenPayload } from './tokenUtils';
+import { getTokenPayload } from './tokenUtils';
 
 export const extractUserInfoFromToken = () => {
   try {

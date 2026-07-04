@@ -1,4 +1,3 @@
-import React from 'react';
 import { Box, Typography, Accordion, AccordionSummary, AccordionDetails } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import { LineChart } from '@mui/x-charts/LineChart';
@@ -8,7 +7,7 @@ const MIN_WIDTH = 500;
 const MAX_WIDTH = 900;
 const PX_PER_POINT = 45;
 
-const DualAxisTrendChart = ({ title, leftData, rightData, leftLabel, rightLabel, leftColor, rightColor, leftUnit, rightUnit, referenceLines }) => {
+const DualAxisTrendChart = ({ title, leftData, rightData, leftLabel, rightLabel, leftColor, rightColor, leftUnit, rightUnit }) => {
   if (leftData.length < 2 && rightData.length < 2) return null;
 
   const dateMap = new Map();
@@ -112,8 +111,6 @@ const SingleAxisTrendChart = ({ title, data, label, color, unit, referenceValues
   const chartWidth = Math.min(MAX_WIDTH, Math.max(MIN_WIDTH, data.length * PX_PER_POINT));
   const needsScroll = chartWidth >= MAX_WIDTH;
 
-  const dataMin = Math.min(...values);
-  const dataMax = Math.max(...values);
   const allVals = [...values, ...(referenceValues || [])];
   const rangeMin = Math.min(...allVals);
   const rangeMax = Math.max(...allVals);

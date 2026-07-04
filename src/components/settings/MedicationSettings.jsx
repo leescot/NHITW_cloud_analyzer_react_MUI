@@ -19,15 +19,12 @@ import {
   TextField,
   List,
   ListItem,
-  ListItemText,
   IconButton,
   Divider,
-  Paper,
   Grid,
   Chip,
   Radio,
   RadioGroup,
-  Tooltip,
 } from "@mui/material";
 import MedicationIcon from "@mui/icons-material/Medication";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
@@ -35,8 +32,6 @@ import EditIcon from "@mui/icons-material/Edit";
 import DeleteIcon from "@mui/icons-material/Delete";
 import AddIcon from "@mui/icons-material/Add";
 import ColorLensIcon from "@mui/icons-material/ColorLens";
-import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
-import FormatListBulletedIcon from "@mui/icons-material/FormatListBulleted";
 import { handleSettingChange } from "../../utils/settingsHelper";
 import { debugLog } from "../../utils/logger";
 
@@ -400,29 +395,6 @@ const MedicationSettings = () => {
 
     // 返回對應顏色的樣式，如果找不到則返回預設樣式
     return styleMap.get(color) || { ...baseStyle, bgcolor: 'grey.100', color: 'text.secondary', border: '1px solid', borderColor: 'grey.300' };
-  };
-
-  // 打开 FloatingIcon 的自訂設定标签
-  const openCustomFormatEditor = () => {
-    // Only proceed if enableMedicationCustomCopyFormat is true
-    if (!settings.enableMedicationCustomCopyFormat) return;
-
-    // 发送消息给 background script 或直接调用 FloatingIcon 的方法
-    if (window.openFloatingIconDialog) {
-      window.openFloatingIconDialog();
-      // 等对话框打开后，切换到自訂設定标签（索引为9）
-      setTimeout(() => {
-        chrome.runtime.sendMessage({
-          action: 'switchToCustomFormatTab',
-          tabIndex: 9
-        });
-      }, 100);
-    } else {
-      // 如果全局方法不可用，则发送消息给背景脚本处理
-      chrome.runtime.sendMessage({
-        action: 'openCustomFormatEditor'
-      });
-    }
   };
 
   debugLog("Render - medicationCopyFormat:", settings.medicationCopyFormat);

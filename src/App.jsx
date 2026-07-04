@@ -1,4 +1,4 @@
-import React, { useEffect } from 'react';
+import { useEffect } from 'react';
 
 import { updateDataStatus } from './utils/settingsHelper.js';
 import { debugLog } from './utils/logger';
@@ -38,7 +38,7 @@ function App() {
   return (
     <div className="app-container">
       <h1>NHI Cloud Data Extractor</h1>
-      <p>This is the main application component, but it's not used in the Chrome extension context.</p>
+      <p>This is the main application component, but it&apos;s not used in the Chrome extension context.</p>
       <p>The extension functionality is provided through the content script and popup.</p>
     </div>
   );

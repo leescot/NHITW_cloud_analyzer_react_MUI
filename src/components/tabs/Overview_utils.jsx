@@ -37,7 +37,6 @@ export const getMedicationColorGroup = (medication, settings) => {
   // FALLBACK MECHANISM FOR MISSING ATC5 CODES
   if (!atc5Code) {
     // Try to match by medication name to common medication categories
-    const medNameLower = medication.name ? medication.name.toLowerCase() : '';
 
     let matchedGroup = null;
 

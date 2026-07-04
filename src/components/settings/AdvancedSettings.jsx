@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import { useState, useEffect } from "react";
 import {
   Typography,
   Switch,
@@ -8,14 +8,12 @@ import {
   FormControlLabel,
   Radio,
   RadioGroup,
-  Button,
   Box,
   Chip,
 } from "@mui/material";
 import ExpandMoreIcon from "@mui/icons-material/ExpandMore";
 import TuneIcon from "@mui/icons-material/Tune";
 import { FormHelperText, Divider } from "@mui/material";
-import { handleSettingChange } from "../../utils/settingsHelper";
 import { debugLog } from "../../utils/logger";
 
 const AdvancedSettings = () => {
@@ -91,52 +89,6 @@ const AdvancedSettings = () => {
         }
       });
     });
-  };
-
-  // Function to open the FloatingIcon's custom format editor
-  const openCustomFormatEditor = () => {
-    // Only proceed if enableMedicationCustomCopyFormat is true
-    if (!settings.enableMedicationCustomCopyFormat) return;
-
-    // Send a message to open the FloatingIcon dialog and switch to the custom format tab
-    if (window.openFloatingIconDialog) {
-      window.openFloatingIconDialog();
-      // After the dialog is open, switch to the custom format tab (index 9)
-      setTimeout(() => {
-        chrome.runtime.sendMessage({
-          action: 'switchToCustomFormatTab',
-          tabIndex: 9
-        });
-      }, 100);
-    } else {
-      // If the global method is not available, send a message to the background script
-      chrome.runtime.sendMessage({
-        action: 'openCustomFormatEditor'
-      });
-    }
-  };
-
-  // Function to open the Lab custom format editor
-  const openLabCustomFormatEditor = () => {
-    // Only proceed if enableLabCustomCopyFormat is true
-    if (!settings.enableLabCustomCopyFormat) return;
-
-    // Send a message to open the FloatingIcon dialog and switch to the lab custom format tab
-    if (window.openFloatingIconDialog) {
-      window.openFloatingIconDialog();
-      // After the dialog is open, switch to the lab custom format tab (index 10)
-      setTimeout(() => {
-        chrome.runtime.sendMessage({
-          action: 'switchToLabCustomFormatTab',
-          tabIndex: 10
-        });
-      }, 100);
-    } else {
-      // If the global method is not available, send a message to the background script
-      chrome.runtime.sendMessage({
-        action: 'openLabCustomFormatEditor'
-      });
-    }
   };
 
   return (

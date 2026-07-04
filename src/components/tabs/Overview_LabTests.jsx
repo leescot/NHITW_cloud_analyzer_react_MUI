@@ -1,11 +1,8 @@
-import React, { useState, useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import {
   Box,
   Typography,
   Paper,
-  Grid,
-  Chip,
-  Divider,
   Table,
   TableBody,
   TableCell,
@@ -15,9 +12,8 @@ import {
   Tooltip,
   IconButton
 } from "@mui/material";
-import { styled } from '@mui/material/styles';
 import PrintIcon from '@mui/icons-material/Print';
-import { formatDate, formatDateShort, isWithinLast90Days } from './Overview_utils';
+import { formatDateShort } from './Overview_utils';
 import { FALLBACK_LAB_TESTS, SPECIAL_LAB_CODES } from '../settings/OverviewSettings';
 import TypographySizeWrapper from "../utils/TypographySizeWrapper";
 import LabItemTrendPopover from "./lab/LabItemTrendPopover";
@@ -598,7 +594,6 @@ const Overview_LabTests = ({
                 if (!targetOrderCodes.includes(lab.orderCode) && !isCBCCode(lab.orderCode)) return;
                 let dn = null;
                 // Classify lab item for trend data
-                const existing = Object.keys(trendItems);
                 if (lab.orderCode === '09015C') {
                   const isNHI = lab.assayMethod === '健保署計算' || lab.abbrName === 'eGFR(健保署)';
                   const isGFR = isNHI || lab.abbrName === 'eGFR' || lab.abbrName === 'eGFR(MDRD)' || (lab.itemName && (lab.itemName.includes('GFR') || lab.itemName.includes('腎絲球過濾率') || lab.itemName.includes('Ccr')));

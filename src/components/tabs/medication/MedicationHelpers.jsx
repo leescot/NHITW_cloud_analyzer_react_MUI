@@ -20,7 +20,7 @@ export const getMedicationColor = (medication, settings) => {
   }
 
   // 檢查藥物的 ATC5 代碼是否屬於任何群組
-  const group = Object.entries(settings.atc5Groups).find(([groupName, codes]) => {
+  const group = Object.entries(settings.atc5Groups).find(([, codes]) => {
     const match = codes.some(code => {
       if (code.length === 7) {
         return atc5Code === code; // 7字元代碼的精確匹配
@@ -56,7 +56,7 @@ export const getMedicationColor = (medication, settings) => {
 };
 
 // 判斷藥物是否應該以粗體顯示的函數
-export const shouldBeBold = (medication, settings) => {
+export const shouldBeBold = (_medication, _settings) => {
   // if (!settings.enableATC5Colors) return false;
 
   // let atc5Code = medication.atc_code;

@@ -238,7 +238,7 @@ const parseReferenceRange = (referenceStr, orderCode = null, hosp = null) => {
   const cleanStr = referenceStr.trim();
 
   // 按順序嘗試每個策略
-  for (const [_, strategy] of referenceRangeStrategies) {
+  for (const [, strategy] of referenceRangeStrategies) {
     const result = strategy(cleanStr, orderCode, hosp);
     if (result !== null) {
       return result;
@@ -337,7 +337,7 @@ const formatReferenceRangeForDisplay = (referenceStr, orderCode = null, hosp = n
   const cleanStr = referenceStr.trim();
 
   // 按順序嘗試每個格式化策略
-  for (const [_, strategy] of displayFormatStrategies) {
+  for (const [, strategy] of displayFormatStrategies) {
     const result = strategy(cleanStr, orderCode, hosp);
     if (result !== null) {
       return result;
@@ -365,7 +365,7 @@ const formatReferenceRangeForDisplay = (referenceStr, orderCode = null, hosp = n
 
     // 如果無法解析但原始字串非空，返回清理過的原始字串
     if (cleanStr) {
-      return cleanStr.replace(/[\[\]]/g, '');
+      return cleanStr.replace(/[[\]]/g, '');
     }
     return '';
   }
@@ -382,7 +382,7 @@ const formatReferenceRangeForDisplay = (referenceStr, orderCode = null, hosp = n
   }
 
   // 如果都沒解析出來，返回原始字串
-  return cleanStr.replace(/[\[\]]/g, '');
+  return cleanStr.replace(/[[\]]/g, '');
 };
 
 // 從原始格式和解析後的參考範圍獲取顯示文本
@@ -446,7 +446,7 @@ const getReferenceRangeDisplayText = (referenceStr, orderCode = null, hosp = nul
   ]);
 
   // 按順序嘗試每個格式化策略
-  for (const [_, strategy] of displayTextStrategies) {
+  for (const [, strategy] of displayTextStrategies) {
     const result = strategy();
     if (result !== null) {
       return result;
@@ -495,7 +495,7 @@ const getReferenceRangeDisplayText = (referenceStr, orderCode = null, hosp = nul
   }
 
   // 3. 如果沒有成功解析，返回清理過的原始字串或空字串
-  return referenceStr ? referenceStr.replace(/[\[\]]/g, '') : '';
+  return referenceStr ? referenceStr.replace(/[[\]]/g, '') : '';
 };
 
 export {

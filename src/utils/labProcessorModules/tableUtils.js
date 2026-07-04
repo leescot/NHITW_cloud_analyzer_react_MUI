@@ -166,7 +166,6 @@ const prepareLabTableData = (groupedLabs, selectedType = null) => {
       const itemKey = lab.itemName || lab.orderName || '';
 
       // 使用策略映射處理特殊情況
-      let handled = false;
 
       // 檢查 HDL 特殊比例處理
       if (specialItemHandlers.get('hdl-ratio')(lab, group, itemMap)) {

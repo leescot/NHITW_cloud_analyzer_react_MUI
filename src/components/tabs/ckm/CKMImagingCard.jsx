@@ -1,5 +1,5 @@
 // CKM 影像卡片（含 EKG alert / LVEF 標註、報告 tooltip 與 dialog）— 由 CKMData.jsx 抽出
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import {
   Paper, Typography, Tooltip, IconButton, List, ListItem, ListItemText,
   Dialog, DialogTitle, DialogContent, DialogActions, Button, Box, Chip,

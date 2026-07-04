@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState } from 'react';
 import {
   Table,
   TableBody,
@@ -7,7 +7,6 @@ import {
   TableHead,
   TableRow,
   Paper,
-  Typography,
   Box,
   RadioGroup,
   FormControlLabel,

@@ -204,18 +204,11 @@ export function renderNephroReportHTML(reportData) {
 
   const { dates, rows, userInfo, dateHospMap } = reportData;
   const name = userInfo?.name || '';
-  const userId = userInfo?.userId || '';
   const rawGender = userInfo?.gender || '';
   const gender = rawGender === 'M' ? '男' : rawGender === 'F' ? '女' : rawGender;
   const age = userInfo?.age != null ? `${userInfo.age}歲` : '';
   const patientLine = [name, gender, age].filter(Boolean).join(' ');
 
-  function formatDate(d) {
-    if (!d) return '';
-    const p = d.replace(/-/g, '/').split('/');
-    if (p.length === 3) return `${p[0]}/${p[1]}/${p[2]}`;
-    return d;
-  }
   function shortDate(d) {
     if (!d) return '';
     const p = d.replace(/-/g, '/').split('/');
@@ -287,7 +280,7 @@ export function renderNephroReportHTML(reportData) {
 </div>
 <div id="content">
   <h2 style="margin:0;text-align:center">腎臟相關檢驗報告</h2>
-  <div class="patient-line">${patientLine}　列印日期：${new Date().toLocaleDateString('zh-TW')}</div>
+  <div class="patient-line">${patientLine}\u3000列印日期：${new Date().toLocaleDateString('zh-TW')}</div>
   <div class="controls" id="controls">
     <span>顯示組數：</span>
     ${[4, 5, 6, 7, 8].filter(n => n <= dates.length).map(n => `<label><input type="radio" name="dc" value="${n}" ${n === Math.min(6, dates.length) ? 'checked' : ''}>${n}</label>`).join('')}
