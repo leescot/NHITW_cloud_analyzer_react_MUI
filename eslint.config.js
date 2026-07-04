@@ -26,6 +26,8 @@ export default [
       // 引用推薦的語法檢測規則
       // ref: https://eslint.org/docs/latest/rules/
       ...js.configs.recommended.rules,
+      // 允許以 _ 前綴標示刻意未用的參數；catch(e) 未用 e 不報錯
+      "no-unused-vars": ["error", { argsIgnorePattern: "^_", caughtErrors: "none" }],
 
       // 引用客製化推薦程式碼風格規則，及做一些微調
       // ref: https://eslint.style/rules
@@ -75,6 +77,8 @@ export default [
       ...react.configs['jsx-runtime'].rules,
       ...reactHooks.configs.recommended.rules,
       'react/jsx-no-target-blank': 'off',
+      // JS 專案未使用 PropTypes，型別由 jsconfig + tsc (npm run type-check) 把關
+      'react/prop-types': 'off',
       'react-refresh/only-export-components': [
         'warn',
         { allowConstantExport: true },
