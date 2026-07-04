@@ -1,9 +1,7 @@
 // settingsManager.js
 // 統一管理所有設置相關的函數
 
-import { DEFAULT_SETTINGS } from "../config/defaultSettings";
-import { DEFAULT_LAB_TESTS } from "../config/labTests";
-import { DEFAULT_IMAGE_TESTS } from "../config/imageTests";
+import { buildStorageDefaults, structureFromFlat, sectionFromFlat } from "../config/settingsSchema";
 import { debugLog } from "./logger";
 import { dataStore } from "../store/dataStore";
 
@@ -13,144 +11,8 @@ import { dataStore } from "../store/dataStore";
  */
 export const loadAllSettings = async () => {
   return new Promise((resolve) => {
-    chrome.storage.sync.get({
-      // Western medication settings
-      simplifyMedicineName: DEFAULT_SETTINGS.western.simplifyMedicineName,
-      showGenericName: DEFAULT_SETTINGS.western.showGenericName,
-      showDiagnosis: DEFAULT_SETTINGS.western.showDiagnosis,
-      showATC5Name: DEFAULT_SETTINGS.western.showATC5Name,
-      medicationCopyFormat: DEFAULT_SETTINGS.western.medicationCopyFormat,
-      separateShortTermMeds: DEFAULT_SETTINGS.western.separateShortTermMeds,
-      showExternalDrugImage: DEFAULT_SETTINGS.western.showExternalDrugImage,
-      enableMedicationCustomCopyFormat: DEFAULT_SETTINGS.western.enableMedicationCustomCopyFormat || false,
-      enableMedicationCopyAll: DEFAULT_SETTINGS.western.enableMedicationCopyAll || false,
-      medicationCopyAllOrder: DEFAULT_SETTINGS.western.medicationCopyAllOrder || 'newToOld',
-      drugSeparator: DEFAULT_SETTINGS.western.drugSeparator || ',',
-      customMedicationHeaderCopyFormat: DEFAULT_SETTINGS.western.customMedicationHeaderCopyFormat,
-      customMedicationDrugCopyFormat: DEFAULT_SETTINGS.western.customMedicationDrugCopyFormat,
-
-      // ATC5 Color settings
-      enableATC5Colors: DEFAULT_SETTINGS.atc5.enableColors,
-      atc5Groups: DEFAULT_SETTINGS.atc5.groups,
-      atc5ColorGroups: DEFAULT_SETTINGS.atc5.colorGroups,
-
-      // Chinese medicine settings
-      chineseMedShowDiagnosis: DEFAULT_SETTINGS.chinese.showDiagnosis,
-      chineseMedShowEffectName: DEFAULT_SETTINGS.chinese.showEffectName,
-      chineseMedDoseFormat: DEFAULT_SETTINGS.chinese.doseFormat,
-      chineseMedCopyFormat: DEFAULT_SETTINGS.chinese.copyFormat,
-
-      // Lab settings
-      displayLabFormat: DEFAULT_SETTINGS.lab.displayLabFormat,
-      showLabUnit: DEFAULT_SETTINGS.lab.showUnit,
-      showLabReference: DEFAULT_SETTINGS.lab.showReference,
-      enableLabAbbrev: DEFAULT_SETTINGS.lab.enableLabAbbrev,
-      highlightAbnormalLab: DEFAULT_SETTINGS.lab.highlightAbnormal,
-      copyLabFormat: DEFAULT_SETTINGS.lab.copyLabFormat,
-      enableLabChooseCopy: DEFAULT_SETTINGS.lab.enableLabChooseCopy,
-      labChooseCopyItems: DEFAULT_SETTINGS.lab.labChooseCopyItems,
-      enableLabCustomCopyFormat: DEFAULT_SETTINGS.lab.enableLabCustomCopyFormat || false,
-      enableLabCopyAll: DEFAULT_SETTINGS.lab.enableLabCopyAll || false,
-      labCopyAllOrder: DEFAULT_SETTINGS.lab.labCopyAllOrder || 'newToOld',
-      itemSeparator: DEFAULT_SETTINGS.lab.itemSeparator || ',',
-      customLabHeaderCopyFormat: DEFAULT_SETTINGS.lab.customLabHeaderCopyFormat,
-      customLabItemCopyFormat: DEFAULT_SETTINGS.lab.customLabItemCopyFormat,
-
-      // Overview settings
-      medicationTrackingDays: DEFAULT_SETTINGS.overview.medicationTrackingDays,
-      labTrackingDays: DEFAULT_SETTINGS.overview.labTrackingDays,
-      imageTrackingDays: DEFAULT_SETTINGS.overview.imageTrackingDays,
-      focusedLabTests: DEFAULT_SETTINGS.overview.focusedLabTests,
-      focusedImageTests: DEFAULT_SETTINGS.overview.focusedImageTests,
-
-      // General display settings
-      autoOpenPage: DEFAULT_SETTINGS.general.autoOpenPage,
-      titleTextSize: DEFAULT_SETTINGS.general.titleTextSize,
-      contentTextSize: DEFAULT_SETTINGS.general.contentTextSize,
-      noteTextSize: DEFAULT_SETTINGS.general.noteTextSize,
-      floatingIconPosition: DEFAULT_SETTINGS.general.floatingIconPosition,
-      alwaysOpenOverviewTab: DEFAULT_SETTINGS.general.alwaysOpenOverviewTab,
-      useColorfulTabs: DEFAULT_SETTINGS.general.useColorfulTabs,
-      enableCKMTab: DEFAULT_SETTINGS.general.enableCKMTab,
-      enableNephroReport: DEFAULT_SETTINGS.general.enableNephroReport,
-      enableCKMScreening: DEFAULT_SETTINGS.general.enableCKMScreening,
-
-      // Cloud data settings
-      fetchAdultHealthCheck: DEFAULT_SETTINGS.cloud.fetchAdultHealthCheck,
-      fetchCancerScreening: DEFAULT_SETTINGS.cloud.fetchCancerScreening,
-      fetchHbcvdata: DEFAULT_SETTINGS.cloud.fetchHbcvdata,
-    }, (items) => {
-      // 組織所有設置到一個結構化對象
-      const allSettings = {
-        western: {
-          simplifyMedicineName: items.simplifyMedicineName,
-          showGenericName: items.showGenericName,
-          showDiagnosis: items.showDiagnosis,
-          showATC5Name: items.showATC5Name,
-          medicationCopyFormat: items.medicationCopyFormat,
-          separateShortTermMeds: items.separateShortTermMeds,
-          showExternalDrugImage: items.showExternalDrugImage,
-          enableMedicationCustomCopyFormat: items.enableMedicationCustomCopyFormat,
-          enableMedicationCopyAll: items.enableMedicationCopyAll,
-          medicationCopyAllOrder: items.medicationCopyAllOrder || 'newToOld',
-          customMedicationHeaderCopyFormat: items.customMedicationHeaderCopyFormat,
-          customMedicationDrugCopyFormat: items.customMedicationDrugCopyFormat,
-          drugSeparator: items.drugSeparator,
-        },
-        atc5: {
-          enableColors: items.enableATC5Colors,
-          groups: items.atc5Groups,
-          colorGroups: items.atc5ColorGroups,
-        },
-        chinese: {
-          showDiagnosis: items.chineseMedShowDiagnosis,
-          showEffectName: items.chineseMedShowEffectName,
-          doseFormat: items.chineseMedDoseFormat,
-          copyFormat: items.chineseMedCopyFormat,
-        },
-        lab: {
-          displayLabFormat: items.displayLabFormat,
-          showUnit: items.showLabUnit,
-          showReference: items.showLabReference,
-          enableLabAbbrev: items.enableLabAbbrev,
-          highlightAbnormal: items.highlightAbnormalLab,
-          copyLabFormat: items.copyLabFormat,
-          enableLabChooseCopy: items.enableLabChooseCopy,
-          labChooseCopyItems: items.labChooseCopyItems,
-          enableLabCustomCopyFormat: items.enableLabCustomCopyFormat,
-          enableLabCopyAll: items.enableLabCopyAll,
-          labCopyAllOrder: items.labCopyAllOrder || 'newToOld',
-          itemSeparator: items.itemSeparator || ',',
-          customLabHeaderCopyFormat: items.customLabHeaderCopyFormat,
-          customLabItemCopyFormat: items.customLabItemCopyFormat,
-        },
-        overview: {
-          medicationTrackingDays: items.medicationTrackingDays,
-          labTrackingDays: items.labTrackingDays,
-          imageTrackingDays: items.imageTrackingDays,
-          focusedLabTests: items.focusedLabTests || DEFAULT_LAB_TESTS,
-          focusedImageTests: items.focusedImageTests || DEFAULT_IMAGE_TESTS
-        },
-        general: {
-          autoOpenPage: items.autoOpenPage,
-          titleTextSize: items.titleTextSize,
-          contentTextSize: items.contentTextSize,
-          noteTextSize: items.noteTextSize,
-          floatingIconPosition: items.floatingIconPosition,
-          alwaysOpenOverviewTab: items.alwaysOpenOverviewTab,
-          useColorfulTabs: items.useColorfulTabs,
-          enableCKMTab: items.enableCKMTab,
-          enableNephroReport: items.enableNephroReport,
-          enableCKMScreening: items.enableCKMScreening,
-        },
-        cloud: {
-          fetchAdultHealthCheck: items.fetchAdultHealthCheck,
-          fetchCancerScreening: items.fetchCancerScreening,
-          fetchHbcvdata: items.fetchHbcvdata,
-        }
-      };
-
-      resolve(allSettings);
+    chrome.storage.sync.get(buildStorageDefaults(), (items) => {
+      resolve(structureFromFlat(items));
     });
   });
 };
@@ -232,12 +94,7 @@ export const handleSettingChangeMessage = (message, settingsUpdateCallback) => {
 const handleChineseMedSettingsChange = (event, currentSettings, updateCallback, callbacks) => {
   if (event.detail.allSettings) {
     // 更新所有中藥設置
-    const newChineseMedSettings = {
-      showDiagnosis: event.detail.allSettings.chineseMedShowDiagnosis,
-      showEffectName: event.detail.allSettings.chineseMedShowEffectName,
-      doseFormat: event.detail.allSettings.chineseMedDoseFormat,
-      copyFormat: event.detail.allSettings.chineseMedCopyFormat,
-    };
+    const newChineseMedSettings = sectionFromFlat('chinese', event.detail.allSettings);
 
     // 更新設置並重新處理數據
     updateCallback({
@@ -261,22 +118,7 @@ const handleLabSettingsChange = (event, currentSettings, updateCallback, callbac
 
   if (event.detail.allSettings) {
     // 更新所有檢驗設置
-    const newLabSettings = {
-      displayLabFormat: event.detail.allSettings.displayLabFormat,
-      showUnit: event.detail.allSettings.showLabUnit,
-      showReference: event.detail.allSettings.showLabReference,
-      enableLabAbbrev: event.detail.allSettings.enableLabAbbrev,
-      highlightAbnormal: event.detail.allSettings.highlightAbnormalLab,
-      copyLabFormat: event.detail.allSettings.copyLabFormat,
-      enableLabChooseCopy: event.detail.allSettings.enableLabChooseCopy,
-      labChooseCopyItems: event.detail.allSettings.labChooseCopyItems,
-      enableLabCustomCopyFormat: event.detail.allSettings.enableLabCustomCopyFormat,
-      enableLabCopyAll: event.detail.allSettings.enableLabCopyAll,
-      labCopyAllOrder: event.detail.allSettings.labCopyAllOrder || 'newToOld',
-      itemSeparator: event.detail.allSettings.itemSeparator || ',',
-      customLabHeaderCopyFormat: event.detail.allSettings.customLabHeaderCopyFormat,
-      customLabItemCopyFormat: event.detail.allSettings.customLabItemCopyFormat,
-    };
+    const newLabSettings = sectionFromFlat('lab', event.detail.allSettings);
 
     debugLog("Updating all lab settings:", newLabSettings);
 
@@ -394,13 +236,7 @@ const handleLabSettingsChange = (event, currentSettings, updateCallback, callbac
 const handleOverviewSettingsChange = (event, currentSettings, updateCallback, callbacks) => {
   if (event.detail.allSettings) {
     // 更新所有總覽設置
-    const newOverviewSettings = {
-      medicationTrackingDays: event.detail.allSettings.medicationTrackingDays,
-      labTrackingDays: event.detail.allSettings.labTrackingDays,
-      imageTrackingDays: event.detail.allSettings.imageTrackingDays,
-      focusedLabTests: event.detail.allSettings.focusedLabTests || DEFAULT_LAB_TESTS,
-      focusedImageTests: event.detail.allSettings.focusedImageTests || DEFAULT_IMAGE_TESTS
-    };
+    const newOverviewSettings = sectionFromFlat('overview', event.detail.allSettings);
 
     // 更新設置
     updateCallback({
@@ -442,11 +278,7 @@ const handleOverviewSettingsChange = (event, currentSettings, updateCallback, ca
 const handleCloudDataSettingsChange = (event, currentSettings, updateCallback) => {
   if (event.detail.allSettings) {
     // 更新所有雲端資料設置
-    const newCloudSettings = {
-      fetchAdultHealthCheck: event.detail.allSettings.fetchAdultHealthCheck,
-      fetchCancerScreening: event.detail.allSettings.fetchCancerScreening,
-      fetchHbcvdata: event.detail.allSettings.fetchHbcvdata,
-    };
+    const newCloudSettings = sectionFromFlat('cloud', event.detail.allSettings);
 
     // 更新設置
     updateCallback({
@@ -474,18 +306,7 @@ const handleCloudDataSettingsChange = (event, currentSettings, updateCallback) =
 const handleGeneralDisplaySettingsChange = (event, updateGeneralDisplaySettings) => {
   if (event.detail.allSettings) {
     // 更新所有顯示設置
-    const newGeneralDisplaySettings = {
-      autoOpenPage: event.detail.allSettings.autoOpenPage,
-      titleTextSize: event.detail.allSettings.titleTextSize,
-      contentTextSize: event.detail.allSettings.contentTextSize,
-      noteTextSize: event.detail.allSettings.noteTextSize,
-      floatingIconPosition: event.detail.allSettings.floatingIconPosition,
-      alwaysOpenOverviewTab: event.detail.allSettings.alwaysOpenOverviewTab,
-      useColorfulTabs: event.detail.allSettings.useColorfulTabs,
-      enableCKMTab: event.detail.allSettings.enableCKMTab,
-      enableNephroReport: event.detail.allSettings.enableNephroReport,
-      enableCKMScreening: event.detail.allSettings.enableCKMScreening,
-    };
+    const newGeneralDisplaySettings = sectionFromFlat('general', event.detail.allSettings);
 
     // 更新設置
     updateGeneralDisplaySettings(newGeneralDisplaySettings);
