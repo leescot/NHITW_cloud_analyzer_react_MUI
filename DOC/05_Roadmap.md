@@ -36,6 +36,7 @@
 ## 未來候選方向(非承諾,尚未排入計畫)
 
 出處:`docs/superpowers/2026-07-02-refactor-handoff.md`「階段 7+ 候選項目」與本次盤點時延伸整理。
+**擴充性的整體目標架構(資料型別描述檔、表格管線、UI registry)已獨立成 [`07_擴充藍圖.md`](./07_擴充藍圖.md),下列個別項目與其對齊。**
 
 - **漸進式 TypeScript**:目前僅 `// @ts-check` + JSDoc typedef 的最小可行安全網(`jsconfig.json` 全域 `checkJs: false`)。若要進一步,下一步可能是挑幾個低風險、高變動率的檔案(如 `src/store/dataStore.js`)開 `// @ts-check` 試跑,再逐步擴大範圍,而非一次性遷移全 repo 或改用 `.ts` 副檔名(esbuild/vite 設定與 build pipeline 需同步調整)。
 - **`dataStore.subscribe` 的 React 細粒度整合**:目前 `dataStore.subscribe` 尚無消費者,UI 更新仍靠 `dataFetchCompleted` 事件驅動全量重處理。若要細粒度更新,可設計 `useNhiData(type)` hook 直接訂閱單一型別變化,搭配 React 18 自動批次,理論上可取代事件機制;需先確認「批次抓取時 14 次逐型別通知」在該 hook 設計下不會造成不必要的中繼 render(`dataStore.js` 檔頭註解已預留此考量)。
