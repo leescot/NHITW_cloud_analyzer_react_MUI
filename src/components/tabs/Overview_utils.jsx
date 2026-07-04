@@ -135,7 +135,7 @@ const mapColorNameToColorCode = (colorName) => {
     // 預設值
     ['default', 'primary']
   ]);
-  
+
   // 如果顏色名稱存在於 Map 中，則返回對應的顏色代碼
   // 否則返回預設值 'primary'
   return colorMap.get(colorName) || colorMap.get('default');
@@ -172,7 +172,7 @@ export const formatDate = (dateString) => {
     if (dateString.includes('/')) {
       return dateString;
     }
-    
+
     // 將 YYYY-MM-DD 格式轉換為 YYYY/MM/DD，避免 Date 物件轉換
     if (dateString.includes('-')) {
       return dateString.replace(/-/g, '/');
@@ -189,12 +189,12 @@ export const formatDateShort = (dateString) => {
 
   // 直接從字符串提取月日，避免 Date 物件的時區轉換
   let dateStr = dateString;
-  
+
   // 處理不同格式的日期字符串
   if (dateStr.includes('-')) {
     dateStr = dateStr.replace(/-/g, '/');
   }
-  
+
   // 提取月日部分 (YYYY/MM/DD -> MM/DD)
   const parts = dateStr.split('/');
   if (parts.length >= 3) {
@@ -202,7 +202,7 @@ export const formatDateShort = (dateString) => {
     const day = parts[2].padStart(2, '0');
     return `${month}/${day}`;
   }
-  
+
   // 如果無法處理，返回原始字符串
   return dateString;
 };

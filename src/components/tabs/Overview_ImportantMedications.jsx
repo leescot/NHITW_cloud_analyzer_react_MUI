@@ -134,7 +134,7 @@ const Overview_ImportantMedications = ({
           [() => dateStr.includes('/'), () => {
             const parts = dateStr.split('/');
             // 假設 YYYY/MM/DD 如果第一部分是 4 位數
-            return parts[0].length === 4 
+            return parts[0].length === 4
               ? new Date(parts[0], parts[1] - 1, parts[2])
               : new Date(parts[2], parts[1] - 1, parts[0]); // 否則假設 DD/MM/YYYY
           }],
@@ -371,12 +371,12 @@ const Overview_ImportantMedications = ({
 
   // CKM 治療群組配色：血糖藍 / 血壓紅 / 利尿青 / 血脂橘 / 血栓紫 / 心臟淡紅
   const CKM_CATEGORY_COLORS = {
-    antidiabetic:     { light: alpha('#1565c0', 0.12), medium: '#1565c0', dark: '#0d47a1', name: '藍色' },
+    antidiabetic: { light: alpha('#1565c0', 0.12), medium: '#1565c0', dark: '#0d47a1', name: '藍色' },
     antihypertensive: { light: alpha('#c62828', 0.12), medium: '#c62828', dark: '#8e0000', name: '紅色' },
-    diuretic:         { light: alpha('#00897b', 0.12), medium: '#00897b', dark: '#005b4f', name: '青色' },
-    lipidLowering:    { light: alpha('#ef6c00', 0.15), medium: '#ef6c00', dark: '#b53d00', name: '橘色' },
-    antithrombotic:   { light: alpha('#6a1b9a', 0.12), medium: '#6a1b9a', dark: '#38006b', name: '紫色' },
-    cardiac:          { light: alpha('#ad1457', 0.12), medium: '#ad1457', dark: '#78002e', name: '淡紅' },
+    diuretic: { light: alpha('#00897b', 0.12), medium: '#00897b', dark: '#005b4f', name: '青色' },
+    lipidLowering: { light: alpha('#ef6c00', 0.15), medium: '#ef6c00', dark: '#b53d00', name: '橘色' },
+    antithrombotic: { light: alpha('#6a1b9a', 0.12), medium: '#6a1b9a', dark: '#38006b', name: '紫色' },
+    cardiac: { light: alpha('#ad1457', 0.12), medium: '#ad1457', dark: '#78002e', name: '淡紅' },
   };
   const getCKMColorInfo = (category) =>
     CKM_CATEGORY_COLORS[category] || CKM_CATEGORY_COLORS.antidiabetic;

@@ -73,8 +73,7 @@ IMAGE_PLACEHOLDER(icon128, 點擊「雲」圖示)
 
 IMAGE_PLACEHOLDER(demo_patient, 健保雲端測試病人資料整合資訊)
 
-`
-,
+`,
   },
   {
     id: 'data-export',

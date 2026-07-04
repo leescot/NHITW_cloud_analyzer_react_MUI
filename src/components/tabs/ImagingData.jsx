@@ -512,7 +512,7 @@ const ReportImagingTable = ({ data }) => {
                             {item.images.slice(rowIndex * 5, (rowIndex + 1) * 5).map((img, colIndex) => {
                               const imgIndex = rowIndex * 5 + colIndex;
                               return (
-                                <Tooltip key={imgIndex} title={`查看影像 ${imgIndex+1}`}>
+                                <Tooltip key={imgIndex} title={`查看影像 ${imgIndex + 1}`}>
                                   <IconButton
                                     color="primary"
                                     size="small"
@@ -608,11 +608,11 @@ const ImagingData = ({ imagingData }) => {
     // # zh-TW: 顯示所有報告
     ['all', () => processedData.withReport],
     // # zh-TW: 只顯示 CT & MRI 的報告
-    ['ctmri', () => processedData.withReport.filter(item => 
+    ['ctmri', () => processedData.withReport.filter(item =>
       ctMriOrderCodes.includes(item.order_code)
     )],
     // # zh-TW: 只顯示超音波的報告
-    ['ultrasound', () => processedData.withReport.filter(item => 
+    ['ultrasound', () => processedData.withReport.filter(item =>
       ultrasoundOrderCodes.includes(item.order_code)
     )]
   ]), [processedData.withReport, ctMriOrderCodes, ultrasoundOrderCodes]);
@@ -623,7 +623,7 @@ const ImagingData = ({ imagingData }) => {
     if (!shouldShowFilter) {
       return processedData.withReport;
     }
-    
+
     // # zh-TW: 從 Map 獲取對應的過濾函數並執行
     const filterFunction = filterMap.get(filterOption);
     return filterFunction ? filterFunction() : processedData.withReport;

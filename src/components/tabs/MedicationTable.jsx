@@ -195,21 +195,21 @@ const MedicationTable = ({ groupedMedications, settings }) => {
       const medName = med.name;
       // 創建一個唯一的鍵來表示日期和醫院的組合
       const dateHospKey = `${date}__${hosp}`;
-      
+
       // 若藥名不存在於 Map 中，先建立
       if (!medicineMap.has(medName)) {
         medicineMap.set(medName, new Map());
       }
-      
+
       // 獲取藥物的日期醫院組合 Map
       const dateHospMap = medicineMap.get(medName);
-      
+
       // 建立當前藥物的劑量和頻次資訊
       const currentDosageFreq = {
         perDosage: med.perDosage,
         frequency: med.frequency,
       };
-      
+
       // 檢查該日期醫院組合是否已有此藥物的記錄
       if (!dateHospMap.has(dateHospKey)) {
         // 創建新的藥物記錄
@@ -246,11 +246,11 @@ const MedicationTable = ({ groupedMedications, settings }) => {
           existingMed.chronicTotal = med.chronicTotal;
         }
       }
-      
+
       // 保存日期醫院組合映射
       dateHospToKeyMap[dateHospKey] = { date, hosp };
       keyToDateHospMap[dateHospKey] = { date, hosp };
-      
+
       // 記錄所有日期醫院組合
       allDateHospPairs.add(dateHospKey);
     };
@@ -271,7 +271,7 @@ const MedicationTable = ({ groupedMedications, settings }) => {
       // 優先按日期排序
       const dateCompare = dateB.localeCompare(dateA);
       if (dateCompare !== 0) return dateCompare;
-      
+
       // 如果日期相同，則按醫院名稱排序
       const hospA = a.split('__')[1];
       const hospB = b.split('__')[1];
@@ -299,19 +299,19 @@ const MedicationTable = ({ groupedMedications, settings }) => {
       ["gt28", (days) => days > 28],
       ["colored_only", (_, medName) => getMedicationColor(medName) !== null]
     ]),
-    
+
     // 獲取過濾函數
     getFilterFunction(filterName) {
       return this.definitions.get(filterName) || (() => true);
     },
-    
+
     // 檢查藥物是否符合過濾條件
     meetsCriteria(filterName, days, medName) {
       const filterFn = this.getFilterFunction(filterName);
       return filterFn(days, medName);
     }
   };
-  
+
   // 對藥物按天數進行過濾的函數
   const filterMedicinesByDays = (medicines) => {
     return Array.from(medicines).filter(([medName, dateHospMap]) => {
@@ -414,27 +414,27 @@ const MedicationTable = ({ groupedMedications, settings }) => {
   // 在 TableCell 的渲染部分修改為顯示多種頻次
   const renderMultipleDosages = (dosageFreqs) => {
     // 格式化單個劑量頻次的函數
-    const formatDosageFrequency = (df) => 
+    const formatDosageFrequency = (df) =>
       df.perDosage !== "SPECIAL"
         ? `${df.perDosage}# ${df.frequency}`
         : `總量${df.dosage} ${df.frequency}`;
-    
+
     // 對頻次進行排序，QD 最優先，其次是 Q 開頭的頻次，最後是其他頻次
     const sortedDosageFreqs = [...dosageFreqs].sort((a, b) => {
       // QD 頻次最優先
       if (a.frequency === 'QD' && b.frequency !== 'QD') return -1;
       if (a.frequency !== 'QD' && b.frequency === 'QD') return 1;
-      
+
       // 其次是 Q 開頭的頻次
       const aStartsWithQ = a.frequency.startsWith('Q');
       const bStartsWithQ = b.frequency.startsWith('Q');
-      
+
       if (aStartsWithQ && !bStartsWithQ) return -1;
       if (!aStartsWithQ && bStartsWithQ) return 1;
-      
+
       return 0;
     });
-    
+
     // 將所有劑量頻次格式化為字符串，並用 " + " 連接
     return sortedDosageFreqs.map(formatDosageFrequency).join(" + ");
   };
@@ -444,7 +444,7 @@ const MedicationTable = ({ groupedMedications, settings }) => {
     if (!shouldDisplay) {
       return null;
     }
-    
+
     // 藥物劑量的顯示邏輯
     const renderDosage = () => {
       if (!medData.dosageFreqs) {
@@ -453,7 +453,7 @@ const MedicationTable = ({ groupedMedications, settings }) => {
           ? `${medData.perDosage}# ${medData.frequency}`
           : `總量${medData.dosage} ${medData.frequency}`;
       }
-      
+
       // 處理新的多劑量格式
       return medData.dosageFreqs.length > 1
         ? renderMultipleDosages(medData.dosageFreqs)
@@ -461,11 +461,11 @@ const MedicationTable = ({ groupedMedications, settings }) => {
             ? `${medData.dosageFreqs[0].perDosage}# ${medData.dosageFreqs[0].frequency}`
             : `總量${medData.dosage} ${medData.dosageFreqs[0].frequency}`);
     };
-    
+
     // 用藥天數的顯示邏輯
     const renderDayInfo = () => {
       const hasRemainingDrug = medData.drug_left > 0;
-      
+
       return (
         <TypographySizeWrapper
           variant="caption"
@@ -507,7 +507,7 @@ const MedicationTable = ({ groupedMedications, settings }) => {
         </TypographySizeWrapper>
       );
     };
-    
+
     return (
       <>
         <TypographySizeWrapper
@@ -525,9 +525,9 @@ const MedicationTable = ({ groupedMedications, settings }) => {
   // 檢查藥物在特定日期醫院組合是否應該顯示的函數
   const shouldDisplayMedication = (medData, dayFilter, name) => {
     if (!medData) return false;
-    
+
     if (dayFilter === "all") return true;
-    
+
     const days = parseInt(medData.days) || 0;
     return filterConditions.meetsCriteria(dayFilter, days, name);
   };
@@ -664,7 +664,7 @@ const MedicationTable = ({ groupedMedications, settings }) => {
                     const { date, hosp } = processedData.keyToDateHospMap[key];
                     // 清理醫院名稱，只取分號前的部分
                     const hospName = hosp.split(';')[0];
-                    
+
                     return (
                       <TableCell
                         key={key}
@@ -758,7 +758,7 @@ const MedicationTable = ({ groupedMedications, settings }) => {
                       {visibleDateHospKeys.map((key) => {
                         const medData = dateHospMap.get(key);
                         const shouldDisplay = shouldDisplayMedication(medData, dayFilter, name);
-                        
+
                         return (
                           <TableCell
                             key={key}
@@ -769,9 +769,9 @@ const MedicationTable = ({ groupedMedications, settings }) => {
                               padding: "6px 4px",
                             }}
                           >
-                            <MedicationDosageCell 
-                              medData={medData} 
-                              shouldDisplay={shouldDisplay} 
+                            <MedicationDosageCell
+                              medData={medData}
+                              shouldDisplay={shouldDisplay}
                             />
                           </TableCell>
                         );

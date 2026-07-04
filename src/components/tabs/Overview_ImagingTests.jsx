@@ -296,7 +296,7 @@ const Overview_ImagingTests = ({
                             open: true,
                             title: `${test.orderName} - ${test.date}`,
                             content: processedContent
-                          })
+                          });
                         }}
                       >
                         <DescriptionIcon fontSize="small" />

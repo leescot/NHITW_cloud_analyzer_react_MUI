@@ -28,8 +28,8 @@ const LabItemDisplay = ({
   const displayComponents = new Map([
     // 顯示帶有複選框的版本 - 當啟用自定義複製且顯示格式不是垂直或水平
     [
-      () => enableLabChooseCopy && 
-            (displayLabFormat !== 'vertical' && 
+      () => enableLabChooseCopy &&
+            (displayLabFormat !== 'vertical' &&
              displayLabFormat !== 'horizontal'),
       () => (
         <FormControlLabel

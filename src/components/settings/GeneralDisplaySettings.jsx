@@ -58,7 +58,7 @@ const GeneralDisplaySettings = () => {
     chrome.storage.sync.set({ autoOpenPage: newValue });
 
     // Notify FloatingIcon component of the change
-    chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
       if (tabs[0]) {
         chrome.tabs.sendMessage(tabs[0].id, {
           action: "settingChanged",
@@ -87,7 +87,7 @@ const GeneralDisplaySettings = () => {
     chrome.storage.sync.set({ titleTextSize: newValue });
 
     // Notify FloatingIcon component of the change
-    chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
       if (tabs[0]) {
         chrome.tabs.sendMessage(tabs[0].id, {
           action: "settingChanged",
@@ -116,7 +116,7 @@ const GeneralDisplaySettings = () => {
     chrome.storage.sync.set({ contentTextSize: newValue });
 
     // Notify FloatingIcon component of the change
-    chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
       if (tabs[0]) {
         chrome.tabs.sendMessage(tabs[0].id, {
           action: "settingChanged",
@@ -145,7 +145,7 @@ const GeneralDisplaySettings = () => {
     chrome.storage.sync.set({ noteTextSize: newValue });
 
     // Notify FloatingIcon component of the change
-    chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
       if (tabs[0]) {
         chrome.tabs.sendMessage(tabs[0].id, {
           action: "settingChanged",
@@ -174,7 +174,7 @@ const GeneralDisplaySettings = () => {
     chrome.storage.sync.set({ floatingIconPosition: newValue });
 
     // Notify FloatingIcon component of the change
-    chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
       if (tabs[0]) {
         chrome.tabs.sendMessage(tabs[0].id, {
           action: "settingChanged",
@@ -203,7 +203,7 @@ const GeneralDisplaySettings = () => {
     chrome.storage.sync.set({ alwaysOpenOverviewTab: newValue });
 
     // Notify FloatingIcon component of the change
-    chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
       if (tabs[0]) {
         chrome.tabs.sendMessage(tabs[0].id, {
           action: "settingChanged",
@@ -232,7 +232,7 @@ const GeneralDisplaySettings = () => {
     chrome.storage.sync.set({ useColorfulTabs: newValue });
 
     // Notify FloatingIcon component of the change
-    chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
       if (tabs[0]) {
         chrome.tabs.sendMessage(tabs[0].id, {
           action: "settingChanged",
@@ -259,7 +259,7 @@ const GeneralDisplaySettings = () => {
     setEnableCKMTab(newValue);
     chrome.storage.sync.set({ enableCKMTab: newValue });
 
-    chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
       if (tabs[0]) {
         chrome.tabs.sendMessage(tabs[0].id, {
           action: "settingChanged",

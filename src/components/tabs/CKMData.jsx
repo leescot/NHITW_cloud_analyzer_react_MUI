@@ -26,21 +26,21 @@ const DiagnosisCard = ({ diagnoses }) => {
   for (const [cat, label] of Object.entries(CATEGORY_LABELS)) {
     const items = diagnoses[cat];
     if (!items || items.length === 0) continue;
-    items.forEach((d, i) => rows.push({ cat, label, isFirst: i===0, span: i===0?items.length:0, ...d }));
+    items.forEach((d, i) => rows.push({ cat, label, isFirst: i === 0, span: i === 0 ? items.length : 0, ...d }));
   }
   if (rows.length === 0) return null;
   return (
-    <Paper variant="outlined" sx={{ borderRadius:1, mb:0.75, overflow:'hidden' }}>
+    <Paper variant="outlined" sx={{ borderRadius: 1, mb: 0.75, overflow: 'hidden' }}>
       <SectionTitle>診斷</SectionTitle>
       <Table size="small"><TableBody>
-        {rows.map((r,i) => (
+        {rows.map((r, i) => (
           <TableRow key={i}>
             {r.isFirst && (
-              <TableCell rowSpan={r.span} sx={{...cs, fontWeight:600, color:CATEGORY_COLORS[r.cat], borderRight:'1px solid #eee', width:36, textAlign:'center', verticalAlign:'top'}}>
+              <TableCell rowSpan={r.span} sx={{...cs, fontWeight: 600, color: CATEGORY_COLORS[r.cat], borderRight: '1px solid #eee', width: 36, textAlign: 'center', verticalAlign: 'top'}}>
                 <TypographySizeWrapper textSizeType="note">{r.label}</TypographySizeWrapper>
               </TableCell>
             )}
-            <TableCell sx={{...cs, color:'text.secondary', width:40}}>
+            <TableCell sx={{...cs, color: 'text.secondary', width: 40}}>
               <TypographySizeWrapper textSizeType="note">{sd(r.date)}</TypographySizeWrapper>
             </TableCell>
             <TableCell sx={cs}>
@@ -60,38 +60,38 @@ const MedicationCard = ({ medications }) => {
   for (const [cat, {label}] of Object.entries(CKM_ATC_PREFIXES)) {
     const items = medications[cat];
     if (!items || items.length === 0) continue;
-    items.forEach((m,i) => rows.push({ cat, label, isFirst:i===0, span:i===0?items.length:0, ...m }));
+    items.forEach((m, i) => rows.push({ cat, label, isFirst: i === 0, span: i === 0 ? items.length : 0, ...m }));
   }
   if (rows.length === 0) return null;
   return (
-    <Paper variant="outlined" sx={{ borderRadius:1, mb:0.75, overflow:'hidden' }}>
+    <Paper variant="outlined" sx={{ borderRadius: 1, mb: 0.75, overflow: 'hidden' }}>
       <SectionTitle>藥物</SectionTitle>
       <Table size="small"><TableBody>
-        {rows.map((r,i) => (
+        {rows.map((r, i) => (
           <TableRow key={i}>
             {r.isFirst && (
-              <TableCell rowSpan={r.span} sx={{...cs, fontWeight:600, color:'#555', borderRight:'1px solid #eee', width:38, textAlign:'center', verticalAlign:'top'}}>
+              <TableCell rowSpan={r.span} sx={{...cs, fontWeight: 600, color: '#555', borderRight: '1px solid #eee', width: 38, textAlign: 'center', verticalAlign: 'top'}}>
                 <TypographySizeWrapper textSizeType="note">{r.label}</TypographySizeWrapper>
               </TableCell>
             )}
             <TableCell sx={cs}>
               <TypographySizeWrapper textSizeType="content">
                 {r.drugName}
-                {(() => { const kl = getKeyDrugLabel(r.atcCode); return kl ? <Chip label={kl} size="small" sx={{height:16, fontSize:'0.55rem', ml:0.5, bgcolor:'#1565c0', color:'#fff', '& .MuiChip-label':{px:0.4}}}/> : null; })()}
-                {r.drugLeft > 0 && <Chip label={`餘${r.drugLeft}`} size="small" color="info" variant="outlined" sx={{height:16, fontSize:'0.6rem', ml:0.5, '& .MuiChip-label':{px:0.3}}}/>}
+                {(() => { const kl = getKeyDrugLabel(r.atcCode); return kl ? <Chip label={kl} size="small" sx={{height: 16, fontSize: '0.55rem', ml: 0.5, bgcolor: '#1565c0', color: '#fff', '& .MuiChip-label': {px: 0.4}}}/> : null; })()}
+                {r.drugLeft > 0 && <Chip label={`餘${r.drugLeft}`} size="small" color="info" variant="outlined" sx={{height: 16, fontSize: '0.6rem', ml: 0.5, '& .MuiChip-label': {px: 0.3}}}/>}
               </TypographySizeWrapper>
               {r.ingredient && (
-                <TypographySizeWrapper textSizeType="note" sx={{color:'text.secondary', display:'block'}}>
+                <TypographySizeWrapper textSizeType="note" sx={{color: 'text.secondary', display: 'block'}}>
                   {r.ingredient}
                 </TypographySizeWrapper>
               )}
             </TableCell>
-            <TableCell sx={{...cs, color:'text.secondary', whiteSpace:'nowrap', width:95}}>
+            <TableCell sx={{...cs, color: 'text.secondary', whiteSpace: 'nowrap', width: 95}}>
               <TypographySizeWrapper textSizeType="note">
-                {r.dosage&&`${r.dosage}# `}{r.frequency} {r.days}天
+                {r.dosage && `${r.dosage}# `}{r.frequency} {r.days}天
               </TypographySizeWrapper>
             </TableCell>
-            <TableCell sx={{...cs, color:'text.secondary', width:38}}>
+            <TableCell sx={{...cs, color: 'text.secondary', width: 38}}>
               <TypographySizeWrapper textSizeType="note">{sd(r.date)}</TypographySizeWrapper>
             </TableCell>
           </TableRow>
@@ -209,12 +209,12 @@ const CKMLabTable = ({ groupedLabs, labSettings, enableNephroReport, userInfo })
 
   return (
     <Paper variant="outlined" sx={{ borderRadius: 1, mb: 0.75, overflow: 'hidden' }}>
-      <Box sx={{ bgcolor:'#e3f2fd', px:0.75, py:0.3, borderRadius:'4px 4px 0 0', display:'flex', justifyContent:'space-between', alignItems:'center' }}>
-        <Typography variant="caption" sx={{ fontWeight:700, color:'#1565c0' }}>CKM 檢驗 - {TRACKING_DAYS} 天內</Typography>
+      <Box sx={{ bgcolor: '#e3f2fd', px: 0.75, py: 0.3, borderRadius: '4px 4px 0 0', display: 'flex', justifyContent: 'space-between', alignItems: 'center' }}>
+        <Typography variant="caption" sx={{ fontWeight: 700, color: '#1565c0' }}>CKM 檢驗 - {TRACKING_DAYS} 天內</Typography>
         {enableNephroReport && (
           <Tooltip title="開新分頁顯示腎臟檢驗報告（可列印）">
-            <IconButton size="small" sx={{ p:0.25, color:'#1565c0' }} onClick={handleOpenNephroReport}>
-              <PrintIcon sx={{ fontSize:'1rem' }} />
+            <IconButton size="small" sx={{ p: 0.25, color: '#1565c0' }} onClick={handleOpenNephroReport}>
+              <PrintIcon sx={{ fontSize: '1rem' }} />
             </IconButton>
           </Tooltip>
         )}
@@ -223,11 +223,11 @@ const CKMLabTable = ({ groupedLabs, labSettings, enableNephroReport, userInfo })
         <Table size="small" stickyHeader sx={{ minWidth: uniqueDates.length > 6 ? (70 + uniqueDates.length * 55) : 'auto' }}>
           <TableHead>
             <TableRow>
-              <TableCell sx={{ position:'sticky', left:0, bgcolor:'background.paper', zIndex:2, ...cs }}>
-                <TypographySizeWrapper textSizeType="content" sx={{fontWeight:600}}>項目</TypographySizeWrapper>
+              <TableCell sx={{ position: 'sticky', left: 0, bgcolor: 'background.paper', zIndex: 2, ...cs }}>
+                <TypographySizeWrapper textSizeType="content" sx={{fontWeight: 600}}>項目</TypographySizeWrapper>
               </TableCell>
               {uniqueDates.map(date => (
-                <TableCell key={date} align="right" sx={{...cs, whiteSpace:'nowrap'}}>
+                <TableCell key={date} align="right" sx={{...cs, whiteSpace: 'nowrap'}}>
                   <TypographySizeWrapper textSizeType="note">{sd(date)}</TypographySizeWrapper>
                 </TableCell>
               ))}
@@ -236,7 +236,7 @@ const CKMLabTable = ({ groupedLabs, labSettings, enableNephroReport, userInfo })
           <TableBody>
             {sortedTestTypes.map(displayName => (
               <TableRow key={displayName}>
-                <TableCell sx={{ position:'sticky', left:0, bgcolor:'background.paper', zIndex:1, ...cs, whiteSpace:'nowrap' }}>
+                <TableCell sx={{ position: 'sticky', left: 0, bgcolor: 'background.paper', zIndex: 1, ...cs, whiteSpace: 'nowrap' }}>
                   {(() => {
                     const ti = trendItems[displayName];
                     const numericCount = ti ? Object.values(ti.values).filter(v => v && !isNaN(parseFloat(v.value))).length : 0;
@@ -261,7 +261,7 @@ const CKMLabTable = ({ groupedLabs, labSettings, enableNephroReport, userInfo })
                       bgcolor: highlightAbnormal ? getStatusBg(test) : 'inherit',
                     }}>
                       <TypographySizeWrapper textSizeType="content">
-                        {test ? (test.value || test.result || '') : <span style={{color:'#ccc'}}>—</span>}
+                        {test ? (test.value || test.result || '') : <span style={{color: '#ccc'}}>—</span>}
                       </TypographySizeWrapper>
                     </TableCell>
                   );
@@ -278,7 +278,7 @@ const CKMLabTable = ({ groupedLabs, labSettings, enableNephroReport, userInfo })
 const CKMData = ({ ckmData, groupedLabs, labSettings, userInfo }) => {
   const generalDisplaySettings = useGeneralDisplaySettings();
   if (!ckmData || !ckmData.hasCKMData) {
-    return <Box sx={{p:2,textAlign:'center'}}><Typography color="text.secondary">無 CKM 相關資料</Typography></Box>;
+    return <Box sx={{p: 2, textAlign: 'center'}}><Typography color="text.secondary">無 CKM 相關資料</Typography></Box>;
   }
 
   const gds = generalDisplaySettings;

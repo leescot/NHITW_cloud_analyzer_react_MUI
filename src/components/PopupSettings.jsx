@@ -109,7 +109,7 @@ const PopupSettings = () => {
     [2, (
       <Box>
         <Typography variant="h6" align="center" gutterBottom>贊助我們</Typography>
-        <Typography paragraph  align="center">
+        <Typography paragraph align="center">
           感謝您使用「更好的健保雲端2.0」</Typography><Typography paragraph align="center">
           如果您覺得這個工具對您醫療上有所幫助，您可以考慮贊助我們，幫助我們持續改進和維護這個專案。
         </Typography>
@@ -150,7 +150,7 @@ const PopupSettings = () => {
       openNHIMedCloud();
       return;
     }
-    
+
     // 正常切換標籤
     setActiveTab(newValue);
   };
@@ -165,15 +165,15 @@ const PopupSettings = () => {
       action: (currentMode) => {
         const newMode = !currentMode;
         setDeveloperMode(newMode);
-        
+
         // 儲存開發者模式狀態
         chrome.storage.local.set({ developerMode: newMode });
-        
+
         // 如果關閉開發者模式，且當前在開發頁面 (idx=3)，切換回設定頁面
         if (!newMode && activeTab === 3) {
           setActiveTab(0);
         }
-        
+
         return {
           message: newMode ? '開發者模式已啟用' : '開發者模式已關閉',
           severity: newMode ? 'success' : 'info'
@@ -192,7 +192,7 @@ const PopupSettings = () => {
     const actionConfig = handleDeveloperModeActions.get(newCount);
     if (actionConfig) {
       const { message, severity } = actionConfig.action(developerMode);
-      
+
       // 顯示通知
       setSnackbar({
         open: true,

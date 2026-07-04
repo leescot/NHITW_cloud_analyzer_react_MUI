@@ -65,7 +65,7 @@ export const medicationProcessor = {
     for (const [regex, replacement] of regexReplacements.entries()) {
       simplifiedName = simplifiedName.replace(regex, replacement);
     }
-    
+
     simplifiedName = simplifiedName.trim();
 
     // 處理複雜劑量
@@ -154,7 +154,7 @@ export const medicationProcessor = {
 
     // 檢查是否是特殊頻次（QOD, TIW, BIW, QW）
     let totalDoses;
-    
+
     // 先檢查特殊頻次
     for (const [specialFreq, doseCalculator] of specialFreqMap.entries()) {
       if (frequency.includes(specialFreq)) {
@@ -178,7 +178,7 @@ export const medicationProcessor = {
     const singleDose = totalDosage / totalDoses;
 
     const threshold = 0.24;
-    
+
     // 如果單次劑量過小，回傳 SPECIAL
     if (singleDose < threshold) {
       return "SPECIAL";
@@ -189,7 +189,7 @@ export const medicationProcessor = {
       // 計算週數和估計劑量
       const numWeeks = Math.ceil(parseInt(days) / 7);
       let estimatedDoses;
-      
+
       if (freq === 'TIW' || frequency.includes('TIW')) {
         estimatedDoses = numWeeks * 3;
       } else if (freq === 'BIW' || frequency.includes('BIW')) {
@@ -197,9 +197,9 @@ export const medicationProcessor = {
       } else { // QW
         estimatedDoses = numWeeks;
       }
-      
+
       const perDose = Math.round(totalDosage / estimatedDoses);
-      
+
       // 只有在是標準單位劑量時才回傳
       if (validUnits.includes(perDose)) {
         return perDose.toString();
@@ -488,7 +488,7 @@ export const medicationProcessor = {
           const getFieldValue = (record, fieldMapping, isDefault = false) => {
             const mapping = fieldMappings.get(fieldMapping);
             if (!mapping) return "";
-            
+
             if (mapping.primary && record[mapping.primary]) {
               return record[mapping.primary];
             } else if (mapping.fallback && record[mapping.fallback]) {
@@ -500,7 +500,7 @@ export const medicationProcessor = {
             } else if (isDefault && mapping.default) {
               return mapping.default;
             }
-            
+
             return "";
           };
 
@@ -608,7 +608,7 @@ export const medicationProcessor = {
     if (format === "none") {
       return "";
     }
-    
+
     // 分隔符：groupInfo 由呼叫端（UI）從 settings.drugSeparator 帶入，缺省時用預設值
     const drugSeparatorFromSettings = groupInfo.drugSeparator ?? ', ';
 
@@ -653,17 +653,17 @@ export const medicationProcessor = {
       // 增強 groupInfo 以支持自定義格式
       enhancedGroupInfo.formatType = format;
       enhancedGroupInfo.isHorizontal = isHorizontal;
-      
+
       // 使用 medicationCopyFormatter 處理自定義格式
       const customResult = medicationCopyFormatter.applyCustomFormat(medications, enhancedGroupInfo);
       if (customResult !== null) {
         return customResult;
       }
     }
-    
+
     // 獲取適當的格式處理器
     const formatHandler = formatHandlers.get(format) || ((med) => med.name);
-    
+
     // 應用格式處理器到每個藥物
     const medicationTexts = medications.map((med) => formatHandler(med));
 

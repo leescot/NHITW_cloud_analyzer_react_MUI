@@ -67,7 +67,7 @@ const TypographySizeWrapper = ({
   // 根據 sizeType 獲取相應的設置屬性名
   const settingKey = `${sizeType}TextSize`;
   const sizeSetting = generalDisplaySettings[settingKey] || (sizeType === 'title' ? 'medium' : sizeType === 'note' ? 'small' : 'medium');
-  
+
   const fontSize = sizeMap[sizeSetting];
 
   // 將 fontSize 合併到現有的 sx 屬性中

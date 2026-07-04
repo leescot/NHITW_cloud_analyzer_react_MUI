@@ -304,8 +304,8 @@ export function renderNephroReportHTML(reportData) {
 
 export function attachNephroReportHandlers(win, dateCount) {
   var doc = win.document;
-  doc.getElementById('print-btn').addEventListener('click', function() { win.print(); });
-  doc.getElementById('close-btn').addEventListener('click', function() { win.close(); });
+  doc.getElementById('print-btn').addEventListener('click', function () { win.print(); });
+  doc.getElementById('close-btn').addEventListener('click', function () { win.close(); });
 
   var radios = doc.querySelectorAll('input[name="dc"]');
   function update() {
@@ -316,12 +316,12 @@ export function attachNephroReportHandlers(win, dateCount) {
     var ths = doc.querySelectorAll('#reportTable thead th');
     for (var i = 1; i < ths.length; i++) ths[i].style.display = i <= show ? '' : 'none';
     var trs = doc.querySelectorAll('#reportTable tbody tr');
-    trs.forEach(function(tr) {
+    trs.forEach(function (tr) {
       var tds = tr.querySelectorAll('td');
       if (tds.length <= 1) return;
       for (var i = 1; i < tds.length; i++) tds[i].style.display = i <= show ? '' : 'none';
     });
   }
-  radios.forEach(function(r) { r.addEventListener('change', update); });
+  radios.forEach(function (r) { r.addEventListener('change', update); });
   update();
 }

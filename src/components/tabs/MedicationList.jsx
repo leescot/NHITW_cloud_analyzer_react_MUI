@@ -90,13 +90,13 @@ const MedicationList = ({
     ]);
 
     // 獲取對應的過濾函數
-    const filterFunc = visitTypeFilterMap.get(selectedVisitType) || 
+    const filterFunc = visitTypeFilterMap.get(selectedVisitType) ||
                       ((visitType) => visitTypeFilterMap.get("default")(visitType));
 
     // 執行過濾
-    visitTypeFiltered = selectedVisitType === "" || selectedVisitType === "顯示所有項目" ? 
-                       filterFunc() : 
-                       (selectedVisitType === "門診+急診" || selectedVisitType === "門診" ? 
+    visitTypeFiltered = selectedVisitType === "" || selectedVisitType === "顯示所有項目" ?
+                       filterFunc() :
+                       (selectedVisitType === "門診+急診" || selectedVisitType === "門診" ?
                        filterFunc() : filterFunc(selectedVisitType));
 
     // 如果有搜尋文字，再進一步過濾藥物

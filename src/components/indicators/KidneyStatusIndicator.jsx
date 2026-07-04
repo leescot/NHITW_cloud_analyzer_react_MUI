@@ -12,7 +12,7 @@ const KidneyStatusIndicator = ({ stage, fontSize }) => {
 
   // 根據階段決定顏色
   let color;
-  switch(stage) {
+  switch (stage) {
     case 3:
       color = "warning"; // Stage 3 使用橙色
       break;

@@ -7,7 +7,7 @@ import { useGeneralDisplaySettings } from "../../contexts/SettingsContext";
 
 /**
  * Integrated component for displaying Adult Health Check, Cancer Screening, and Hepatitis B & C data
- * 
+ *
  * @param {Object} adultHealthCheckData - The adult health check data
  * @param {Object} cancerScreeningData - The cancer screening data
  * @param {Object} hbcvData - The hepatitis B & C data

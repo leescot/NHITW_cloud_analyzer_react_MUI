@@ -67,14 +67,14 @@ export const useCopyLabData = () => {
   const applyStandardVerticalFormat = (group, showUnit, showReference) => {
     // 格式化日期，從 YYYY-MM-DD 轉換為 YYYY/MM/DD
     const formattedDate = formatDate(group.date);
-    
+
     let formattedText = `${formattedDate} - ${group.hosp}\n`;
-    
+
     // 垂直格式：每個項目一行
     group.labs.forEach((lab) => {
       formattedText += `${formatLabItemForCopy(lab, showUnit, showReference)}\n`;
     });
-    
+
     return formattedText;
   };
 
@@ -82,13 +82,13 @@ export const useCopyLabData = () => {
   const applyStandardHorizontalFormat = (group, showUnit, showReference) => {
     // 格式化日期，從 YYYY-MM-DD 轉換為 YYYY/MM/DD
     const formattedDate = formatDate(group.date);
-    
+
     let formattedText = `${formattedDate} - ${group.hosp}\n`;
-    
+
     // 水平格式：項目在同一行，用空格分隔
     let labItems = group.labs.map((lab) => formatLabItemForCopy(lab, showUnit, showReference));
     formattedText += labItems.join(" ");
-    
+
     return formattedText;
   };
 

@@ -15,26 +15,26 @@ const LabData = ({ groupedLabs, settings, labSettings }) => {
   // 添加搜尋功能狀態
   const [searchText, setSearchText] = useState("");
   const [filteredGroupedLabs, setFilteredGroupedLabs] = useState(groupedLabs);
-  
+
   // 處理搜尋文字變化
   const handleSearchChange = (event) => {
     setSearchText(event.target.value);
   };
-  
+
   // 當搜尋文字變化時過濾檢驗項目
   useEffect(() => {
     if (searchText.trim() === "") {
       setFilteredGroupedLabs(groupedLabs);
       return;
     }
-    
+
     const searchLower = searchText.toLowerCase();
-    
+
     // 針對每個檢驗組，只保留符合搜尋條件的檢驗項目
     const searchFiltered = groupedLabs.map(group => {
       // 深複製組資料，但不包含labs
       const newGroup = { ...group };
-      
+
       // 過濾檢驗項目，只保留符合搜尋條件的
       newGroup.labs = group.labs.filter(lab =>
         (lab.orderName && lab.orderName.toLowerCase().includes(searchLower)) ||
@@ -42,10 +42,10 @@ const LabData = ({ groupedLabs, settings, labSettings }) => {
         (lab.abbrName && lab.abbrName.toLowerCase().includes(searchLower)) ||
         (lab.itemName && lab.itemName.toLowerCase().includes(searchLower))
       );
-      
+
       return newGroup;
     }).filter(group => group.labs.length > 0); // 只保留有符合檢驗項目的組
-    
+
     setFilteredGroupedLabs(searchFiltered);
   }, [searchText, groupedLabs]);
 
@@ -107,37 +107,37 @@ const LabData = ({ groupedLabs, settings, labSettings }) => {
       // # zh-TW: 建立特殊檢驗代碼與其對應條件的對照表
       const specialOrderCodesMap = new Map([
         ['08011C', new Map([
-          ['08011C-WBC', lab => 
-            lab.itemName?.toLowerCase().includes('wbc') || 
+          ['08011C-WBC', lab =>
+            lab.itemName?.toLowerCase().includes('wbc') ||
             lab.itemName?.toLowerCase().includes('白血球')],
-          ['08011C-Hb', lab => 
-            lab.itemName?.toLowerCase().includes('hb') || 
-            lab.itemName?.toLowerCase().includes('hgb') || 
-            lab.itemName?.toLowerCase().includes('血色素') || 
+          ['08011C-Hb', lab =>
+            lab.itemName?.toLowerCase().includes('hb') ||
+            lab.itemName?.toLowerCase().includes('hgb') ||
+            lab.itemName?.toLowerCase().includes('血色素') ||
             lab.itemName?.toLowerCase().includes('hemoglobin')],
-          ['08011C-Platelet', lab => 
-            lab.itemName?.toLowerCase().includes('plt') || 
-            lab.itemName?.toLowerCase().includes('platelet') || 
+          ['08011C-Platelet', lab =>
+            lab.itemName?.toLowerCase().includes('plt') ||
+            lab.itemName?.toLowerCase().includes('platelet') ||
             lab.itemName?.toLowerCase().includes('血小板')]
         ])],
         ['09015C', new Map([
           ['09015C', () => true]  // 對於09015C代碼，總是選中
         ])],
         ['09040C', new Map([
-          ['09040C', lab => 
-            lab.abbrName === 'UPCR' || 
+          ['09040C', lab =>
+            lab.abbrName === 'UPCR' ||
             (lab.itemName && (
-              lab.itemName.includes('UPCR') || 
-              lab.itemName.includes('蛋白/肌酸酐比值') || 
+              lab.itemName.includes('UPCR') ||
+              lab.itemName.includes('蛋白/肌酸酐比值') ||
               lab.itemName.includes('protein/Creatinine')
             ))]
         ])],
         ['12111C', new Map([
-          ['12111C', lab => 
-            lab.abbrName === 'UACR' || 
+          ['12111C', lab =>
+            lab.abbrName === 'UACR' ||
             (lab.itemName && (
-              lab.itemName.toLowerCase().includes('u-acr') || 
-              lab.itemName.toLowerCase().includes('albumin/creatinine') || 
+              lab.itemName.toLowerCase().includes('u-acr') ||
+              lab.itemName.toLowerCase().includes('albumin/creatinine') ||
               lab.itemName.toLowerCase().includes('/cre')
             ))]
         ])]
@@ -167,7 +167,7 @@ const LabData = ({ groupedLabs, settings, labSettings }) => {
                   break;
                 }
               }
-            } 
+            }
             // 標準處理其他項目
             else if (enabledOrderCodes.includes(lab.orderCode)) {
               isPreselected = true;
@@ -278,7 +278,7 @@ const LabData = ({ groupedLabs, settings, labSettings }) => {
 
     // 選擇格式化函數
     const formatFunction = formatFunctions[copyLabFormat] || formatFunctions.default;
-    
+
     // 執行格式化
     allFormattedText = formatFunction();
 

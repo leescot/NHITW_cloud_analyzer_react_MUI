@@ -75,7 +75,7 @@ export const resetLabTestsToDefault = (callback = () => {}) => {
     { focusedLabTests: DEFAULT_LAB_TESTS },
     () => {
       // 通知其他組件設定已更改
-      chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+      chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
         if (tabs[0]) {
           chrome.tabs.sendMessage(tabs[0].id, {
             action: "dataFetchCompleted",
@@ -110,7 +110,7 @@ export const resetImageTestsToDefault = (callback = () => {}) => {
     { focusedImageTests: DEFAULT_IMAGE_TESTS },
     () => {
       // 通知其他組件設定已更改
-      chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+      chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
         if (tabs[0]) {
           chrome.tabs.sendMessage(tabs[0].id, {
             action: "dataFetchCompleted",
@@ -168,7 +168,7 @@ const OverviewSettings = () => {
       chrome.storage.sync.set({ medicationTrackingDays: newValue });
 
       // 發送消息給 FloatingIcon 組件更新
-      chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+      chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
         if (tabs[0]) {
           chrome.tabs.sendMessage(tabs[0].id, {
             action: "settingChanged",
@@ -194,7 +194,7 @@ const OverviewSettings = () => {
       chrome.storage.sync.set({ labTrackingDays: newValue });
 
       // 發送消息給 FloatingIcon 組件更新
-      chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+      chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
         if (tabs[0]) {
           chrome.tabs.sendMessage(tabs[0].id, {
             action: "settingChanged",
@@ -220,7 +220,7 @@ const OverviewSettings = () => {
       chrome.storage.sync.set({ imageTrackingDays: newValue });
 
       // 發送消息給 FloatingIcon 組件更新
-      chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+      chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
         if (tabs[0]) {
           chrome.tabs.sendMessage(tabs[0].id, {
             action: "settingChanged",
@@ -255,7 +255,7 @@ const OverviewSettings = () => {
     chrome.storage.sync.set({ focusedLabTests: tempLabTests });
 
     // 發送消息給 FloatingIcon 組件更新
-    chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
       if (tabs[0]) {
         chrome.tabs.sendMessage(tabs[0].id, {
           action: "settingChanged",
@@ -320,7 +320,7 @@ const OverviewSettings = () => {
     chrome.storage.sync.set({ focusedImageTests: tempImageTests });
 
     // 發送消息給 FloatingIcon 組件更新
-    chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
       if (tabs[0]) {
         chrome.tabs.sendMessage(tabs[0].id, {
           action: "settingChanged",
