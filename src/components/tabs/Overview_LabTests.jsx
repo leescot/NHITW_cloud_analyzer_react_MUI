@@ -1,11 +1,8 @@
-import React, { useState, useEffect, useMemo } from "react";
+import { useMemo } from "react";
 import {
   Box,
   Typography,
   Paper,
-  Grid,
-  Chip,
-  Divider,
   Table,
   TableBody,
   TableCell,
@@ -15,9 +12,8 @@ import {
   Tooltip,
   IconButton
 } from "@mui/material";
-import { styled } from '@mui/material/styles';
 import PrintIcon from '@mui/icons-material/Print';
-import { formatDate, formatDateShort, isWithinLast90Days } from './Overview_utils';
+import { formatDateShort } from './Overview_utils';
 import { FALLBACK_LAB_TESTS, SPECIAL_LAB_CODES } from '../settings/OverviewSettings';
 import TypographySizeWrapper from "../utils/TypographySizeWrapper";
 import LabItemTrendPopover from "./lab/LabItemTrendPopover";
@@ -196,7 +192,6 @@ const Overview_LabTests = ({
                         lab.itemName.toLowerCase().includes('complete blood count') ||
                         lab.itemName.toLowerCase().includes('血球計數')
                       ))) {
-
                     // Process based on the item details using our helper functions
                     processSpecialCBCItem(lab, labGroup.date, targetOrderCodes, matchingTests);
                   }
@@ -232,9 +227,9 @@ const Overview_LabTests = ({
               // 使用 some() 方法檢查是否包含任何目標文本
               return targets.some(target => {
                 const lowerTarget = target.toLowerCase();
-                
+
                 // 使用多種匹配方式：包含、完全匹配、邊界匹配等
-                return lowerSource.includes(lowerTarget) || 
+                return lowerSource.includes(lowerTarget) ||
                        lowerSource === lowerTarget ||
                        lowerSource.startsWith(lowerTarget + ' ') ||
                        lowerSource.endsWith(' ' + lowerTarget) ||
@@ -272,23 +267,23 @@ const Overview_LabTests = ({
                   for (const [type, config] of cbcItemTypes.entries()) {
                     if (containsText(item.itemName, config.keywords)) {
                       foundItems.set(type, {
-                        ...item, 
-                        orderCode: config.orderCode, 
-                        date, 
+                        ...item,
+                        orderCode: config.orderCode,
+                        date,
                         displayName: config.displayName
                       });
                     }
                   }
                 }
-              } 
+              }
               // 如果是直接的實驗室項目（實驗室本身是 WBC、Hb 或 PLT）
               else {
                 for (const [type, config] of cbcItemTypes.entries()) {
                   if (containsText(lab.itemName, config.keywords)) {
                     foundItems.set(type, {
-                      ...lab, 
-                      orderCode: config.orderCode, 
-                      date, 
+                      ...lab,
+                      orderCode: config.orderCode,
+                      date,
                       displayName: config.displayName
                     });
                   }
@@ -516,11 +511,11 @@ const Overview_LabTests = ({
                   if (test.displayName) {
                     displayOrder[test.displayName] = index;
                   }
-                  
+
                   // 處理特殊映射的情況
                   if (orderCodeToDisplayMap.has(orderCode)) {
                     const displayNames = orderCodeToDisplayMap.get(orderCode);
-                    
+
                     if (Array.isArray(displayNames)) {
                       // 處理多個顯示名稱的情況 (例如 09015C -> Cr 及 GFR)
                       displayNames.forEach((name, offset) => {
@@ -599,7 +594,6 @@ const Overview_LabTests = ({
                 if (!targetOrderCodes.includes(lab.orderCode) && !isCBCCode(lab.orderCode)) return;
                 let dn = null;
                 // Classify lab item for trend data
-                const existing = Object.keys(trendItems);
                 if (lab.orderCode === '09015C') {
                   const isNHI = lab.assayMethod === '健保署計算' || lab.abbrName === 'eGFR(健保署)';
                   const isGFR = isNHI || lab.abbrName === 'eGFR' || lab.abbrName === 'eGFR(MDRD)' || (lab.itemName && (lab.itemName.includes('GFR') || lab.itemName.includes('腎絲球過濾率') || lab.itemName.includes('Ccr')));
@@ -611,7 +605,7 @@ const Overview_LabTests = ({
                 } else if (lab.orderCode === '12111C') {
                   if (lab.abbrName === 'UACR' || (lab.itemName && (lab.itemName.toLowerCase().includes('u-acr') || lab.itemName.toLowerCase().includes('albumin/creatinine') || lab.itemName.toLowerCase().includes('/cre')))) dn = 'UACR';
                 } else if (isCBCCode(lab.orderCode)) {
-                  const n = ((lab.itemName||'') + ' ' + (lab.abbrName||'')).toLowerCase();
+                  const n = ((lab.itemName || '') + ' ' + (lab.abbrName || '')).toLowerCase();
                   if (/\bwbc\b|白血球/.test(n)) dn = 'WBC';
                   else if (/\bhb\b|hemoglobin|血色素/.test(n)) dn = 'Hb';
                   else if (/platelet|plt|血小板/.test(n)) dn = 'PLT';

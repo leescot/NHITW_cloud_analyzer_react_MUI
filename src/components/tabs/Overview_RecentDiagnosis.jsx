@@ -9,12 +9,11 @@
  * - 疫苗記錄（ICD Z23-Z27）單獨顯示在各自的類別中
  */
 
-import React, { useMemo } from "react";
+import { useMemo } from "react";
 import {
   Box,
   Card,
   CardContent,
-  Typography,
   Table,
   TableBody,
   TableRow,
@@ -408,7 +407,7 @@ const Overview_RecentDiagnosis = ({
         </TableCell>
         <TableCell sx={{ borderBottom: 'none', padding: '8px 0' }}>
           <Box>
-            {visibleDiagnoses.map((diagnosis, index) => (
+            {visibleDiagnoses.map((diagnosis) => (
               <Box key={diagnosis.key} sx={{ display: 'flex', alignItems: 'center', mb: 0.8 }}>
                 {(isInpatient || isEmergency) && (
                   <Chip

@@ -1,17 +1,13 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Box,
   Typography,
   AppBar,
-  Toolbar,
   Button,
   Tabs,
   Tab,
-  CircularProgress,
   Snackbar,
   Alert,
-  IconButton,
-  Tooltip
 } from '@mui/material';
 import SettingsIcon from '@mui/icons-material/Settings';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
@@ -36,9 +32,12 @@ import AdvancedSettings from './settings/AdvancedSettings';
 import CloudDataSettings from './settings/CloudDataSettings';
 import { updateDataStatus } from '../utils/settingsHelper';
 import LoadDataTab from './settings/LoadDataTab';
+import { storageDefaultsForSection } from '../config/settingsSchema';
+
+const GENERAL_DEFAULTS = storageDefaultsForSection('general');
 
 const PopupSettings = () => {
-  const [dataStatus, setDataStatus] = useState({
+  const [, setDataStatus] = useState({
     medication: { status: 'none', count: 0 },
     labData: { status: 'none', count: 0 },
     chineseMed: { status: 'none', count: 0 },
@@ -53,15 +52,7 @@ const PopupSettings = () => {
   });
 
   // 添加一般顯示設定狀態
-  const [generalDisplaySettings, setGeneralDisplaySettings] = useState({
-    useColorfulTabs: false,
-    titleTextSize: 'medium',
-    contentTextSize: 'medium',
-    noteTextSize: 'small',
-    floatingIconPosition: 'top-right',
-    alwaysOpenOverviewTab: true,
-    autoOpenPage: false
-  });
+  const [generalDisplaySettings, setGeneralDisplaySettings] = useState(GENERAL_DEFAULTS);
 
   // 新增通知
   const [snackbar, setSnackbar] = useState({
@@ -91,7 +82,7 @@ const PopupSettings = () => {
   // 「雲端」是動作鍵（開啟外部 NHI 頁面），不對應內容 map。
   const tabContentMap = new Map([
     [0, (
-      <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+      <Box key="tab-settings" sx={{ display: 'flex', flexDirection: 'column' }}>
         <GeneralDisplaySettings />
         <CloudDataSettings />
         <OverviewSettings />
@@ -102,14 +93,14 @@ const PopupSettings = () => {
       </Box>
     )],
     [1, (
-      <Box>
+      <Box key="tab-about">
         <AboutTab />
       </Box>
     )],
     [2, (
-      <Box>
+      <Box key="tab-sponsor">
         <Typography variant="h6" align="center" gutterBottom>贊助我們</Typography>
-        <Typography paragraph  align="center">
+        <Typography paragraph align="center">
           感謝您使用「更好的健保雲端2.0」</Typography><Typography paragraph align="center">
           如果您覺得這個工具對您醫療上有所幫助，您可以考慮贊助我們，幫助我們持續改進和維護這個專案。
         </Typography>
@@ -133,7 +124,7 @@ const PopupSettings = () => {
       </Box>
     )],
     [3, (
-      <Box>
+      <Box key="tab-dev">
         <LoadDataTab
           localDataStatus={localDataStatus}
           setSnackbar={setSnackbar}
@@ -150,7 +141,7 @@ const PopupSettings = () => {
       openNHIMedCloud();
       return;
     }
-    
+
     // 正常切換標籤
     setActiveTab(newValue);
   };
@@ -165,15 +156,15 @@ const PopupSettings = () => {
       action: (currentMode) => {
         const newMode = !currentMode;
         setDeveloperMode(newMode);
-        
+
         // 儲存開發者模式狀態
         chrome.storage.local.set({ developerMode: newMode });
-        
+
         // 如果關閉開發者模式，且當前在開發頁面 (idx=3)，切換回設定頁面
         if (!newMode && activeTab === 3) {
           setActiveTab(0);
         }
-        
+
         return {
           message: newMode ? '開發者模式已啟用' : '開發者模式已關閉',
           severity: newMode ? 'success' : 'info'
@@ -192,7 +183,7 @@ const PopupSettings = () => {
     const actionConfig = handleDeveloperModeActions.get(newCount);
     if (actionConfig) {
       const { message, severity } = actionConfig.action(developerMode);
-      
+
       // 顯示通知
       setSnackbar({
         open: true,
@@ -259,15 +250,7 @@ const PopupSettings = () => {
     updateDataStatus(setDataStatus);
 
     // 加載一般顯示設定
-    chrome.storage.sync.get({
-      useColorfulTabs: false,
-      titleTextSize: 'medium',
-      contentTextSize: 'medium',
-      noteTextSize: 'small',
-      floatingIconPosition: 'top-right',
-      alwaysOpenOverviewTab: true,
-      autoOpenPage: false
-    }, (items) => {
+    chrome.storage.sync.get(GENERAL_DEFAULTS, (items) => {
       setGeneralDisplaySettings(items);
     });
 

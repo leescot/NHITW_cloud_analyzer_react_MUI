@@ -77,17 +77,17 @@ const prepareLabTableData = (groupedLabs, selectedType = null) => {
         const item = specialItems.get(abbrKey);
         const dateKey = `${group.date}_${group.hosp}`;
         item.values[dateKey] = createValueObject(lab);
-        
+
         return true; // 表示已處理
       }
       return false; // 未處理
     }],
-    
+
     // 特殊情況 2: 處理 09043C 和 09044C 中包含 "/HDL" 的項目
     ['hdl-ratio', (lab, group, itemMap) => {
       const orderCode = lab.orderCode || '';
       const itemKey = lab.itemName || lab.orderName || '';
-      
+
       if ((orderCode === "09043C" || orderCode === "09044C") && itemKey.includes("/HDL")) {
         const specialKey = `${orderCode}_HDLRATIO`;
 
@@ -109,7 +109,7 @@ const prepareLabTableData = (groupedLabs, selectedType = null) => {
         const item = itemMap.get(specialKey);
         const dateKey = `${group.date}_${group.hosp}`;
         item.values[dateKey] = createValueObject(lab);
-        
+
         return true; // 表示已處理
       }
       return false; // 未處理
@@ -164,10 +164,9 @@ const prepareLabTableData = (groupedLabs, selectedType = null) => {
       }
 
       const itemKey = lab.itemName || lab.orderName || '';
-      
+
       // 使用策略映射處理特殊情況
-      let handled = false;
-      
+
       // 檢查 HDL 特殊比例處理
       if (specialItemHandlers.get('hdl-ratio')(lab, group, itemMap)) {
         return; // 如果已處理則跳過後續步驟
@@ -175,7 +174,7 @@ const prepareLabTableData = (groupedLabs, selectedType = null) => {
 
       // 判斷處理邏輯: 使用多項目邏輯還是單一項目邏輯
       const isMultiItem = isMultiItemOrderCode(orderCode) || autoDetectedMultiItems.has(orderCode);
-      
+
       if (isMultiItem) {
         // 複合測試特殊處理 - 使用預定義的多項目碼或自動檢測到的多項目碼
         const key = lab.abbrName || (orderCode + '-' + itemKey);

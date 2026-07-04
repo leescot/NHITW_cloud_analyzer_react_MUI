@@ -1,6 +1,5 @@
 // 資料去重處理相關函數
 import { normalizeValue } from './valueUtils.js';
-import { isGFRItem } from './abbreviationUtils.js';
 
 // 新的去重邏輯，處理特殊情況
 const deduplicateLabData = (labArray) => {

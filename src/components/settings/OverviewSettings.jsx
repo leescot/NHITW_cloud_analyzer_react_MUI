@@ -1,17 +1,12 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Box,
   Typography,
   FormControl,
-  InputLabel,
-  Select,
-  MenuItem,
   TextField,
-  Divider,
   Accordion,
   AccordionSummary,
   AccordionDetails,
-  FormHelperText,
   Button,
   Dialog,
   DialogTitle,
@@ -35,6 +30,7 @@ import ImageIcon from '@mui/icons-material/Image';
 // 導入從配置文件中移出的常數
 import { DEFAULT_LAB_TESTS } from '../../config/labTests';
 import { DEFAULT_IMAGE_TESTS } from '../../config/imageTests';
+import { storageDefaultsForSection } from '../../config/settingsSchema';
 
 /**
  * FALLBACK_LAB_TESTS - 極簡版的檢驗項目配置
@@ -75,7 +71,7 @@ export const resetLabTestsToDefault = (callback = () => {}) => {
     { focusedLabTests: DEFAULT_LAB_TESTS },
     () => {
       // 通知其他組件設定已更改
-      chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+      chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
         if (tabs[0]) {
           chrome.tabs.sendMessage(tabs[0].id, {
             action: "dataFetchCompleted",
@@ -110,7 +106,7 @@ export const resetImageTestsToDefault = (callback = () => {}) => {
     { focusedImageTests: DEFAULT_IMAGE_TESTS },
     () => {
       // 通知其他組件設定已更改
-      chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+      chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
         if (tabs[0]) {
           chrome.tabs.sendMessage(tabs[0].id, {
             action: "dataFetchCompleted",
@@ -145,13 +141,7 @@ const OverviewSettings = () => {
 
   // 加載設定
   useEffect(() => {
-    chrome.storage.sync.get({
-      medicationTrackingDays: 100,
-      labTrackingDays: 180,
-      imageTrackingDays: 180,
-      focusedLabTests: DEFAULT_LAB_TESTS,
-      focusedImageTests: DEFAULT_IMAGE_TESTS
-    }, (items) => {
+    chrome.storage.sync.get(storageDefaultsForSection('overview'), (items) => {
       setMedicationTrackingDays(items.medicationTrackingDays);
       setLabTrackingDays(items.labTrackingDays);
       setImageTrackingDays(items.imageTrackingDays);
@@ -168,7 +158,7 @@ const OverviewSettings = () => {
       chrome.storage.sync.set({ medicationTrackingDays: newValue });
 
       // 發送消息給 FloatingIcon 組件更新
-      chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+      chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
         if (tabs[0]) {
           chrome.tabs.sendMessage(tabs[0].id, {
             action: "settingChanged",
@@ -194,7 +184,7 @@ const OverviewSettings = () => {
       chrome.storage.sync.set({ labTrackingDays: newValue });
 
       // 發送消息給 FloatingIcon 組件更新
-      chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+      chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
         if (tabs[0]) {
           chrome.tabs.sendMessage(tabs[0].id, {
             action: "settingChanged",
@@ -220,7 +210,7 @@ const OverviewSettings = () => {
       chrome.storage.sync.set({ imageTrackingDays: newValue });
 
       // 發送消息給 FloatingIcon 組件更新
-      chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+      chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
         if (tabs[0]) {
           chrome.tabs.sendMessage(tabs[0].id, {
             action: "settingChanged",
@@ -255,7 +245,7 @@ const OverviewSettings = () => {
     chrome.storage.sync.set({ focusedLabTests: tempLabTests });
 
     // 發送消息給 FloatingIcon 組件更新
-    chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
       if (tabs[0]) {
         chrome.tabs.sendMessage(tabs[0].id, {
           action: "settingChanged",
@@ -320,7 +310,7 @@ const OverviewSettings = () => {
     chrome.storage.sync.set({ focusedImageTests: tempImageTests });
 
     // 發送消息給 FloatingIcon 組件更新
-    chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
       if (tabs[0]) {
         chrome.tabs.sendMessage(tabs[0].id, {
           action: "settingChanged",

@@ -49,7 +49,7 @@ const customReferenceRanges = {
  * @returns {boolean} - 是否有自定義參考範圍
  */
 const hasCustomReferenceRange = (orderCode) => {
-  return customReferenceRanges.hasOwnProperty(orderCode);
+  return Object.prototype.hasOwnProperty.call(customReferenceRanges, orderCode);
 };
 
 /**

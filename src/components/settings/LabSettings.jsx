@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Typography,
   Switch,
@@ -25,8 +25,6 @@ import {
 } from '@mui/material';
 import ScienceIcon from '@mui/icons-material/Science';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import ViewColumnIcon from '@mui/icons-material/ViewColumn';
-import CategoryIcon from '@mui/icons-material/Category';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import { handleSettingChange } from '../../utils/settingsHelper';
 import { DEFAULT_LAB_COPY_ITEMS } from '../../config/labTests';
@@ -40,7 +38,7 @@ export const resetLabCopyItemsToDefault = (callback = () => {}) => {
     { labChooseCopyItems: DEFAULT_LAB_COPY_ITEMS },
     () => {
       // 通知其他組件設定已更改
-      chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+      chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
         if (tabs[0]) {
           chrome.tabs.sendMessage(tabs[0].id, {
             action: "settingChanged",
@@ -165,7 +163,7 @@ const LabSettings = () => {
     setSettings(updatedSettings);
     chrome.storage.sync.set({ labChooseCopyItems: tempCustomCopyItems }, () => {
       // 發送消息給其他組件更新
-      chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+      chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
         if (tabs[0]) {
           chrome.tabs.sendMessage(tabs[0].id, {
             action: "settingChanged",
@@ -199,29 +197,6 @@ const LabSettings = () => {
     const updatedItems = [...tempCustomCopyItems];
     updatedItems[index].enabled = !updatedItems[index].enabled;
     setTempCustomCopyItems(updatedItems);
-  };
-
-  // 打開 FloatingIcon 的檢驗自訂格式標籤
-  const openLabCustomFormatEditor = () => {
-    // Only proceed if enableLabCustomCopyFormat is true
-    if (!settings.enableLabCustomCopyFormat) return;
-    
-    // 發送消息給 background script 或直接調用 FloatingIcon 的方法
-    if (window.openFloatingIconDialog) {
-      window.openFloatingIconDialog();
-      // 等對話框打開後，切換到檢驗自訂格式標籤（索引為10）
-      setTimeout(() => {
-        chrome.runtime.sendMessage({ 
-          action: 'switchToLabCustomFormatTab',
-          tabIndex: 10
-        });
-      }, 100);
-    } else {
-      // 如果全局方法不可用，則發送消息給背景脚本處理
-      chrome.runtime.sendMessage({ 
-        action: 'openLabCustomFormatEditor' 
-      });
-    }
   };
 
   return (
@@ -352,14 +327,14 @@ const LabSettings = () => {
           >
             <MenuItem value="vertical">直式格式 (每項檢驗獨立一行)</MenuItem>
             <MenuItem value="horizontal">橫式格式 (檢驗項目並排顯示)</MenuItem>
-            <MenuItem 
-              value="customVertical" 
+            <MenuItem
+              value="customVertical"
               disabled={!settings.enableLabCustomCopyFormat}
             >
               自訂檢驗複製格式(直式)
             </MenuItem>
-            <MenuItem 
-              value="customHorizontal" 
+            <MenuItem
+              value="customHorizontal"
               disabled={!settings.enableLabCustomCopyFormat}
             >
               自訂檢驗複製格式(橫式)

@@ -15,7 +15,7 @@
  * This file serves as the integration point for all the separate components.
  */
 
-import React, { useMemo, useEffect } from "react";
+import { useMemo, useEffect } from "react";
 import { Grid, Box } from "@mui/material";
 
 // Import individual components
@@ -39,7 +39,6 @@ import { debugLog } from '../../utils/logger';
 import { useGeneralDisplaySettings } from '../../contexts/SettingsContext';
 
 const Overview = ({
-  dashboardData,
   allergyData,
   surgeryData,
   dischargeData,

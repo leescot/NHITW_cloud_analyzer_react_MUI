@@ -122,8 +122,8 @@ export const chineseMedProcessor = {
       ['QID', 4], ['QIDP', 4],
       ['Q2H', 12], ['Q4H', 6], ['Q6H', 4], ['Q8H', 3], ['Q12H', 2],
       // 少於每日 1 次
-      ['QOD', 1/2], ['Q2D', 1/2],
-      ['QW', 1/7], ['BIW', 2/7], ['TIW', 3/7],
+      ['QOD', 1 / 2], ['Q2D', 1 / 2],
+      ['QW', 1 / 7], ['BIW', 2 / 7], ['TIW', 3 / 7],
       // 特殊情況
       ['PRN', null], ['PRNB', null], ['ASORDER', null], ['ONCE', null], ['需要時', null],
       ['STAT', null], ['ST', null],
@@ -218,7 +218,7 @@ export const chineseMedProcessor = {
       }
       mapTotalDosagePerHosp.set(key, group.dosage + (mapTotalDosagePerHosp.get(key) || 0));
     }
-    
+
     return Object.values(grouped)
       .sort((a, b) => {
         // date

@@ -1,4 +1,3 @@
-import React from 'react';
 import { Chip, Tooltip } from "@mui/material";
 import ReportRoundedIcon from '@mui/icons-material/ReportRounded';
 import { NOTE_TEXT_SIZES } from "../../utils/textSizeUtils";
@@ -12,7 +11,7 @@ const KidneyStatusIndicator = ({ stage, fontSize }) => {
 
   // 根據階段決定顏色
   let color;
-  switch(stage) {
+  switch (stage) {
     case 3:
       color = "warning"; // Stage 3 使用橙色
       break;

@@ -51,8 +51,8 @@ export const allergyProcessor = {
     ]);
 
     // 檢查 drug_name
-    if (!item.drugName || 
-        invalidDrugNames.has(item.drugName) || 
+    if (!item.drugName ||
+        invalidDrugNames.has(item.drugName) ||
         item.drugName.includes('未過敏')) {
       return false;
     }

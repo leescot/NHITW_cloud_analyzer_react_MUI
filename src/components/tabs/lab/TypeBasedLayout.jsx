@@ -90,26 +90,26 @@ const TypeBasedLayout = ({
       () => {
         // 對類型按項目數量排序
         const sortedGroups = [...groupKeys].sort((a, b) => labsByType[b].length - labsByType[a].length);
-        
+
         // 取出項目數最多的兩個類型
         const largestGroup = sortedGroups[0];
         const secondLargestGroup = sortedGroups[1];
-        
+
         // 其餘類型
         const remainingGroups = sortedGroups.slice(2);
-        
+
         return (
           <Grid container spacing={2}>
             {/* 最大類型組 */}
             <Grid item xs={12} sm={4} key="largest">
               {renderTypeGroup(largestGroup, labsByType[largestGroup])}
             </Grid>
-            
+
             {/* 第二大類型組 */}
             <Grid item xs={12} sm={4} key="second-largest">
               {renderTypeGroup(secondLargestGroup, labsByType[secondLargestGroup])}
             </Grid>
-            
+
             {/* 其餘類型組合併 */}
             <Grid item xs={12} sm={4} key="remaining">
               <Box>
@@ -132,7 +132,7 @@ const TypeBasedLayout = ({
         const group2 = groupKeys[1];
         const group1Count = labsByType[group1].length;
         const group2Count = labsByType[group2].length;
-        
+
         // 確定哪個組更大，哪個更小
         let smallerGroup, largerGroup, smallerCount, largerCount;
         if (group1Count <= group2Count) {
@@ -146,7 +146,7 @@ const TypeBasedLayout = ({
           smallerCount = group2Count;
           largerCount = group1Count;
         }
-        
+
         // 根據組大小比例選擇不同佈局策略
         const layoutOptions = new Map([
           // 大組比小組的項目數多於兩倍
@@ -156,19 +156,19 @@ const TypeBasedLayout = ({
               const halfLargerCount = Math.ceil(largerCount / 2);
               const firstHalf = labsByType[largerGroup].slice(0, halfLargerCount);
               const secondHalf = labsByType[largerGroup].slice(halfLargerCount);
-              
+
               return (
                 <Grid container spacing={2}>
                   {/* 小組區域 */}
                   <Grid item xs={12} sm={4} key="smaller">
                     {renderTypeGroup(smallerGroup, labsByType[smallerGroup])}
                   </Grid>
-                  
+
                   {/* 大組第一欄 */}
                   <Grid item xs={12} sm={4} key="larger-1">
                     {renderTypeGroup(largerGroup, firstHalf, `${largerGroup} (一)`)}
                   </Grid>
-                  
+
                   {/* 大組第二欄 */}
                   <Grid item xs={12} sm={4} key="larger-2">
                     {renderTypeGroup(largerGroup, secondHalf, `${largerGroup} (二)`)}
@@ -183,19 +183,19 @@ const TypeBasedLayout = ({
             () => {
               const firstPart = labsByType[largerGroup].slice(0, smallerCount);
               const secondPart = labsByType[largerGroup].slice(smallerCount);
-              
+
               return (
                 <Grid container spacing={2}>
                   {/* 小組區域 */}
                   <Grid item xs={12} sm={4} key="smaller">
                     {renderTypeGroup(smallerGroup, labsByType[smallerGroup])}
                   </Grid>
-                  
+
                   {/* 大組第一欄 */}
                   <Grid item xs={12} sm={4} key="larger-1">
                     {renderTypeGroup(largerGroup, firstPart, `${largerGroup} (一)`)}
                   </Grid>
-                  
+
                   {/* 大組第二欄 */}
                   <Grid item xs={12} sm={4} key="larger-2">
                     {renderTypeGroup(largerGroup, secondPart, `${largerGroup} (二)`)}
@@ -205,14 +205,14 @@ const TypeBasedLayout = ({
             }
           ]
         ]);
-        
+
         // 遍歷佈局選項，找到匹配的佈局
         for (const [condition, renderer] of layoutOptions) {
           if (condition()) {
             return renderer();
           }
         }
-        
+
         // 如果沒有特殊條件匹配，回到默認佈局
         return null;
       }
@@ -231,7 +231,7 @@ const TypeBasedLayout = ({
       )
     ]
   ]);
-  
+
   // 遍歷佈局策略，找到匹配的佈局
   for (const [condition, renderer] of layoutStrategies) {
     if (condition(groupKeys.length)) {
@@ -239,7 +239,7 @@ const TypeBasedLayout = ({
       if (layout) return layout;
     }
   }
-  
+
   // 以防萬一，提供默認佈局
   return (
     <Grid container spacing={2}>

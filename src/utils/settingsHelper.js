@@ -28,26 +28,6 @@ export const updateDataStatus = (setDataStatus) => {
   });
 };
 
-// 從存儲鍵獲取狀態鍵的輔助函數 - 使用 Map 代替對象映射
-const storageToStatusKeyMap = new Map([
-  ['medicationData', 'medication'],
-  ['labData', 'labData'],
-  ['chinesemedData', 'chineseMed'],
-  ['imagingData', 'imaging'],
-  ['allergyData', 'allergy'],
-  ['surgeryData', 'surgery'],
-  ['dischargeData', 'discharge'],
-  ['medDaysData', 'medDays'],
-  ['patientSummaryData', 'patientSummary'],
-  ['adultHealthCheckData', 'adultHealthCheck'],
-  ['cancerScreeningData', 'cancerScreening']
-]);
-
-// 從存儲鍵獲取狀態鍵的輔助函數
-const getStatusKeyFromStorageKey = (storageKey) => {
-  return storageToStatusKeyMap.get(storageKey) || storageKey;
-};
-
 // 設定變更處理函數
 export const handleSettingChange = (settingName, value, setLocalState, localStateProp, settingType) => {
   // Add special logging for displayLabFormat changes

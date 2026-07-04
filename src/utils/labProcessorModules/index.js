@@ -76,15 +76,13 @@ const labProcessor = {
    * @param {object} [settings]
    * @returns {import('../../types/processors.js').LabGroup[]}
    */
-  processLabData(labData, settings = {}) {
+  processLabData(labData, _settings = {}) {
     if (!labData || !labData.rObject || !Array.isArray(labData.rObject)) {
       console.error('Invalid lab data format:', labData);
       return [];
     }
 
     // Extract settings with defaults
-    const showLabReference = settings.showLabReference !== undefined ? settings.showLabReference : true;
-    const highlightAbnormal = settings.highlightAbnormalLab !== undefined ? settings.highlightAbnormalLab : true;
 
     // First, deduplicate the lab data with new rules
     const dedupedLabData = this.deduplicateLabData(labData.rObject);
@@ -146,39 +144,39 @@ const labProcessor = {
       // 1. 創建條件檢查和對應動作的 Map
       const valueStatusChecks = new Map([
         // 檢查是否跳過異常標記 (零參考範圍且非自定義範圍)
-        [() => (lab.consult_value && this.isZeroReferenceRange(lab.consult_value) && !usingCustomRange), 
+        [() => (lab.consult_value && this.isZeroReferenceRange(lab.consult_value) && !usingCustomRange),
          () => { valueStatus = "normal"; }],
-         
+
         // 檢查是否有有效數值可供比較
-        [() => lab.assay_value && !isNaN(parseFloat(lab.assay_value)), 
+        [() => lab.assay_value && !isNaN(parseFloat(lab.assay_value)),
          () => {
            const value = parseFloat(lab.assay_value);
-           
+
            // 使用內部 Map 處理不同的參考範圍情況
            const referenceChecks = new Map([
              // 同時有上下限
-             [() => (referenceMin !== null && referenceMax !== null), 
+             [() => (referenceMin !== null && referenceMax !== null),
               () => {
                 const min = parseFloat(referenceMin);
                 const max = parseFloat(referenceMax);
-                
+
                 if (!isNaN(min) && !isNaN(max)) {
                   if (value < min) valueStatus = "low";
                   else if (value > max) valueStatus = "high";
                 }
               }],
-              
+
              // 只有下限
-             [() => (referenceMin !== null && referenceMax === null), 
+             [() => (referenceMin !== null && referenceMax === null),
               () => {
                 const min = parseFloat(referenceMin);
                 if (!isNaN(min) && value < min) {
                   valueStatus = "low";
                 }
               }],
-              
+
              // 只有上限
-             [() => (referenceMin === null && referenceMax !== null), 
+             [() => (referenceMin === null && referenceMax !== null),
               () => {
                 const max = parseFloat(referenceMax);
                 if (!isNaN(max) && value > max) {
@@ -186,7 +184,7 @@ const labProcessor = {
                 }
               }]
            ]);
-           
+
            // 執行第一個符合條件的檢查
            for (const [check, action] of referenceChecks) {
              if (check()) {
@@ -196,7 +194,7 @@ const labProcessor = {
            }
          }]
       ]);
-      
+
       // 執行第一個符合條件的檢查
       for (const [check, action] of valueStatusChecks) {
         if (check()) {
@@ -245,20 +243,20 @@ const labProcessor = {
             // 檢查是否跳過異常標記
             [() => (lab.consult_value && this.isZeroReferenceRange(lab.consult_value) && !usingCustomRange),
              () => { valueStatus = "normal"; }],
-             
+
             // 檢查是否高於上限
             [() => (referenceMax !== null && maxValue > parseFloat(referenceMax)),
              () => { valueStatus = "high"; }],
-             
+
             // 檢查是否低於下限
             [() => (referenceMin !== null && minValue < parseFloat(referenceMin)),
              () => { valueStatus = "low"; }],
-             
+
             // 默認情況
             [() => true,
              () => { valueStatus = "normal"; }]
           ]);
-          
+
           // 執行第一個符合條件的檢查
           for (const [check, action] of multiValueStatusChecks) {
             if (check()) {

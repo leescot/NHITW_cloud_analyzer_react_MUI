@@ -1,4 +1,3 @@
-import React from "react";
 import { Box, Divider, IconButton, Tooltip, Chip } from "@mui/material";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import TypographySizeWrapper from "../../utils/TypographySizeWrapper";

@@ -1,5 +1,5 @@
 // CKM 影像卡片（含 EKG alert / LVEF 標註、報告 tooltip 與 dialog）— 由 CKMData.jsx 抽出
-import React, { useState, useMemo } from 'react';
+import { useState, useMemo } from 'react';
 import {
   Paper, Typography, Tooltip, IconButton, List, ListItem, ListItemText,
   Dialog, DialogTitle, DialogContent, DialogActions, Button, Box, Chip,
@@ -39,7 +39,7 @@ const CKMImagingCard = ({ imaging, ekgAlerts, lvef }) => {
   if (withReportOnly.length === 0) return null;
 
   return (
-    <Paper variant="outlined" sx={{ borderRadius:1, mb:0.75, overflow:'hidden' }}>
+    <Paper variant="outlined" sx={{ borderRadius: 1, mb: 0.75, overflow: 'hidden' }}>
       <SectionTitle>影像</SectionTitle>
       <List dense disablePadding>
         {withReportOnly.map((img, i) => {
@@ -51,7 +51,7 @@ const CKMImagingCard = ({ imaging, ekgAlerts, lvef }) => {
             secondaryAction={
               <Tooltip
                 title={
-                  <Typography variant="caption" style={{whiteSpace:'pre-line'}}>
+                  <Typography variant="caption" style={{whiteSpace: 'pre-line'}}>
                     <div dangerouslySetInnerHTML={{__html: highlightReport(img.reportFull || img.reportExcerpt)}} />
                   </Typography>
                 }
@@ -103,20 +103,20 @@ const CKMImagingCard = ({ imaging, ekgAlerts, lvef }) => {
         })}
       </List>
 
-      <Dialog open={reportDialog.open} onClose={() => setReportDialog({...reportDialog, open:false})} maxWidth="md" fullWidth>
+      <Dialog open={reportDialog.open} onClose={() => setReportDialog({...reportDialog, open: false})} maxWidth="md" fullWidth>
         <DialogTitle>
           <TypographySizeWrapper textSizeType="title">{reportDialog.title}</TypographySizeWrapper>
         </DialogTitle>
         <DialogContent dividers>
-          <TypographySizeWrapper textSizeType="content" style={{whiteSpace:'pre-line'}}>
+          <TypographySizeWrapper textSizeType="content" style={{whiteSpace: 'pre-line'}}>
             <div dangerouslySetInnerHTML={{__html: highlightReport(reportDialog.content)}} />
           </TypographySizeWrapper>
         </DialogContent>
         <DialogActions>
           <Button startIcon={<ContentCopyIcon/>} onClick={() => {
-            navigator.clipboard.writeText(reportDialog.content).then(() => { setCopySuccess(true); setTimeout(()=>setCopySuccess(false),2000); });
+            navigator.clipboard.writeText(reportDialog.content).then(() => { setCopySuccess(true); setTimeout(() => setCopySuccess(false), 2000); });
           }}>{copySuccess ? '已複製' : '複製'}</Button>
-          <Button onClick={() => setReportDialog({...reportDialog, open:false})}>關閉</Button>
+          <Button onClick={() => setReportDialog({...reportDialog, open: false})}>關閉</Button>
         </DialogActions>
       </Dialog>
     </Paper>

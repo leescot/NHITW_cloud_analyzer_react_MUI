@@ -1,4 +1,3 @@
-import React from "react";
 import { Box, TextField, InputAdornment, FormControl, RadioGroup, FormControlLabel, Radio, Button } from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
@@ -45,7 +44,7 @@ const MedicationFilters = ({
   // 創建 Radio 按鈕選項
   const createRadioOptions = () => {
     const options = [];
-    
+
     // 遍歷 Map 生成選項
     for (const [value, { condition, label }] of visitTypeOptions.entries()) {
       // 檢查選項是否應該顯示
@@ -66,7 +65,7 @@ const MedicationFilters = ({
         );
       }
     }
-    
+
     return options;
   };
 
@@ -78,14 +77,14 @@ const MedicationFilters = ({
         placeholder="可輸入商品名或學名..."
         value={searchText}
         onChange={handleSearchChange}
-        sx={{ 
-          mb: 1, 
-          mr: 2, 
-          flexGrow: 1, 
+        sx={{
+          mb: 1,
+          mr: 2,
+          flexGrow: 1,
           maxWidth: { xs: '100%', sm: '300px' },
           '& .MuiInputBase-root': {
             height: '24px'
-          } 
+          }
         }}
         InputProps={{
           startAdornment: (
@@ -98,13 +97,13 @@ const MedicationFilters = ({
 
       {/* 顯示複製全部按鈕，如果設置允許 */}
       {settings?.enableMedicationCopyAll && (
-        <Button 
-          variant="outlined" 
-          size="small" 
+        <Button
+          variant="outlined"
+          size="small"
           onClick={onCopyAll}
-          sx={{ 
-            mb: 1, 
-            mr: 2, 
+          sx={{
+            mb: 1,
+            mr: 2,
             height: '24px',
             position: 'relative',
             fontSize: '0.75rem',

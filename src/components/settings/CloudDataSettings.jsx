@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Typography,
   Switch,
@@ -12,22 +12,16 @@ import {
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import CloudQueueIcon from '@mui/icons-material/CloudQueue';
 import { handleSettingChange } from '../../utils/settingsHelper';
-import { DEFAULT_SETTINGS } from '../../config/defaultSettings';
+import { storageDefaultsForSection } from '../../config/settingsSchema';
+
+const CLOUD_DEFAULTS = storageDefaultsForSection('cloud');
 
 const CloudDataSettings = () => {
-  const [settings, setSettings] = useState({
-    fetchAdultHealthCheck: DEFAULT_SETTINGS.cloud.fetchAdultHealthCheck,
-    fetchCancerScreening: DEFAULT_SETTINGS.cloud.fetchCancerScreening,
-    fetchHbcvdata: DEFAULT_SETTINGS.cloud.fetchHbcvdata,
-  });
+  const [settings, setSettings] = useState(CLOUD_DEFAULTS);
 
   useEffect(() => {
     // Load cloud data settings
-    chrome.storage.sync.get({
-      fetchAdultHealthCheck: DEFAULT_SETTINGS.cloud.fetchAdultHealthCheck,
-      fetchCancerScreening: DEFAULT_SETTINGS.cloud.fetchCancerScreening,
-      fetchHbcvdata: DEFAULT_SETTINGS.cloud.fetchHbcvdata,
-    }, (items) => {
+    chrome.storage.sync.get(CLOUD_DEFAULTS, (items) => {
       setSettings({
         fetchAdultHealthCheck: items.fetchAdultHealthCheck,
         fetchCancerScreening: items.fetchCancerScreening,
@@ -109,4 +103,4 @@ const CloudDataSettings = () => {
   );
 };
 
-export default CloudDataSettings; 
+export default CloudDataSettings;

@@ -72,12 +72,12 @@ export const CKM_ICD_PREFIXES = {
 
 // ATC 藥物碼前綴 → 類別
 export const CKM_ATC_PREFIXES = {
-  antidiabetic:     { prefixes: ['A10'], label: '血糖' },
+  antidiabetic: { prefixes: ['A10'], label: '血糖' },
   antihypertensive: { prefixes: ['C02', 'C07', 'C08', 'C09'], label: '血壓' },
-  diuretic:         { prefixes: ['C03'], label: '利尿' },
-  lipidLowering:    { prefixes: ['C10'], label: '血脂' },
-  antithrombotic:   { prefixes: ['B01'], label: '血栓' },
-  cardiac:          { prefixes: ['C01'], label: '心臟' },
+  diuretic: { prefixes: ['C03'], label: '利尿' },
+  lipidLowering: { prefixes: ['C10'], label: '血脂' },
+  antithrombotic: { prefixes: ['B01'], label: '血栓' },
+  cardiac: { prefixes: ['C01'], label: '心臟' },
 };
 
 // Lab 檢驗碼 → 分組

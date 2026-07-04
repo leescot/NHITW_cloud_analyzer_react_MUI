@@ -1,22 +1,16 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import {
   Box,
   Typography,
   Button,
   CircularProgress,
-  Divider,
   Paper,
-  List,
-  ListItem,
-  ListItemIcon,
-  ListItemText,
   Chip,
   Alert
 } from '@mui/material';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import FolderOpenIcon from '@mui/icons-material/FolderOpen';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
-import DeleteIcon from '@mui/icons-material/Delete';
 import DownloadIcon from '@mui/icons-material/Download';
 
 // 資料類型對照表
@@ -38,7 +32,7 @@ const handleDownloadJSON = (setDownloading, setSnackbar) => {
   setDownloading(true);
 
   // 從 content script 獲取所有資料
-  chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+  chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
     if (!tabs || !tabs[0] || !tabs[0].id) {
       setDownloading(false);
       setSnackbar({
@@ -50,7 +44,7 @@ const handleDownloadJSON = (setDownloading, setSnackbar) => {
     }
 
     try {
-      chrome.tabs.sendMessage(tabs[0].id, { action: "getPatientData" }, function(response) {
+      chrome.tabs.sendMessage(tabs[0].id, { action: "getPatientData" }, function (response) {
         setDownloading(false);
 
         // 處理 chrome 錯誤
@@ -344,7 +338,7 @@ const LoadDataTab = ({ localDataStatus, setSnackbar }) => {
         </Alert>
       )}
 
-      
+
     </Box>
   );
 };

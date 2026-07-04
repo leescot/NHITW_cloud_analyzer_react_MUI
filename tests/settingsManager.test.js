@@ -1,8 +1,9 @@
 import { describe, it, assert, beforeEach, vi } from 'vitest';
 
 import { dataStore } from '../src/store/dataStore.js';
-import { handleDataFetchCompletedSettingsChange } from '../src/utils/settingsManager.js';
+import { handleDataFetchCompletedSettingsChange, loadAllSettings } from '../src/utils/settingsManager.js';
 import { DEFAULT_SETTINGS } from '../src/config/defaultSettings.js';
+import { EXPECTED_STORAGE_KEYS } from './fixtures/storageKeys.js';
 
 const makeCurrentSettings = () => ({
   western: { ...DEFAULT_SETTINGS.western },
@@ -168,5 +169,75 @@ describe('utils/settingsManager.handleDataFetchCompletedSettingsChange', functio
     assert.equal(callbacks.reprocessLab.mock.calls.length, 0);
     assert.equal(callbacks.reprocessChineseMed.mock.calls.length, 0);
     assert.equal(callbacks.reprocessMedication.mock.calls.length, 0);
+  });
+});
+
+// 暫時替換 chrome.storage.sync.get,回傳 defaults 疊上 overrides,並記錄請求的 defaults
+const withSyncGetStub = async (overrides, fn) => {
+  const original = chrome.storage.sync.get;
+  let requestedDefaults;
+  chrome.storage.sync.get = (defaults, cb) => {
+    requestedDefaults = defaults;
+    cb({ ...defaults, ...overrides });
+  };
+  try {
+    return { result: await fn(), requestedDefaults };
+  } finally {
+    chrome.storage.sync.get = original;
+  }
+};
+
+describe('utils/settingsManager.loadAllSettings(characterization,重構前行為基準)', function () {
+  it('向 chrome.storage.sync.get 要求的扁平預設鍵 = 52 鍵快照', async function () {
+    const { requestedDefaults } = await withSyncGetStub({}, loadAllSettings);
+    assert.deepEqual(Object.keys(requestedDefaults).sort(), EXPECTED_STORAGE_KEYS);
+  });
+
+  it('storage 全空(回傳 defaults)時,輸出各 section 與 DEFAULT_SETTINGS 等值', async function () {
+    const { result } = await withSyncGetStub({}, loadAllSettings);
+    assert.deepEqual(result.western, DEFAULT_SETTINGS.western);
+    assert.deepEqual(result.atc5, DEFAULT_SETTINGS.atc5);
+    assert.deepEqual(result.chinese, DEFAULT_SETTINGS.chinese);
+    assert.deepEqual(result.lab, DEFAULT_SETTINGS.lab);
+    assert.deepEqual(result.overview, DEFAULT_SETTINGS.overview);
+    assert.deepEqual(result.general, DEFAULT_SETTINGS.general);
+    assert.deepEqual(result.cloud, DEFAULT_SETTINGS.cloud);
+  });
+
+  it('storage 覆寫值會映射到巢狀結構(含歷史改名鍵與跨 section 同名鍵)', async function () {
+    const { result } = await withSyncGetStub({
+      chineseMedDoseFormat: 'perTime',
+      showLabUnit: true,
+      enableATC5Colors: false,
+      highlightAbnormalLab: false,
+      showDiagnosis: false, // western 的同名鍵
+      enableCKMScreening: true,
+    }, loadAllSettings);
+    assert.equal(result.chinese.doseFormat, 'perTime');
+    assert.equal(result.lab.showUnit, true);
+    assert.equal(result.atc5.enableColors, false);
+    assert.equal(result.lab.highlightAbnormal, false);
+    assert.equal(result.western.showDiagnosis, false);
+    assert.equal(result.chinese.showDiagnosis, DEFAULT_SETTINGS.chinese.showDiagnosis);
+    assert.equal(result.general.enableCKMScreening, true);
+  });
+
+  it('falsy 覆寫的退回行為:copyAllOrder/itemSeparator/focused 清單退回預設,其餘 falsy 保留', async function () {
+    const { result } = await withSyncGetStub({
+      medicationCopyAllOrder: '',
+      labCopyAllOrder: '',
+      itemSeparator: '',
+      focusedLabTests: null,
+      focusedImageTests: null,
+      drugSeparator: '', // 舊程式「不」退回
+      autoOpenPage: false,
+    }, loadAllSettings);
+    assert.equal(result.western.medicationCopyAllOrder, 'newToOld');
+    assert.equal(result.lab.labCopyAllOrder, 'newToOld');
+    assert.equal(result.lab.itemSeparator, ',');
+    assert.deepEqual(result.overview.focusedLabTests, DEFAULT_SETTINGS.overview.focusedLabTests);
+    assert.deepEqual(result.overview.focusedImageTests, DEFAULT_SETTINGS.overview.focusedImageTests);
+    assert.equal(result.western.drugSeparator, '');
+    assert.equal(result.general.autoOpenPage, false);
   });
 });

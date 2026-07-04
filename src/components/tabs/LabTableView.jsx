@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState } from 'react';
 import {
   Table,
   TableBody,
@@ -7,7 +7,6 @@ import {
   TableHead,
   TableRow,
   Paper,
-  Typography,
   Box,
   RadioGroup,
   FormControlLabel,
@@ -93,13 +92,13 @@ const LabTableView = ({ groupedLabs, labSettings }) => {
   const formatDateHeader = (dateStr) => {
     // 日期為空的情況
     if (!dateStr) return dateFormatterMap.get('empty')();
-    
+
     // 嘗試分割日期字串
     const parts = dateStr.split('-');
-    
+
     // 判斷日期格式是否有效
     const dateStatus = parts.length === 3 ? 'valid' : 'invalid';
-    
+
     // 使用 Map 獲取對應的格式化函數
     return dateFormatterMap.get(dateStatus)(dateStatus === 'valid' ? parts : dateStr);
   };

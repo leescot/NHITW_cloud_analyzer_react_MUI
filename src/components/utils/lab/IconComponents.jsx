@@ -1,10 +1,9 @@
-import React from "react";
 import { Typography, Box, IconButton, Tooltip } from "@mui/material";
 import { styled } from '@mui/material/styles';
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 
 // 方法：使用相對定位和絕對定位為圖標添加文字
-export const IconWithTextOverlay = styled(Box)(({ theme }) => ({
+export const IconWithTextOverlay = styled(Box)(() => ({
   position: 'relative',
   display: 'inline-flex',
   alignItems: 'center',

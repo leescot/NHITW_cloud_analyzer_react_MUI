@@ -1,4 +1,3 @@
-import React, { useEffect, useState } from "react";
 import { Paper, Typography, Box, Table, TableBody, TableCell, TableContainer, TableRow } from "@mui/material";
 import { alpha } from "@mui/material/styles";
 import HealthAndSafetyIcon from "@mui/icons-material/HealthAndSafety";
@@ -7,7 +6,7 @@ import { useGeneralDisplaySettings } from "../../contexts/SettingsContext";
 
 /**
  * Integrated component for displaying Adult Health Check, Cancer Screening, and Hepatitis B & C data
- * 
+ *
  * @param {Object} adultHealthCheckData - The adult health check data
  * @param {Object} cancerScreeningData - The cancer screening data
  * @param {Object} hbcvData - The hepatitis B & C data
@@ -285,7 +284,7 @@ const Overview_IntegratedHealthData = ({
 
         const content = (
             <>
-                {contentParts.map((part, index) => {
+                {contentParts.map((part) => {
                     if (part.type === 'results') {
                         return (
                             <Box key="results" sx={{ mb: contentParts.length > 1 ? 0.5 : 0 }}>

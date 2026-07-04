@@ -1,6 +1,5 @@
 import React from "react";
 import {
-  Typography,
   Paper,
   List,
   ListItem,

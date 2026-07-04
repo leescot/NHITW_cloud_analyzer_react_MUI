@@ -20,7 +20,7 @@ export const getMedicationColor = (medication, settings) => {
   }
 
   // 檢查藥物的 ATC5 代碼是否屬於任何群組
-  const group = Object.entries(settings.atc5Groups).find(([groupName, codes]) => {
+  const group = Object.entries(settings.atc5Groups).find(([, codes]) => {
     const match = codes.some(code => {
       if (code.length === 7) {
         return atc5Code === code; // 7字元代碼的精確匹配
@@ -37,14 +37,14 @@ export const getMedicationColor = (medication, settings) => {
 
   // 檢查群組是否被分配到顏色
   const colorGroups = settings.atc5ColorGroups || { red: [], orange: [], green: [] };
-  
+
   // 使用 Map 儲存顏色映射關係
   const colorMap = new Map([
     ['red', { name: 'red', color: '#f44336' }],
     ['orange', { name: 'orange', color: '#ed6c02' }],
     ['green', { name: 'green', color: '#2e7d32' }]
   ]);
-  
+
   // 檢查群組屬於哪個顏色類別
   for (const [colorKey, groupNames] of Object.entries(colorGroups)) {
     if (groupNames && groupNames.includes(groupName) && colorMap.has(colorKey)) {
@@ -56,7 +56,7 @@ export const getMedicationColor = (medication, settings) => {
 };
 
 // 判斷藥物是否應該以粗體顯示的函數
-export const shouldBeBold = (medication, settings) => {
+export const shouldBeBold = (_medication, _settings) => {
   // if (!settings.enableATC5Colors) return false;
 
   // let atc5Code = medication.atc_code;
@@ -103,7 +103,7 @@ export const getVisitTypeColor = (visitType) => {
     ["住診", "#388e3c"], // 較柔和的綠色
     ["門診", "primary.main"] // 預設藍色
   ]);
-  
+
   // 返回對應顏色或預設值
   return visitTypeColorMap.get(visitType) || "primary.main";
 };

@@ -1,7 +1,6 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Box,
-  Typography,
   Tabs,
   Tab,
   Paper,
@@ -17,6 +16,7 @@ import MedicationIcon from '@mui/icons-material/Medication';
 import ScienceIcon from '@mui/icons-material/Science';
 // Other icons can be imported for future settings pages
 
+import { storageDefaultsForSection } from '../../config/settingsSchema';
 import { useGeneralDisplaySettings } from '../../contexts/SettingsContext';
 
 /**
@@ -33,7 +33,7 @@ const AdvancedSettings = ({ appSettings, setAppSettings }) => {
   useEffect(() => {
     chrome.storage.sync.get(
       {
-        enableLabCustomCopyFormat: false
+        enableLabCustomCopyFormat: storageDefaultsForSection('lab').enableLabCustomCopyFormat
       },
       (items) => {
         setEnableLabCustomFormat(items.enableLabCustomCopyFormat);
@@ -67,14 +67,14 @@ const AdvancedSettings = ({ appSettings, setAppSettings }) => {
       {/* <Typography variant="h5" fontWeight="medium" sx={{ mb: 2 }}>
         進階設定
       </Typography> */}
-      
+
       {/* 設定頁籤選擇 */}
-      <Paper 
-        elevation={0} 
-        sx={{ 
-          mb: 1, 
+      <Paper
+        elevation={0}
+        sx={{
+          mb: 1,
           backgroundColor: '#f5f9ff',
-          borderRadius: '8px', 
+          borderRadius: '8px',
           overflow: 'hidden'
         }}
       >
@@ -99,14 +99,14 @@ const AdvancedSettings = ({ appSettings, setAppSettings }) => {
             },
           }}
         >
-          <Tab 
-            label="西藥自訂複製格式" 
+          <Tab
+            label="西藥自訂複製格式"
             icon={<MedicationIcon sx={{ fontSize: '1rem' }} />}
             iconPosition="start"
           />
           {enableLabCustomFormat && (
-            <Tab 
-              label="檢驗複製格式" 
+            <Tab
+              label="檢驗複製格式"
               icon={<ScienceIcon sx={{ fontSize: '1rem' }} />}
               iconPosition="start"
             />
@@ -114,26 +114,26 @@ const AdvancedSettings = ({ appSettings, setAppSettings }) => {
           {/* 在這裡可以加入更多的設定頁籤 */}
         </Tabs>
       </Paper>
-      
+
       <Divider sx={{ mb: 1 }} />
-      
+
       {/* 設定頁面內容 */}
       <Box role="tabpanel" hidden={settingsTabIndex !== 0}>
         {settingsTabIndex === 0 && (
-          <MedicationCustomFormatEditor 
-            appSettings={appSettings} 
-            setAppSettings={setAppSettings} 
+          <MedicationCustomFormatEditor
+            appSettings={appSettings}
+            setAppSettings={setAppSettings}
           />
         )}
       </Box>
-      
+
       {/* 檢驗複製格式設定頁面 */}
       {enableLabCustomFormat && (
         <Box role="tabpanel" hidden={settingsTabIndex !== 1}>
           {settingsTabIndex === 1 && (
-            <LabCustomFormatEditor 
-              appSettings={appSettings} 
-              setAppSettings={setAppSettings} 
+            <LabCustomFormatEditor
+              appSettings={appSettings}
+              setAppSettings={setAppSettings}
             />
           )}
         </Box>
@@ -142,4 +142,4 @@ const AdvancedSettings = ({ appSettings, setAppSettings }) => {
   );
 };
 
-export default AdvancedSettings; 
+export default AdvancedSettings;

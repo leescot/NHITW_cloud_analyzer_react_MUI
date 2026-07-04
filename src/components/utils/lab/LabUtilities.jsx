@@ -1,5 +1,3 @@
-import React from "react";
-
 // 獲取檢驗結果的顯示顏色
 export const getStatusColor = (lab, highlightAbnormal) => {
   if (!lab || !highlightAbnormal) return "inherit";

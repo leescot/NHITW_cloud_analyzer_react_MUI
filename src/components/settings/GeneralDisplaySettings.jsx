@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Box,
   Typography,
@@ -16,30 +16,24 @@ import {
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import DisplaySettingsIcon from '@mui/icons-material/DisplaySettings';
+import { storageDefaultsForSection } from '../../config/settingsSchema';
+
+const GENERAL_DEFAULTS = storageDefaultsForSection('general');
 
 const GeneralDisplaySettings = () => {
   // Define state variables for settings
-  const [autoOpenPage, setAutoOpenPage] = useState(false);
-  const [titleTextSize, setTitleTextSize] = useState('medium');
-  const [contentTextSize, setContentTextSize] = useState('medium');
-  const [noteTextSize, setNoteTextSize] = useState('small');
-  const [floatingIconPosition, setFloatingIconPosition] = useState('top-right');
-  const [alwaysOpenOverviewTab, setAlwaysOpenOverviewTab] = useState(true);
-  const [useColorfulTabs, setUseColorfulTabs] = useState(false);
-  const [enableCKMTab, setEnableCKMTab] = useState(false);
+  const [autoOpenPage, setAutoOpenPage] = useState(GENERAL_DEFAULTS.autoOpenPage);
+  const [titleTextSize, setTitleTextSize] = useState(GENERAL_DEFAULTS.titleTextSize);
+  const [contentTextSize, setContentTextSize] = useState(GENERAL_DEFAULTS.contentTextSize);
+  const [noteTextSize, setNoteTextSize] = useState(GENERAL_DEFAULTS.noteTextSize);
+  const [floatingIconPosition, setFloatingIconPosition] = useState(GENERAL_DEFAULTS.floatingIconPosition);
+  const [alwaysOpenOverviewTab, setAlwaysOpenOverviewTab] = useState(GENERAL_DEFAULTS.alwaysOpenOverviewTab);
+  const [useColorfulTabs, setUseColorfulTabs] = useState(GENERAL_DEFAULTS.useColorfulTabs);
+  const [enableCKMTab, setEnableCKMTab] = useState(GENERAL_DEFAULTS.enableCKMTab);
 
   // Load settings from storage
   useEffect(() => {
-    chrome.storage.sync.get({
-      autoOpenPage: false,
-      titleTextSize: 'medium',
-      contentTextSize: 'medium',
-      noteTextSize: 'small',
-      floatingIconPosition: 'top-right',
-      alwaysOpenOverviewTab: true,
-      useColorfulTabs: true,
-      enableCKMTab: false,
-    }, (items) => {
+    chrome.storage.sync.get(GENERAL_DEFAULTS, (items) => {
       setAutoOpenPage(items.autoOpenPage);
       setTitleTextSize(items.titleTextSize);
       setContentTextSize(items.contentTextSize);
@@ -58,7 +52,7 @@ const GeneralDisplaySettings = () => {
     chrome.storage.sync.set({ autoOpenPage: newValue });
 
     // Notify FloatingIcon component of the change
-    chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
       if (tabs[0]) {
         chrome.tabs.sendMessage(tabs[0].id, {
           action: "settingChanged",
@@ -87,7 +81,7 @@ const GeneralDisplaySettings = () => {
     chrome.storage.sync.set({ titleTextSize: newValue });
 
     // Notify FloatingIcon component of the change
-    chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
       if (tabs[0]) {
         chrome.tabs.sendMessage(tabs[0].id, {
           action: "settingChanged",
@@ -116,7 +110,7 @@ const GeneralDisplaySettings = () => {
     chrome.storage.sync.set({ contentTextSize: newValue });
 
     // Notify FloatingIcon component of the change
-    chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
       if (tabs[0]) {
         chrome.tabs.sendMessage(tabs[0].id, {
           action: "settingChanged",
@@ -145,7 +139,7 @@ const GeneralDisplaySettings = () => {
     chrome.storage.sync.set({ noteTextSize: newValue });
 
     // Notify FloatingIcon component of the change
-    chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
       if (tabs[0]) {
         chrome.tabs.sendMessage(tabs[0].id, {
           action: "settingChanged",
@@ -174,7 +168,7 @@ const GeneralDisplaySettings = () => {
     chrome.storage.sync.set({ floatingIconPosition: newValue });
 
     // Notify FloatingIcon component of the change
-    chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
       if (tabs[0]) {
         chrome.tabs.sendMessage(tabs[0].id, {
           action: "settingChanged",
@@ -203,7 +197,7 @@ const GeneralDisplaySettings = () => {
     chrome.storage.sync.set({ alwaysOpenOverviewTab: newValue });
 
     // Notify FloatingIcon component of the change
-    chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
       if (tabs[0]) {
         chrome.tabs.sendMessage(tabs[0].id, {
           action: "settingChanged",
@@ -232,7 +226,7 @@ const GeneralDisplaySettings = () => {
     chrome.storage.sync.set({ useColorfulTabs: newValue });
 
     // Notify FloatingIcon component of the change
-    chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+    chrome.tabs.query({ active: true, currentWindow: true }, function (tabs) {
       if (tabs[0]) {
         chrome.tabs.sendMessage(tabs[0].id, {
           action: "settingChanged",
@@ -248,33 +242,6 @@ const GeneralDisplaySettings = () => {
             alwaysOpenOverviewTab: alwaysOpenOverviewTab,
             useColorfulTabs: newValue,
             enableCKMTab: enableCKMTab
-          }
-        });
-      }
-    });
-  };
-
-  const handleEnableCKMTabChange = (event) => {
-    const newValue = event.target.checked;
-    setEnableCKMTab(newValue);
-    chrome.storage.sync.set({ enableCKMTab: newValue });
-
-    chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
-      if (tabs[0]) {
-        chrome.tabs.sendMessage(tabs[0].id, {
-          action: "settingChanged",
-          settingType: "generalDisplay",
-          setting: "enableCKMTab",
-          value: newValue,
-          allSettings: {
-            autoOpenPage: autoOpenPage,
-            titleTextSize: titleTextSize,
-            contentTextSize: contentTextSize,
-            noteTextSize: noteTextSize,
-            floatingIconPosition: floatingIconPosition,
-            alwaysOpenOverviewTab: alwaysOpenOverviewTab,
-            useColorfulTabs: useColorfulTabs,
-            enableCKMTab: newValue
           }
         });
       }

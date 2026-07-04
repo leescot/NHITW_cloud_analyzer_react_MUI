@@ -2,7 +2,6 @@
 import { getAbbreviation } from './abbreviationUtils.js';
 import { normalizeValue, getValueStatus } from './valueUtils.js';
 import { parseReferenceRange, isZeroReferenceRange, getReferenceRangeDisplayText } from './referenceRangeUtils.js';
-import { checkIfAbnormal } from './valueUtils.js';
 import { hasCustomReferenceRange, getCustomReferenceRange } from './customReferenceRanges.js';
 
 // 格式化單筆檢驗資料

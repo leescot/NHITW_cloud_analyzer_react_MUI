@@ -39,4 +39,4 @@ export const adultHealthCheckProcessor = {
       return { result_data: null };
     }
   }
-}; 
+};

@@ -1,4 +1,3 @@
-/* eslint-disable react/prop-types -- 專案未使用 PropTypes(全 repo 該規則有 ~2100 個未修告警,實質未執行) */
 import {
   Box,
   Paper,

@@ -1,4 +1,3 @@
-import React from "react";
 import { Box } from "@mui/material";
 import TypographySizeWrapper from "../../utils/TypographySizeWrapper";
 import { CopySectionButton, CopySelectedButton } from "../../utils/lab/IconComponents";

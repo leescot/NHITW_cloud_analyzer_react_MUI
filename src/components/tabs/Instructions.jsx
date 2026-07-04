@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Box, Typography, Paper, Grid, List, ListItem, ListItemText, Divider } from '@mui/material';
+import { useState, useEffect } from 'react';
+import { Box, Typography, Paper, Grid, List, ListItem, ListItemText } from '@mui/material';
 import ReactMarkdown from 'react-markdown';
 
 // 導入的 JSON 圖片數據，目前選用壓縮率高的 webp 格式，轉為 base64 放進 JSON 中
@@ -73,8 +73,7 @@ IMAGE_PLACEHOLDER(icon128, 點擊「雲」圖示)
 
 IMAGE_PLACEHOLDER(demo_patient, 健保雲端測試病人資料整合資訊)
 
-`
-,
+`,
   },
   {
     id: 'data-export',

@@ -19,7 +19,7 @@ const FALLBACK_APP_SETTINGS = {
 
 const SettingsContext = createContext(null);
 
-// eslint-disable-next-line react/prop-types -- 專案未使用 prop-types,遵循既有元件慣例
+
 export const SettingsProvider = ({ appSettings, generalDisplaySettings, children }) => {
   const value = useMemo(
     () => ({ appSettings, generalDisplaySettings }),

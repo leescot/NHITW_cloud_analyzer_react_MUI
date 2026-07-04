@@ -1,4 +1,3 @@
-import React from "react";
 import { Box, Grid, Paper } from "@mui/material";
 import TypographySizeWrapper from "../../utils/TypographySizeWrapper";
 import LabItemDisplay from "./LabItemDisplay";
@@ -40,7 +39,6 @@ export const VerticalLayout = ({
 // 橫式布局組件 - 所有檢驗連續顯示在同一行
 export const HorizontalLayout = ({
   labs,
-  groupIndex,
   labSettings
 }) => {
   const { enableLabAbbrev, showUnit, showReference, highlightAbnormal } = labSettings;
