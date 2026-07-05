@@ -18,10 +18,13 @@
   window.dispatchEvent(new Event('storage'));
   ```
 - 寫入失敗時只 `console.error`,不拋出、不中斷主流程(對齊「分享失敗不可影響核心功能」的既有行為)。
+- **大小監控(2026-07-05 起)**:寫入前量測序列化後大小(UTF-16 每字元估 2 bytes),超過
+  `NHITW_DATA_WARN_BYTES`(4MB)時經 `debugLog` 告警——只警告不截斷、不阻擋寫入;
+  寫入失敗的 `console.error` 訊息會附上估算大小,方便診斷 quota 問題。
 
 ## 完整格式
 
-`buildShareData(timestamp = Date.now())` 回傳的物件依序含 16 個 key(**timestamp 必為第一個 key**):
+`buildShareData(timestamp = Date.now())` 回傳的物件依序含 17 個 key(**timestamp 必為第一個 key**):
 
 | # | key | 型別/來源 | 說明 |
 |---|---|---|---|
@@ -41,6 +44,7 @@
 | 14 | `cancerScreening` | `dataStore.getData('cancerScreening')` | 四癌篩檢 |
 | 15 | `hbcvdata` | `dataStore.getData('hbcvdata')` | B、C 型肝炎專區 |
 | 16 | `chronicMed` | `dataStore.getData('chronicMed')` | 慢性處方箋,原始 schema `{ rObject: [{ chrDataN, chrDataY }] }`(非一般型別的 `rObject` 陣列;細節見 `src/apiInterceptor/README.md`) |
+| 17 | `truncated` | `boolean` | **2026-07-05 新增**:快照是否因大小限制被截斷。截斷策略尚未實作,目前恆為 `false`;未來若實作截斷,會設為 `true` 讓消費端辨識「這份快照不完整」。消費端讀到 `undefined`(舊版寫入的資料)應視同 `false` |
 
 ### 內容規則
 
