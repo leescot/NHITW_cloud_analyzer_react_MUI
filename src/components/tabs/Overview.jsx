@@ -36,7 +36,6 @@ import CKMImagingCard from "./ckm/CKMImagingCard";
 import { DEFAULT_LAB_TESTS } from '../../config/labTests';
 import { DEFAULT_IMAGE_TESTS } from '../../config/imageTests';
 import { debugLog } from '../../utils/logger';
-import { useGeneralDisplaySettings } from '../../contexts/SettingsContext';
 
 const Overview = ({
   allergyData,
@@ -65,7 +64,6 @@ const Overview = ({
   enableCKMTab = false,
   userInfo = null
 }) => {
-  const generalDisplaySettings = useGeneralDisplaySettings();
   // Check if components have data
   const hasMedications = useMemo(() => groupedMedications && groupedMedications.length > 0, [groupedMedications]);
   const hasAllergyData = useMemo(() => allergyData && allergyData.length > 0, [allergyData]);
@@ -89,7 +87,6 @@ const Overview = ({
           medications={ckmData.medications}
           groupedLabs={groupedLabs}
           userInfo={userInfo}
-          gds={generalDisplaySettings}
         />
       )}
       <Grid container spacing={1}>

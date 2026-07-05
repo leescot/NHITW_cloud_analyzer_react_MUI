@@ -281,12 +281,11 @@ const CKMData = ({ ckmData, groupedLabs, labSettings, userInfo }) => {
     return <Box sx={{p: 2, textAlign: 'center'}}><Typography color="text.secondary">無 CKM 相關資料</Typography></Box>;
   }
 
-  const gds = generalDisplaySettings;
   const enableNephroReport = generalDisplaySettings?.enableNephroReport;
 
   return (
     <Box sx={{ p: 0.5 }}>
-      <CKMSummaryBar summary={ckmData.summary} medications={ckmData.medications} groupedLabs={groupedLabs} userInfo={userInfo} gds={gds} />
+      <CKMSummaryBar summary={ckmData.summary} medications={ckmData.medications} groupedLabs={groupedLabs} userInfo={userInfo} />
       <Grid container spacing={0.75}>
         <Grid item xs={12} md={4.5}>
           <DiagnosisCard diagnoses={ckmData.diagnoses} />

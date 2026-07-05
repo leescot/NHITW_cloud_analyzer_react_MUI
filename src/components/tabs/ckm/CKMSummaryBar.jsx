@@ -1,6 +1,7 @@
 // CKM 頂部摘要列：90天內關鍵用藥 badge / 近期檢驗 Chip / 篩檢指標
 import { useMemo } from 'react';
 import { Box, Typography, Chip, Tooltip } from '@mui/material';
+import { useGeneralDisplaySettings } from '../../../contexts/SettingsContext';
 import { getRecentKeyDrugs } from '../../../utils/ckmUtils';
 import { computeScreeningIndicators } from '../../../utils/screeningIndicators';
 
@@ -8,13 +9,14 @@ const BAND_COLOR = { low: 'success', mid: 'warning', high: 'error' };
 const Sep = () => <Typography sx={{ mx: 0.5, color: '#bbb', fontSize: '0.9rem' }}>|</Typography>;
 
 
-const CKMSummaryBar = ({ summary, medications, groupedLabs, userInfo, gds }) => {
+const CKMSummaryBar = ({ summary, medications, groupedLabs, userInfo }) => {
+  const generalDisplaySettings = useGeneralDisplaySettings();
   // hooks 必須在任何 early return 之前
   const screening = useMemo(() => {
-    if (!gds?.enableCKMScreening) return [];
+    if (!generalDisplaySettings?.enableCKMScreening) return [];
     const r = computeScreeningIndicators({ groupedLabs, summary, userInfo });
     return ['fib4', 'tyg', 'kfre', 'homaIr'].map(k => r[k]).filter(Boolean);
-  }, [gds, groupedLabs, summary, userInfo]);
+  }, [generalDisplaySettings, groupedLabs, summary, userInfo]);
 
   if (!summary) return null;
 
