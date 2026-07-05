@@ -1,4 +1,5 @@
 import { getTokenPayload } from './tokenUtils';
+import { calculateAgeFromROCBirthday } from './ageUtils';
 
 export const extractUserInfoFromToken = () => {
   try {
@@ -10,20 +11,8 @@ export const extractUserInfoFromToken = () => {
     const gender = payload.UserSex || "";
     const birthday = payload.UserBirthday || "";
 
-    let age = null;
-    if (birthday && birthday.length === 7) {
-      const rocYear = parseInt(birthday.substring(0, 3), 10);
-      const month = parseInt(birthday.substring(3, 5), 10);
-      const day = parseInt(birthday.substring(5, 7), 10);
-      const adYear = rocYear + 1911;
-      const birthDate = new Date(adYear, month - 1, day);
-      const today = new Date();
-      age = today.getFullYear() - birthDate.getFullYear();
-      const monthDiff = today.getMonth() - birthDate.getMonth();
-      if (monthDiff < 0 || (monthDiff === 0 && today.getDate() < birthDate.getDate())) {
-        age--;
-      }
-    }
+    // 年齡計算與本地匯入路徑(ageUtils.buildUserInfoFromLocal)共用單一來源
+    const age = calculateAgeFromROCBirthday(birthday);
 
     return { name, userId, gender, birthday, age };
   } catch (error) {
