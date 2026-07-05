@@ -41,7 +41,7 @@ const safeSetter = (setters, setterName, data, dataName) => {
  * - guard: 決定是否執行該項目。
  *   - 'rObject'：dataSources[sourceKey]?.rObject 存在才執行（多數型別）。
  *   - 'truthy'：dataSources[sourceKey] 存在即執行（cancerScreening / adultHealthCheck / hbcvdata）。
- *   - function(dataSources)：自訂判斷（patientSummary 的大小寫 key 後備邏輯）。
+ *   - function(dataSources)：自訂判斷（目前無使用者;保留給形狀特殊的新型別）。
  * - getInput(dataSources)：取得要傳給 process() 的主要資料（預設為 dataSources[sourceKey]）。
  * - run(input, dataSources, settings)：實際呼叫 processor，可回傳值或 Promise。
  * - setterName / resultKey：setter 名稱與 results 物件要寫入的 key。
@@ -106,13 +106,10 @@ const PROCESSOR_REGISTRY = [
     resultKey: 'medDays',
   },
   {
-    // 原碼優先讀 dataSources.patientsummary(小寫s)，不存在才後備讀
-    // dataSources.patientSummary(大寫S)；兩者共用同一個 setter/resultKey。
+    // 唯一組裝路徑 collectDataSources() 只產生大寫 S 的 patientSummary;
+    // 舊的小寫 patientsummary fallback 為死分支,已移除(2026-07-05,DOC/07 地雷 #1)。
     sourceKey: 'patientSummary',
-    guard: (dataSources) =>
-      Boolean(dataSources.patientsummary?.rObject || dataSources.patientSummary?.rObject),
-    getInput: (dataSources) =>
-      dataSources.patientsummary?.rObject ? dataSources.patientsummary : dataSources.patientSummary,
+    guard: 'rObject',
     run: (input) => patientSummaryProcessor.processPatientSummaryData(input),
     setterName: 'setPatientSummaryData',
     resultKey: 'patientSummary',

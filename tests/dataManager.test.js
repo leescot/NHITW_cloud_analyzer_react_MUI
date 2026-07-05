@@ -189,21 +189,7 @@ describe('utils/dataManager.handleAllData（行為鎖定，重構前後皆須為
     assert.deepEqual(results, {});
   });
 
-  it('patientSummary：優先使用 dataSources.patientsummary(小寫s)', async function () {
-    const { patientSummaryProcessor } = await import('../src/utils/patientSummaryProcessor.js');
-    const patientsummary = { rObject: [{ id: 'ps1' }] };
-    const dataSources = { patientsummary };
-    const setters = makeSetters();
-
-    const results = await handleAllData(dataSources, {}, setters);
-
-    assert.strictEqual(patientSummaryProcessor.processPatientSummaryData.mock.calls.length, 1);
-    assert.strictEqual(patientSummaryProcessor.processPatientSummaryData.mock.calls[0][0], patientsummary);
-    assert.strictEqual(setters.setPatientSummaryData.mock.calls.length, 1);
-    assert.exists(results.patientSummary);
-  });
-
-  it('patientSummary：小寫 s 不存在時，退回使用 dataSources.patientSummary(大寫S)', async function () {
+  it('patientSummary：讀 dataSources.patientSummary(collectDataSources 的唯一組裝 key)', async function () {
     const { patientSummaryProcessor } = await import('../src/utils/patientSummaryProcessor.js');
     const patientSummary = { rObject: [{ id: 'ps2' }] };
     const dataSources = { patientSummary };
@@ -215,5 +201,16 @@ describe('utils/dataManager.handleAllData（行為鎖定，重構前後皆須為
     assert.strictEqual(patientSummaryProcessor.processPatientSummaryData.mock.calls[0][0], patientSummary);
     assert.strictEqual(setters.setPatientSummaryData.mock.calls.length, 1);
     assert.exists(results.patientSummary);
+  });
+
+  it('patientSummary：小寫 patientsummary key 不再被讀取(大小寫 fallback 死分支已移除)', async function () {
+    const { patientSummaryProcessor } = await import('../src/utils/patientSummaryProcessor.js');
+    const dataSources = { patientsummary: { rObject: [{ id: 'ps1' }] } };
+    const setters = makeSetters();
+
+    await handleAllData(dataSources, {}, setters);
+
+    assert.strictEqual(patientSummaryProcessor.processPatientSummaryData.mock.calls.length, 0);
+    assert.strictEqual(setters.setPatientSummaryData.mock.calls.length, 0);
   });
 });

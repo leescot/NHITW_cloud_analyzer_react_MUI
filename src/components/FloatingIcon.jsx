@@ -47,10 +47,10 @@ const FloatingIcon = () => {
   // nhiDataRef：見 useSettingsState.js 檔頭註解，解決 useSettingsState 與
   // useNhiDataState 互相依賴的問題。FloatingIcon 建立空 ref 傳入 useSettingsState，
   // 待 useNhiDataState 執行完成後於本次 render 賦值，listener 皆於非同步事件觸發時
-  // 透過 .current 讀取，時序與既有的 openRef/appSettingsRef pattern 相同。
+  // 透過 .current 讀取，時序與既有的 appSettingsRef pattern 相同。
   const nhiDataRef = useRef(null);
   const { appSettings, setAppSettings, generalDisplaySettings, appSettingsRef } =
-    useSettingsState({ open, setOpen, setTabValue, advancedTabIndex, nhiDataRef });
+    useSettingsState({ nhiDataRef });
 
   const nhiData = useNhiDataState({
     appSettingsRef,

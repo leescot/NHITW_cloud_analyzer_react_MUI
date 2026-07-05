@@ -1,13 +1,13 @@
 // useSettingsState.js
 // 設定狀態與三種監聽器（chrome.storage 設定變更、runtime 訊息、dataFetchCompleted）。
-// openRef/appSettingsRef 供掛載一次的 listener 讀取最新值（stale closure 修復模式，勿改）。
+// appSettingsRef 供掛載一次的 listener 讀取最新值（stale closure 修復模式，勿改）。
 //
 // nhiDataRef 循環依賴解法：useNhiDataState 需要本 hook 的 appSettingsRef，本 hook（掛載一次
 // 的 listener）需要呼叫 useNhiDataState 回傳的 handleData / setGroupedXxx。FloatingIcon 建立一個
 // 空的 nhiDataRef 傳入本 hook，待 useNhiDataState 執行後才把回傳值指派給 nhiDataRef.current；
 // 本 hook 內部的 listener 一律透過 nhiDataRef.current.xxx 存取，因為 listener 只在非同步事件
 // （storage 變更、runtime 訊息、資料抓取完成）觸發時才讀取，此時 nhiDataRef.current 必定已由
-// FloatingIcon render 賦值完成——與既有的 openRef/appSettingsRef pattern 相同的時序保證。
+// FloatingIcon render 賦值完成——與既有的 appSettingsRef pattern 相同的時序保證。
 import { useState, useEffect, useRef } from "react";
 
 import { reprocessData } from "../utils/dataManager";
@@ -21,7 +21,7 @@ import {
 import { dataStore } from "../store/dataStore";
 import { DEFAULT_SETTINGS } from "../config/defaultSettings";
 
-export function useSettingsState({ open, setOpen, setTabValue, advancedTabIndex, nhiDataRef }) {
+export function useSettingsState({ nhiDataRef }) {
   const [generalDisplaySettings, setGeneralDisplaySettings] = useState(
     DEFAULT_SETTINGS.general
   );
@@ -37,10 +37,8 @@ export function useSettingsState({ open, setOpen, setTabValue, advancedTabIndex,
   });
 
   // 以 ref 保存最新值,供掛載時註冊的 listener 讀取(修復 stale closure)
-  const openRef = useRef(open);
   const appSettingsRef = useRef(appSettings);
   useEffect(() => {
-    openRef.current = open;
     appSettingsRef.current = appSettings;
   });
 
@@ -113,50 +111,9 @@ export function useSettingsState({ open, setOpen, setTabValue, advancedTabIndex,
         // 觸發設置重新加載
         initializeSettings();
       }
-
-      // 處理切換到自訂設定標籤的消息
-      if (message.action === "switchToCustomFormatTab") {
-        // 如果對話框未打開，先打開它
-        if (!openRef.current) {
-          setOpen(true);
-        }
-        // 只有當自訂設定已啟用時才切換到指定的標籤
-        if (typeof message.tabIndex === 'number' && appSettingsRef.current.western.enableMedicationCustomCopyFormat) {
-          setTabValue(message.tabIndex);
-        }
-      }
-
-      // 處理切換到檢驗自訂格式編輯器的消息
-      if (message.action === "switchToLabCustomFormatTab") {
-        // 如果對話框未打開，先打開它
-        if (!openRef.current) {
-          setOpen(true);
-        }
-        // 只有當自訂設定已啟用時才切換到指定的標籤
-        if (typeof message.tabIndex === 'number' && appSettingsRef.current.lab.enableLabCustomCopyFormat) {
-          setTabValue(message.tabIndex);
-        }
-      }
-
-      // 處理打開自訂格式編輯器的消息
-      if (message.action === "openCustomFormatEditor") {
-        if (!openRef.current) {
-          setOpen(true);
-        }
-        if (appSettingsRef.current.western.enableMedicationCustomCopyFormat) {
-          setTabValue(advancedTabIndex);
-        }
-      }
-
-      // 處理打開檢驗自訂格式編輯器的消息
-      if (message.action === "openLabCustomFormatEditor") {
-        if (!openRef.current) {
-          setOpen(true);
-        }
-        if (appSettingsRef.current.lab.enableLabCustomCopyFormat) {
-          setTabValue(advancedTabIndex);
-        }
-      }
+      // 舊的 switchToCustomFormatTab / switchToLabCustomFormatTab /
+      // openCustomFormatEditor / openLabCustomFormatEditor 四個 handler
+      // 已無任何發送端(含 tabIndex 魔術數字),於 2026-07-05 移除(DOC/07 地雷 #2)。
     });
 
     // 數據加載完成事件監聽處理函數
