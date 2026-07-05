@@ -16,6 +16,7 @@ import MainDialogHeader from "./MainDialogHeader";
 
 // Import tab components
 import TabPanel from "./tabs/TabPanel";
+import { TAB } from "./tabs/tabIds";
 import Overview from "./tabs/Overview";
 import MedicationList from "./tabs/MedicationList";
 import MedicationTable from "./tabs/MedicationTable";
@@ -40,9 +41,8 @@ const FloatingIcon = () => {
   const { userInfo, setUserInfo } = useUserInfo(open);
   const [tabValue, setTabValue] = useState(false);
 
-  // Tab index（CKM 已整合進 Overview，不再有獨立 Tab）
-  const helpTabIndex = 7;
-  const advancedTabIndex = 8;
+  // tab 一律以 tabIds.js 的字串 id 定位(tabValue === false 顯示 Overview);
+  // CKM 已整合進 Overview,不再有獨立 Tab。
 
   // nhiDataRef：見 useSettingsState.js 檔頭註解，解決 useSettingsState 與
   // useNhiDataState 互相依賴的問題。FloatingIcon 建立空 ref 傳入 useSettingsState，
@@ -247,7 +247,7 @@ const FloatingIcon = () => {
           )}
 
           {/* Western Medication List Tab */}
-          <TabPanel value={tabValue} index={0}>
+          <TabPanel value={tabValue} index={TAB.medication}>
             <MedicationList
               groupedMedications={groupedMedications}
               settings={{
@@ -261,7 +261,7 @@ const FloatingIcon = () => {
           </TabPanel>
 
           {/* Western Medication Table Tab */}
-          <TabPanel value={tabValue} index={1}>
+          <TabPanel value={tabValue} index={TAB.medicationTable}>
             <MedicationTable
               groupedMedications={groupedMedications}
               settings={{
@@ -274,7 +274,7 @@ const FloatingIcon = () => {
           </TabPanel>
 
           {/* Chinese Medicine Tab */}
-          <TabPanel value={tabValue} index={2}>
+          <TabPanel value={tabValue} index={TAB.chineseMed}>
             <ChineseMedicine
               groupedChineseMeds={groupedChineseMeds}
               chineseMedSettings={appSettings.chinese}
@@ -282,7 +282,7 @@ const FloatingIcon = () => {
           </TabPanel>
 
           {/* Lab Data Tab */}
-          <TabPanel value={tabValue} index={3}>
+          <TabPanel value={tabValue} index={TAB.lab}>
             <LabData
               groupedLabs={groupedLabs}
               settings={appSettings.western}
@@ -291,7 +291,7 @@ const FloatingIcon = () => {
           </TabPanel>
 
           {/* New Lab Table Tab */}
-          <TabPanel value={tabValue} index={4}>
+          <TabPanel value={tabValue} index={TAB.labTable}>
             <LabTableView
               groupedLabs={groupedLabs}
               labSettings={appSettings.lab}
@@ -299,27 +299,27 @@ const FloatingIcon = () => {
           </TabPanel>
 
           {/* Imaging Data Tab */}
-          <TabPanel value={tabValue} index={5}>
+          <TabPanel value={tabValue} index={TAB.imaging}>
             <ImagingData
               imagingData={imagingData}
             />
           </TabPanel>
 
           {/* MedDays Data Tab */}
-          <TabPanel value={tabValue} index={6}>
+          <TabPanel value={tabValue} index={TAB.medDays}>
             <MedDaysData
               medDaysData={medDaysData}
             />
           </TabPanel>
 
           {/* Instructions Tab */}
-          <TabPanel value={tabValue} index={helpTabIndex}>
+          <TabPanel value={tabValue} index={TAB.help}>
             <Instructions />
           </TabPanel>
 
           {/* Advanced Settings Tab */}
           {showAdvancedTab && (
-            <TabPanel value={tabValue} index={advancedTabIndex}>
+            <TabPanel value={tabValue} index={TAB.advanced}>
               <AdvancedSettings
                 appSettings={appSettings}
                 setAppSettings={setAppSettings}

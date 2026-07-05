@@ -24,6 +24,8 @@ import BiotechIcon from "@mui/icons-material/Biotech";
 
 // 引入標籤顏色工具函數
 import { getTabColor, getTabSelectedColor } from "../utils/tabColorUtils";
+// tab 穩定字串 id(單一來源,見 tabIds.js;禁止數字 index)
+import { TAB } from "./tabs/tabIds";
 
 // Import new tools
 import {
@@ -159,6 +161,7 @@ const MainDialogHeader = ({
           }}
         >
           <Tab
+            value={TAB.medication}
             label={`西藥 (${groupedMedications.length})`}
             icon={<MedicationIcon sx={{ fontSize: "1rem" }} />}
             iconPosition="start"
@@ -173,6 +176,7 @@ const MainDialogHeader = ({
             }}
           />
           <Tab
+            value={TAB.medicationTable}
             icon={<TableChartIcon sx={{ fontSize: "1.125rem" }} />}
             aria-label="西藥表格檢視"
             sx={{
@@ -187,6 +191,7 @@ const MainDialogHeader = ({
             }}
           />
           <Tab
+            value={TAB.chineseMed}
             label={`中藥 (${groupedChineseMeds.length})`}
             icon={<GrassIcon sx={{ fontSize: "1rem" }} />}
             iconPosition="start"
@@ -201,6 +206,7 @@ const MainDialogHeader = ({
             }}
           />
           <Tab
+            value={TAB.lab}
             label={`檢驗 (${groupedLabs.length})`}
             icon={<ScienceIcon sx={{ fontSize: "1rem" }} />}
             iconPosition="start"
@@ -213,6 +219,7 @@ const MainDialogHeader = ({
             }}
           />
           <Tab
+            value={TAB.labTable}
             icon={<TableViewIcon sx={{ fontSize: "1.125rem" }} />}
             aria-label="檢驗表格檢視"
             sx={{
@@ -225,6 +232,7 @@ const MainDialogHeader = ({
             }}
           />
           <Tab
+            value={TAB.imaging}
             label={`影像 (${imagingData.withReport.length +
               imagingData.withoutReport.length
               })`}
@@ -249,6 +257,7 @@ const MainDialogHeader = ({
             }}
           />
           <Tab
+            value={TAB.medDays}
             label={`餘藥 (${medDaysData.length})`}
             icon={<InventoryIcon sx={{ fontSize: "1rem" }} />}
             iconPosition="start"
@@ -261,6 +270,7 @@ const MainDialogHeader = ({
             }}
           />
           <Tab
+            value={TAB.help}
             label="說明"
             icon={<HelpOutlineIcon sx={{ fontSize: "1rem" }} />}
             iconPosition="start"
@@ -274,6 +284,7 @@ const MainDialogHeader = ({
           />
           {showAdvancedTab && (
             <Tab
+              value={TAB.advanced}
               label="進階"
               icon={<SettingsIcon sx={{ fontSize: "1rem" }} />}
               iconPosition="start"
