@@ -1,7 +1,9 @@
 // src/dataTypes/registry.js
-// 由 coreTypes.js(14 舊型別,遷移中)與 devTypes.js(開發者補抓型別)的描述檔
-// 衍生出各既有接點需要的片段。遷移期間,尚未搬入 coreTypes 的舊型別仍在各檔
-// 手寫登記,衍生值以「CORE 在前、手寫在後、DEV 最後」的順序併入,維持順序不變。
+// 由 coreTypes.js(14 個核心型別)與 devTypes.js(開發者補抓型別)的描述檔
+// 衍生出各既有接點需要的片段(API_PATH_MAP / NODE_TO_DATA_TYPE / TYPE_SHAPE /
+// DATA_TYPES / 抓取分流 / buildShareData / LOCAL_KEY_TO_STORE_TYPE)。
+// 2026-07-07 遷移完成:分散登記已全數刪除,此檔為單一衍生來源;
+// 併入順序固定為「CORE 在前、DEV 在後」,對齊 NHITW_DATA/下載 JSON key 順序。
 
 import { CORE_DATA_TYPES } from './coreTypes';
 import { DEV_DATA_TYPES } from './devTypes';

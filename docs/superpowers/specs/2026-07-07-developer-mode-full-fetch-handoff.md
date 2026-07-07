@@ -97,6 +97,10 @@
   (`lab`↔`labdata`、`patientSummary`↔`patientsummary`);舊下載 JSON 與 `.test_data/` 測資
   全程可匯入,零破壞。同時 `NHITW_DATA` 對外契約**解除凍結**(尚無任何消費端;首個消費端
   上線時再凍結)——`nhitwExport.js` 檔頭、DOC/02、DOC/07 命名規則段已同步更新。
+  **2026-07-07 遷移已完成**:舊 14 型別已全數搬入 `src/dataTypes/coreTypes.js`,
+  分散登記(`apiPathMap`/`permissionMap`/`TYPE_SHAPE`/`DATA_TYPES`/抓取分流/`buildShareData`/
+  `LOCAL_KEY_TO_STORE_TYPE`)已刪除,詳細執行過程見
+  `docs/superpowers/plans/2026-07-07-core-types-registry-migration.md`。
 
 ## 4. 接手須知 / 陷阱
 

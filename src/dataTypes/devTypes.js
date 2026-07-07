@@ -1,7 +1,7 @@
 // src/dataTypes/devTypes.js
 // 開發者「完整抓取模式」(devFetchAll) 才抓的補抓型別的單一描述來源。
-// DOC/07 方向一「資料型別描述檔」的輕量 pilot:只含這批新型別,14 個舊型別
-// 維持原分散登記(apiPathMap/permissionMap/…)並存。由 registry.js 衍生出各既有
+// DOC/07 方向一「資料型別描述檔」的實作:14 個舊(核心)型別已於 2026-07-07
+// 遷入 coreTypes.js,不再另外分散登記。由 registry.js 衍生出各既有
 // 接點需要的片段(API_PATH_MAP / NODE_TO_DATA_TYPE / TYPE_SHAPE / DATA_TYPES)。
 //
 // 端點與回應形狀依 DOC/06 與 .test_data/api_data/ 實測樣本定案(2026-07-07 spec v2)。
