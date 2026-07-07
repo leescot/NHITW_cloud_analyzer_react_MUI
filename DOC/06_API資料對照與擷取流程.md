@@ -47,6 +47,56 @@ Token 儲存在 `sessionStorage` key `"token"` 中，由 NHI 頁面登入流程�
    - 所有資料抓完後統一寫入 `localStorage('NHITW_DATA')`（跨擴充功能共享）
    - 透過 `chrome.runtime.sendMessage({ action: 'setBadge' })` 通知 background 設定 badge
 
+## 下載 JSON 資料檔(與 NHITW_DATA 的差異)
+
+擴充功能有兩個格式、用途都不同的 JSON 輸出,容易混淆:
+
+| | NHITW_DATA | 下載 JSON 資料檔 |
+|---|---|---|
+| 產生時機 | 每次抓取/匯入完成後自動寫入 | 使用者按「下載 JSON 資料檔」按鈕才產生 |
+| 儲存位置 | `localStorage`(供同頁面其他 extension 讀取) | 使用者本機檔案(下載 `.json`) |
+| 產生程式 | `buildShareData()`(`src/store/nhitwExport.js`) | `getPatientData` handler(`src/apiInterceptor/messageHandlers.js`) |
+| 讀回程式 | 無(本擴充功能不會讀回自己寫的 NHITW_DATA,純粹給其他 extension 讀) | `processLocalData()`(`src/localDataHandler.js`,「匯入本地 JSON」功能) |
+| 文件 | `02_NHITW_DATA_對外契約.md`(17 個 key,凍結前) | 本節 |
+
+兩者都以 `dataStore` 為讀取來源,但頂層結構、key 命名規則不同,**不可互換或假設格式相容**。
+
+### 下載 JSON 頂層欄位
+
+`chrome.runtime.onMessage` 的 `"getPatientData"` action 組出以下結構,`JSON.stringify(patientData, null, 2)` 後觸發瀏覽器下載,檔名 `<yyyyMMdd_HHmm>_<遮罩身分證號>.json`(僅檔名遮罩身分證號,**JSON 內容本身仍含完整 PII**):
+
+| 欄位 | 型別/來源 | 說明 |
+|---|---|---|
+| `UserName` / `UserID` / `UserSex` / `UserBirthday` | JWT payload | 病患基本資料 |
+| `ClientTime` | `new Date().toISOString()` | **下載當下**的時間,不是抓取時間 |
+| 各資料型別 key | `dataStore.getData(dataType)` | 見下段,共 25 個(14 核心 + 11 開發者補抓) |
+| `masterMenu` | `dataStore.getData('masterMenu')` | 目前抓取流程未主動寫入,恆為 `null`(見 `02_NHITW_DATA_對外契約.md` masterMenu 列) |
+| `permission` | `{ nodes, dataTypes }` | 優先取抓取時寫入 `dataStore` 的授權清單;只下載、未重抓過(值為 `null`)時由目前 JWT 現場派生,確保下載檔一定有值 |
+
+資料型別 key 來自 `API_PATH_MAP`(`src/dataTypes/registry.js` 的 `CORE_API_ENTRIES` + `DEV_API_ENTRIES`,即 14 核心型別 + 11 開發者補抓型別)的全部 key,逐一經 `CORE_EXPORT_KEY.get(dataType) ?? dataType` 轉換對外名稱——只有核心型別的 `labdata`/`patientsummary` 有別名(輸出 `lab`/`patientSummary`,與 NHITW_DATA 相同),其餘型別(含全部開發者補抓型別)key 與內部 store key 同名。未授權或未抓取的型別,值為 `null`(與 NHITW_DATA 相同的「未載入 = `null`」約定)。
+
+開發者補抓型別 key:`specialPayment`、`controlledMed`、`controlledMedSummary`、`acupuncture`、`chineseMedCare`、`chineseMedCareSummary`、`dental`、`labRecord`、`rehabilitation`、`rehabilitationSummary`、`specialMaterial`。只有「開發者完整抓取模式」(`devFetchAll`)開啟且該節點有授權時才會抓到實際資料,否則 key 仍存在但值為 `null`。
+
+只有 `dataStore` 內任一型別有實際資料(`rObject` 為非空陣列)時才會觸發下載;`permission` 本身不影響此判斷,避免「只有授權清單、沒有醫療資料」時仍誤觸發下載。
+
+### 匯入本地 JSON 讀回(`LOCAL_KEY_TO_STORE_TYPE`)
+
+「匯入本地 JSON」由 `processLocalData()` 依 `src/localDataHandler.js` 的 `LOCAL_KEY_TO_STORE_TYPE` 對照表,逐一把下載 JSON 的頂層 key 寫回對應的 `dataStore` 型別:
+
+- 核心型別由描述檔衍生(`CORE_DATA_TYPES` 的 `exportKey ?? key`),即 `lab`→`labdata`、`patientSummary`→`patientsummary`,其餘核心型別 key 原樣對應
+- `masterMenu`、`permission` 為手寫條目
+- 開發者補抓型別一律 `[key, key]`
+
+### 2026-07-07 round-trip 修復(commit `55af520`)
+
+修復前:`getPatientData` 只把 `labdata` 別名為 `lab`,病摘輸出的 key 是小寫 `patientsummary`;但 `LOCAL_KEY_TO_STORE_TYPE` 只認駝峰 `patientSummary`,且無 `masterMenu` 條目。結果:用舊版擴充功能下載的 JSON 重新匯入時,「病摘」與「masterMenu」會被靜默丟棄(不報錯,資料就是消失)。
+
+修復後:
+
+- 下載鍵改由 `CORE_EXPORT_KEY`(`src/dataTypes/registry.js`)衍生,病摘下載鍵改為駝峰 `patientSummary`,與 NHITW_DATA 一致
+- `LOCAL_KEY_TO_STORE_TYPE` 補上小寫 `patientsummary` 相容 alias(讀舊檔用)與 `masterMenu` 條目
+- 新舊下載檔皆可完整 round-trip:新檔(`patientSummary`)靠對照表新條目讀回,舊檔(2026-07 前下載,小寫 `patientsummary`)靠新增的相容 alias 讀回,不受影響
+
 ## 病患切換偵測
 
 採用雙重偵測機制：

@@ -42,7 +42,7 @@
 | 9 | `discharge` | `dataStore.getData('discharge')` | 出院病摘 |
 | 10 | `medDays` | `dataStore.getData('medDays')` | 門診藥品餘藥日數 |
 | 11 | `patientSummary` | `dataStore.getData('patientsummary')` | **駝峰命名**(對外 `patientSummary`,內部 store key 是全小寫 `patientsummary`) |
-| 12 | `masterMenu` | `dataStore.getData('masterMenu')` | 目前抓取流程未主動寫入此型別(見下方「已知落差」) |
+| 12 | `masterMenu` | `dataStore.getData('masterMenu')` | 目前抓取流程未主動寫入此型別(`src/apiInterceptor/` 內查無任何對此 key 呼叫 `dataStore.setData`),值恆為 `null`;保留此 key 只是為了與下載 JSON(見 `06_API資料對照與擷取流程.md`)的頂層結構對齊 |
 | 13 | `adultHealthCheck` | `dataStore.getData('adultHealthCheck')` | 成人預防保健 |
 | 14 | `cancerScreening` | `dataStore.getData('cancerScreening')` | 四癌篩檢 |
 | 15 | `hbcvdata` | `dataStore.getData('hbcvdata')` | B、C 型肝炎專區 |
