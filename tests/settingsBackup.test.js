@@ -100,5 +100,32 @@ describe('utils/settingsBackup', function () {
       assert.lengthOf(r.warnings, 1);
       assert.match(r.warnings[0], /型別不符/);
     });
+
+    it('物件型鍵給 null 或陣列 → 回預設 + warning(typeof null 縫隙)', function () {
+      const r = parseSettingsImport({
+        format: SETTINGS_EXPORT_FORMAT, version: 1,
+        settings: { atc5Groups: null, atc5ColorGroups: [] },
+      });
+      assert.isTrue(r.ok);
+      assert.deepEqual(r.settings.atc5Groups, defaultOf('atc5Groups'));
+      assert.deepEqual(r.settings.atc5ColorGroups, defaultOf('atc5ColorGroups'));
+      assert.lengthOf(r.warnings, 1);
+      assert.match(r.warnings[0], /型別不符/);
+    });
+
+    it('數值/字串/布林的合法 falsy 值(0、空字串、false)round-trip 完整存活', function () {
+      const flat = {
+        ...buildStorageDefaults(),
+        medicationTrackingDays: 0,
+        itemSeparator: '',
+        simplifyMedicineName: false,
+      };
+      const r = parseSettingsImport(buildSettingsExport(flat, FIXED_TIME));
+      assert.isTrue(r.ok);
+      assert.strictEqual(r.settings.medicationTrackingDays, 0);
+      assert.strictEqual(r.settings.itemSeparator, '');
+      assert.strictEqual(r.settings.simplifyMedicineName, false);
+      assert.lengthOf(r.warnings, 0);
+    });
   });
 });
