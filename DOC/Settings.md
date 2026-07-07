@@ -15,7 +15,7 @@ western / atc5 / chinese / lab / overview / general / cloud)。
   (各設定 UI 元件的 `sync.get` 與 state 初始值使用)
 
 行為由 `tests/settingsSchema.test.js` 與 `tests/settingsManager.test.js` 的
-characterization 測試鎖定(52 鍵快照存於 `tests/fixtures/storageKeys.js`)。
+characterization 測試鎖定(54 鍵快照存於 `tests/fixtures/storageKeys.js`)。
 
 ## 新增一個設定的 SOP
 
@@ -64,7 +64,7 @@ popup 設定 tab 尾端的「設定備份」區塊(`src/components/settings/Sett
 - 匯出檔信封 `{ format: 'nhitw-settings', version: 1, exportedAt, settings }`,
   `settings` 為 SETTINGS_SCHEMA 的 54 個扁平 storageKey(歷史改名鍵原樣)。
 - 匯入為**全量還原**:檔內鍵覆蓋、schema 內缺鍵重設為預設;寫回是一次
-  `chrome.storage.sync.set` 完整 52 鍵。
+  `chrome.storage.sync.set` 完整 54 鍵。
 - **加鍵不 bump version**:新增設定鍵後,舊檔匯入缺鍵回預設、新檔匯入未知鍵
   忽略 + 警告;`version` 只在信封結構破壞性改變時才升(屆時匯入拒絕並提示更新)。
 - `developerMode`/`devFetchAll`(`storage.local` 開發旗標)不進備份。
