@@ -478,8 +478,9 @@ const Overview_LabTests = ({
             // Create a map to determine the display order based on the user's settings
             const displayOrder = {};
 
-            // Determine the display order based on the user's settings
-            if (overviewSettings.focusedLabTests && Array.isArray(overviewSettings.focusedLabTests)) {
+            // Determine the display order based on the resolved CodeSet order
+            // (labTestsConfig 已是 overlay 解析後的順序;不可再讀凍結的舊 focusedLabTests)
+            if (Array.isArray(labTestsConfig)) {
               // 創建一個 Map 來存儲順序規則
               const orderCodeToDisplayMap = new Map([
                 ['08011C-WBC', 'WBC'],
@@ -491,31 +492,30 @@ const Overview_LabTests = ({
               ]);
 
               // Assign order for all tests based on configuration
-              overviewSettings.focusedLabTests
-                .filter(test => test.enabled)
-                .forEach((test, index) => {
-                  const orderCode = test.orderCode;
+              // (labTestsConfig 只含已啟用項,已依 overlay 解析順序排列,不需再篩 enabled)
+              labTestsConfig.forEach((test, index) => {
+                const orderCode = test.orderCode;
 
-                  // 處理直接映射的情況
-                  if (test.displayName) {
-                    displayOrder[test.displayName] = index;
+                // 處理直接映射的情況('Special' 是 CBC/09015C 等特殊碼的佔位名稱,非實際列名)
+                if (test.displayName && test.displayName !== 'Special') {
+                  displayOrder[test.displayName] = index;
+                }
+
+                // 處理特殊映射的情況
+                if (orderCodeToDisplayMap.has(orderCode)) {
+                  const displayNames = orderCodeToDisplayMap.get(orderCode);
+
+                  if (Array.isArray(displayNames)) {
+                    // 處理多個顯示名稱的情況 (例如 09015C -> Cr 及 GFR)
+                    displayNames.forEach((name, offset) => {
+                      displayOrder[name] = index + (offset * 0.1); // 使用小偏移以保持相關項目在一起
+                    });
+                  } else {
+                    // 處理單個顯示名稱的情況
+                    displayOrder[displayNames] = index;
                   }
-
-                  // 處理特殊映射的情況
-                  if (orderCodeToDisplayMap.has(orderCode)) {
-                    const displayNames = orderCodeToDisplayMap.get(orderCode);
-
-                    if (Array.isArray(displayNames)) {
-                      // 處理多個顯示名稱的情況 (例如 09015C -> Cr 及 GFR)
-                      displayNames.forEach((name, offset) => {
-                        displayOrder[name] = index + (offset * 0.1); // 使用小偏移以保持相關項目在一起
-                      });
-                    } else {
-                      // 處理單個顯示名稱的情況
-                      displayOrder[displayNames] = index;
-                    }
-                  }
-                });
+                }
+              });
             }
 
             // CKM 追加列獨立呈現在底部：以使用者啟用的 orderCode 推導出主列表名稱，
