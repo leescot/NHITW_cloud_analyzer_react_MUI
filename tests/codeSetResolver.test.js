@@ -1,5 +1,5 @@
 import { describe, it, assert } from 'vitest';
-import { sanitizeOverlay, resolveCodeSet } from '../src/utils/codeSetResolver.js';
+import { sanitizeOverlay, resolveCodeSet, migrateLegacyFocusList, diffToOverlay } from '../src/utils/codeSetResolver.js';
 
 const BUILTIN = [
   { id: 'a', label: 'A', codes: ['01C'], enabled: true,  order: 0 },
@@ -63,5 +63,74 @@ describe('resolveCodeSet', () => {
   });
   it('整份 overlay 是垃圾 → 等同 null(不炸)', () => {
     assert.deepEqual(resolveCodeSet(BUILTIN, 'garbage'), BUILTIN);
+  });
+});
+
+describe('migrateLegacyFocusList', () => {
+  const BUILTIN2 = [
+    { id: 'mri', label: 'MRI', codes: ['33085B', '33084B'], enabled: true,  order: 0 },
+    { id: 'ct',  label: 'CT',  codes: ['33072B', '33070B'], enabled: true,  order: 1 },
+    { id: 'cxr', label: 'CXR', codes: ['32001C'],           enabled: false, order: 2 },
+  ];
+  it('非陣列 → null(不遷移)', () => {
+    assert.isNull(migrateLegacyFocusList(null, BUILTIN2));
+    assert.isNull(migrateLegacyFocusList({}, BUILTIN2));
+  });
+  it('與內建完全一致 → 空 overlay(遷移完成標記,resolve 後等同內建)', () => {
+    const legacy = [
+      { orderCode: '33085B,33084B', displayName: 'MRI', enabled: true },
+      { orderCode: '33072B,33070B', displayName: 'CT',  enabled: true },
+      { orderCode: '32001C',        displayName: 'CXR', enabled: false },
+    ];
+    const overlay = migrateLegacyFocusList(legacy, BUILTIN2);
+    assert.deepEqual(overlay, { overrides: {}, additions: [], removals: [] });
+    assert.deepEqual(resolveCodeSet(BUILTIN2, overlay), BUILTIN2);
+  });
+  it('使用者改過 enabled/順序/名稱 → 記為 overrides;未知碼 → addition', () => {
+    const legacy = [
+      { orderCode: '32001C',        displayName: '胸部X光', enabled: true },   // 改名+啟用+提到第0位
+      { orderCode: '33085B,33084B', displayName: 'MRI',     enabled: true },
+      { orderCode: '99999X',        displayName: '自訂',     enabled: true },   // 內建沒有
+    ];
+    const overlay = migrateLegacyFocusList(legacy, BUILTIN2);
+    assert.deepEqual(overlay.overrides.cxr, { enabled: true, order: 0, label: '胸部X光' });
+    assert.deepEqual(overlay.overrides.mri, { order: 1 });
+    assert.isUndefined(overlay.overrides.ct); // legacy 沒列 ct → 不動(內建升級項自動出現的語意)
+    assert.deepEqual(overlay.additions, [
+      { id: 'legacy:99999X', label: '自訂', codes: ['99999X'], enabled: true, order: 2 },
+    ]);
+  });
+  it('壞 entry(無 orderCode)跳過', () => {
+    const overlay = migrateLegacyFocusList([{ displayName: 'x' }, null, 'junk'], BUILTIN2);
+    assert.deepEqual(overlay, { overrides: {}, additions: [], removals: [] });
+  });
+});
+
+describe('diffToOverlay', () => {
+  const BUILTIN3 = [
+    { id: 'a', label: 'A', codes: ['01C'], enabled: true,  order: 0 },
+    { id: 'b', label: 'B', codes: ['02C'], enabled: true,  order: 1 },
+  ];
+  it('無改動 → 空 overlay', () => {
+    assert.deepEqual(diffToOverlay(BUILTIN3, BUILTIN3), { overrides: {}, additions: [], removals: [] });
+  });
+  it('改欄位/換順序/加項 → 對應 delta;round-trip 經 resolveCodeSet 還原工作清單', () => {
+    const working = [
+      { id: 'b', label: 'B', codes: ['02C'], enabled: false, order: 1 },                  // 提到第0位+停用
+      { id: 'catalog:09C', label: 'X', codes: ['09C'], enabled: true, order: 99 },        // 加入項(order 以 index 為準)
+      { id: 'a', label: 'A2', codes: ['01C'], enabled: true, order: 0 },                  // 改名+移到第2位
+    ];
+    const overlay = diffToOverlay(BUILTIN3, working);
+    assert.deepEqual(overlay.overrides, {
+      b: { enabled: false, order: 0 },
+      a: { label: 'A2', order: 2 },
+    });
+    assert.deepEqual(overlay.additions, [
+      { id: 'catalog:09C', label: 'X', codes: ['09C'], enabled: true, order: 1 },
+    ]);
+    assert.deepEqual(
+      resolveCodeSet(BUILTIN3, overlay).map(i => i.id),
+      ['b', 'catalog:09C', 'a']
+    );
   });
 });
