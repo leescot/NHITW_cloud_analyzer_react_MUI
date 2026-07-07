@@ -70,7 +70,7 @@ Token 儲存在 `sessionStorage` key `"token"` 中，由 NHI 頁面登入流程�
 | `UserName` / `UserID` / `UserSex` / `UserBirthday` | JWT payload | 病患基本資料 |
 | `ClientTime` | `new Date().toISOString()` | **下載當下**的時間,不是抓取時間 |
 | 各資料型別 key | `dataStore.getData(dataType)` | 見下段,共 25 個(14 核心 + 11 開發者補抓) |
-| `masterMenu` | `dataStore.getData('masterMenu')` | 目前抓取流程未主動寫入,恆為 `null`(見 `02_NHITW_DATA_對外契約.md` masterMenu 列) |
+| `masterMenu` | `dataStore.getData('masterMenu')` | 抓取流程從不寫入(該情境下為 `null`);本地匯入路徑 2026-07-07 起可寫入,匯入後再下載會帶出非 `null` 值(詳見 `02_NHITW_DATA_對外契約.md` masterMenu 列) |
 | `permission` | `{ nodes, dataTypes }` | 優先取抓取時寫入 `dataStore` 的授權清單;只下載、未重抓過(值為 `null`)時由目前 JWT 現場派生,確保下載檔一定有值 |
 
 資料型別 key 來自 `API_PATH_MAP`(`src/dataTypes/registry.js` 的 `CORE_API_ENTRIES` + `DEV_API_ENTRIES`,即 14 核心型別 + 11 開發者補抓型別)的全部 key,逐一經 `CORE_EXPORT_KEY.get(dataType) ?? dataType` 轉換對外名稱——只有核心型別的 `labdata`/`patientsummary` 有別名(輸出 `lab`/`patientSummary`,與 NHITW_DATA 相同),其餘型別(含全部開發者補抓型別)key 與內部 store key 同名。未授權或未抓取的型別,值為 `null`(與 NHITW_DATA 相同的「未載入 = `null`」約定)。
