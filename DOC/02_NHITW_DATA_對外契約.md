@@ -7,7 +7,10 @@
 
 本擴充功能(NHITW_cloud_analyzer)在 `medcloud2.nhi.gov.tw` 頁面主動抓取健保雲端 API 資料後,除了寫入自己的 `dataStore` 供內部 UI 使用外,還會把同一份原始資料以統一格式寫進**該頁面的 page `localStorage`**(`window.localStorage`,同源、isolated world 內可見),讓同一頁面上安裝的**其他** chrome extension 可以讀取,不需要重複實作抓取邏輯。這是目前唯一的跨擴充功能資料交換管道。
 
-**這是一份對外契約:變更 key 名稱或既有 key 的語意前,必須同步調整所有消費端 extension。**
+**契約狀態(2026-07-07 決策):目前尚無任何已知消費端,格式「未凍結」,仍可調整。**
+首個消費端 extension 上線時,本格式即凍結為正式對外契約——屆時變更 key 名稱或既有 key
+的語意前,必須同步調整所有消費端 extension。在那之前,變更只需更新本文件與
+`src/store/nhitwExport.js`,不需過渡期或新舊 key 併存。
 
 ## 儲存位置與寫入方式
 
@@ -71,6 +74,12 @@
 
 ## 變更政策
 
-- **禁止**在不通知消費端的情況下改變 key 名稱、`timestamp` 的位置語意、或既有型別「未載入 = `null`」的約定。
+- **凍結前(現況)**:尚無消費端,格式變更只需同步更新 `buildShareData` 與本文件。
+  既有 key 命名(`lab`/`patientSummary` 等)雖未凍結,仍**維持不改**——改名的成本在
+  內部 store key 的全面波及與既有下載 JSON/測資作廢,不在契約(見 `07_擴充藍圖.md`
+  方向一「命名規則」)。
+- **凍結後(首個消費端上線起)**:禁止在不通知消費端的情況下改變 key 名稱、`timestamp`
+  的位置語意、或既有型別「未載入 = `null`」的約定;若必須做 breaking change(例如整批
+  改名),應在 commit message 與(若有)CHANGELOG 中明確標註,並考慮短期內新舊 key
+  併存的過渡期。
 - 新增資料型別時(見 `03_開發與維護指南.md` 的「新增資料型別」清單),同步在 `buildShareData` 加一個 key,並更新本文件的表格。
-- 若必須做 breaking change(例如整批改名),應在 commit message 與(若有)CHANGELOG 中明確標註,並考慮短期內新舊 key 併存的過渡期。

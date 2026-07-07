@@ -1,7 +1,9 @@
 // nhitwExport.js
 // NHITW_DATA localStorage 匯出:供同頁面的其他 chrome extension 交換資料使用。
-// ⚠️ 這是對外契約。2026-07-02 起兩條寫入路徑(主動抓取/本地匯入)統一為此單一格式;
-//    變更 key 名稱或語意前,必須同步調整所有消費端 extension。
+// 2026-07-02 起兩條寫入路徑(主動抓取/本地匯入)統一為此單一格式。
+// 契約狀態(2026-07-07 決策):目前**尚無任何消費端**,格式未凍結,可調整;
+// 首個消費端 extension 上線時本格式即凍結為對外契約(屆時變更 key 名稱或語意
+// 須同步調整所有消費端)。既有 key 命名(lab/patientSummary)維持不改。
 // 格式:timestamp 最前;labdata 對外改名 lab;patientSummary 駝峰;
 //      未載入的型別輸出 null;truncated 最後(快照完整性標記)。
 import { dataStore } from './dataStore';

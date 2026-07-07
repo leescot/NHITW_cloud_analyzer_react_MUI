@@ -92,6 +92,11 @@
 - 新型別目前**只進下載 JSON,不進 `NHITW_DATA`**。日後若做出功能要跨擴充功能讀取,因命名已統一,
   加進 `store/nhitwExport.js#buildShareData` 是一行(見 spec v2 §7 與「命名解凍」決策)。
 - registry pilot 驗證順手後,可依 DOC/07 方向一把舊 14 型別逐一遷入(characterization 先行,一型別一 commit)。
+  **2026-07-07 決策定案**:遷入採「選項 A」——key 一律照舊(`labdata`/`patientsummary` 等
+  歷史小寫不改名),描述檔以 `exportKey`/`localImportKey` 欄位承載僅有的 2 個 alias
+  (`lab`↔`labdata`、`patientSummary`↔`patientsummary`);舊下載 JSON 與 `.test_data/` 測資
+  全程可匯入,零破壞。同時 `NHITW_DATA` 對外契約**解除凍結**(尚無任何消費端;首個消費端
+  上線時再凍結)——`nhitwExport.js` 檔頭、DOC/02、DOC/07 命名規則段已同步更新。
 
 ## 4. 接手須知 / 陷阱
 
