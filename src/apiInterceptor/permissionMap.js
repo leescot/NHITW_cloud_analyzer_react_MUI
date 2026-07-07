@@ -7,7 +7,6 @@ export const NODE_TO_DATA_TYPE = {
   '1.2': ['hbcvdata'],
   '2.3': ['chronicMed'],
   '2.4': ['medDays'],
-  '3.1': ['chinesemed'],
   '5.1': ['allergy'],
   '6.2': ['imaging'],
   '6.3': ['adultHealthCheck'],
