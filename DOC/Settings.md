@@ -39,3 +39,19 @@ characterization 測試鎖定(52 鍵快照存於 `tests/fixtures/storageKeys.js`
 `medicationCopyAllOrder`、`labCopyAllOrder`、`itemSeparator`、`focusedLabTests`、
 `focusedImageTests` 五鍵在 storage 存有 falsy 值時退回預設值(沿襲舊版
 `loadAllSettings` 的 `||` 行為,封存於 schema 的 `FALSY_FALLBACK_KEYS`)。
+
+## 設定備份(匯出/匯入)
+
+popup 設定 tab 尾端的「設定備份」區塊(`src/components/settings/SettingsBackup.jsx`,
+純邏輯在 `src/utils/settingsBackup.js`)。格式契約與相容策略見
+`docs/superpowers/specs/2026-07-07-settings-backup-design.md`,重點:
+
+- 匯出檔信封 `{ format: 'nhitw-settings', version: 1, exportedAt, settings }`,
+  `settings` 為 SETTINGS_SCHEMA 的 52 個扁平 storageKey(歷史改名鍵原樣)。
+- 匯入為**全量還原**:檔內鍵覆蓋、schema 內缺鍵重設為預設;寫回是一次
+  `chrome.storage.sync.set` 完整 52 鍵。
+- **加鍵不 bump version**:新增設定鍵後,舊檔匯入缺鍵回預設、新檔匯入未知鍵
+  忽略 + 警告;`version` 只在信封結構破壞性改變時才升(屆時匯入拒絕並提示更新)。
+- `developerMode`/`devFetchAll`(`storage.local` 開發旗標)不進備份。
+- 匯入後 popup 各區塊需重開視窗才顯示新值(各區塊只在 mount 時讀 storage);
+  頁面端由 `settingsManager` 的 `storage.onChanged` 自動刷新。

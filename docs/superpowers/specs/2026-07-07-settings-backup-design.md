@@ -75,9 +75,10 @@
 
 ## 資料流與刷新
 
-匯入 `sync.set` 後,既有的 `chrome.storage.onChanged` 監聽
-(`PopupSettings.jsx`、`utils/settingsManager.js`、`App.jsx`)自動刷新 popup 與頁面內 UI,
-**不新增任何通知機制**。
+匯入 `sync.set` 後:**頁面端**由既有的 `chrome.storage.onChanged` 監聽
+(`utils/settingsManager.js`、`App.jsx`)自動刷新;**popup 端**各設定區塊
+只在 mount 時讀 storage、無 onChanged 監聽,故匯入成功訊息提示使用者
+「重新開啟本視窗」。不新增任何通知機制。
 
 ## 錯誤處理
 
