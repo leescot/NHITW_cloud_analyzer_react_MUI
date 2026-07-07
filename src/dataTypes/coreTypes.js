@@ -25,4 +25,5 @@ export const CORE_DATA_TYPES = [
   { key: 'chinesemed', node: '3.1', apiPath: 'imue0090/imue0090s02/get-data' },
   { key: 'imaging', node: '6.2', apiPath: 'imue0130/imue0130s02/get-data' },
   { key: 'allergy', node: '5.1', apiPath: 'imue0040/imue0040s02/get-data' },
+  { key: 'surgery', node: '7.1', apiPath: 'imue0020/imue0020s02/get-data' },
 ];
