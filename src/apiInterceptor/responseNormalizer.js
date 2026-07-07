@@ -3,7 +3,7 @@
 // 新型別回應形狀特殊時,在 TYPE_SHAPE 加一行對照,不再累積 if-else 分支
 // (2026-07-05,DOC/07 地雷 #4)。
 
-import { DEV_SHAPE_ENTRIES } from '../dataTypes/registry.js';
+import { CORE_SHAPE_ENTRIES, DEV_SHAPE_ENTRIES } from '../dataTypes/registry.js';
 
 // 各形狀的正規化函數:(data, recordsArray) => { rObject: [...] }
 // - data:原始回應;recordsArray:data.rObject ?? data.robject(大小寫相容)
@@ -25,6 +25,8 @@ const SHAPE_NORMALIZERS = {
 
 // 形狀特殊的型別對照;未列出的型別走預設 'rows'
 const TYPE_SHAPE = new Map([
+  // 已遷入 src/dataTypes/coreTypes.js 的核心型別非預設形狀(遷移中,依序搬入)
+  ...CORE_SHAPE_ENTRIES,
   ['medDays', 'dataAsRows'],
   ['labdraw', 'dataAsRows'],
   ['patientsummary', 'rowsOrSingle'],

@@ -9,10 +9,12 @@
 // 規畫中的階段 4 訂閱者是依型別過濾的 hook,且 React 18+ 自動批次
 // 會把同一 tick 的多次通知合併為一次 render,不會造成 15 次 re-render。
 
-import { DEV_KEYS } from '../dataTypes/registry.js';
+import { CORE_KEYS, DEV_KEYS } from '../dataTypes/registry.js';
 
 export const DATA_TYPES = [
-  'medication', 'labdata', 'labdraw', 'chinesemed', 'imaging',
+  // 已遷入 src/dataTypes/coreTypes.js 的核心型別(遷移中,依序搬入)
+  ...CORE_KEYS,
+  'labdata', 'labdraw', 'chinesemed', 'imaging',
   'allergy', 'surgery', 'discharge', 'medDays', 'patientsummary',
   'adultHealthCheck', 'cancerScreening', 'hbcvdata', 'chronicMed',
   'masterMenu',
