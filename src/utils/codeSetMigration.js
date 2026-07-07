@@ -15,7 +15,12 @@ export const runCodeSetMigrations = () => new Promise((resolve) => {
       if (overlay) updates[cs.storageKey] = overlay;
     });
     if (Object.keys(updates).length > 0) {
-      chrome.storage.sync.set(updates, () => resolve(updates));
+      chrome.storage.sync.set(updates, () => {
+        if (chrome.runtime.lastError) {
+          console.warn('[codeSet] 遷移寫入失敗', chrome.runtime.lastError.message);
+        }
+        resolve(updates);
+      });
     } else {
       resolve(updates);
     }

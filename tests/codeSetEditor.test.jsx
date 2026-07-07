@@ -80,4 +80,34 @@ describe('CodeSetEditor(labFocus)', () => {
     await waitFor(() => assert.equal(setCalls.length, 1));
     assert.isNull(setCalls[0].labFocusOverlay);
   }, 15000);
+
+  it('sync quota 超額:保存失敗時不關閉對話框,顯示錯誤訊息', async () => {
+    let closed = false;
+    const { findByText, getByRole, findByText: findByTextAgain } = render(
+      <CodeSetEditor codeSetId="labFocus" open onClose={() => { closed = true; }} />
+    );
+    await findByText('Hb');
+
+    globalThis.chrome.storage.sync.set = (items, cb) => {
+      setCalls.push(items);
+      globalThis.chrome.runtime.lastError = { message: 'QUOTA_BYTES_PER_ITEM quota exceeded' };
+      cb?.();
+      globalThis.chrome.runtime.lastError = undefined;
+    };
+
+    fireEvent.click(getByRole('button', { name: '保存' }));
+    await findByTextAgain(/儲存失敗/);
+    assert.isFalse(closed);
+    assert.equal(setCalls.length, 1);
+
+    // 修復後(儲存不再出錯)再次保存應成功關閉
+    globalThis.chrome.storage.sync.set = (items, cb) => {
+      setCalls.push(items);
+      Object.assign(store, items);
+      cb?.();
+    };
+    fireEvent.click(getByRole('button', { name: '保存' }));
+    await waitFor(() => assert.isTrue(closed));
+    assert.equal(setCalls.length, 2);
+  }, 15000);
 });

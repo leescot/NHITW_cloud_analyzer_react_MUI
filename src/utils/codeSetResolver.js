@@ -46,7 +46,7 @@ export const resolveCodeSet = (builtin, overlay) => {
   const safe = sanitizeOverlay(overlay);
   const overrides = safe?.overrides ?? {};
   const removals = new Set(safe?.removals ?? []);
-  const base = builtin.map(item => ({ ...item, ...(overrides[item.id] ?? {}) }));
+  const base = builtin.map(item => ({ ...item, codes: [...item.codes], ...(overrides[item.id] ?? {}) }));
   const additions = (safe?.additions ?? []).filter(a => !removals.has(a.id));
   return [...additions, ...base].sort((a, b) => a.order - b.order);
 };

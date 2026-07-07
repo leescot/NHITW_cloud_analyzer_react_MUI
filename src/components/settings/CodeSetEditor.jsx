@@ -37,6 +37,7 @@ const CodeSetEditor = ({ codeSetId, open, onClose }) => {
   const [editingId, setEditingId] = useState(null);
   const [editingLabel, setEditingLabel] = useState('');
   const [confirmReset, setConfirmReset] = useState(false);
+  const [saveError, setSaveError] = useState(null);
 
   useEffect(() => {
     if (!open || !codeSet) return;
@@ -49,6 +50,7 @@ const CodeSetEditor = ({ codeSetId, open, onClose }) => {
     setFilter('');
     setEditingId(null);
     setConfirmReset(false);
+    setSaveError(null);
   }, [open, codeSetId]);
 
   if (!codeSet) return null;
@@ -57,7 +59,7 @@ const CodeSetEditor = ({ codeSetId, open, onClose }) => {
   const inListIds = new Set(workingList.map(i => i.id));
   const availableCatalog = codeSet.catalog.filter(e =>
     !inListIds.has(`catalog:${e.code}`) &&
-    (filter === '' || e.label.toLowerCase().includes(filter.toLowerCase()) || e.code.includes(filter))
+    (filter === '' || e.label.toLowerCase().includes(filter.toLowerCase()) || e.code.toLowerCase().includes(filter.toLowerCase()))
   );
   const availablePresets = codeSet.aliasPresets.filter(p => !inListIds.has(p.id));
 
@@ -89,14 +91,24 @@ const CodeSetEditor = ({ codeSetId, open, onClose }) => {
   };
 
   const handleSave = () => {
+    setSaveError(null);
     const overlay = diffToOverlay(codeSet.builtin, workingList);
     chrome.storage.sync.set({ [codeSet.storageKey]: overlay }, () => {
+      if (chrome.runtime.lastError) {
+        setSaveError(chrome.runtime.lastError.message);
+        return;
+      }
       notifyPage(codeSet.storageKey, overlay);
       onClose();
     });
   };
   const handleResetAll = () => {
+    setSaveError(null);
     chrome.storage.sync.set({ [codeSet.storageKey]: null }, () => {
+      if (chrome.runtime.lastError) {
+        setSaveError(chrome.runtime.lastError.message);
+        return;
+      }
       notifyPage(codeSet.storageKey, null);
       onClose();
     });
@@ -185,6 +197,12 @@ const CodeSetEditor = ({ codeSetId, open, onClose }) => {
             action={<Button color="inherit" size="small" onClick={handleResetAll}>確認還原</Button>}
           >
             將清除此清單的全部自訂(啟停、排序、改名、加入項),還原為出廠預設。
+          </Alert>
+        )}
+
+        {saveError && (
+          <Alert severity="error" sx={{ mt: 1 }}>
+            儲存失敗:{saveError}(可能超出同步儲存配額,請減少加入項目)
           </Alert>
         )}
       </DialogContent>
