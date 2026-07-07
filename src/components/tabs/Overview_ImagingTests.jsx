@@ -29,7 +29,8 @@ import PhotoLibraryIcon from '@mui/icons-material/PhotoLibrary';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 
 // 導入從配置文件中移出的常數
-import { DEFAULT_IMAGE_TESTS } from '../../config/imageTests';
+import { IMAGE_FOCUS_BUILTIN } from '../../config/imageTests';
+import { resolveCodeSet, buildCodeMatcher } from '../../utils/codeSetResolver';
 
 // 處理 orderName，移除括號內的內容和分號
 const formatOrderName = (orderName) => {
@@ -83,7 +84,7 @@ const consolidateImagingRecords = (records) => {
 
 const Overview_ImagingTests = ({
   imagingData = { withReport: [], withoutReport: [] },
-  overviewSettings = { imageTrackingDays: 90, focusedImageTests: DEFAULT_IMAGE_TESTS }
+  overviewSettings = { imageTrackingDays: 90 }
 }) => {
   // Add state for report dialog
   const [reportDialog, setReportDialog] = useState({ open: false, content: '', title: '' });
@@ -172,11 +173,10 @@ const Overview_ImagingTests = ({
     const cutoffDate = new Date();
     cutoffDate.setDate(cutoffDate.getDate() - overviewSettings.imageTrackingDays);
 
-    // Get the enabled order codes from focusedImageTests
-    const enabledOrderCodes = (overviewSettings.focusedImageTests || [])
-      .filter(test => test.enabled)
-      .map(test => test.orderCode.split(','))
-      .flat();
+    // CodeSet:啟用項 codes 展平(逗號串已在 builtin 拆為陣列)
+    const enabledOrderCodes = buildCodeMatcher(
+      resolveCodeSet(IMAGE_FOCUS_BUILTIN, overviewSettings.imageFocusOverlay ?? null)
+    ).codes;
 
     // If no tests are enabled, return an empty array
     if (enabledOrderCodes.length === 0) return [];
