@@ -89,7 +89,7 @@ export default [
   {
     files: [
       '*.js',
-      'scripts/**/*.js',
+      'scripts/**/*.{js,mjs}',
       'tests/serve.js',
     ],
     languageOptions: {
