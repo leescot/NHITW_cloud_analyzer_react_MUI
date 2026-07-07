@@ -4,12 +4,14 @@
 import { buildStorageDefaults, structureFromFlat, sectionFromFlat } from "../config/settingsSchema";
 import { debugLog } from "./logger";
 import { dataStore } from "../store/dataStore";
+import { runCodeSetMigrations } from './codeSetMigration';
 
 /**
  * 從 Chrome storage 加載所有設置
  * @returns {Promise<Object>} 所有設置
  */
 export const loadAllSettings = async () => {
+  await runCodeSetMigrations(); // CodeSet 一次性遷移(冪等;已遷移時只是一次 get)
   return new Promise((resolve) => {
     chrome.storage.sync.get(buildStorageDefaults(), (items) => {
       resolve(structureFromFlat(items));
