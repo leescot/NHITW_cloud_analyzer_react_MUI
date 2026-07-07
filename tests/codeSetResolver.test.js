@@ -1,5 +1,5 @@
 import { describe, it, assert } from 'vitest';
-import { sanitizeOverlay, resolveCodeSet, migrateLegacyFocusList, diffToOverlay } from '../src/utils/codeSetResolver.js';
+import { sanitizeOverlay, resolveCodeSet, migrateLegacyFocusList, diffToOverlay, buildCodeMatcher } from '../src/utils/codeSetResolver.js';
 
 const BUILTIN = [
   { id: 'a', label: 'A', codes: ['01C'], enabled: true,  order: 0 },
@@ -132,5 +132,30 @@ describe('diffToOverlay', () => {
       resolveCodeSet(BUILTIN3, overlay).map(i => i.id),
       ['b', 'catalog:09C', 'a']
     );
+  });
+});
+
+describe('buildCodeMatcher', () => {
+  const RESOLVED = [
+    { id: 'mri', label: 'MRI', codes: ['33085B', '33084B'], enabled: true,  order: 0 },
+    { id: 'cbc', label: 'CBC', codes: ['08011C', '08003C'], enabled: true,  order: 1 },
+    { id: 'cxr', label: 'CXR', codes: ['32001C'],           enabled: false, order: 2 },
+  ];
+  it('codes = 啟用項展平(停用項不入);itemForCode 回對應項', () => {
+    const m = buildCodeMatcher(RESOLVED);
+    assert.deepEqual(m.codes, ['33085B', '33084B', '08011C', '08003C']);
+    assert.equal(m.itemForCode('08003C').id, 'cbc');   // alias 第二碼也命中同一項
+    assert.equal(m.itemForCode('33084B').id, 'mri');
+    assert.isNull(m.itemForCode('32001C'));            // 停用
+    assert.isNull(m.itemForCode('99999X'));            // 未知
+  });
+  it('同碼被兩項使用 → 先到先贏(order 排序後前者)', () => {
+    const dup = [
+      { id: 'x', label: 'X', codes: ['19009C'], enabled: true, order: 0 },
+      { id: 'y', label: 'Y', codes: ['19009C'], enabled: true, order: 1 },
+    ];
+    const m = buildCodeMatcher(dup);
+    assert.deepEqual(m.codes, ['19009C']);
+    assert.equal(m.itemForCode('19009C').id, 'x');
   });
 });

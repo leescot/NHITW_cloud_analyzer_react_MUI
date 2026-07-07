@@ -11,7 +11,7 @@ import { DEFAULT_SETTINGS } from '../src/config/defaultSettings.js';
 import { EXPECTED_STORAGE_KEYS, RENAMED_KEY_MAP } from './fixtures/storageKeys.js';
 
 describe('config/settingsSchema', function () {
-  it('schema 涵蓋 DEFAULT_SETTINGS 全部鍵,storage 鍵與 52 鍵快照一致', function () {
+  it('schema 涵蓋 DEFAULT_SETTINGS 全部鍵,storage 鍵與 54 鍵快照一致', function () {
     assert.deepEqual(Object.keys(buildStorageDefaults()).sort(), EXPECTED_STORAGE_KEYS);
   });
 

@@ -109,3 +109,24 @@ export const diffToOverlay = (builtin, workingList) => {
   });
   return { overrides, additions, removals: [] };
 };
+
+/**
+ * 啟用項的代碼展平 + 反查。消費端沿用既有「codes 陣列 includes」型比對:
+ * - 精確碼與 alias:展平後自然涵蓋(任一 code 命中即該項命中)
+ * - 08011C- 偽代碼:留在展平集合,由消費端既有 CBC 判讀特例處理
+ * - 影像多代碼:builtin 已是陣列,不再有逗號串
+ */
+export const buildCodeMatcher = (resolvedList) => {
+  const itemByCode = new Map();
+  resolvedList
+    .filter(item => item.enabled)
+    .forEach(item => {
+      item.codes.forEach(code => {
+        if (!itemByCode.has(code)) itemByCode.set(code, item);
+      });
+    });
+  return {
+    codes: [...itemByCode.keys()],
+    itemForCode: (code) => itemByCode.get(code) ?? null,
+  };
+};

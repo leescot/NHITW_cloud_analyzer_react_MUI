@@ -20,9 +20,12 @@ export const buildSettingsExport = (flatSettings, exportedAt) => ({
 
 // 陣列型預設值用 Array.isArray 判斷;其餘用 typeof 比對,並擋掉 typeof null === 'object'
 // 與陣列冒充物件('object')的兩個縫隙(atc5Groups/atc5ColorGroups 為僅有的物件型鍵)。
+// null 預設值允許 null 輸入(新的 overlay 鍵)。
 const matchesType = (value, defaultValue) =>
   Array.isArray(defaultValue)
     ? Array.isArray(value)
+    : defaultValue === null
+    ? value === null
     : value !== null && !Array.isArray(value) && typeof value === typeof defaultValue;
 
 // 全量還原:從 buildStorageDefaults() 出發,檔內通過驗證的鍵覆蓋,回傳完整 52 鍵。

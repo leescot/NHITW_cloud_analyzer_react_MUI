@@ -16,7 +16,7 @@ describe('utils/settingsBackup', function () {
     SETTINGS_SCHEMA.find((e) => e.storageKey === storageKey).defaultValue;
 
   describe('.buildSettingsExport', function () {
-    it('信封欄位齊全,settings 恰為 schema 全部 storageKey(52 鍵快照)', function () {
+    it('信封欄位齊全,settings 恰為 schema 全部 storageKey(54 鍵快照)', function () {
       const exp = buildSettingsExport(buildStorageDefaults(), FIXED_TIME);
       assert.strictEqual(exp.format, SETTINGS_EXPORT_FORMAT);
       assert.strictEqual(exp.version, SETTINGS_EXPORT_VERSION);
@@ -66,7 +66,7 @@ describe('utils/settingsBackup', function () {
       assert.lengthOf(r.warnings, 0);
     });
 
-    it('檔內只有部分鍵 → 其餘鍵重設為預設(輸出恆為完整 52 鍵)', function () {
+    it('檔內只有部分鍵 → 其餘鍵重設為預設(輸出恆為完整 54 鍵)', function () {
       const r = parseSettingsImport({
         format: SETTINGS_EXPORT_FORMAT, version: 1,
         settings: { simplifyMedicineName: false },

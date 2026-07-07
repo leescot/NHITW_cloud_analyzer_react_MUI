@@ -102,6 +102,9 @@ export const DEFAULT_SETTINGS = {
     imageTrackingDays: 180,
     focusedLabTests: DEFAULT_LAB_TESTS,
     focusedImageTests: DEFAULT_IMAGE_TESTS,
+    // CodeSet overlay(null = 無自訂,用內建;spec 2026-07-07-codeset-pilot-design.md)
+    labFocusOverlay: null,
+    imageFocusOverlay: null,
   },
 
   // 一般顯示設定

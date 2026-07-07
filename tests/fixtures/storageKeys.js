@@ -1,4 +1,4 @@
-// 現行 chrome.storage.sync 扁平鍵快照(重構前行為基準,52 鍵)
+// 現行 chrome.storage.sync 扁平鍵快照(重構前行為基準,54 鍵)
 // 抄自 settingsManager.js loadAllSettings 的 sync.get 預設物件(2026-07-04)
 export const EXPECTED_STORAGE_KEYS = [
   // western (13)
@@ -15,8 +15,9 @@ export const EXPECTED_STORAGE_KEYS = [
   'highlightAbnormalLab', 'copyLabFormat', 'enableLabChooseCopy', 'labChooseCopyItems',
   'enableLabCustomCopyFormat', 'enableLabCopyAll', 'labCopyAllOrder', 'itemSeparator',
   'customLabHeaderCopyFormat', 'customLabItemCopyFormat',
-  // overview (5)
+  // overview (7)
   'medicationTrackingDays', 'labTrackingDays', 'imageTrackingDays', 'focusedLabTests', 'focusedImageTests',
+  'labFocusOverlay', 'imageFocusOverlay',
   // general (10)
   'autoOpenPage', 'titleTextSize', 'contentTextSize', 'noteTextSize', 'floatingIconPosition',
   'alwaysOpenOverviewTab', 'useColorfulTabs', 'enableCKMTab', 'enableNephroReport', 'enableCKMScreening',
