@@ -28,7 +28,6 @@ const TYPE_SHAPE = new Map([
   // 已遷入 src/dataTypes/coreTypes.js 的核心型別非預設形狀(遷移中,依序搬入)
   ...CORE_SHAPE_ENTRIES,
   ['chronicMed', 'dataAsSingle'],
-  ['adultHealthCheck', 'recordAsSingle'],
   ['cancerScreening', 'recordAsSingle'],
   ['hbcvdata', 'recordAsSingle'],
   // 開發者補抓型別的非預設形狀(特殊給付限制三分表→recordAsSingle、
