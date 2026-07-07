@@ -26,6 +26,7 @@
 - **Cr/CCr**:同碼 `09015C`(`estimated Ccr(MDRD)` 是其下 itemName)→ 既有內建特殊處理已涵蓋,**不需 alias 組**。
 - **尿蛋白**:UPCR/UACR 跨碼(`09040C`/`09016C`/`12111C`/院所自訂 `Y00002`)但同碼下有非目標項目,orderCode 層 alias 會誤抓 → **留待後續**(需 itemName 過濾能力)。
 - 結論:alias 預設組初版只收 **CBC 一組**;此結論在 Task 11 補記回 spec。
+- **檢驗目錄來源**:`.test_data/reference/kmuh_lab_reference_20260707.json`(KMUH 公開檢驗目錄,719 筆,**非個資**;檔案本身 gitignored,但衍生的健保醫令碼+名稱清單為公開標準資料,可進 config)。**同一檢驗會因分屬多科/檢體變體而重覆多列**(如 GPT 三列、glucose 四列)——目錄**以 order_code 去重**(比對只認 orderCode,科別不影響),每碼取最簡短名稱為代表標籤、手挑常用碼標籤優先;排除內建碼與逗號串組合套餐碼 → **301 筆** + 手挑補漏。
 
 ---
 
@@ -98,12 +99,15 @@ describe('codeSets 宣告與內建資料結構', () => {
     );
   });
 
-  it('目錄與 alias 組:code 不與內建重複、alias 組 id 有 alias: 前綴', () => {
+  it('目錄與 alias 組:code 不與內建重複且唯一、alias 組 id 有 alias: 前綴', () => {
     for (const cs of CODE_SETS) {
       const builtinCodes = new Set(cs.builtin.flatMap(i => i.codes));
+      const catalogCodes = cs.catalog.map(e => e.code);
+      assert.equal(new Set(catalogCodes).size, catalogCodes.length, `${cs.id} 目錄 code 重複`);
       cs.catalog.forEach(e => {
         assert.isString(e.code);
         assert.isString(e.label);
+        assert.isAbove(e.label.length, 0);
         assert.isFalse(builtinCodes.has(e.code), `${cs.id} 目錄 ${e.code} 已在內建`);
       });
       cs.aliasPresets.forEach(p => {
@@ -112,6 +116,10 @@ describe('codeSets 宣告與內建資料結構', () => {
         assert.isAbove(p.codes.length, 1, 'alias 組必須一對多');
       });
     }
+  });
+
+  it('LAB_CATALOG 為 KMUH 去重 + 手挑聯集(生成腳本有跑:至少 250 筆)', () => {
+    assert.isAbove(getCodeSet('labFocus').catalog.length, 250);
   });
 });
 ```
@@ -186,37 +194,87 @@ export const IMAGE_FOCUS_BUILTIN = [
 ];
 ```
 
-Create `src/config/codeSetCatalog.js`:
+Create `src/config/codeSetCatalog.js` ——**LAB_CATALOG 由一次性腳本生成**。KMUH 表同一檢驗因分屬多科/檢體變體會重覆多列(GPT 三列、glucose 四列),故**以 order_code 去重**、每碼取最簡短名稱為代表標籤(手挑常用碼標籤優先);排除內建碼與逗號串組合套餐碼。在 repo 根目錄執行:
 
-```js
-/**
+```bash
+python3 - <<'PYEOF'
+import json, re
+
+REF = '.test_data/reference/kmuh_lab_reference_20260707.json'
+# LAB_FOCUS_BUILTIN 的純醫令碼(偽代碼 08011C-* 不會過 regex,列純碼 08011C 即可)
+BUILTIN = {
+    '08011C',
+    '09002C', '09015C', '09040C', '12111C', '09038C', '09005C', '09006C',
+    '09001C', '09004C', '09043C', '09044C', '09021C', '09022C', '09011C',
+    '09012C', '09013C', '09025C', '09026C', '09027C', '09029C', '09030C', '09031C',
+}
+# 手挑常用碼:標籤較簡潔,優先蓋過 KMUH 名稱;也補 KMUH 表沒有的常用碼(如 Fe)
+CURATED = {
+    '09016C': 'Cr(Urine)', '09020C': 'Fe', '09023C': 'Cl', '09032C': 'CPK',
+    '09033C': 'LDH', '09035C': 'TIBC', '09046B': 'Mg', '09064C': 'Lipase',
+    '09071C': 'CK-MB', '12015C': 'CRP', '12116C': 'Ferritin',
+    '09099C': 'Troponin I', '08005C': 'ESR', '08133B': 'Cystatin C', '12007C': 'AFP',
+}
+
+rows = json.load(open(REF))['rObject']
+names_by_code = {}
+for r in rows:
+    c = (r.get('order_code') or '').strip()
+    # 只收標準單碼(5 位數字+A/B/C);排除逗號串組合套餐與內建碼
+    if not re.fullmatch(r'\d{5}[A-C]', c) or c in BUILTIN:
+        continue
+    label = re.sub(r'\s+', ' ', (r.get('order_english_name') or r.get('order_name') or '').strip())
+    if label:
+        names_by_code.setdefault(c, []).append(label)
+
+# 每碼取最簡短名稱為代表標籤;手挑標籤優先
+catalog = {c: min(ns, key=len) for c, ns in names_by_code.items()}
+catalog.update(CURATED)
+
+def js(s):
+    return s.replace('\\', '\\\\').replace("'", "\\'")
+
+lines = [f"  {{ code: '{c}', label: '{js(catalog[c])}' }}," for c in sorted(catalog)]
+body = '\n'.join(lines)
+
+content = f"""/**
  * 代碼集目錄(catalog)與 alias 預設組
  *
- * - 目錄:一對一常用項目,使用者從編輯器篩選加入(pilot 不開放自由輸入代碼)。
- *   lab 初版承 abbreviationUtils.js 常用碼(排除已在內建者)+ 真實資料常見項;
- *   影像初版取真實資料高頻且不在內建的檢查。擴充=往此檔加行。
+ * - LAB_CATALOG:一對一常用檢驗項目,使用者從編輯器篩選加入(pilot 不開放自由輸入代碼)。
+ *   來源:KMUH 公開檢驗目錄(www.kmuh.org.tw/Web/KMULab,2026-07-07 快照),
+ *   以 order_code 去重(同檢驗跨科/檢體變體只取一,標籤取最簡短名稱)+
+ *   專案手挑常用碼(標籤優先)。公開標準醫令碼,非個資。
+ *   再生方式見 docs/superpowers/plans/2026-07-07-codeset-pilot.md Task 1;手動加行亦可。
  * - alias 預設組:專案維護的已知一對多代碼組合(2026-07-07 測資查證:
  *   CRP/hs-CRP 與 Cr/CCr 為同碼多 itemName 不需 alias;尿蛋白跨碼但有
  *   itemName 歧義留待後續;初版僅 CBC)。
  */
 export const LAB_CATALOG = [
-  { code: '09016C', label: 'Cr(Urine)' },
-  { code: '09020C', label: 'Fe' },
-  { code: '09023C', label: 'Cl' },
-  { code: '09032C', label: 'CPK' },
-  { code: '09033C', label: 'LDH' },
-  { code: '09035C', label: 'TIBC' },
-  { code: '09046B', label: 'Mg' },
-  { code: '09064C', label: 'Lipase' },
-  { code: '09071C', label: 'CK-MB' },
-  { code: '12015C', label: 'CRP' },
-  { code: '12116C', label: 'Ferritin' },
-  { code: '09099C', label: 'Troponin I' },
-  { code: '08005C', label: 'ESR' },
-  { code: '08133B', label: 'Cystatin C' },
-  { code: '12007C', label: 'AFP' },
+{body}
 ];
 
+export const IMAGE_CATALOG = [
+  {{ code: '32011C', label: '脊椎X光' }},
+  {{ code: '32006C', label: 'KUB' }},
+  {{ code: '19005C', label: '其他超音波(19005C)' }},
+  {{ code: '18007C', label: '心臟都卜勒血流圖' }},
+  {{ code: '32018C', label: '下肢骨關節X光' }},
+];
+
+export const LAB_ALIAS_PRESETS = [
+  {{ id: 'alias:cbc', label: 'CBC', codes: ['08011C', '08003C'] }},
+];
+
+export const IMAGE_ALIAS_PRESETS = [];
+"""
+open('src/config/codeSetCatalog.js', 'w').write(content)
+print(f'寫入 {len(catalog)} 筆 LAB_CATALOG')
+PYEOF
+```
+
+Expected: `寫入 30X 筆 LAB_CATALOG`(KMUH 去重 301 + 手挑補漏,聯集約 300 出頭)。生成後**檢視檔案**確認格式正確(引號跳脫、無亂碼),並抽查 `09026C` 不在目錄(內建 GPT)、`09033C → LDH`(手挑標籤生效)。生成的檔案即以下靜態內容(IMAGE_CATALOG 等後段固定):
+
+```js
 export const IMAGE_CATALOG = [
   { code: '32011C', label: '脊椎X光' },
   { code: '32006C', label: 'KUB' },
@@ -272,13 +330,13 @@ export const getCodeSet = (id) => CODE_SETS.find(cs => cs.id === id);
 - [ ] **Step 4: 跑測試確認通過**
 
 Run: `npx vitest run tests/codeSets.test.js`
-Expected: PASS(5 tests)
+Expected: PASS(6 tests)
 
 - [ ] **Step 5: Commit**
 
 ```bash
 git add src/config/labTests.js src/config/imageTests.js src/config/codeSetCatalog.js src/config/codeSets.js tests/codeSets.test.js
-git commit -m "功能:CodeSet 內建資料與宣告檔(labFocus/imageFocus builtin、目錄、CBC alias 組)"
+git commit -m "功能:CodeSet 內建資料與宣告檔(builtin、KMUH 去重目錄約 300 筆、CBC alias 組)"
 ```
 
 ---
@@ -1495,6 +1553,14 @@ alias 預設組初版僅 CBC(`08011C`/`08003C`):CRP/hs-CRP 同碼 `12015C`、
 Cr/CCr 同碼 `09015C`(皆為 itemName 變體,免 alias);尿蛋白(UPCR/UACR)
 跨碼(`09040C`/`09016C`/`Y00002` 等)但同碼下有非目標項目,orderCode 層
 alias 會誤抓,留待「itemName 過濾」能力(CodeSet 成熟後階段)。
+
+檢驗目錄(LAB_CATALOG)來源改為 KMUH 公開檢驗目錄快照
+(`.test_data/reference/kmuh_lab_reference_20260707.json`,非個資),
+以 order_code 去重約 301 筆 + 手挑常用碼聯集(取代 spec 原「abbreviationUtils
+28 碼衍生」的初版方案,涵蓋面大幅擴大;手挑標籤優先)。注意:KMUH 表同一
+檢驗因分屬多科(work_dept)/檢體變體會重覆多列(GPT 曾同時掛生化與腎功能
+實驗室),去重以 order_code 為單位、標籤取最簡短名稱——比對只認 orderCode,
+科別歸屬不影響功能。
 ```
 
 - [ ] **Step 4: 全量驗證**
