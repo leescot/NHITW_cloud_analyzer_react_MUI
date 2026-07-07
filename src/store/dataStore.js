@@ -12,13 +12,11 @@
 import { CORE_KEYS, DEV_KEYS } from '../dataTypes/registry.js';
 
 export const DATA_TYPES = [
-  // 已遷入 src/dataTypes/coreTypes.js 的核心型別(遷移中,依序搬入)
+  // 核心型別與開發者補抓型別皆由 src/dataTypes/ 描述檔衍生
   ...CORE_KEYS,
-  'chronicMed',
   'masterMenu',
   // JWT 授權清單(非 apiPath 型別,由 fetchAllDataTypes 寫入;值 { nodes, dataTypes })
   'permission',
-  // 開發者補抓型別(devFetchAll 才抓);由 src/dataTypes/ 描述檔衍生。
   ...DEV_KEYS,
 ];
 

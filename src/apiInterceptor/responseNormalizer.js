@@ -25,11 +25,8 @@ const SHAPE_NORMALIZERS = {
 
 // 形狀特殊的型別對照;未列出的型別走預設 'rows'
 const TYPE_SHAPE = new Map([
-  // 已遷入 src/dataTypes/coreTypes.js 的核心型別非預設形狀(遷移中,依序搬入)
+  // 核心型別與開發者補抓型別的非預設形狀皆由 src/dataTypes/ 描述檔衍生
   ...CORE_SHAPE_ENTRIES,
-  ['chronicMed', 'dataAsSingle'],
-  // 開發者補抓型別的非預設形狀(特殊給付限制三分表→recordAsSingle、
-  // 各彙總副表裸陣列→dataAsRows);由 src/dataTypes/ 描述檔衍生。
   ...DEV_SHAPE_ENTRIES,
 ]);
 

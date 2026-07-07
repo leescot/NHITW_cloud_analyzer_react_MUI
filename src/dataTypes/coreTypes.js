@@ -2,7 +2,6 @@
 // 14 個舊(核心)資料型別的單一描述來源(DOC/07 方向一)。
 // 由 registry.js 衍生各接點需要的片段(API_PATH_MAP / NODE_TO_DATA_TYPE /
 // TYPE_SHAPE / DATA_TYPES / 抓取分流 / NHITW_DATA / 本地匯入)。
-// 遷移中:尚未搬入的型別仍在各檔手寫登記(見 plans/2026-07-07-core-types-registry-migration.md)。
 //
 // 欄位:
 //   key             store key,全系統唯一,照舊不改名(2026-07-07 選項 A 決策)
@@ -32,4 +31,5 @@ export const CORE_DATA_TYPES = [
   { key: 'adultHealthCheck', node: '6.3', apiPath: 'imue0140/imue0140s01/hpa-data', shape: 'recordAsSingle', fetchGroup: 'special', cloudSettingKey: 'fetchAdultHealthCheck' },
   { key: 'cancerScreening', node: '6.4', apiPath: 'imue0150/imue0150s01/hpa-data', shape: 'recordAsSingle', fetchGroup: 'special', cloudSettingKey: 'fetchCancerScreening' },
   { key: 'hbcvdata', node: '1.2', apiPath: 'imue0180/imue0180s01/hbcv-data', shape: 'recordAsSingle', fetchGroup: 'special', cloudSettingKey: 'fetchHbcvdata' },
+  { key: 'chronicMed', node: '2.3', apiPath: 'imue0008/imue0008s05/get-data', shape: 'dataAsSingle' },
 ];
