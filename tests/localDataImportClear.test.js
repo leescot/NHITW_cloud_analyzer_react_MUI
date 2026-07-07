@@ -75,5 +75,6 @@ describe('localDataHandler.processLocalData — 換人完整替換', function ()
     assert.deepEqual(dataStore.getData('labdata'), { rObject: [{ lab: 'D檢' }] });
     assert.deepEqual(dataStore.getData('patientsummary'), { rObject: [{ s: 'D摘' }] });
     assert.deepEqual(dataStore.getData('masterMenu'), { rObject: [{ m: 'D單' }] });
+    assert.includeMembers(result.loadedTypes, ['labData', 'patientsummary', 'masterMenu']);
   });
 });

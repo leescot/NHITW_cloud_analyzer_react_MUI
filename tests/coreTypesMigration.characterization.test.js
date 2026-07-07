@@ -7,9 +7,9 @@ import { normalizeResponseData } from '../src/apiInterceptor/responseNormalizer.
 import { DATA_TYPES, dataStore } from '../src/store/dataStore.js';
 import { processLocalData } from '../src/localDataHandler.js';
 
-// 特徵(characterization)測試:鎖定舊 14 型別「遷入 registry 前」所有登記面的現況。
-// 遷移期間(Task 2–16)任何一步讓本檔變紅 = 行為改變,必須修遷移、不可改本檔。
-// Task 17(round-trip 修復)是唯一允許更新本檔斷言的任務(刻意的行為變更)。
+// 特徵(characterization)測試:鎖定 registry(src/dataTypes/coreTypes.js + devTypes.js)
+// 衍生的全部登記面最終狀態 —— API_PATH_MAP / NODE_TO_DATA_TYPE / 正規化形狀 / DATA_TYPES / 本地匯入對照。
+// 任何讓本檔變紅的改動 = 登記行為改變;先確認是否為刻意變更,再同步更新斷言與相關文件(DOC/02、DOC/06)。
 // buildShareData 的 key 順序已由 tests/nhitwExport.test.js 鎖定,不在此重複。
 
 describe('coreTypes 遷移特徵測試', function () {
