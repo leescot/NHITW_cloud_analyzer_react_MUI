@@ -150,7 +150,7 @@ const CodeSetEditor = ({ codeSetId, open, onClose }) => {
         <Button startIcon={<PlaylistAddIcon />} onClick={() => setShowPicker(v => !v)} sx={{ mt: 1 }}>
           從常用項目加入
         </Button>
-        <Collapse in={showPicker}>
+        <Collapse in={showPicker} unmountOnExit>
           <Box sx={{ mt: 1 }}>
             <TextField
               size="small" fullWidth placeholder="輸入名稱或代碼過濾"
