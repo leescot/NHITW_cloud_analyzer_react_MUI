@@ -1,4 +1,4 @@
-import { useState } from 'react';
+import { useState, useEffect } from 'react';
 import {
   Box,
   Typography,
@@ -6,14 +6,17 @@ import {
   CircularProgress,
   Paper,
   Chip,
-  Alert
+  Alert,
+  Switch,
+  FormControlLabel,
 } from '@mui/material';
 import CloudUploadIcon from '@mui/icons-material/CloudUpload';
 import FolderOpenIcon from '@mui/icons-material/FolderOpen';
 import CheckCircleIcon from '@mui/icons-material/CheckCircle';
 import DownloadIcon from '@mui/icons-material/Download';
+import RefreshIcon from '@mui/icons-material/Refresh';
 
-// 資料類型對照表
+// 資料類型對照表（匯入狀態 chip 用）
 const dataTypeMap = new Map([
   ['medication', '西藥處方'],
   ['labData', '檢驗報告'],
@@ -24,7 +27,21 @@ const dataTypeMap = new Map([
   ['discharge', '出院病摘'],
   ['medDays', '餘藥資料'],
   ['patientSummary', '病患摘要'],
-  ['chronicMed', '慢性處方箋']
+  ['chronicMed', '慢性處方箋'],
+  // round-trip 補完 + 開發者補抓型別（spec v2）
+  ['labdraw', '檢驗圖形化'],
+  ['permission', '授權清單'],
+  ['specialPayment', '特殊給付限制'],
+  ['controlledMed', '特定管制用藥'],
+  ['controlledMedSummary', '特定管制用藥(彙總)'],
+  ['acupuncture', '針傷治療'],
+  ['chineseMedCare', '特定疾病門診加強照護'],
+  ['chineseMedCareSummary', '特定疾病門診加強照護(彙總)'],
+  ['dental', '牙科處置'],
+  ['labRecord', '檢查檢驗紀錄'],
+  ['rehabilitation', '復健醫療'],
+  ['rehabilitationSummary', '復健醫療(彙總)'],
+  ['specialMaterial', '特材紀錄'],
 ]);
 
 // 新增下載功能
@@ -102,6 +119,55 @@ const LoadDataTab = ({ localDataStatus, setSnackbar }) => {
   const [loading, setLoading] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
   const [downloading, setDownloading] = useState(false); // 新增下載狀態
+  const [devFetchAll, setDevFetchAll] = useState(false); // 完整抓取模式旗標
+  const [refetching, setRefetching] = useState(false);   // 立即重抓狀態
+
+  // 掛載時讀取 devFetchAll(chrome.storage.local,不進 settingsSchema/sync)
+  useEffect(() => {
+    chrome.storage.local.get({ devFetchAll: false }, (items) => {
+      setDevFetchAll(Boolean(items.devFetchAll));
+    });
+  }, []);
+
+  // 切換完整抓取模式
+  const handleDevFetchAllToggle = (event) => {
+    const checked = event.target.checked;
+    setDevFetchAll(checked);
+    chrome.storage.local.set({ devFetchAll: checked });
+  };
+
+  // 立即重新抓取:對當前分頁送 manualFetchData 訊息(content script 此時讀到最新 devFetchAll)
+  const handleManualRefetch = () => {
+    setRefetching(true);
+    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      if (!tabs || !tabs[0] || !tabs[0].id) {
+        setRefetching(false);
+        setSnackbar({ open: true, message: '無法獲取當前標籤頁資訊', severity: 'error' });
+        return;
+      }
+      try {
+        chrome.tabs.sendMessage(tabs[0].id, { action: 'manualFetchData' }, () => {
+          setRefetching(false);
+          if (chrome.runtime.lastError) {
+            setSnackbar({
+              open: true,
+              message: '與內容腳本通訊失敗，請確認目前在健保雲端頁面',
+              severity: 'error',
+            });
+            return;
+          }
+          setSnackbar({
+            open: true,
+            message: '已觸發重新抓取，稍候即可下載 JSON',
+            severity: 'success',
+          });
+        });
+      } catch (err) {
+        setRefetching(false);
+        setSnackbar({ open: true, message: '與內容腳本通訊時發生錯誤', severity: 'error' });
+      }
+    });
+  };
 
   // 處理檔案選擇
   const handleFileChange = (event) => {
@@ -237,9 +303,31 @@ const LoadDataTab = ({ localDataStatus, setSnackbar }) => {
 
   return (
     <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
-      {/* <Typography variant="h6" gutterBottom>
-        本地資料載入
-      </Typography> */}
+      {/* 開發者完整抓取控制（僅「開發」tab 顯示，本 tab 本身即開發者模式專屬） */}
+      <Paper variant="outlined" sx={{ p: 2 }}>
+        <Typography variant="subtitle1" gutterBottom>
+          開發者完整抓取
+        </Typography>
+        <FormControlLabel
+          control={<Switch checked={devFetchAll} onChange={handleDevFetchAllToggle} />}
+          label="完整抓取模式（含未介接 API）"
+        />
+        <Typography variant="body2" color="text.secondary" sx={{ mt: 0.5, mb: 2 }}>
+          開啟後會額外抓取約 11 個一般不介接的 API 端點（特殊給付、管制用藥、針傷、牙科、
+          檢查檢驗紀錄、復健、特材…），供開發參考；一次呼叫較多、較慢。關閉時一般抓取行為不變。
+          切換後請按「立即重新抓取」再下載 JSON。
+        </Typography>
+        <Button
+          variant="outlined"
+          color="primary"
+          startIcon={refetching ? <CircularProgress size={16} color="inherit" /> : <RefreshIcon />}
+          onClick={handleManualRefetch}
+          disabled={refetching}
+          sx={{ width: '100%' }}
+        >
+          {refetching ? '抓取中...' : '立即重新抓取'}
+        </Button>
+      </Paper>
 
       {/* 新增下載 JSON 資料檔的按鈕 */}
       <Paper variant="outlined" sx={{ p: 2 }}>

@@ -23,9 +23,10 @@ export function maskIdForFilename(id) {
  * @param {Function} deps.getTokenPayload 取得目前登入 token 解析後的 payload
  * @param {import('../store/dataStore').dataStore} deps.dataStore 資料儲存單例
  * @param {Map<string,string>} deps.API_PATH_MAP 資料型別 → API path 對照表
+ * @param {Function} deps.getAuthorizedDataTypes 由權限節點陣列換算授權型別 Set（permission 派生用）
  */
 export function setupMessageListeners(deps) {
-  const { fetchAllDataTypes, clearAllData, getTokenPayload, dataStore, API_PATH_MAP } = deps;
+  const { fetchAllDataTypes, clearAllData, getTokenPayload, dataStore, API_PATH_MAP, getAuthorizedDataTypes } = deps;
 
   chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.action === "manualFetchData") {
@@ -95,6 +96,18 @@ export function setupMessageListeners(deps) {
         }
         patientData.masterMenu = dataStore.getData('masterMenu');
 
+        // 授權清單:優先取 dataStore('permission')(抓取時寫入);
+        // 只下載、未重抓過(null)時由 JWT 現場派生,確保下載檔一定有值。
+        let permission = dataStore.getData('permission');
+        if (!permission) {
+          const nodes = payload?.Permission ? payload.Permission.split(',') : [];
+          const dataTypes = getAuthorizedDataTypes ? [...getAuthorizedDataTypes(nodes)] : [];
+          permission = { nodes, dataTypes };
+        }
+        patientData.permission = permission;
+
+        // hasAnyData 只認 rObject;permission({nodes,dataTypes} 無 rObject)天然不影響判斷,
+        // 避免「只有授權清單、沒有醫療資料」時仍觸發下載。
         const hasAnyData = Object.values(patientData).some(value => {
           return value?.rObject && Array.isArray(value.rObject) && value.rObject.length > 0;
         });

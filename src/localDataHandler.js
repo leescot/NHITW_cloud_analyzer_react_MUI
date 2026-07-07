@@ -6,11 +6,15 @@
 import { debugLog } from './utils/logger';
 import { dataStore } from './store/dataStore';
 import { buildShareData, writeShareDataToLocalStorage } from './store/nhitwExport';
+import { DEV_KEYS } from './dataTypes/registry';
 
-// 本地 JSON 的 key → store 型別(lab→labdata、patientSummary→patientsummary)
+// 本地 JSON 的 key → store 型別(lab→labdata、patientSummary→patientsummary)。
+// labdraw / permission / 開發者補抓型別為完整 round-trip 補完(spec v2 §7.2);
+// 開發者補抓型別名字已統一,一律 [key, key]。
 const LOCAL_KEY_TO_STORE_TYPE = new Map([
   ['medication', 'medication'],
   ['lab', 'labdata'],
+  ['labdraw', 'labdraw'],
   ['chinesemed', 'chinesemed'],
   ['imaging', 'imaging'],
   ['allergy', 'allergy'],
@@ -22,6 +26,8 @@ const LOCAL_KEY_TO_STORE_TYPE = new Map([
   ['cancerScreening', 'cancerScreening'],
   ['hbcvdata', 'hbcvdata'],
   ['chronicMed', 'chronicMed'],
+  ['permission', 'permission'],
+  ...DEV_KEYS.map(key => [key, key]),
 ]);
 
 /**

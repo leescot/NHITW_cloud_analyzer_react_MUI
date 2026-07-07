@@ -1,5 +1,8 @@
 # 開發者模式完整抓取 + 資料 round-trip 設計
 
+> ⚠️ **已由 `2026-07-07-developer-mode-full-fetch-design-v2.md` 修訂取代**(阻擋端點已補齊,
+> UI 改置「開發」tab、改走輕量 registry pilot、`NHITW_DATA` 命名解凍)。本檔保留供歷史對照。
+>
 > 2026-07-05 brainstorming 定案(方案 A)。
 > **實作前置條件:`DOC/06_API資料對照與擷取流程.md`「JWT Permission 節點對應表」中
 > 尚缺 API 端點的節點(1.3/2.2/3.2/3.3/4.1/6.5/9.1/10.1)由維護者補齊後才動工**,

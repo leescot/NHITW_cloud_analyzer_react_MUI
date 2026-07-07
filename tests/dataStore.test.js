@@ -7,12 +7,17 @@ describe('store/dataStore', function () {
     dataStore.clearAll();
   });
 
-  it('DATA_TYPES 涵蓋全部 15 種資料型別', function () {
+  it('DATA_TYPES 涵蓋 15 種核心型別 + permission + 11 個開發者補抓型別', function () {
     assert.deepEqual(DATA_TYPES, [
       'medication', 'labdata', 'labdraw', 'chinesemed', 'imaging',
       'allergy', 'surgery', 'discharge', 'medDays', 'patientsummary',
       'adultHealthCheck', 'cancerScreening', 'hbcvdata', 'chronicMed',
       'masterMenu',
+      'permission',
+      'specialPayment', 'controlledMed', 'controlledMedSummary',
+      'acupuncture', 'chineseMedCare', 'chineseMedCareSummary',
+      'dental', 'labRecord', 'rehabilitation', 'rehabilitationSummary',
+      'specialMaterial',
     ]);
   });
 
@@ -21,7 +26,7 @@ describe('store/dataStore', function () {
   });
 
   it('未知型別回傳 undefined(對齊從未宣告的 window 變數,JSON.stringify 會省略)', function () {
-    assert.isUndefined(dataStore.getData('rehabilitation'));
+    assert.isUndefined(dataStore.getData('notARealDataType'));
   });
 
   it('setData 後 getData 回傳同一參考', function () {

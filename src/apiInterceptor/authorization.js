@@ -30,10 +30,12 @@ export function getAuthorizedDataTypes(permissions) {
  * 非特殊型別（不在 SPECIAL_DATA_TYPE_SETTING_KEYS 中）恆回傳 true。
  * @param {string} dataType
  * @param {object} cloudSettings - 已解析出的 cloud 設定物件（key 為 SPECIAL_DATA_TYPE_SETTING_KEYS 對應值）
+ * @param {boolean} [devFetchAll=false] - 開發者「完整抓取模式」;為 true 時無視 cloudSettings 一律抓取
  * @returns {boolean}
  */
-export function shouldFetchSpecialData(dataType, cloudSettings) {
+export function shouldFetchSpecialData(dataType, cloudSettings, devFetchAll = false) {
   const key = SPECIAL_DATA_TYPE_SETTING_KEYS[dataType];
-  if (!key) return true;
+  if (!key) return true;          // 非特殊型別恆 true
+  if (devFetchAll) return true;   // 完整抓取模式無視雲端開關
   return Boolean(cloudSettings && cloudSettings[key]);
 }

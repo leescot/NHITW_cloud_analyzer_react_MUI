@@ -104,5 +104,26 @@ describe('apiInterceptor/authorization', function () {
         hbcvdata: 'fetchHbcvdata',
       });
     });
+
+    // devFetchAll 第三參數(開發者完整抓取模式,spec v2 §6.1)
+    it('devFetchAll=true overrides a disabled cloud setting (fetches anyway)', function () {
+      assert.isTrue(shouldFetchSpecialData('adultHealthCheck', { fetchAdultHealthCheck: false }, true));
+      assert.isTrue(shouldFetchSpecialData('cancerScreening', { fetchCancerScreening: false }, true));
+      assert.isTrue(shouldFetchSpecialData('hbcvdata', {}, true));
+    });
+
+    it('devFetchAll=false preserves the original 2-arg behavior', function () {
+      assert.isFalse(shouldFetchSpecialData('adultHealthCheck', { fetchAdultHealthCheck: false }, false));
+      assert.isTrue(shouldFetchSpecialData('adultHealthCheck', { fetchAdultHealthCheck: true }, false));
+    });
+
+    it('omitting devFetchAll defaults to false (backward compatible)', function () {
+      assert.isFalse(shouldFetchSpecialData('adultHealthCheck', { fetchAdultHealthCheck: false }));
+    });
+
+    it('devFetchAll does not affect non-special types (still true)', function () {
+      assert.isTrue(shouldFetchSpecialData('medication', {}, true));
+      assert.isTrue(shouldFetchSpecialData('medication', {}, false));
+    });
   });
 });

@@ -9,11 +9,17 @@
 // 規畫中的階段 4 訂閱者是依型別過濾的 hook,且 React 18+ 自動批次
 // 會把同一 tick 的多次通知合併為一次 render,不會造成 15 次 re-render。
 
+import { DEV_KEYS } from '../dataTypes/registry.js';
+
 export const DATA_TYPES = [
   'medication', 'labdata', 'labdraw', 'chinesemed', 'imaging',
   'allergy', 'surgery', 'discharge', 'medDays', 'patientsummary',
   'adultHealthCheck', 'cancerScreening', 'hbcvdata', 'chronicMed',
   'masterMenu',
+  // JWT 授權清單(非 apiPath 型別,由 fetchAllDataTypes 寫入;值 { nodes, dataTypes })
+  'permission',
+  // 開發者補抓型別(devFetchAll 才抓);由 src/dataTypes/ 描述檔衍生。
+  ...DEV_KEYS,
 ];
 
 const createInitialMap = () => new Map(DATA_TYPES.map(type => [type, null]));

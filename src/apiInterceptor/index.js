@@ -2,6 +2,7 @@
 // 純主動抓取架構，移除被動攔截（XHR/fetch monkey-patch）
 
 import { API_PATH_MAP } from './apiPathMap.js';
+import { DEV_KEYS } from '../dataTypes/registry.js';
 import { normalizeResponseData } from './responseNormalizer.js';
 import {
   getAuthorizedDataTypes,
@@ -51,6 +52,7 @@ function initialize() {
     getTokenPayload,
     dataStore,
     API_PATH_MAP,
+    getAuthorizedDataTypes,
   });
 
   if (isOnLoginPage()) {
@@ -201,6 +203,16 @@ function getCloudSettingsForType(dataType) {
   });
 }
 
+// 讀取開發者「完整抓取模式」旗標(chrome.storage.local.devFetchAll,預設 false)。
+// 開發工具旗標,刻意不進 settingsSchema/storage.sync(不跨機同步、不污染設定契約)。
+function getDevFetchAll() {
+  return new Promise((resolve) => {
+    chrome.storage.local.get({ devFetchAll: false }, (items) => {
+      resolve(Boolean(items.devFetchAll));
+    });
+  });
+}
+
 // ===== 資料抓取 =====
 
 function fetchAllDataTypes() {
@@ -222,6 +234,13 @@ function fetchAllDataTypes() {
   const permissions = getPermissions();
   const authorized = getAuthorizedDataTypes(permissions);
 
+  // 授權清單寫入 dataStore（permission 型別;一般模式也寫,成本為零,資料本來就在 JWT 內）。
+  // 供下載 JSON 輸出參考;不進 NHITW_DATA 對外契約(buildShareData)。
+  dataStore.setData('permission', {
+    nodes: permissions,
+    dataTypes: [...authorized],
+  });
+
   const regularTypes = [
     "medication", "labdata", "chinesemed", "imaging",
     "allergy", "surgery", "discharge", "medDays",
@@ -239,20 +258,35 @@ function fetchAllDataTypes() {
   });
 
   const specialTypes = ["adultHealthCheck", "cancerScreening", "hbcvdata", "labdraw"];
-  const specialPromises = specialTypes.map(type => {
-    return getCloudSettingsForType(type).then(cloudSettings => {
-      const shouldFetch = shouldFetchSpecialData(type, cloudSettings);
-      if (shouldFetch && authorized.has(type)) {
+
+  // devFetchAll 為單一閘門:同時控制「特殊型別無視雲端開關」與「開發者補抓型別是否抓取」。
+  getDevFetchAll().then(devFetchAll => {
+    const specialPromises = specialTypes.map(type => {
+      return getCloudSettingsForType(type).then(cloudSettings => {
+        const shouldFetch = shouldFetchSpecialData(type, cloudSettings, devFetchAll);
+        if (shouldFetch && authorized.has(type)) {
+          return fetchSingleDataType(type).catch(err => {
+            console.error(`獲取 ${type} 資料時發生錯誤:`, err);
+            return createEmptyDataResult(type);
+          });
+        }
+        return createEmptyDataResult(type);
+      });
+    });
+
+    // 開發者補抓型別:僅 devFetchAll 開啟且該節點有授權時才抓,否則以空結果佔位(不增加 API 呼叫)。
+    const devPromises = DEV_KEYS.map(type => {
+      if (devFetchAll && authorized.has(type)) {
         return fetchSingleDataType(type).catch(err => {
           console.error(`獲取 ${type} 資料時發生錯誤:`, err);
           return createEmptyDataResult(type);
         });
       }
-      return createEmptyDataResult(type);
+      return Promise.resolve(createEmptyDataResult(type));
     });
-  });
 
-  Promise.all([...regularPromises, ...specialPromises])
+    return Promise.all([...regularPromises, ...specialPromises, ...devPromises]);
+  })
     .then(results => {
       saveToLocalStorage();
 

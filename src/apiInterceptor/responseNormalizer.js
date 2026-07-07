@@ -3,6 +3,8 @@
 // 新型別回應形狀特殊時,在 TYPE_SHAPE 加一行對照,不再累積 if-else 分支
 // (2026-07-05,DOC/07 地雷 #4)。
 
+import { DEV_SHAPE_ENTRIES } from '../dataTypes/registry.js';
+
 // 各形狀的正規化函數:(data, recordsArray) => { rObject: [...] }
 // - data:原始回應;recordsArray:data.rObject ?? data.robject(大小寫相容)
 const SHAPE_NORMALIZERS = {
@@ -30,6 +32,9 @@ const TYPE_SHAPE = new Map([
   ['adultHealthCheck', 'recordAsSingle'],
   ['cancerScreening', 'recordAsSingle'],
   ['hbcvdata', 'recordAsSingle'],
+  // 開發者補抓型別的非預設形狀(特殊給付限制三分表→recordAsSingle、
+  // 各彙總副表裸陣列→dataAsRows);由 src/dataTypes/ 描述檔衍生。
+  ...DEV_SHAPE_ENTRIES,
 ]);
 
 export function normalizeResponseData(data, dataType) {

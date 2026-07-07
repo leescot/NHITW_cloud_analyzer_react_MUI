@@ -109,6 +109,24 @@ describe('apiInterceptor/responseNormalizer', function () {
     });
   });
 
+  describe('.normalizeResponseData — 開發者補抓型別的 TYPE_SHAPE 衍生對照(spec v2 §5)', function () {
+    it('specialPayment(三分表物件)走 recordAsSingle:整個 robject 物件包成一元素', function () {
+      const tables = { medical_service: [1], drugs: [2], special_material: [3] };
+      const input = { robject: tables };
+      assert.deepEqual(normalizeResponseData(input, 'specialPayment'), { rObject: [tables] });
+    });
+
+    it('controlledMedSummary(裸陣列)走 dataAsRows:回應本體即列陣列,原樣輸出', function () {
+      const input = [{ a: 1 }, { a: 2 }];
+      assert.deepEqual(normalizeResponseData(input, 'controlledMedSummary'), { rObject: [{ a: 1 }, { a: 2 }] });
+    });
+
+    it('dental(未登記 shape)走預設 rows', function () {
+      const input = { robject: [{ x: 1 }] };
+      assert.deepEqual(normalizeResponseData(input, 'dental'), { rObject: [{ x: 1 }] });
+    });
+  });
+
   describe('.normalizeResponseData — null/undefined input', function () {
     it('throws when data is null, because .rObject is read unconditionally before branching', function () {
       assert.throws(() => normalizeResponseData(null, 'medication'));
