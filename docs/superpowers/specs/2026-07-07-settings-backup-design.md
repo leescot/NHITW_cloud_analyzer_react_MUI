@@ -75,9 +75,10 @@
 
 ## 資料流與刷新
 
-匯入 `sync.set` 後:**頁面端**由既有的 `chrome.storage.onChanged` 監聽
-(`utils/settingsManager.js`、`App.jsx`)自動刷新;**popup 端**各設定區塊
-只在 mount 時讀 storage、無 onChanged 監聽,故匯入成功訊息提示使用者
+匯入 `sync.set` 後:**頁面端**由既有的 `chrome.storage.onChanged` 監聽自動刷新
+(`utils/settingsManager.js` 的 `listenForSettingsChanges`,經 `useSettingsState.js`
+由 `contentScript.jsx` 掛載的 `FloatingIcon` 使用);**popup 端**各設定區塊
+只在 mount 時讀 storage、無 sync 區監聽,故匯入成功訊息提示使用者
 「重新開啟本視窗」。不新增任何通知機制。
 
 ## 錯誤處理
