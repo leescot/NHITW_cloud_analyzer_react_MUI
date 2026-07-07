@@ -6,7 +6,6 @@ export const NODE_TO_DATA_TYPE = {
   '1.1': ['patientsummary'],
   '1.2': ['hbcvdata'],
   '2.3': ['chronicMed'],
-  '2.4': ['medDays'],
   '6.3': ['adultHealthCheck'],
   '6.4': ['cancerScreening'],
   // 開發者補抓型別的授權節點(1.3/2.2/3.2/3.3/4.1/6.5/9.1/10.1);

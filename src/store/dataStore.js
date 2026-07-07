@@ -14,7 +14,7 @@ import { CORE_KEYS, DEV_KEYS } from '../dataTypes/registry.js';
 export const DATA_TYPES = [
   // 已遷入 src/dataTypes/coreTypes.js 的核心型別(遷移中,依序搬入)
   ...CORE_KEYS,
-  'medDays', 'patientsummary',
+  'patientsummary',
   'adultHealthCheck', 'cancerScreening', 'hbcvdata', 'chronicMed',
   'masterMenu',
   // JWT 授權清單(非 apiPath 型別,由 fetchAllDataTypes 寫入;值 { nodes, dataTypes })

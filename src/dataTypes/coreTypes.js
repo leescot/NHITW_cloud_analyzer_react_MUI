@@ -27,4 +27,5 @@ export const CORE_DATA_TYPES = [
   { key: 'allergy', node: '5.1', apiPath: 'imue0040/imue0040s02/get-data' },
   { key: 'surgery', node: '7.1', apiPath: 'imue0020/imue0020s02/get-data' },
   { key: 'discharge', node: '8.1', apiPath: 'imue0070/imue0070s02/get-data' },
+  { key: 'medDays', node: '2.4', apiPath: 'imue0120/imue0120s01/pres-med-day', shape: 'dataAsRows' },
 ];
