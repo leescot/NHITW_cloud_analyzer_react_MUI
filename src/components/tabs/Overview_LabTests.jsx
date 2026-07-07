@@ -14,7 +14,8 @@ import {
 } from "@mui/material";
 import PrintIcon from '@mui/icons-material/Print';
 import { formatDateShort } from './Overview_utils';
-import { FALLBACK_LAB_TESTS, SPECIAL_LAB_CODES } from '../settings/OverviewSettings';
+import { LAB_FOCUS_BUILTIN, LAB_FOCUS_SPECIAL_CODES } from '../../config/labTests';
+import { resolveCodeSet, buildCodeMatcher } from '../../utils/codeSetResolver';
 import TypographySizeWrapper from "../utils/TypographySizeWrapper";
 import LabItemTrendPopover from "./lab/LabItemTrendPopover";
 import { CKM_LAB_ITEMS, CKM_SPECIAL_LAB_CODES, classifyLabItem } from "../../utils/ckmUtils";
@@ -117,32 +118,20 @@ const Overview_LabTests = ({
       </TypographySizeWrapper> */}
       {(() => {
         if (effectiveLabData && effectiveLabData.length > 0) {
-          // Use focusedLabTests from overviewSettings if available, otherwise use default config
-          const labTestsConfig = (() => {
-            if (overviewSettings.focusedLabTests && Array.isArray(overviewSettings.focusedLabTests)) {
-              // Filter only enabled tests and map to the format expected by the component
-              return overviewSettings.focusedLabTests
-                .filter(test => test.enabled)
-                .map(test => {
-                  // Special handling for tests with special processing needed
-                  const isSpecial = SPECIAL_LAB_CODES.some(code =>
-                    test.orderCode === code ||
-                    (code.endsWith('-') && test.orderCode.startsWith(code))
-                  );
-
-                  return {
-                    orderCode: test.orderCode,
-                    displayName: isSpecial ? 'Special' : test.displayName
-                  };
-                });
-            } else {
-              // Fallback to default config if settings are not available
-              return FALLBACK_LAB_TESTS.map(test => ({
-                orderCode: test.orderCode,
-                displayName: test.displayName
-              }));
-            }
-          })();
+          // CodeSet:內建基底 + 使用者 overlay → 展平 codes(alias 任一碼命中即該項命中)。
+          // null/壞 overlay 由 resolver 退回內建預設,原 FALLBACK 分支不再需要。
+          const matcher = buildCodeMatcher(
+            resolveCodeSet(LAB_FOCUS_BUILTIN, overviewSettings.labFocusOverlay ?? null)
+          );
+          const labTestsConfig = matcher.codes.map(code => {
+            const isSpecial = LAB_FOCUS_SPECIAL_CODES.some(sc =>
+              code === sc || (sc.endsWith('-') && code.startsWith(sc))
+            );
+            return {
+              orderCode: code,
+              displayName: isSpecial ? 'Special' : matcher.itemForCode(code).label,
+            };
+          });
 
           // Create a mapping from orderCode to displayName for easier lookup
           const orderCodeToName = {};
