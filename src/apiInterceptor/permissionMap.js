@@ -3,7 +3,6 @@ import { CORE_NODE_TO_TYPES, DEV_NODE_TO_TYPES } from '../dataTypes/registry.js'
 export const NODE_TO_DATA_TYPE = {
   // 已遷入 src/dataTypes/coreTypes.js 的核心型別(遷移中,依序搬入)
   ...CORE_NODE_TO_TYPES,
-  '1.1': ['patientsummary'],
   '1.2': ['hbcvdata'],
   '2.3': ['chronicMed'],
   '6.3': ['adultHealthCheck'],
