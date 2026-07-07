@@ -22,6 +22,21 @@
   (「CodeSet 成熟後」階段)。
 - 目錄不涵蓋的代碼:等目錄擴充(往 config 加行),不開自由輸入。
 
+## 實作時補記(2026-07-07,146 份真實測資查證)
+
+alias 預設組初版僅 CBC(`08011C`/`08003C`):CRP/hs-CRP 同碼 `12015C`、
+Cr/CCr 同碼 `09015C`(皆為 itemName 變體,免 alias);尿蛋白(UPCR/UACR)
+跨碼(`09040C`/`09016C`/`Y00002` 等)但同碼下有非目標項目,orderCode 層
+alias 會誤抓,留待「itemName 過濾」能力(CodeSet 成熟後階段)。
+
+檢驗目錄(LAB_CATALOG)來源改為 KMUH 公開檢驗目錄快照
+(`.test_data/reference/kmuh_lab_reference_20260707.json`,非個資),
+以 order_code 去重約 301 筆 + 手挑常用碼聯集(取代 spec 原「abbreviationUtils
+28 碼衍生」的初版方案,涵蓋面大幅擴大;手挑標籤優先)。注意:KMUH 表同一
+檢驗因分屬多科(work_dept)/檢體變體會重覆多列(GPT 曾同時掛生化與腎功能
+實驗室),去重以 order_code 為單位、標籤取最簡短名稱——比對只認 orderCode,
+科別歸屬不影響功能。
+
 ## 資料模型
 
 ### 單筆項目(list shape)
