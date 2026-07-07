@@ -30,4 +30,5 @@ export const CORE_DATA_TYPES = [
   { key: 'medDays', node: '2.4', apiPath: 'imue0120/imue0120s01/pres-med-day', shape: 'dataAsRows' },
   { key: 'patientsummary', node: '1.1', apiPath: 'imue2000/imue2000s01/get-summary', shape: 'rowsOrSingle', exportKey: 'patientSummary' },
   { key: 'adultHealthCheck', node: '6.3', apiPath: 'imue0140/imue0140s01/hpa-data', shape: 'recordAsSingle', fetchGroup: 'special', cloudSettingKey: 'fetchAdultHealthCheck' },
+  { key: 'cancerScreening', node: '6.4', apiPath: 'imue0150/imue0150s01/hpa-data', shape: 'recordAsSingle', fetchGroup: 'special', cloudSettingKey: 'fetchCancerScreening' },
 ];
