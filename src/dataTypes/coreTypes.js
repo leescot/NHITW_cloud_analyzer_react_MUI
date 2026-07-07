@@ -23,4 +23,5 @@ export const CORE_DATA_TYPES = [
   { key: 'labdata', node: '6.1', apiPath: 'imue0060/imue0060s02/get-data', exportKey: 'lab' },
   { key: 'labdraw', node: '6.1', apiPath: 'imue0060/imue0060s03/get-data', shape: 'dataAsRows', fetchGroup: 'special' },
   { key: 'chinesemed', node: '3.1', apiPath: 'imue0090/imue0090s02/get-data' },
+  { key: 'imaging', node: '6.2', apiPath: 'imue0130/imue0130s02/get-data' },
 ];
