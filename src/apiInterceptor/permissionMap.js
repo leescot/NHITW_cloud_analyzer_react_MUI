@@ -9,7 +9,6 @@ export const NODE_TO_DATA_TYPE = {
   '2.4': ['medDays'],
   '3.1': ['chinesemed'],
   '5.1': ['allergy'],
-  '6.1': ['labdata', 'labdraw'],
   '6.2': ['imaging'],
   '6.3': ['adultHealthCheck'],
   '6.4': ['cancerScreening'],

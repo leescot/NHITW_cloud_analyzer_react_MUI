@@ -3,8 +3,6 @@ import { CORE_API_ENTRIES, DEV_API_ENTRIES } from '../dataTypes/registry.js';
 export const API_PATH_MAP = new Map([
   // 已遷入 src/dataTypes/coreTypes.js 的核心型別(遷移中,依序搬入)
   ...CORE_API_ENTRIES,
-  ["labdata", "imue0060/imue0060s02/get-data"],
-  ["labdraw", "imue0060/imue0060s03/get-data"],
   ["chinesemed", "imue0090/imue0090s02/get-data"],
   ["imaging", "imue0130/imue0130s02/get-data"],
   ["allergy", "imue0040/imue0040s02/get-data"],

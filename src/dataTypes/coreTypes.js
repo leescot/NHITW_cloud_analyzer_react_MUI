@@ -20,4 +20,6 @@
 
 export const CORE_DATA_TYPES = [
   { key: 'medication', node: '2.1', apiPath: 'imue0008/imue0008s02/get-data' },
+  { key: 'labdata', node: '6.1', apiPath: 'imue0060/imue0060s02/get-data', exportKey: 'lab' },
+  { key: 'labdraw', node: '6.1', apiPath: 'imue0060/imue0060s03/get-data', shape: 'dataAsRows', fetchGroup: 'special' },
 ];
