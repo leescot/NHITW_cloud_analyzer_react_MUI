@@ -29,6 +29,7 @@ import LabSettings from './settings/LabSettings';
 import OverviewSettings from './settings/OverviewSettings';
 import AboutTab from './settings/AboutTab';
 import AdvancedSettings from './settings/AdvancedSettings';
+import SettingsBackup from './settings/SettingsBackup';
 import CloudDataSettings from './settings/CloudDataSettings';
 import { updateDataStatus } from '../utils/settingsHelper';
 import LoadDataTab from './settings/LoadDataTab';
@@ -90,6 +91,7 @@ const PopupSettings = () => {
         <ChineseMedicationSettings />
         <LabSettings />
         <AdvancedSettings />
+        <SettingsBackup />
       </Box>
     )],
     [1, (
