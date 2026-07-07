@@ -14,6 +14,11 @@ import { DEV_KEYS } from './dataTypes/registry';
 // 開發者補抓型別名字已統一,一律 [key, key]。
 const LOCAL_KEY_TO_STORE_TYPE = new Map([
   ...CORE_DATA_TYPES.map(t => [t.exportKey ?? t.key, t.key]),
+  // 舊版下載 JSON 相容:2026-07 前的下載檔 patientsummary 為小寫(修復前的
+  // messageHandlers 只別名 labdata→lab),既有 .test_data 個案檔皆此格式。
+  ['patientsummary', 'patientsummary'],
+  // masterMenu 在下載 JSON 內但原對照表漏登記,匯入時被丟棄;補上使 round-trip 完整。
+  ['masterMenu', 'masterMenu'],
   ['permission', 'permission'],
   ...DEV_KEYS.map(key => [key, key]),
 ]);

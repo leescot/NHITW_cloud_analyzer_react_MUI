@@ -63,4 +63,17 @@ describe('localDataHandler.processLocalData — 換人完整替換', function ()
     assert.isNull(dataStore.getData('dental'));
     assert.isNull(dataStore.getData('permission'));
   });
+
+  it('舊版下載 JSON(小寫 patientsummary + masterMenu)可完整匯入(round-trip 修復)', async function () {
+    const result = await processLocalData({
+      UserName: '丁', UserID: 'D4',
+      lab: { rObject: [{ lab: 'D檢' }] },
+      patientsummary: { rObject: [{ s: 'D摘' }] },
+      masterMenu: { rObject: [{ m: 'D單' }] },
+    }, 'd-legacy.json');
+    assert.isTrue(result.success);
+    assert.deepEqual(dataStore.getData('labdata'), { rObject: [{ lab: 'D檢' }] });
+    assert.deepEqual(dataStore.getData('patientsummary'), { rObject: [{ s: 'D摘' }] });
+    assert.deepEqual(dataStore.getData('masterMenu'), { rObject: [{ m: 'D單' }] });
+  });
 });

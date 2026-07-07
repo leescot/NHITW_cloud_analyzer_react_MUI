@@ -2,6 +2,8 @@
 // 從 legacyContent.js 抽出，透過依賴注入取得所需的外部函數/值，
 // 讓本模組不直接耦合 legacyContent.js 的模組狀態。
 
+import { CORE_EXPORT_KEY } from '../dataTypes/registry.js';
+
 /**
  * 下載檔名用的身分證號遮罩:檔名本身即 PII,匯出檔名不得含完整身分證號。
  * 格式:前 3 碼 + xxxx + 末 1 碼(檔名不能用 *,以 x 取代;與 debug log 遮罩同精神)。
@@ -91,7 +93,7 @@ export function setupMessageListeners(deps) {
           ClientTime: new Date().toISOString(),
         };
         for (const dataType of API_PATH_MAP.keys()) {
-          const key = dataType === 'labdata' ? 'lab' : dataType;
+          const key = CORE_EXPORT_KEY.get(dataType) ?? dataType;
           patientData[key] = dataStore.getData(dataType);
         }
         patientData.masterMenu = dataStore.getData('masterMenu');

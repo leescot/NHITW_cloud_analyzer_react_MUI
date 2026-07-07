@@ -118,7 +118,7 @@ describe('coreTypes 遷移特徵測試', function () {
       delete window._localUserInfo;
     });
 
-    it('14 舊型別經 lab/patientSummary 別名匯入;小寫 patientsummary 與 masterMenu 現況「不」匯入', async function () {
+    it('14 舊型別經別名匯入;小寫 patientsummary 與 masterMenu 修復後可匯入(round-trip 完整)', async function () {
       const p = (tag) => ({ rObject: [{ tag }] });
       const result = await processLocalData({
         UserID: 'X1',
@@ -127,8 +127,8 @@ describe('coreTypes 遷移特徵測試', function () {
         surgery: p('sur'), discharge: p('dis'), medDays: p('md'),
         patientSummary: p('ps'), adultHealthCheck: p('ahc'),
         cancerScreening: p('cs'), hbcvdata: p('hbcv'), chronicMed: p('chr'),
-        // ↓ 下載 JSON 實際輸出的是小寫 patientsummary 與 masterMenu;
-        //   現況兩者匯入時被丟棄(round-trip 斷點)。Task 17 修復時更新本測項。
+        // ↓ 下載 JSON(修復前版本)實際輸出的是小寫 patientsummary 與 masterMenu;
+        //   Task 17 修復後兩者皆可匯入(round-trip 完整)。
         patientsummary: p('ps-lower'),
         masterMenu: p('mm'),
       }, 'x.json');
@@ -143,12 +143,12 @@ describe('coreTypes 遷移特徵測試', function () {
       assert.deepEqual(dataStore.getData('surgery'), p('sur'));
       assert.deepEqual(dataStore.getData('discharge'), p('dis'));
       assert.deepEqual(dataStore.getData('medDays'), p('md'));
-      assert.deepEqual(dataStore.getData('patientsummary'), p('ps')); // 駝峰 key 進來
+      assert.deepEqual(dataStore.getData('patientsummary'), p('ps-lower')); // 修復後:小寫 key 也匯入(舊下載檔相容);兩 key 併存時後迭代者覆蓋
       assert.deepEqual(dataStore.getData('adultHealthCheck'), p('ahc'));
       assert.deepEqual(dataStore.getData('cancerScreening'), p('cs'));
       assert.deepEqual(dataStore.getData('hbcvdata'), p('hbcv'));
       assert.deepEqual(dataStore.getData('chronicMed'), p('chr'));
-      assert.isNull(dataStore.getData('masterMenu')); // 現況特徵:被丟棄
+      assert.deepEqual(dataStore.getData('masterMenu'), p('mm')); // 修復後:masterMenu 匯入
     });
   });
 });

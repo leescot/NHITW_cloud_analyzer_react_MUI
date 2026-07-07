@@ -33,3 +33,8 @@ export const CORE_SPECIAL_KEYS = CORE_DATA_TYPES.filter(t => t.fetchGroup === 's
 export const CORE_SETTING_KEYS = Object.fromEntries(
   CORE_DATA_TYPES.filter(t => t.cloudSettingKey).map(t => [t.key, t.cloudSettingKey])
 );
+
+// messageHandlers 下載 JSON 用:store key → 對外 key(只含有別名的型別)
+export const CORE_EXPORT_KEY = new Map(
+  CORE_DATA_TYPES.filter(t => t.exportKey).map(t => [t.key, t.exportKey])
+);
