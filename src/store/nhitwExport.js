@@ -7,6 +7,7 @@
 // 格式:timestamp 最前;labdata 對外改名 lab;patientSummary 駝峰;
 //      未載入的型別輸出 null;truncated 最後(快照完整性標記)。
 import { dataStore } from './dataStore';
+import { CORE_DATA_TYPES } from '../dataTypes/coreTypes';
 import { debugLog } from '../utils/logger';
 
 // 大小警告門檻(估算 bytes)。Chrome localStorage 每 origin 約 5MB(UTF-16 計價),
@@ -18,27 +19,19 @@ export const NHITW_DATA_WARN_BYTES = 4 * 1024 * 1024;
 const estimateBytes = (json) => json.length * 2;
 
 export const buildShareData = (timestamp = Date.now()) => {
-  return {
-    timestamp,
-    medication: dataStore.getData('medication'),
-    lab: dataStore.getData('labdata'),
-    labdraw: dataStore.getData('labdraw'),
-    chinesemed: dataStore.getData('chinesemed'),
-    imaging: dataStore.getData('imaging'),
-    allergy: dataStore.getData('allergy'),
-    surgery: dataStore.getData('surgery'),
-    discharge: dataStore.getData('discharge'),
-    medDays: dataStore.getData('medDays'),
-    patientSummary: dataStore.getData('patientsummary'),
-    masterMenu: dataStore.getData('masterMenu'),
-    adultHealthCheck: dataStore.getData('adultHealthCheck'),
-    cancerScreening: dataStore.getData('cancerScreening'),
-    hbcvdata: dataStore.getData('hbcvdata'),
-    chronicMed: dataStore.getData('chronicMed'),
-    // 對外契約新增欄位(2026-07-05):快照是否因大小限制被截斷。
-    // 截斷策略未實作,目前恆為 false;實作後由截斷邏輯設 true。
-    truncated: false,
-  };
+  const shareData = { timestamp };
+  for (const t of CORE_DATA_TYPES) {
+    shareData[t.exportKey ?? t.key] = dataStore.getData(t.key);
+    // masterMenu 為無 apiPath 的偽型別,不在描述檔;
+    // 對外契約既定順序:固定插在 patientSummary 之後(見 DOC/02 表格)。
+    if (t.key === 'patientsummary') {
+      shareData.masterMenu = dataStore.getData('masterMenu');
+    }
+  }
+  // 對外契約欄位(2026-07-05):快照是否因大小限制被截斷。
+  // 截斷策略未實作,目前恆為 false;實作後由截斷邏輯設 true。
+  shareData.truncated = false;
+  return shareData;
 };
 
 /**
