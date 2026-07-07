@@ -5,6 +5,7 @@ import { CORE_DATA_TYPES } from '../src/dataTypes/coreTypes.js';
 import { DEV_DATA_TYPES } from '../src/dataTypes/devTypes.js';
 import {
   CORE_KEYS, CORE_API_ENTRIES, CORE_SHAPE_ENTRIES, CORE_NODE_TO_TYPES,
+  CORE_REGULAR_KEYS, CORE_SPECIAL_KEYS, CORE_SETTING_KEYS,
   DEV_NODE_TO_TYPES,
 } from '../src/dataTypes/registry.js';
 
@@ -43,5 +44,20 @@ describe('dataTypes/coreTypes + registry 不變量', function () {
     assert.deepEqual(CORE_KEYS, CORE_DATA_TYPES.map(t => t.key));
     assert.deepEqual(CORE_API_ENTRIES, CORE_DATA_TYPES.map(t => [t.key, t.apiPath]));
     assert.deepEqual(CORE_SHAPE_ENTRIES, CORE_DATA_TYPES.filter(t => t.shape).map(t => [t.key, t.shape]));
+  });
+
+  it('抓取分流衍生對齊現行 index.js 的手寫清單', function () {
+    assert.deepEqual(CORE_REGULAR_KEYS, [
+      'medication', 'labdata', 'chinesemed', 'imaging',
+      'allergy', 'surgery', 'discharge', 'medDays',
+      'patientsummary', 'chronicMed',
+    ]);
+    // 衍生序為描述檔序(labdraw 在前);與舊手寫序的差異見 Step 3 說明
+    assert.deepEqual(CORE_SPECIAL_KEYS, ['labdraw', 'adultHealthCheck', 'cancerScreening', 'hbcvdata']);
+    assert.deepEqual(CORE_SETTING_KEYS, {
+      adultHealthCheck: 'fetchAdultHealthCheck',
+      cancerScreening: 'fetchCancerScreening',
+      hbcvdata: 'fetchHbcvdata',
+    });
   });
 });

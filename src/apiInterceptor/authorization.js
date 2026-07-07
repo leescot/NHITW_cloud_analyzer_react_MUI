@@ -1,12 +1,10 @@
 import { NODE_TO_DATA_TYPE } from './permissionMap.js';
+import { CORE_SETTING_KEYS } from '../dataTypes/registry.js';
 
 // 特殊資料型別（健檢/癌篩/hbcv）對應的 chrome.storage.sync 設定 key，
 // 供 legacyContent.js 呼叫端組出 chrome.storage.sync.get 的查詢物件。
-export const SPECIAL_DATA_TYPE_SETTING_KEYS = {
-  adultHealthCheck: 'fetchAdultHealthCheck',
-  cancerScreening: 'fetchCancerScreening',
-  hbcvdata: 'fetchHbcvdata',
-};
+// 由 coreTypes 描述檔的 cloudSettingKey 衍生。
+export const SPECIAL_DATA_TYPE_SETTING_KEYS = CORE_SETTING_KEYS;
 
 /**
  * 依權限節點陣列計算已授權的資料型別集合。

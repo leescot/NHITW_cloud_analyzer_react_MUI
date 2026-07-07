@@ -2,7 +2,7 @@
 // 純主動抓取架構，移除被動攔截（XHR/fetch monkey-patch）
 
 import { API_PATH_MAP } from './apiPathMap.js';
-import { DEV_KEYS } from '../dataTypes/registry.js';
+import { CORE_REGULAR_KEYS, CORE_SPECIAL_KEYS, DEV_KEYS } from '../dataTypes/registry.js';
 import { normalizeResponseData } from './responseNormalizer.js';
 import {
   getAuthorizedDataTypes,
@@ -241,11 +241,8 @@ function fetchAllDataTypes() {
     dataTypes: [...authorized],
   });
 
-  const regularTypes = [
-    "medication", "labdata", "chinesemed", "imaging",
-    "allergy", "surgery", "discharge", "medDays",
-    "patientsummary", "chronicMed",
-  ];
+  // 由 coreTypes 描述檔衍生:regular = 一般批次;special = 經 shouldFetchSpecialData 閘門
+  const regularTypes = CORE_REGULAR_KEYS;
 
   const regularPromises = regularTypes.map(type => {
     if (authorized.has(type)) {
@@ -257,7 +254,7 @@ function fetchAllDataTypes() {
     return Promise.resolve(createEmptyDataResult(type));
   });
 
-  const specialTypes = ["adultHealthCheck", "cancerScreening", "hbcvdata", "labdraw"];
+  const specialTypes = CORE_SPECIAL_KEYS;
 
   // devFetchAll 為單一閘門:同時控制「特殊型別無視雲端開關」與「開發者補抓型別是否抓取」。
   getDevFetchAll().then(devFetchAll => {

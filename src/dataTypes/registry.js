@@ -25,3 +25,11 @@ export const DEV_KEYS = toKeys(DEV_DATA_TYPES);
 export const DEV_API_ENTRIES = toApiEntries(DEV_DATA_TYPES);
 export const DEV_SHAPE_ENTRIES = toShapeEntries(DEV_DATA_TYPES);
 export const DEV_NODE_TO_TYPES = toNodeToTypes(DEV_DATA_TYPES);
+
+// index.js 抓取分流用:regular 批次 / special 批次(經 shouldFetchSpecialData 閘門)
+export const CORE_REGULAR_KEYS = CORE_DATA_TYPES.filter(t => t.fetchGroup !== 'special').map(t => t.key);
+export const CORE_SPECIAL_KEYS = CORE_DATA_TYPES.filter(t => t.fetchGroup === 'special').map(t => t.key);
+// authorization.js 用:特殊型別 → chrome.storage.sync 開關 key
+export const CORE_SETTING_KEYS = Object.fromEntries(
+  CORE_DATA_TYPES.filter(t => t.cloudSettingKey).map(t => [t.key, t.cloudSettingKey])
+);
