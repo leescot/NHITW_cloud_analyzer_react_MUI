@@ -125,6 +125,18 @@ describe('apiInterceptor/responseNormalizer', function () {
       const input = { robject: [{ x: 1 }] };
       assert.deepEqual(normalizeResponseData(input, 'dental'), { rObject: [{ x: 1 }] });
     });
+
+    // 2026-07-08 正式環境實測(.test_data/json_allapi 27 檔):imue0080s03 回應是
+    // { log2time, robject: [...] } 物件,非 spec v2 推測的裸陣列;誤登記 dataAsRows
+    // 會把整個 envelope 包成一筆假紀錄。正確走預設 rows(相容小寫 robject)。
+    it('rehabilitationSummary(正式環境 {log2time, robject} 物件)走預設 rows:取出內層列', function () {
+      const rows = [
+        { type: '1', cureType1: '0', cureType4: '0', cureType6: '0', cureType7: '0' },
+        { type: '2', cureType1: '0', cureType4: '0', cureType6: '0', cureType7: '0' },
+      ];
+      const input = { log2time: '2026-07-08T13:55:28.621328+08:00', robject: rows };
+      assert.deepEqual(normalizeResponseData(input, 'rehabilitationSummary'), { rObject: rows });
+    });
   });
 
   describe('.normalizeResponseData — null/undefined input', function () {

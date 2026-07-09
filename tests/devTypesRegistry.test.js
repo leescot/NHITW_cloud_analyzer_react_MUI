@@ -61,6 +61,9 @@ describe('dataTypes/devTypes + registry', function () {
       // 預設 'rows' 的型別不應出現
       assert.isFalse(map.has('dental'));
       assert.isFalse(map.has('controlledMed'));
+      // 2026-07-08 正式環境實測:imue0080s03 回 { log2time, robject } 物件,
+      // 非 spec v2 推測的裸陣列,故不得登記 dataAsRows(走預設 rows)
+      assert.isFalse(map.has('rehabilitationSummary'));
     });
 
     it('DEV_NODE_TO_TYPES 對多型別節點 group by node(2.2/3.3/9.1 各兩型別)', function () {

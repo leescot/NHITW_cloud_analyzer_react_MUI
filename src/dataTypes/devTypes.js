@@ -22,6 +22,8 @@ export const DEV_DATA_TYPES = [
   { key: 'dental', node: '4.1', apiPath: 'imue0030/imue0030s02/get-data' },
   { key: 'labRecord', node: '6.5', apiPath: 'imue0010/imue0010s02/get-data' },
   { key: 'rehabilitation', node: '9.1', apiPath: 'imue0080/imue0080s02/get-data' },
-  { key: 'rehabilitationSummary', node: '9.1', apiPath: 'imue0080/imue0080s03/get-data', shape: 'dataAsRows' },
+  // 2026-07-08 正式環境實測:imue0080s03 回 { log2time, robject } 物件(非 spec v2
+  // 推測的裸陣列),走預設 rows 取內層 robject;dataAsRows 會把 envelope 包成一筆假紀錄。
+  { key: 'rehabilitationSummary', node: '9.1', apiPath: 'imue0080/imue0080s03/get-data' },
   { key: 'specialMaterial', node: '10.1', apiPath: 'imue0200/imue0200s02/get-data' },
 ];

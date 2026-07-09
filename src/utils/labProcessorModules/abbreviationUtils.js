@@ -60,11 +60,13 @@ const specialHandlers = new Map([
     if (!itemName) return null;
 
     // UPCR 相關判斷
+    // 「蛋白/肌酸酐比值」子字串涵蓋「尿液蛋白/肌酸酐比值」「總蛋白/肌酸酐比值」等中文變體
+    // (與 Overview_LabTests 的 UPCR 判定對齊,避免兩層標籤不一致;實測 .test_data)。
     if (itemName === "Urine protein/Creatinine ratio(UPCR)" ||
         itemName.includes("UPCR") ||
         (itemName.includes("protein") && itemName.includes("Creatinine") && itemName.includes("ratio")) ||
         itemName === "TP/CRE" ||
-        itemName === "總蛋白/肌酸酐比值") {
+        itemName.includes("蛋白/肌酸酐比值")) {
       return "UPCR";
     }
 
@@ -93,10 +95,14 @@ const specialHandlers = new Map([
     if (!itemName) return null;
 
     // UACR 相關判斷
-    if (itemName.toLowerCase().includes("u-acr") ||
-        itemName.toLowerCase().includes("albumin/creatinine") ||
-        itemName.toLowerCase().includes("/cre") ||
-        itemName.toLowerCase().includes("acr-u")) {
+    // 純文字 "UACR"(含大小寫)為實測常見 item 名(.test_data ×22),原條件只認帶連字號的
+    // "u-acr" 會漏判,補 "uacr" 子字串。
+    const lowerItem = itemName.toLowerCase();
+    if (lowerItem.includes("uacr") ||
+        lowerItem.includes("u-acr") ||
+        lowerItem.includes("albumin/creatinine") ||
+        lowerItem.includes("/cre") ||
+        lowerItem.includes("acr-u")) {
       return "UACR";
     }
 

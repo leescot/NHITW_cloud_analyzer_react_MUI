@@ -2,8 +2,8 @@ import { describe, it, assert } from 'vitest';
 import { sanitizeOverlay, resolveCodeSet, migrateLegacyFocusList, diffToOverlay, buildCodeMatcher } from '../src/utils/codeSetResolver.js';
 
 const BUILTIN = [
-  { id: 'a', label: 'A', codes: ['01C'], enabled: true,  order: 0 },
-  { id: 'b', label: 'B', codes: ['02C'], enabled: true,  order: 1 },
+  { id: 'a', label: 'A', codes: ['01C'], enabled: true, order: 0 },
+  { id: 'b', label: 'B', codes: ['02C'], enabled: true, order: 1 },
   { id: 'c', label: 'C', codes: ['03C'], enabled: false, order: 2 },
 ];
 
@@ -68,9 +68,9 @@ describe('resolveCodeSet', () => {
 
 describe('migrateLegacyFocusList', () => {
   const BUILTIN2 = [
-    { id: 'mri', label: 'MRI', codes: ['33085B', '33084B'], enabled: true,  order: 0 },
-    { id: 'ct',  label: 'CT',  codes: ['33072B', '33070B'], enabled: true,  order: 1 },
-    { id: 'cxr', label: 'CXR', codes: ['32001C'],           enabled: false, order: 2 },
+    { id: 'mri', label: 'MRI', codes: ['33085B', '33084B'], enabled: true, order: 0 },
+    { id: 'ct', label: 'CT', codes: ['33072B', '33070B'], enabled: true, order: 1 },
+    { id: 'cxr', label: 'CXR', codes: ['32001C'], enabled: false, order: 2 },
   ];
   it('非陣列 → null(不遷移)', () => {
     assert.isNull(migrateLegacyFocusList(null, BUILTIN2));
@@ -79,8 +79,8 @@ describe('migrateLegacyFocusList', () => {
   it('與內建完全一致 → 空 overlay(遷移完成標記,resolve 後等同內建)', () => {
     const legacy = [
       { orderCode: '33085B,33084B', displayName: 'MRI', enabled: true },
-      { orderCode: '33072B,33070B', displayName: 'CT',  enabled: true },
-      { orderCode: '32001C',        displayName: 'CXR', enabled: false },
+      { orderCode: '33072B,33070B', displayName: 'CT', enabled: true },
+      { orderCode: '32001C', displayName: 'CXR', enabled: false },
     ];
     const overlay = migrateLegacyFocusList(legacy, BUILTIN2);
     assert.deepEqual(overlay, { overrides: {}, additions: [], removals: [] });
@@ -88,9 +88,9 @@ describe('migrateLegacyFocusList', () => {
   });
   it('使用者改過 enabled/順序/名稱 → 記為 overrides;未知碼 → addition', () => {
     const legacy = [
-      { orderCode: '32001C',        displayName: '胸部X光', enabled: true },   // 改名+啟用+提到第0位
-      { orderCode: '33085B,33084B', displayName: 'MRI',     enabled: true },
-      { orderCode: '99999X',        displayName: '自訂',     enabled: true },   // 內建沒有
+      { orderCode: '32001C', displayName: '胸部X光', enabled: true },   // 改名+啟用+提到第0位
+      { orderCode: '33085B,33084B', displayName: 'MRI', enabled: true },
+      { orderCode: '99999X', displayName: '自訂', enabled: true },   // 內建沒有
     ];
     const overlay = migrateLegacyFocusList(legacy, BUILTIN2);
     assert.deepEqual(overlay.overrides.cxr, { enabled: true, order: 0, label: '胸部X光' });
@@ -108,8 +108,8 @@ describe('migrateLegacyFocusList', () => {
 
 describe('diffToOverlay', () => {
   const BUILTIN3 = [
-    { id: 'a', label: 'A', codes: ['01C'], enabled: true,  order: 0 },
-    { id: 'b', label: 'B', codes: ['02C'], enabled: true,  order: 1 },
+    { id: 'a', label: 'A', codes: ['01C'], enabled: true, order: 0 },
+    { id: 'b', label: 'B', codes: ['02C'], enabled: true, order: 1 },
   ];
   it('無改動 → 空 overlay', () => {
     assert.deepEqual(diffToOverlay(BUILTIN3, BUILTIN3), { overrides: {}, additions: [], removals: [] });
@@ -137,9 +137,9 @@ describe('diffToOverlay', () => {
 
 describe('buildCodeMatcher', () => {
   const RESOLVED = [
-    { id: 'mri', label: 'MRI', codes: ['33085B', '33084B'], enabled: true,  order: 0 },
-    { id: 'cbc', label: 'CBC', codes: ['08011C', '08003C'], enabled: true,  order: 1 },
-    { id: 'cxr', label: 'CXR', codes: ['32001C'],           enabled: false, order: 2 },
+    { id: 'mri', label: 'MRI', codes: ['33085B', '33084B'], enabled: true, order: 0 },
+    { id: 'cbc', label: 'CBC', codes: ['08011C', '08003C'], enabled: true, order: 1 },
+    { id: 'cxr', label: 'CXR', codes: ['32001C'], enabled: false, order: 2 },
   ];
   it('codes = 啟用項展平(停用項不入);itemForCode 回對應項', () => {
     const m = buildCodeMatcher(RESOLVED);

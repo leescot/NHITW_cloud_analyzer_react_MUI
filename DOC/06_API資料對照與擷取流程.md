@@ -206,6 +206,10 @@ JWT payload 的 `Permission` 欄位（等同 masterMenu API 的 `prsnAuth`）：
   - `imue0009s03/get-data`（**彙總**，無 query 參數）：回應是**裸陣列**（無 `robject` 包裝）。
     `drug_rel_code_ename`+`drug_ing_code`→**成分名稱(成分代碼)**、`fee_ym`→**就醫年月**、`hosp_times`→**就醫次數**、
     `hosp_units`→**就醫院所數**、`drug_qty`→**總劑量(mg)**、`drug_ddd_qty`→**總DDD數**、`code_cname`→**備註**。
+    ⚠️ 2026-07-08 正式環境實測（devFetchAll 全抓 27 個真實個案）：**全部回空陣列**，
+    含 3 個 `imue0009s02` 明細有資料的個案——與展示版「無參數即有資料」不符，
+    可能是「關懷名單」另有納入條件、或我們附加的 `cli_datetime`/`insert_log` 參數觸發不同行為，
+    待上線開發者工具實測（見 DOC/04 技術債 #7）。
 - **特定凝血因子用藥** `imue0050s02/get-data`（明細；展示版預設日期範圍內無資料列，以下標頭為推測）：
   `drug_atc3_name`→**ATC3名稱**、`drug_atc5_code`→**ATC5代碼**、`drug_atc5_name`→**ATC5名稱**、
   `drug_ing_code`+`drug_ing_name`→**成分名稱(成分代碼)**、`drug_code`→**藥品代碼**、`drug_ename`→**藥品名稱**、
@@ -219,6 +223,8 @@ JWT payload 的 `Permission` 欄位（等同 masterMenu API 的 `prsnAuth`）：
 - **3.3 特定疾病門診加強照護** `imue0170s02/get-data`：欄位同 3.2，另加 `case_date`→**收案日期**、
   `close_date`→**結案日期**、`close_rsn_cname`→**結案原因**。
   另有 `imue0170s03/get-data`（裸陣列，展示資料為空）。
+  ⚠️ 2026-07-08 正式環境實測：s02/s03 於 27 個真實個案**全空**——3.3 收案本屬罕見，
+  可能為真無資料，但與 #7 調查同因的可能性未排除（見 DOC/04 技術債 #7）。
 - **4.1 牙科處置** `imue0030s02/get-data`：來源→**來源**、`icd_*`→**主診斷**、`order_code`→**醫令代碼**、
   `order_ename`→**醫令名稱**、`cure_path`+`cure_path_name`→**診療部位**、`exe_s_date`→**執行時間-起**、
   `exe_e_date`→**執行時間-迄**、`order_qty`→**醫令總量**、`fee_ym`→費用年月、
@@ -234,6 +240,11 @@ JWT payload 的 `Permission` 欄位（等同 masterMenu API 的 `prsnAuth`）：
     `exe_s_date`→**執行日期-起**、`exe_e_date`→**執行日期-迄**、`cure_e_date`→**治療結束日期**、`fee_ym`→費用年月。
   - `imue0080s03/get-data?txt_functype=&txt_hosp=...`（**彙總**，依復健治療種類的次數統計，頁面標頭：
     **復健治療種類／執行次數／簡單／中度／中度複雜／複雜**；欄位 `type, cureType1, cureType4, cureType6, cureType7`）。
+    **回應形狀（2026-07-08 正式環境實測更正）**：是 `{ log2time, robject: [...] }` **物件**，
+    非 spec v2 推測的裸陣列——`devTypes.js` 原誤登記 `dataAsRows`（會把整個 envelope 包成一筆假紀錄），
+    2026-07-08 已改走預設 `rows`（相容小寫 `robject`）。
+    ⚠️ 另一觀察：有 25 筆復健明細的個案，彙總 `cureType*` 仍全為 0——
+    疑與我們未帶 `txt_functype`/`txt_hosp` 參數有關，待上線實測（見 DOC/04 技術債 #7）。
 - **10.1 特材紀錄** `imue0200s02/get-data`：來源→**來源**、`icd_*`→**主診斷**、`order_code`→**特材代碼**、
   `met_c_name`+`met_e_name`→**特材名稱**、`met_type`→特材類別（未顯為標頭）、`doh_license_no`→**許可證字號**、
   `cure_path`→**診療部位**、`pdt_model`→**產品型號/規格**、`func_date`→**就醫日期**、`order_qty`→數量、

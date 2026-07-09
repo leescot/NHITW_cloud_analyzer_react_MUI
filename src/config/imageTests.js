@@ -28,12 +28,12 @@ export const DEFAULT_IMAGE_TESTS = [
  * 舊 DEFAULT_IMAGE_TESTS 的逗號串代碼正式拆為 codes 陣列(一對多 alias)。
  */
 export const IMAGE_FOCUS_BUILTIN = [
-  { id: 'mri',          label: '磁振造影(MRI)', codes: ['33085B', '33084B'], enabled: true,  order: 0 },
-  { id: 'ct',           label: '電腦斷層(CT)',  codes: ['33072B', '33070B'], enabled: true,  order: 1 },
-  { id: 'abd-echo',     label: '腹部超音波',    codes: ['19009C', '19001C'], enabled: true,  order: 2 },
-  { id: 'other-echo',   label: '其他超音波',    codes: ['19009C'],           enabled: true,  order: 3 },
-  { id: 'cardiac-echo', label: '心臟超音波',    codes: ['18006C'],           enabled: true,  order: 4 },
-  { id: 'egd',          label: '胃鏡',          codes: ['28016C'],           enabled: true,  order: 5 },
-  { id: 'cxr',          label: 'CXR',           codes: ['32001C'],           enabled: false, order: 6 },
-  { id: 'ekg',          label: 'EKG',           codes: ['18001C'],           enabled: false, order: 7 },
+  { id: 'mri', label: '磁振造影(MRI)', codes: ['33085B', '33084B'], enabled: true, order: 0 },
+  { id: 'ct', label: '電腦斷層(CT)', codes: ['33072B', '33070B'], enabled: true, order: 1 },
+  { id: 'abd-echo', label: '腹部超音波', codes: ['19009C', '19001C'], enabled: true, order: 2 },
+  { id: 'other-echo', label: '其他超音波', codes: ['19009C'], enabled: true, order: 3 },
+  { id: 'cardiac-echo', label: '心臟超音波', codes: ['18006C'], enabled: true, order: 4 },
+  { id: 'egd', label: '胃鏡', codes: ['28016C'], enabled: true, order: 5 },
+  { id: 'cxr', label: 'CXR', codes: ['32001C'], enabled: false, order: 6 },
+  { id: 'ekg', label: 'EKG', codes: ['18001C'], enabled: false, order: 7 },
 ];

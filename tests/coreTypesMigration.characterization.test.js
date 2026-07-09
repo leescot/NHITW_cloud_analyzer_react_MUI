@@ -75,11 +75,11 @@ describe('coreTypes 遷移特徵測試', function () {
   const PROBE_B = { rObject: { a: 1 } }; // rObject 為單一物件
   const PROBE_C = [1, 2];                // 回應本體就是陣列(無 rObject)
   const SHAPE_EXPECTED = {
-    rows:           [[1, 2],    [],         []],
-    rowsOrSingle:   [[1, 2],    [{ a: 1 }], []],
-    dataAsRows:     [[PROBE_A], [PROBE_B],  [1, 2]],
-    dataAsSingle:   [[PROBE_A], [PROBE_B],  [[1, 2]]],
-    recordAsSingle: [[[1, 2]],  [{ a: 1 }], []],
+    rows: [[1, 2], [], []],
+    rowsOrSingle: [[1, 2], [{ a: 1 }], []],
+    dataAsRows: [[PROBE_A], [PROBE_B], [1, 2]],
+    dataAsSingle: [[PROBE_A], [PROBE_B], [[1, 2]]],
+    recordAsSingle: [[[1, 2]], [{ a: 1 }], []],
   };
   const TYPE_TO_SHAPE = {
     medication: 'rows', labdata: 'rows', labdraw: 'dataAsRows',

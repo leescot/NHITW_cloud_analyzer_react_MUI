@@ -16,6 +16,8 @@ export default [
   {
     ignores: [
       'dist',
+      // gitignored 本機工作區(如 .claude/skills 腳本):CI 看不到,本機裸 eslint 不掃,兩邊結果一致
+      '.claude',
     ],
   },
   {
