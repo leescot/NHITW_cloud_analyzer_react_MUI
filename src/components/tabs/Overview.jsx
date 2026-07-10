@@ -20,6 +20,7 @@ import { Grid, Box } from "@mui/material";
 
 // Import individual components
 import Overview_RecentDiagnosis from "./Overview_RecentDiagnosis";
+import Overview_VaccineEligibility from "./Overview_VaccineEligibility";
 import Overview_ImportantMedications from "./Overview_ImportantMedications";
 import Overview_LabTests from "./Overview_LabTests";
 import Overview_PatientSummary from "./Overview_PatientSummary";
@@ -51,6 +52,7 @@ const Overview = ({
   adultHealthCheckData = null,
   cancerScreeningData = null,
   hbcvData = null,
+  userInfo = null,
   settings = {},
   overviewSettings = {
     medicationTrackingDays: 180,
@@ -101,6 +103,15 @@ const Overview = ({
             groupedMedications={groupedMedications}
             groupedChineseMeds={groupedChineseMeds}
             patientSummaryData={patientSummaryData}
+          />
+
+          {/* 建議疫苗 */}
+          <Overview_VaccineEligibility
+            userInfo={userInfo}
+            groupedMedications={groupedMedications}
+            patientSummaryData={patientSummaryData}
+            hbcvData={hbcvData}
+            generalDisplaySettings={generalDisplaySettings}
           />
 
           {/* 重點藥物 */}

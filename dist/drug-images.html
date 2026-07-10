@@ -1,0 +1,143 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>藥品圖片查看器</title>
+  <style>
+    body {
+      font-family: 'Microsoft JhengHei', Arial, sans-serif;
+      margin: 0;
+      padding: 20px;
+      background-color: #f5f5f5;
+      color: #333;
+      font-size: 18px;
+    }
+    .container {
+      max-width: 1000px;
+      margin: 0 auto;
+      background-color: white;
+      border-radius: 8px;
+      box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+      padding: 20px;
+    }
+    h1 {
+      text-align: center;
+      color: #1976d2;
+      margin-bottom: 20px;
+      font-size: 2em;
+    }
+    .drug-info {
+      margin-bottom: 20px;
+      padding-bottom: 15px;
+      border-bottom: 1px solid #eee;
+      line-height: 1.5;
+    }
+    .drug-info p {
+      margin: 8px 0;
+    }
+    .drug-name {
+      font-weight: bold;
+      font-size: 1.4em;
+      color: #333;
+    }
+    .gallery {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(250px, 1fr));
+      gap: 15px;
+      margin-top: 20px;
+    }
+    .gallery-item {
+      position: relative;
+      overflow: hidden;
+      border-radius: 4px;
+      box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+      background-color: #f9f9f9;
+      padding: 10px;
+      text-align: center;
+    }
+    .gallery-item img {
+      max-width: 100%;
+      height: auto;
+      display: block;
+      margin: 0 auto;
+      cursor: pointer;
+      transition: transform 0.3s ease;
+    }
+    .gallery-item img:hover {
+      transform: scale(1.05);
+    }
+    .source-name {
+      font-size: 0.9em;
+      color: #666;
+      margin-top: 5px;
+      text-align: center;
+    }
+    .loading {
+      text-align: center;
+      padding: 40px;
+      font-size: 1.3em;
+      color: #666;
+    }
+    .error {
+      color: #d32f2f;
+      text-align: center;
+      padding: 20px;
+    }
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 1000;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      background-color: rgba(0, 0, 0, 0.9);
+    }
+    .modal-content {
+      display: block;
+      margin: 0 auto;
+      max-width: 80%;
+      max-height: 80%;
+      position: relative;
+      top: 50%;
+      transform: translateY(-50%);
+    }
+    .close {
+      position: absolute;
+      top: 20px;
+      right: 30px;
+      color: white;
+      font-size: 40px;
+      font-weight: bold;
+      cursor: pointer;
+    }
+    .no-images {
+      text-align: center;
+      padding: 40px;
+      color: #666;
+      font-size: 1.1em;
+    }
+  </style>
+</head>
+<body>
+  <div class="container">
+    <h1>藥品圖片查看器</h1>
+    <div id="drug-info" class="drug-info"></div>
+    <div id="gallery" class="gallery"></div>
+    <div id="loading" class="loading">載入中，請稍候...</div>
+    <div id="error" class="error" style="display: none;"></div>
+    <div id="no-images" class="no-images" style="display: none;">沒有找到此藥品的圖片</div>
+    <div style="text-align: center; margin-top: 30px; padding-top: 15px; border-top: 1px solid #eee; color: #666; font-size: 0.9em;">
+      資料來源：藥‧臺灣 drugtw.com
+    </div>
+  </div>
+
+  <div id="imageModal" class="modal">
+    <span class="close" id="closeModalBtn">&times;</span>
+    <img class="modal-content" id="modalImage">
+  </div>
+
+  <script src="drug-images.js"></script>
+</body>
+</html>
