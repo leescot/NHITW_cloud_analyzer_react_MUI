@@ -600,6 +600,9 @@ const ImagingData = ({ imagingData, generalDisplaySettings }) => {
     '19015C', '19016C', '19017C', '19018C', '18006C', '18005C'
   ];
 
+  // 病理報告的檢查類別名稱
+  const pathologyAssayType = '病理組織檢查';
+
   // 整合報告和影像資料
   const processedData = processImagingData(initialData);
 
@@ -616,8 +619,14 @@ const ImagingData = ({ imagingData, generalDisplaySettings }) => {
     );
   }, [processedData.withReport]);
 
+  const hasPathologyReports = React.useMemo(() => {
+    return processedData.withReport.some(item =>
+      item.assay_tp_cname === pathologyAssayType
+    );
+  }, [processedData.withReport]);
+
   // 是否顯示過濾選項
-  const shouldShowFilter = hasCTMRIReports || hasUltrasoundReports;
+  const shouldShowFilter = hasCTMRIReports || hasUltrasoundReports || hasPathologyReports;
 
   // 使用 Map 實現過濾邏輯，根據過濾選項取得對應的資料處理函數
   const filterMap = React.useMemo(() => new Map([
@@ -630,6 +639,10 @@ const ImagingData = ({ imagingData, generalDisplaySettings }) => {
     // # zh-TW: 只顯示超音波的報告
     ['ultrasound', () => processedData.withReport.filter(item => 
       ultrasoundOrderCodes.includes(item.order_code)
+    )],
+    // # zh-TW: 只顯示病理報告
+    ['pathology', () => processedData.withReport.filter(item =>
+      item.assay_tp_cname === pathologyAssayType
     )]
   ]), [processedData.withReport, ctMriOrderCodes, ultrasoundOrderCodes]);
 
@@ -657,6 +670,8 @@ const ImagingData = ({ imagingData, generalDisplaySettings }) => {
       setFilterOption('all');
     } else if (newValue === 'ultrasound' && !hasUltrasoundReports) {
       setFilterOption('all');
+    } else if (newValue === 'pathology' && !hasPathologyReports) {
+      setFilterOption('all');
     } else {
       setFilterOption(newValue);
     }
@@ -668,8 +683,10 @@ const ImagingData = ({ imagingData, generalDisplaySettings }) => {
       setFilterOption('all');
     } else if (filterOption === 'ultrasound' && !hasUltrasoundReports) {
       setFilterOption('all');
+    } else if (filterOption === 'pathology' && !hasPathologyReports) {
+      setFilterOption('all');
     }
-  }, [hasCTMRIReports, hasUltrasoundReports, filterOption]);
+  }, [hasCTMRIReports, hasUltrasoundReports, hasPathologyReports, filterOption]);
 
   return (
     <Grid container spacing={2}>
@@ -703,13 +720,13 @@ const ImagingData = ({ imagingData, generalDisplaySettings }) => {
             variant="h6"
             textSizeType="title"
             generalDisplaySettings={generalDisplaySettings}
-            sx={{ mr: 2 }}
+            sx={{ mr: 2, whiteSpace: 'nowrap' }}
           >
             已有報告 ({filteredReportData.length})
           </TypographySizeWrapper>
 
           {shouldShowFilter && (
-            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap' }}>
               <FormControlLabel
                 control={
                   <Radio
@@ -768,6 +785,28 @@ const ImagingData = ({ imagingData, generalDisplaySettings }) => {
                       generalDisplaySettings={generalDisplaySettings}
                     >
                       只顯示超音波
+                    </TypographySizeWrapper>
+                  }
+                  sx={{ mr: 2 }}
+                />
+              )}
+
+              {hasPathologyReports && (
+                <FormControlLabel
+                  control={
+                    <Radio
+                      value="pathology"
+                      checked={filterOption === 'pathology'}
+                      onChange={handleFilterChange}
+                      size="small"
+                    />
+                  }
+                  label={
+                    <TypographySizeWrapper
+                      textSizeType="content"
+                      generalDisplaySettings={generalDisplaySettings}
+                    >
+                      只顯示病理
                     </TypographySizeWrapper>
                   }
                 />
