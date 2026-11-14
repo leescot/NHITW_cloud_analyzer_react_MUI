@@ -228,7 +228,10 @@ export const ckmProcessor = {
             seenDrugs.set(key, {
               drugName: med.name || '',
               ingredient: med.ingredient || '',
-              dosage: med.perDosage || '',
+              // 顯示用劑量文字：無法推算單次量（SPECIAL）時顯示總量
+              dosage: med.perDosage === 'SPECIAL'
+                ? `總量${med.dosage}`
+                : (med.perDosage ? `${med.perDosage}#` : ''),
               frequency: med.frequency || '',
               days: med.days || '',
               date,

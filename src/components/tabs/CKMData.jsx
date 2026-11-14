@@ -87,7 +87,7 @@ const MedicationCard = ({ medications, gds }) => {
             </TableCell>
             <TableCell sx={{...cs, color:'text.secondary', whiteSpace:'nowrap', width:95}}>
               <TypographySizeWrapper textSizeType="note" generalDisplaySettings={gds}>
-                {r.dosage&&`${r.dosage}# `}{r.frequency} {r.days}天
+                {r.dosage&&`${r.dosage} `}{r.frequency} {r.days}天
               </TypographySizeWrapper>
             </TableCell>
             <TableCell sx={{...cs, color:'text.secondary', width:38}}>
