@@ -50,7 +50,7 @@ const CKMSummaryBar = ({ summary, medications, groupedLabs, userInfo, gds }) => 
         <>
           <Typography variant="caption" sx={{ fontWeight:600, color:'text.secondary', mr:0.25 }}>90天內用藥 -</Typography>
           {drugBadges.map(d => (
-            <Tooltip key={d.label} title={`${d.drugName} ${d.dosage ? d.dosage+'#' : ''} ${d.date}`} arrow>
+            <Tooltip key={d.label} title={`${d.drugName} ${d.dosage} ${d.date}`} arrow>
               <Chip label={d.label} size="small" color="primary" variant="outlined" sx={{ mr:0.25, height:22 }} />
             </Tooltip>
           ))}

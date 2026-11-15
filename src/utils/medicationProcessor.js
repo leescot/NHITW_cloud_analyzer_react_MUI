@@ -81,9 +81,29 @@ export const medicationProcessor = {
     return simplifiedName.trim();
   },
 
-  // 使用 Map 重構頻次映射表
-  calculatePerDosage(dosage, frequency, days) {
+  /**
+   * 判斷是否為針劑（含筆型針劑）
+   * drug_group11_name 的劑型（如「注射劑」）只有較新的雲端資料才有，因此也比對藥名
+   * @param {string} drugName - 原始藥名（未簡化）
+   * @param {string} dosageForm - drug_group11_name，例如 "SEMAGLUTIDE , 注射劑 "
+   * @returns {boolean}
+   */
+  isInjectionDrug(drugName, dosageForm) {
+    if ((dosageForm || "").includes("注射")) return true;
+    return /inject|\bpen\b|flexpen|flextouch|kwikpen|penfill|solostar/i.test(drugName || "");
+  },
+
+  /**
+   * 以總量、頻次、天數推算單次劑量
+   * @param {Object} options
+   * @param {boolean} options.isInjection - 針劑一律回傳 SPECIAL 改顯示總量。
+   *   筆型針劑無法分辨一支打一次或打多次，推算的「支數」容易被誤解為每次用量（例如 Ozempic 0.25#）
+   * @returns {string} 單次劑量，無法推算時回傳 "SPECIAL"
+   */
+  calculatePerDosage(dosage, frequency, days, { isInjection = false } = {}) {
     if (!dosage || !frequency || !days) return "";
+
+    if (isInjection) return "SPECIAL";
 
     // 使用 Map 儲存頻次和對應的每日劑量次數
     const frequencyMap = new Map([
@@ -118,6 +138,7 @@ export const medicationProcessor = {
       ['ONCE', 1],    // 新增 ONCE (equivalent to STAT)
       ['PRNB', 2],    // 新增 PRNB (PRN BID)
       ['QW', 0.14],   // 新增 QW (once a week) - approximately 1/7
+      ['Q1W', 0.14],  // Q1W 同 QW
       ['BIW', 0.29],  // 新增 BIW (twice a week) - approximately 2/7
       ['TIW', 0.43],  // 新增 TIW (three times a week) - approximately 3/7
     ]);
@@ -128,7 +149,8 @@ export const medicationProcessor = {
       ['Q2D', (d) => Math.ceil(parseInt(d) / 2)],
       ['TIW', (d) => Math.ceil(parseInt(d) / 7) * 3],
       ['BIW', (d) => Math.ceil(parseInt(d) / 7) * 2],
-      ['QW', (d) => Math.ceil(parseInt(d) / 7)]
+      ['QW', (d) => Math.ceil(parseInt(d) / 7)],
+      ['Q1W', (d) => Math.ceil(parseInt(d) / 7)]
     ]);
 
     // 常見的有效單位劑量
@@ -183,28 +205,7 @@ export const medicationProcessor = {
       return "SPECIAL";
     }
 
-    // 特殊頻次的精確計算
-    if (['TIW', 'BIW', 'QW'].includes(freq) || ['TIW', 'BIW', 'QW'].some(f => frequency.includes(f))) {
-      // 計算週數和估計劑量
-      const numWeeks = Math.ceil(parseInt(days) / 7);
-      let estimatedDoses;
-      
-      if (freq === 'TIW' || frequency.includes('TIW')) {
-        estimatedDoses = numWeeks * 3;
-      } else if (freq === 'BIW' || frequency.includes('BIW')) {
-        estimatedDoses = numWeeks * 2;
-      } else { // QW
-        estimatedDoses = numWeeks;
-      }
-      
-      const perDose = Math.round(totalDosage / estimatedDoses);
-      
-      // 只有在是標準單位劑量時才回傳
-      if (validUnits.includes(perDose)) {
-        return perDose.toString();
-      }
-    }
-
+    // QW、BIW、TIW 的次數已由 specialFreqMap 依週數計算，與其他頻次一樣以 0.25 為單位
     const roundedDose = Math.round(singleDose * 4) / 4;
 
     if (!validUnits.includes(roundedDose)) {
@@ -241,6 +242,7 @@ export const medicationProcessor = {
           drug_atc3_code: rec.drug_atc3_code || "",
           drug_ing_name: rec.drug_ing_name || "",
           drug_ename: rec.drug_ename || "",
+          drug_group11_name: rec.drug_group11_name || "",
           drug_date: recDate
         });
       }
@@ -384,14 +386,16 @@ export const medicationProcessor = {
 
       // 2. 合成新藥物紀錄（原處方未命中 或 藥局續領）
       const lookup = drugInfoMap.get(record.order_code) || {};
-      let synthName = record.drug_ename || lookup.drug_ename || record.order_code;
-      if (settings.simplifyMedicineName) {
-        synthName = this.simplifyMedicineName(synthName);
-      }
+      const rawName = record.drug_ename || lookup.drug_ename || record.order_code;
+      const synthName = settings.simplifyMedicineName
+        ? this.simplifyMedicineName(rawName)
+        : rawName;
       const dosage = String(record.order_qty ?? "1");
       const frequency = record.drug_fre || "QD";
       const days = String(record.order_drug_day ?? "1");
-      const perDose = this.calculatePerDosage(dosage, frequency, days);
+      const perDose = this.calculatePerDosage(dosage, frequency, days, {
+        isInjection: this.isInjectionDrug(rawName, lookup.drug_group11_name),
+      });
 
       const synthDrug = {
         name: synthName,
@@ -617,7 +621,13 @@ export const medicationProcessor = {
             const perDose = this.calculatePerDosage(
               totalQty,
               frequency,
-              days
+              days,
+              {
+                isInjection: this.isInjectionDrug(
+                  getFieldValue(record, "med_name"),
+                  record.drug_group11_name
+                ),
+              }
             );
 
             // 將處理後的藥物資訊添加到相應組中
