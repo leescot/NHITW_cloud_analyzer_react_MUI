@@ -12,13 +12,11 @@ const PORT = 5173;
 async function serve({root = ROOT, port = PORT, verbose}) {
   root = path.resolve(root);
   const server = http.createServer((req, res) => {
-    let pathname = `.${url.parse(req.url).pathname}`;
+    let pathname = url.parse(req.url).pathname;
 
     // simple routing
-    if (pathname === './') {
-      pathname = './index.html';
-    } else if (pathname.startsWith('./src/')) {
-      pathname = '../' + pathname.slice(2);
+    if (pathname === '/') {
+      pathname = '/index.html';
     }
 
     const filePath = path.join(root, pathname);

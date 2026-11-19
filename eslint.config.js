@@ -16,7 +16,6 @@ export default [
   {
     ignores: [
       'dist',
-      'tests/lib/**/*.js',
     ],
   },
   {
@@ -103,7 +102,6 @@ export default [
     languageOptions: {
       globals: {
         ...globals.browser,
-        ...globals.mocha,
       },
     },
   },
