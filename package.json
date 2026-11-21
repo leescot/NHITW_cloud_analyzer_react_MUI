@@ -18,7 +18,9 @@
     "build": "vite build && node scripts/build.js",
     "build:zip": "vite build && node scripts/build.js --zip",
     "build:alpha": "vite build && node scripts/build.js --alpha",
-    "test": "playwright install chromium && vitest run",
+    "test": "npm run test:unit && npm run test:e2e",
+    "test:unit": "playwright install chromium && vitest run",
+    "test:e2e": "playwright test",
     "test:manual": "vite build && node scripts/build.js --test && node tests/serve.js",
     "dev": "vite",
     "preview": "vite preview",
@@ -39,6 +41,7 @@
     "vite": "^6.1.0"
   },
   "devDependencies": {
+    "@playwright/test": "^1.65.1",
     "@stylistic/eslint-plugin": "^4.2.0",
     "@types/react": "^19.0.8",
     "@types/react-dom": "^19.0.3",

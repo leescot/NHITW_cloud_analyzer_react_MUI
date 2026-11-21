@@ -114,6 +114,12 @@ jobs:
           Expand-Archive -Path $appZip -DestinationPath $appDir -Force
           echo "NHITW_BROWSER_EXE=$appDir/$appSubpath" >> $env:GITHUB_ENV
 
-      - name: Run tests
+      - name: Run unit tests
         shell: pwsh
         run: npx vitest run
+
+      - name: Run e2e tests
+        shell: pwsh
+        env:
+          CI: ''
+        run: npm run test:e2e

@@ -6,7 +6,7 @@ import {
   computeHomaIr, homaIrBand,
   computeKfre, kfreBand,
   computeScreeningIndicators,
-} from '../src/utils/screeningIndicators.js';
+} from '../../src/utils/screeningIndicators.js';
 
 function daysAgo(n) {
   const d = new Date(Date.now() - n * 24 * 60 * 60 * 1000);

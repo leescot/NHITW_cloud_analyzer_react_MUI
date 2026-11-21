@@ -1,25 +1,25 @@
 import {describe, it, assert} from 'vitest';
 
-import {labProcessor} from '../src/utils/labProcessor.js';
+import {surgeryProcessor} from '../../src/utils/surgeryProcessor.js';
 
-describe('utils/labProcessor', function () {
-  describe('.processLabData', function () {
+describe('utils/surgeryProcessor', function () {
+  describe('.processSurgeryData', function () {
     it('should return [] for invalid input: undefined', function () {
       const input = undefined;
       const expected = [];
-      assert.deepEqual(labProcessor.processLabData(input), expected);
+      assert.deepEqual(surgeryProcessor.processSurgeryData(input), expected);
     });
 
     it('should return [] for invalid input: null', function () {
       const input = null;
       const expected = [];
-      assert.deepEqual(labProcessor.processLabData(input), expected);
+      assert.deepEqual(surgeryProcessor.processSurgeryData(input), expected);
     });
 
     it('should return [] for invalid input: no .rObject', function () {
       const input = {};
       const expected = [];
-      assert.deepEqual(labProcessor.processLabData(input), expected);
+      assert.deepEqual(surgeryProcessor.processSurgeryData(input), expected);
     });
 
     it('should return [] for invalid input: .rObject is not an Array', function () {
@@ -27,7 +27,7 @@ describe('utils/labProcessor', function () {
         rObject: null,
       };
       const expected = [];
-      assert.deepEqual(labProcessor.processLabData(input), expected);
+      assert.deepEqual(surgeryProcessor.processSurgeryData(input), expected);
     });
   });
 });

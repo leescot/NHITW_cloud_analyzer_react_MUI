@@ -1,25 +1,25 @@
 import {describe, it, assert} from 'vitest';
 
-import {surgeryProcessor} from '../src/utils/surgeryProcessor.js';
+import {allergyProcessor} from '../../src/utils/allergyProcessor.js';
 
-describe('utils/surgeryProcessor', function () {
-  describe('.processSurgeryData', function () {
+describe('utils/allergyProcessor', function () {
+  describe('.processAllergyData', function () {
     it('should return [] for invalid input: undefined', function () {
       const input = undefined;
       const expected = [];
-      assert.deepEqual(surgeryProcessor.processSurgeryData(input), expected);
+      assert.deepEqual(allergyProcessor.processAllergyData(input), expected);
     });
 
     it('should return [] for invalid input: null', function () {
       const input = null;
       const expected = [];
-      assert.deepEqual(surgeryProcessor.processSurgeryData(input), expected);
+      assert.deepEqual(allergyProcessor.processAllergyData(input), expected);
     });
 
     it('should return [] for invalid input: no .rObject', function () {
       const input = {};
       const expected = [];
-      assert.deepEqual(surgeryProcessor.processSurgeryData(input), expected);
+      assert.deepEqual(allergyProcessor.processAllergyData(input), expected);
     });
 
     it('should return [] for invalid input: .rObject is not an Array', function () {
@@ -27,7 +27,7 @@ describe('utils/surgeryProcessor', function () {
         rObject: null,
       };
       const expected = [];
-      assert.deepEqual(surgeryProcessor.processSurgeryData(input), expected);
+      assert.deepEqual(allergyProcessor.processAllergyData(input), expected);
     });
   });
 });

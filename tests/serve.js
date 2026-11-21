@@ -6,8 +6,7 @@ import {parseArgs} from 'node:util';
 
 import mime from 'mime-types';
 
-const ROOT = path.resolve(url.fileURLToPath(import.meta.url), '..');
-const PORT = 5173;
+import {ROOT, PORT} from './common.js';
 
 async function serve({root = ROOT, port = PORT, verbose}) {
   root = path.resolve(root);

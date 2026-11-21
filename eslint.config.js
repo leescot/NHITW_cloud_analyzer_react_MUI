@@ -89,7 +89,8 @@ export default [
     files: [
       '*.js',
       'scripts/**/*.js',
-      'tests/serve.js',
+      'tests/*.js',
+      'tests/e2e/**/*.js',
     ],
     languageOptions: {
       globals: globals.node,
@@ -97,7 +98,7 @@ export default [
   },
   {
     files: [
-      'tests/**/*.js',
+      'tests/unit/**/*.js',
     ],
     languageOptions: {
       globals: {
