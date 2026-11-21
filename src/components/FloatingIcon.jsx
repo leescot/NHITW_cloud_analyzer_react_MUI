@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, {useState, useEffect} from "react";
 import {
   Dialog,
   DialogTitle,
@@ -37,7 +37,7 @@ import SettingsIcon from "@mui/icons-material/Settings";
 import FormatListBulletedIcon from "@mui/icons-material/FormatListBulleted";
 
 // Import cloud icon
-import { cloud_icon } from "../assets/pic_cloud_icon.js";
+import {cloud_icon} from "../assets/pic_cloud_icon.js";
 
 // 導入數據和設置管理模組
 import {
@@ -54,14 +54,14 @@ import {
 } from "../utils/settingsManager";
 
 // 引入標籤顏色工具函數
-import { getTabColor, getTabSelectedColor } from "../utils/tabColorUtils";
+import {getTabColor, getTabSelectedColor} from "../utils/tabColorUtils";
 
 // import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import Snackbar from "@mui/material/Snackbar";
 // import VisibilityIcon from '@mui/icons-material/Visibility';
 // import VisibilityOffIcon from '@mui/icons-material/VisibilityOff';
-import { DEFAULT_LAB_TESTS } from "../config/labTests";
-import { DEFAULT_IMAGE_TESTS } from "../config/imageTests";
+import {DEFAULT_LAB_TESTS} from "../config/labTests";
+import {DEFAULT_IMAGE_TESTS} from "../config/imageTests";
 
 // Import tab components
 import TabPanel from "./tabs/TabPanel";
@@ -75,7 +75,7 @@ import MedDaysData from "./tabs/MedDaysData";
 import LabTableView from "./tabs/LabTableView";
 import Instructions from "./tabs/Instructions";
 import AdvancedSettings from "./tabs/AdvancedSettings";
-import { ckmProcessor } from "../utils/ckmProcessor";
+import {ckmProcessor} from "../utils/ckmProcessor";
 
 import MedicationIcon from "@mui/icons-material/Medication";
 import ScienceIcon from "@mui/icons-material/Science";
@@ -105,8 +105,8 @@ import StatusIndicator from "./indicators/StatusIndicator";
 import KidneyStatusIndicator from "./indicators/KidneyStatusIndicator";
 
 // Import new settings
-import { DEFAULT_SETTINGS } from "../config/defaultSettings";
-import { DEFAULT_ATC5_GROUPS } from "../config/medicationGroups";
+import {DEFAULT_SETTINGS} from "../config/defaultSettings";
+import {DEFAULT_ATC5_GROUPS} from "../config/medicationGroups";
 
 // Import user info utilities
 import {
@@ -138,7 +138,7 @@ const FloatingIcon = () => {
   const [dashboardData, setDashboardData] = useState({
     visitCount: 0,
     diagnoses: [],
-    recentMedications: { western: [], chinese: [] },
+    recentMedications: {western: [], chinese: []},
     labSummary: {},
   });
   const [adultHealthCheckData, setAdultHealthCheckData] = useState(null);
@@ -356,7 +356,7 @@ const FloatingIcon = () => {
       const ckm = ckmProcessor.processCKMData({
         groupedMedications: results?.medications || [],
         rawLabData: dataSources.labData,
-        imagingData: results?.imaging || { withReport: [], withoutReport: [] },
+        imagingData: results?.imaging || {withReport: [], withoutReport: []},
         dischargeData: results?.discharge || [],
       });
       setCkmData(ckm);
@@ -377,7 +377,7 @@ const FloatingIcon = () => {
         age = today.getFullYear() - birthDate.getFullYear();
         if (today.getMonth() < month - 1 || (today.getMonth() === month - 1 && today.getDate() < day)) age--;
       }
-      setUserInfo({ name: local.name, userId: local.userId, gender: local.gender, birthday: local.birthday, age });
+      setUserInfo({name: local.name, userId: local.userId, gender: local.gender, birthday: local.birthday, age});
     }
   };
 
@@ -428,7 +428,7 @@ const FloatingIcon = () => {
           age = today.getFullYear() - birthDate.getFullYear();
           if (today.getMonth() < month - 1 || (today.getMonth() === month - 1 && today.getDate() < day)) age--;
         }
-        info = { name: local.name, userId: local.userId, gender: local.gender, birthday: local.birthday, age };
+        info = {name: local.name, userId: local.userId, gender: local.gender, birthday: local.birthday, age};
       }
       setUserInfo(info);
     }
@@ -481,9 +481,9 @@ const FloatingIcon = () => {
 
     // 使用 Map 來存儲不同位置的樣式
     const positionStyleMap = new Map([
-      ["top-right", { ...baseStyle, top: "20px" }],
-      ["middle-right", { ...baseStyle, top: "50%", transform: "translateY(-50%)" }],
-      ["bottom-right", { ...baseStyle, bottom: "20px" }]
+      ["top-right", {...baseStyle, top: "20px"}],
+      ["middle-right", {...baseStyle, top: "50%", transform: "translateY(-50%)"}],
+      ["bottom-right", {...baseStyle, bottom: "20px"}]
     ]);
 
     // 返回匹配的樣式或默認值（底部右側）
@@ -628,7 +628,7 @@ const FloatingIcon = () => {
               >
                 <Tab
                   label={`西藥 (${groupedMedications.length})`}
-                  icon={<MedicationIcon sx={{ fontSize: "1rem" }} />}
+                  icon={<MedicationIcon sx={{fontSize: "1rem"}} />}
                   iconPosition="start"
                   sx={{
                     padding: "6px 10px",
@@ -641,7 +641,7 @@ const FloatingIcon = () => {
                   }}
                 />
                 <Tab
-                  icon={<TableChartIcon sx={{ fontSize: "1.125rem" }} />}
+                  icon={<TableChartIcon sx={{fontSize: "1.125rem"}} />}
                   aria-label="西藥表格檢視"
                   sx={{
                     minWidth: "60px", // Narrower width for icon-only tab
@@ -656,7 +656,7 @@ const FloatingIcon = () => {
                 />
                 <Tab
                   label={`中藥 (${groupedChineseMeds.length})`}
-                  icon={<GrassIcon sx={{ fontSize: "1rem" }} />}
+                  icon={<GrassIcon sx={{fontSize: "1rem"}} />}
                   iconPosition="start"
                   sx={{
                     padding: "6px 10px",
@@ -670,7 +670,7 @@ const FloatingIcon = () => {
                 />
                 <Tab
                   label={`檢驗 (${groupedLabs.length})`}
-                  icon={<ScienceIcon sx={{ fontSize: "1rem" }} />}
+                  icon={<ScienceIcon sx={{fontSize: "1rem"}} />}
                   iconPosition="start"
                   sx={{
                     padding: "6px 10px",
@@ -681,7 +681,7 @@ const FloatingIcon = () => {
                   }}
                 />
                 <Tab
-                  icon={<TableViewIcon sx={{ fontSize: "1.125rem" }} />}
+                  icon={<TableViewIcon sx={{fontSize: "1.125rem"}} />}
                   aria-label="檢驗表格檢視"
                   sx={{
                     minWidth: "60px", // Narrower width for icon-only tab
@@ -696,7 +696,7 @@ const FloatingIcon = () => {
                   label={`影像 (${imagingData.withReport.length +
                     imagingData.withoutReport.length
                     })`}
-                  icon={<ImageIcon sx={{ fontSize: "1rem" }} />}
+                  icon={<ImageIcon sx={{fontSize: "1rem"}} />}
                   iconPosition="start"
                   sx={{
                     padding: "6px 10px",
@@ -718,7 +718,7 @@ const FloatingIcon = () => {
                 />
                 <Tab
                   label={`餘藥 (${medDaysData.length})`}
-                  icon={<InventoryIcon sx={{ fontSize: "1rem" }} />}
+                  icon={<InventoryIcon sx={{fontSize: "1rem"}} />}
                   iconPosition="start"
                   sx={{
                     padding: "6px 10px",
@@ -730,7 +730,7 @@ const FloatingIcon = () => {
                 />
                 <Tab
                   label="說明"
-                  icon={<HelpOutlineIcon sx={{ fontSize: "1rem" }} />}
+                  icon={<HelpOutlineIcon sx={{fontSize: "1rem"}} />}
                   iconPosition="start"
                   sx={{
                     padding: "6px 10px",
@@ -743,7 +743,7 @@ const FloatingIcon = () => {
                 {(appSettings.western.enableMedicationCustomCopyFormat || appSettings.lab.enableLabCustomCopyFormat) && (
                   <Tab
                     label="進階"
-                    icon={<SettingsIcon sx={{ fontSize: "1rem" }} />}
+                    icon={<SettingsIcon sx={{fontSize: "1rem"}} />}
                     iconPosition="start"
                     sx={{
                       padding: "6px 10px",
@@ -812,7 +812,7 @@ const FloatingIcon = () => {
             </Box>
           </Box>
         </DialogTitle>
-        <DialogContent sx={{ flex: 1, overflow: "auto", minHeight: 0 }}>
+        <DialogContent sx={{flex: 1, overflow: "auto", minHeight: 0}}>
           {/* Overview - shown when no tab is selected (clicking patient name) */}
           {tabValue === false && (
             <Overview
@@ -940,7 +940,7 @@ const FloatingIcon = () => {
         autoHideDuration={2000}
         onClose={handleSnackbarClose}
         message={snackbarMessage}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        anchorOrigin={{vertical: "bottom", horizontal: "center"}}
       />
     </>
   );

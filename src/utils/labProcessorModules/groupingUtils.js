@@ -1,5 +1,5 @@
 // 資料分組相關函數
-import { formatLabData } from './formattingUtils.js';
+import {formatLabData} from './formattingUtils.js';
 
 // 將檢驗資料依照日期分組
 const groupLabsByDate = (labs) => {

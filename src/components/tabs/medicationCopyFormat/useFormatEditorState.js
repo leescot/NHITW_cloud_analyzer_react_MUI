@@ -1,11 +1,11 @@
-import { useState, useEffect } from 'react';
-import { 
-  getAvailableElements, 
-  getDefaultHeaderFormat, 
+import {useState, useEffect} from 'react';
+import {
+  getAvailableElements,
+  getDefaultHeaderFormat,
   getDefaultDrugFormat,
   ELEMENT_SECTIONS
 } from './formatEditorConfig';
-import { handleSettingChange } from '../../../utils/settingsHelper';
+import {handleSettingChange} from '../../../utils/settingsHelper';
 
 // Counter for generating unique IDs
 let idCounter = 0;
@@ -23,7 +23,7 @@ const useFormatEditorState = (appSettings, setAppSettings) => {
   const [drugSeparator, setDrugSeparator] = useState(',');
   const [selectedItems, setSelectedItems] = useState([]);
   const [sortMenuAnchor, setSortMenuAnchor] = useState(null);
-  
+
   // Function to get available elements based on format type
   const availableElements = (formatType = 'all') => {
     return getAvailableElements(drugSeparator, formatType);
@@ -43,7 +43,7 @@ const useFormatEditorState = (appSettings, setAppSettings) => {
       } else {
         setHeaderFormat(getDefaultHeaderFormat());
       }
-      
+
       // Initialize drug format
       if (appSettings.western.customMedicationDrugCopyFormat) {
         const drugFormatWithSections = appSettings.western.customMedicationDrugCopyFormat.map(item => ({
@@ -54,7 +54,7 @@ const useFormatEditorState = (appSettings, setAppSettings) => {
       } else {
         setDrugFormat(getDefaultDrugFormat());
       }
-      
+
       // Set drug separator
       setDrugSeparator(appSettings.western.drugSeparator || ',');
     } else {
@@ -62,7 +62,7 @@ const useFormatEditorState = (appSettings, setAppSettings) => {
       resetToDefault();
     }
   }, [
-    appSettings.western?.customMedicationHeaderCopyFormat, 
+    appSettings.western?.customMedicationHeaderCopyFormat,
     appSettings.western?.customMedicationDrugCopyFormat,
     appSettings.western?.drugSeparator
   ]);
@@ -70,22 +70,22 @@ const useFormatEditorState = (appSettings, setAppSettings) => {
   // Add item to header format with appropriate section
   const addHeaderItem = (item) => {
     // Ensure the item has the correct section
-    let itemToAdd = { 
+    let itemToAdd = {
       ...item,
-      section: ELEMENT_SECTIONS.HEADER 
+      section: ELEMENT_SECTIONS.HEADER
     };
-    
+
     // 使用 Map 代替 if-else 來處理特殊元素 #zh-TW
     if (item.id === 'icd') {
       const icdMap = new Map([
         [true, 'icdcode'],   // 代碼情況
         [false, 'icdname']   // 名稱情況
       ]);
-      
+
       const isCodeDisplay = item.display.includes('代碼');
       itemToAdd.id = icdMap.get(isCodeDisplay) || item.id;
     }
-    
+
     // 對空格和文字元素確保有 header 前綴 #zh-TW
     const baseId = itemToAdd.id.split('_')[0];
     if (baseId === 'space' || baseId === 'text') {
@@ -93,54 +93,54 @@ const useFormatEditorState = (appSettings, setAppSettings) => {
         itemToAdd.id = 'header_' + baseId;
       }
     }
-    
+
     // Generate a unique ID by appending counter instead of timestamp
     idCounter++;
     const uniqueId = {
       ...itemToAdd,
       id: `${itemToAdd.id.split('_')[0]}_${idCounter.toString().padStart(2, '0')}`
     };
-    
+
     setHeaderFormat(prev => [...prev, uniqueId]);
   };
 
   // Add item to drug format with appropriate section
   const addDrugItem = (item) => {
     // Ensure the item has the correct section
-    let itemToAdd = { 
+    let itemToAdd = {
       ...item,
-      section: ELEMENT_SECTIONS.DRUG 
+      section: ELEMENT_SECTIONS.DRUG
     };
-    
+
     // 對空格和文字元素確保有 drug 前綴 #zh-TW
     const baseId = itemToAdd.id.split('_')[0];
-    
+
     // 使用 Map 代替 if-else 來處理需要添加前綴的元素類型 #zh-TW
     const prefixMap = new Map([
       ['space', true],
       ['text', true]
     ]);
-    
+
     if (prefixMap.has(baseId) && !itemToAdd.id.startsWith('drug_')) {
       itemToAdd.id = 'drug_' + baseId;
     }
-    
+
     // Generate a unique ID using counter instead of timestamp
     idCounter++;
     const uniqueId = {
       ...itemToAdd,
       id: `${itemToAdd.id.split('_')[0]}_${idCounter.toString().padStart(2, '0')}`
     };
-    
+
     setDrugFormat(prev => [...prev, uniqueId]);
   };
-  
+
   // Add custom text to header format
   const addHeaderCustomText = (text) => {
     const textToAdd = text || customTextValue;
     if (textToAdd.trim()) {
-      addHeaderItem({ 
-        id: 'header_text', 
+      addHeaderItem({
+        id: 'header_text',
         value: textToAdd,
         display: textToAdd,
         group: 'format',
@@ -155,8 +155,8 @@ const useFormatEditorState = (appSettings, setAppSettings) => {
   const addDrugCustomText = (text) => {
     const textToAdd = text || customTextValue;
     if (textToAdd.trim()) {
-      addDrugItem({ 
-        id: 'drug_text', 
+      addDrugItem({
+        id: 'drug_text',
         value: textToAdd,
         display: textToAdd,
         group: 'format',
@@ -186,12 +186,12 @@ const useFormatEditorState = (appSettings, setAppSettings) => {
     // Get default formats for medication
     const defaultHeaderFormat = getDefaultHeaderFormat();
     const defaultDrugFormat = getDefaultDrugFormat();
-    
+
     // Update local state
     setHeaderFormat(defaultHeaderFormat);
     setDrugFormat(defaultDrugFormat);
     setDrugSeparator(','); // Reset the drug separator to default value
-    
+
     // Update app settings - ONLY update western section
     setAppSettings(prev => {
       const newSettings = {
@@ -203,12 +203,12 @@ const useFormatEditorState = (appSettings, setAppSettings) => {
           drugSeparator: ','
         }
       };
-      
+
       console.log('MedicationCustomFormatEditor: Reset to default formats');
-      
+
       return newSettings;
     });
-    
+
     // Show success message
     setSnackbarMessage('已重置為新的預設格式');
     setSnackbarSeverity('success');
@@ -217,35 +217,35 @@ const useFormatEditorState = (appSettings, setAppSettings) => {
 
   // Save changes to settings
   const saveChanges = (newlineOptions = {}) => {
-    const { 
+    const {
       formatType = 'customVertical'
     } = newlineOptions;
-    
+
     // Create deep copies of formats to avoid reference issues
     const finalHeaderFormat = JSON.parse(JSON.stringify(headerFormat));
     const finalDrugFormat = JSON.parse(JSON.stringify(drugFormat));
-    
+
     // Ensure all header elements have the correct section
     finalHeaderFormat.forEach(item => {
       item.section = ELEMENT_SECTIONS.HEADER;
     });
-    
+
     // Ensure all drug elements have the correct section
     finalDrugFormat.forEach(item => {
       item.section = ELEMENT_SECTIONS.DRUG;
     });
-    
+
     // Update settings - now saving header and drug formats separately
     handleSettingChange('enableMedicationCustomCopyFormat', true, null, null, 'western');
     handleSettingChange('customMedicationHeaderCopyFormat', finalHeaderFormat, null, null, 'western');
     handleSettingChange('customMedicationDrugCopyFormat', finalDrugFormat, null, null, 'western');
     handleSettingChange('medicationCopyFormat', formatType, null, null, 'western');
     handleSettingChange('drugSeparator', drugSeparator, null, null, 'western');
-    
+
     setSnackbarMessage('設定已儲存，需重新讀取卡片/新資料才會生效');
     setSnackbarSeverity('success');
     setSnackbarOpen(true);
-    
+
     // Update app settings - ONLY update western section, preserve everything else
     setAppSettings(prev => {
       const newSettings = {
@@ -259,17 +259,17 @@ const useFormatEditorState = (appSettings, setAppSettings) => {
           drugSeparator: drugSeparator
         }
       };
-      
+
       // Log the updated section for debugging
       console.log('Medication format settings updated:', {
         section: 'western',
         changes: newSettings.western
       });
-      
+
       return newSettings;
     });
   };
-  
+
   // Add preset group to header format - removed functionality since it's now empty
   const addHeaderPresetGroup = () => {
     // This function is kept for backward compatibility
@@ -283,27 +283,27 @@ const useFormatEditorState = (appSettings, setAppSettings) => {
   // Handle drug separator change
   const handleDrugSeparatorChange = (newValue) => {
     setDrugSeparator(newValue);
-    
+
     // Update drugsep elements in formats
     // The drugSeparator will be applied when rendering the preview
-    
+
     // Keep this code in case there are still any drugsep elements
     const updatedHeaderFormat = headerFormat.map(item => {
       const baseId = item.id.split('_')[0];
       if (baseId === 'drugsep' || (baseId === 'drug' && item.id.includes('_drugsep'))) {
-        return { ...item, value: newValue };
+        return {...item, value: newValue};
       }
       return item;
     });
-    
+
     const updatedDrugFormat = drugFormat.map(item => {
       const baseId = item.id.split('_')[0];
       if (baseId === 'drugsep' || (baseId === 'drug' && item.id.includes('_drugsep'))) {
-        return { ...item, value: newValue };
+        return {...item, value: newValue};
       }
       return item;
     });
-    
+
     setHeaderFormat(updatedHeaderFormat);
     setDrugFormat(updatedDrugFormat);
   };
@@ -317,17 +317,17 @@ const useFormatEditorState = (appSettings, setAppSettings) => {
       medicationCopyFormat = formatType,
       drugSeparator: customDrugSeparator = drugSeparator,
     } = customSettings;
-    
+
     // console.log('保存設置:', {
     //   medicationCopyFormat,
     //   drugSeparator: customDrugSeparator,
     //   headerElements: headerFormat.length,
     //   drugElements: drugFormat.length
     // });
-    
+
     // 保存當前格式類型
     setSavedFormatType(medicationCopyFormat);
-    
+
     // 保存到 Chrome 存儲
     const settingsToSave = [
       ['medicationCopyFormat', medicationCopyFormat, 'western'],
@@ -335,11 +335,11 @@ const useFormatEditorState = (appSettings, setAppSettings) => {
       ['customMedicationHeaderCopyFormat', headerFormat, 'western'],
       ['customMedicationDrugCopyFormat', drugFormat, 'western']
     ];
-    
+
     settingsToSave.forEach(([key, value, type]) => {
       handleSettingChange(key, value, null, null, type);
     });
-    
+
     return {
       success: true,
       medicationCopyFormat,
@@ -381,4 +381,4 @@ const useFormatEditorState = (appSettings, setAppSettings) => {
   };
 };
 
-export default useFormatEditorState; 
+export default useFormatEditorState;

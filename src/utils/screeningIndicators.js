@@ -65,7 +65,7 @@ export function computeKfre(age, male, eGFR, uacr) {
     - 0.5567 * (eGFR / 5 - 7.222)
     + 0.4510 * (Math.log(uacr) - 5.137);
   const e = Math.exp(LP);
-  return { risk2y: 1 - Math.pow(0.9832, e), risk5y: 1 - Math.pow(0.9365, e) };
+  return {risk2y: 1 - Math.pow(0.9832, e), risk5y: 1 - Math.pow(0.9365, e)};
 }
 export function kfreBand(risk5y) {
   if (risk5y < 0.05) return 'low';
@@ -103,12 +103,12 @@ function kfreNote(risk5y) {
 // ---- 資料抽取 ----
 
 const COMP = {
-  ast: { code: '09025C' },
-  alt: { code: '09026C' },
-  tg: { code: '09004C', norm: normTG },
-  glu: { code: '09005C', norm: normGlucose },
-  ins: { code: '09086B', norm: normInsulin },
-  plt: { code: '08011C', match: (l) => /platelet|血小板/i.test((l.itemName || '') + ' ' + (l.abbrName || '')) },
+  ast: {code: '09025C'},
+  alt: {code: '09026C'},
+  tg: {code: '09004C', norm: normTG},
+  glu: {code: '09005C', norm: normGlucose},
+  ins: {code: '09086B', norm: normInsulin},
+  plt: {code: '08011C', match: (l) => /platelet|血小板/i.test((l.itemName || '') + ' ' + (l.abbrName || ''))},
 };
 
 // groupedLabs → 依日期彙整成分值，回傳新到舊排序的陣列
@@ -118,7 +118,7 @@ function extractByDate(groupedLabs) {
     const date = g.date || '';
     const ms = new Date(String(date).replace(/-/g, '/')).getTime();
     if (!Number.isFinite(ms)) continue;
-    if (!byDate.has(date)) byDate.set(date, { date, ms });
+    if (!byDate.has(date)) byDate.set(date, {date, ms});
     const slot = byDate.get(date);
     for (const lab of (g.labs || [])) {
       for (const [key, def] of Object.entries(COMP)) {
@@ -136,13 +136,13 @@ function extractByDate(groupedLabs) {
 
 // ---- 主入口 ----
 
-export function computeScreeningIndicators({ groupedLabs, summary, userInfo }) {
+export function computeScreeningIndicators({groupedLabs, summary, userInfo}) {
   const dates = extractByDate(groupedLabs);
   const age = userInfo && Number.isFinite(userInfo.age) ? userInfo.age : null;
   const sexRaw = (userInfo && userInfo.gender) || '';
   const male = (sexRaw === 'M' || sexRaw === '男') ? 1 : ((sexRaw === 'F' || sexRaw === '女') ? 0 : null);
 
-  const result = { fib4: null, tyg: null, kfre: null, homaIr: null };
+  const result = {fib4: null, tyg: null, kfre: null, homaIr: null};
 
   // FIB-4：最近一個同時具備 AST+ALT+PLT 的日期
   if (age != null) {
@@ -152,10 +152,10 @@ export function computeScreeningIndicators({ groupedLabs, summary, userInfo }) {
       if (v != null) result.fib4 = {
         value: v, label: `FIB-4 ${v.toFixed(2)}`, band: fib4Band(v, age), note: fib4Note(v, age),
         inputs: [
-          { name: 'AST', value: d.ast, date: d.date },
-          { name: 'ALT', value: d.alt, date: d.date },
-          { name: 'PLT', value: d.plt, date: d.date },
-          { name: 'Age', value: age, date: '' },
+          {name: 'AST', value: d.ast, date: d.date},
+          {name: 'ALT', value: d.alt, date: d.date},
+          {name: 'PLT', value: d.plt, date: d.date},
+          {name: 'Age', value: age, date: ''},
         ],
       };
     }
@@ -168,7 +168,7 @@ export function computeScreeningIndicators({ groupedLabs, summary, userInfo }) {
       const v = computeTyg(d.tg, d.glu);
       if (v != null) result.tyg = {
         value: v, label: `TyG ${v.toFixed(1)}`, band: tygBand(v), note: tygNote(v),
-        inputs: [{ name: 'TG', value: d.tg, date: d.date }, { name: 'Glucose', value: d.glu, date: d.date }],
+        inputs: [{name: 'TG', value: d.tg, date: d.date}, {name: 'Glucose', value: d.glu, date: d.date}],
       };
     }
   }
@@ -182,13 +182,13 @@ export function computeScreeningIndicators({ groupedLabs, summary, userInfo }) {
       let best = null;
       for (const g of gluList) {
         const diff = Math.abs(g.ms - ins.ms) / 86400000;
-        if (diff <= 7 && (best == null || diff < best.diff)) best = { g, diff };
+        if (diff <= 7 && (best == null || diff < best.diff)) best = {g, diff};
       }
       if (best) {
         const v = computeHomaIr(ins.ins, best.g.glu);
         if (v != null) result.homaIr = {
           value: v, label: `HOMA-IR ${v.toFixed(1)}`, band: homaIrBand(v), note: homaIrNote(v),
-          inputs: [{ name: 'Insulin', value: ins.ins, date: ins.date }, { name: 'Glucose', value: best.g.glu, date: best.g.date }],
+          inputs: [{name: 'Insulin', value: ins.ins, date: ins.date}, {name: 'Glucose', value: best.g.glu, date: best.g.date}],
         };
       }
     }
@@ -206,8 +206,8 @@ export function computeScreeningIndicators({ groupedLabs, summary, userInfo }) {
           value: k.risk5y, label: `KFRE 5y ${pct5}%`, band: kfreBand(k.risk5y),
           note: `2年 ${(k.risk2y * 100).toFixed(1)}% / 5年 ${(k.risk5y * 100).toFixed(1)}%；${kfreNote(k.risk5y)}`,
           inputs: [
-            { name: 'eGFR', value: eGFR, date: summary.latestEGFR.date },
-            { name: 'UACR', value: uacr, date: summary.latestUACR.date },
+            {name: 'eGFR', value: eGFR, date: summary.latestEGFR.date},
+            {name: 'UACR', value: uacr, date: summary.latestUACR.date},
           ],
         };
       }

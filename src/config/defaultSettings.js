@@ -8,8 +8,8 @@ import {
   DEFAULT_ATC5_GROUPS,
   DEFAULT_ATC5_COLOR_GROUPS,
 } from "./medicationGroups";
-import { DEFAULT_LAB_TESTS, DEFAULT_LAB_COPY_ITEMS } from "./labTests";
-import { DEFAULT_IMAGE_TESTS } from "./imageTests";
+import {DEFAULT_LAB_TESTS, DEFAULT_LAB_COPY_ITEMS} from "./labTests";
+import {DEFAULT_IMAGE_TESTS} from "./imageTests";
 
 // 整合預設設定
 export const DEFAULT_SETTINGS = {
@@ -27,26 +27,26 @@ export const DEFAULT_SETTINGS = {
     medicationCopyAllOrder: 'newToOld',
     drugSeparator: ',',
     customMedicationHeaderCopyFormat: [
-      { id: 'date_default', display: '日期', group: 'header', section: 'header' },
-      { id: 'header_text_default', value: ' - ', display: ' - ', group: 'format', section: 'header' },
-      { id: 'hosp_default', display: '醫院', group: 'header', section: 'header' },
-      { id: 'header_space_default', display: '(空格)', value: ' ', group: 'format', section: 'header' },
-      { id: 'header_text_default2', value: '[', display: '[', group: 'format', section: 'header' },
-      { id: 'icdcode_default', display: 'ICD代碼', group: 'header', section: 'header' },
-      { id: 'header_space_default2', display: '(空格)', value: ' ', group: 'format', section: 'header' },
-      { id: 'icdname_default', display: 'ICD名稱', group: 'header', section: 'header' },
-      { id: 'header_text_default3', value: ']', display: ']', group: 'format', section: 'header' }
+      {id: 'date_default', display: '日期', group: 'header', section: 'header'},
+      {id: 'header_text_default', value: ' - ', display: ' - ', group: 'format', section: 'header'},
+      {id: 'hosp_default', display: '醫院', group: 'header', section: 'header'},
+      {id: 'header_space_default', display: '(空格)', value: ' ', group: 'format', section: 'header'},
+      {id: 'header_text_default2', value: '[', display: '[', group: 'format', section: 'header'},
+      {id: 'icdcode_default', display: 'ICD代碼', group: 'header', section: 'header'},
+      {id: 'header_space_default2', display: '(空格)', value: ' ', group: 'format', section: 'header'},
+      {id: 'icdname_default', display: 'ICD名稱', group: 'header', section: 'header'},
+      {id: 'header_text_default3', value: ']', display: ']', group: 'format', section: 'header'}
     ],
     customMedicationDrugCopyFormat: [
-      { id: 'simplifiedname_default', display: '簡化藥名', group: 'medication', section: 'drug' },
-      { id: 'drug_space_default', display: '(空格)', value: ' ', group: 'format', section: 'drug' },
-      { id: 'perDosage_default', display: '單次劑量', group: 'dosage', section: 'drug' },
-      { id: 'drug_text_default', value: '#', display: '#', group: 'format', section: 'drug' },
-      { id: 'drug_space_default2', display: '(空格)', value: ' ', group: 'format', section: 'drug' },
-      { id: 'frequency_default', display: '頻次', group: 'dosage', section: 'drug' },
-      { id: 'drug_space_default3', display: '(空格)', value: ' ', group: 'format', section: 'drug' },
-      { id: 'days_default', display: '天數', group: 'dosage', section: 'drug' },
-      { id: 'drug_text_default2', value: '天', display: '天', group: 'format', section: 'drug' }
+      {id: 'simplifiedname_default', display: '簡化藥名', group: 'medication', section: 'drug'},
+      {id: 'drug_space_default', display: '(空格)', value: ' ', group: 'format', section: 'drug'},
+      {id: 'perDosage_default', display: '單次劑量', group: 'dosage', section: 'drug'},
+      {id: 'drug_text_default', value: '#', display: '#', group: 'format', section: 'drug'},
+      {id: 'drug_space_default2', display: '(空格)', value: ' ', group: 'format', section: 'drug'},
+      {id: 'frequency_default', display: '頻次', group: 'dosage', section: 'drug'},
+      {id: 'drug_space_default3', display: '(空格)', value: ' ', group: 'format', section: 'drug'},
+      {id: 'days_default', display: '天數', group: 'dosage', section: 'drug'},
+      {id: 'drug_text_default2', value: '天', display: '天', group: 'format', section: 'drug'}
     ]
   },
 
@@ -80,18 +80,18 @@ export const DEFAULT_SETTINGS = {
     labCopyAllOrder: 'newToOld',
     itemSeparator: ',',
     customLabHeaderCopyFormat: [
-      { id: 'date_default', display: '日期', group: 'header', section: 'labheader' },
-      { id: 'header_text_default', value: ' - ', display: ' - ', group: 'format', section: 'labheader' },
-      { id: 'hosp_default', display: '醫院', group: 'header', section: 'labheader' },
-      { id: 'header_space_default', display: '(空格)', value: ' ', group: 'format', section: 'labheader' },
+      {id: 'date_default', display: '日期', group: 'header', section: 'labheader'},
+      {id: 'header_text_default', value: ' - ', display: ' - ', group: 'format', section: 'labheader'},
+      {id: 'hosp_default', display: '醫院', group: 'header', section: 'labheader'},
+      {id: 'header_space_default', display: '(空格)', value: ' ', group: 'format', section: 'labheader'},
     ],
     customLabItemCopyFormat: [
-      { id: 'itemName_default', display: '檢驗名稱', group: 'lab', section: 'labcontent' },
-      { id: 'lab_space_default', display: '(空格)', value: ' ', group: 'format', section: 'labcontent' },
-      { id: 'value_default', display: '數值', group: 'lab', section: 'labcontent' },
-      { id: 'lab_space_default2', display: '(空格)', value: ' ', group: 'format', section: 'labcontent' },
-      { id: 'unit_default', display: '單位', group: 'lab', section: 'labcontent' },
-      { id: 'consultValue_default', display: '參考值', group: 'lab', section: 'labcontent' }
+      {id: 'itemName_default', display: '檢驗名稱', group: 'lab', section: 'labcontent'},
+      {id: 'lab_space_default', display: '(空格)', value: ' ', group: 'format', section: 'labcontent'},
+      {id: 'value_default', display: '數值', group: 'lab', section: 'labcontent'},
+      {id: 'lab_space_default2', display: '(空格)', value: ' ', group: 'format', section: 'labcontent'},
+      {id: 'unit_default', display: '單位', group: 'lab', section: 'labcontent'},
+      {id: 'consultValue_default', display: '參考值', group: 'lab', section: 'labcontent'}
     ]
   },
 

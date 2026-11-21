@@ -1,8 +1,8 @@
 import React from "react";
-import { Box } from "@mui/material";
+import {Box} from "@mui/material";
 import TypographySizeWrapper from "../../utils/TypographySizeWrapper";
-import { CopySectionButton, CopySelectedButton } from "../../utils/lab/IconComponents";
-import { formatDate } from "../../utils/lab/LabUtilities";
+import {CopySectionButton, CopySelectedButton} from "../../utils/lab/IconComponents";
+import {formatDate} from "../../utils/lab/LabUtilities";
 
 const LabHeader = ({
   group,
@@ -14,16 +14,16 @@ const LabHeader = ({
   handleCopyUserSelectedLabData,
   hasSelectedItems
 }) => {
-  const copyButtonStyle = { ml: 1 };
+  const copyButtonStyle = {ml: 1};
 
   return (
-    <Box sx={{ display: "flex", alignItems: "center", mb: 1 }}>
+    <Box sx={{display: "flex", alignItems: "center", mb: 1}}>
       <TypographySizeWrapper
         variant="subtitle1"
         textSizeType="content"
         generalDisplaySettings={generalDisplaySettings}
         color="primary"
-        sx={{ flexGrow: 1 }}
+        sx={{flexGrow: 1}}
       >
         {/* 將日期格式從 YYYY-MM-DD 轉換為 YYYY/MM/DD */}
         {formatDate(group.date)} - {group.hosp}

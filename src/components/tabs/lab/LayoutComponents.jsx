@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, Grid, Paper } from "@mui/material";
+import {Box, Grid, Paper} from "@mui/material";
 import TypographySizeWrapper from "../../utils/TypographySizeWrapper";
 import LabItemDisplay from "./LabItemDisplay";
 
@@ -23,7 +23,7 @@ export const VerticalLayout = ({
       }}
     >
       {labs.map((lab, labIndex) => (
-        <Box key={labIndex} sx={{ mb: 0.15 }}>
+        <Box key={labIndex} sx={{mb: 0.15}}>
           <LabItemDisplay
             lab={lab}
             groupIndex={groupIndex}
@@ -46,7 +46,7 @@ export const HorizontalLayout = ({
   generalDisplaySettings,
   labSettings
 }) => {
-  const { enableLabAbbrev, showUnit, showReference, highlightAbnormal } = labSettings;
+  const {enableLabAbbrev, showUnit, showReference, highlightAbnormal} = labSettings;
 
   // 使用 Map 來映射狀態和顏色 - 提高可讀性和效率
   const statusColorMap = new Map([
@@ -71,7 +71,7 @@ export const HorizontalLayout = ({
         textSizeType="content"
         generalDisplaySettings={generalDisplaySettings}
       >
-        <div style={{ display: 'flex', flexWrap: 'wrap' }}>
+        <div style={{display: 'flex', flexWrap: 'wrap'}}>
           {labs.map((lab, labIndex) => {
             // 使用 Map 取代 if-else 結構的 getStatusColor 函數
             const getStatusColor = () => {
@@ -80,24 +80,24 @@ export const HorizontalLayout = ({
             };
 
             return (
-              <span key={labIndex} style={{ marginRight: '12px' }}>
+              <span key={labIndex} style={{marginRight: '12px'}}>
                 {enableLabAbbrev
                   ? lab.abbrName || lab.itemName
                   : lab.itemName}{" "}
-                <span style={{ fontWeight: 'medium', color: getStatusColor() }}>
+                <span style={{fontWeight: 'medium', color: getStatusColor()}}>
                   {lab.value}
                 </span>
                 {showUnit && lab.unit && (
-                  <span style={{ color: "gray" }}>{` ${lab.unit}`}</span>
+                  <span style={{color: "gray"}}>{` ${lab.unit}`}</span>
                 )}
                 {showReference &&
                   (lab.formattedReference ? (
-                    <span style={{ color: "gray", fontSize: "0.8em" }}>
+                    <span style={{color: "gray", fontSize: "0.8em"}}>
                       {" "}
                       ({lab.formattedReference})
                     </span>
                   ) : lab.referenceMin !== null ? (
-                    <span style={{ color: "gray", fontSize: "0.8em" }}>
+                    <span style={{color: "gray", fontSize: "0.8em"}}>
                       {" "}
                       ({lab.referenceMin}
                       {lab.referenceMax !== null ? `-${lab.referenceMax}` : ""})
@@ -127,7 +127,7 @@ export const MultiColumnLayout = ({
 
   return (
     <Grid container spacing={2}>
-      {Array.from({ length: columnCount }).map((_, colIndex) => {
+      {Array.from({length: columnCount}).map((_, colIndex) => {
         const startIndex = colIndex * itemsPerColumn;
         const endIndex = Math.min(startIndex + itemsPerColumn, labs.length);
         const columnLabs = labs.slice(startIndex, endIndex);
@@ -144,7 +144,7 @@ export const MultiColumnLayout = ({
               }}
             >
               {columnLabs.map((lab, labIndex) => (
-                <Box key={labIndex} sx={{ mb: 0.15 }}>
+                <Box key={labIndex} sx={{mb: 0.15}}>
                   <LabItemDisplay
                     lab={lab}
                     groupIndex={groupIndex}

@@ -1,11 +1,11 @@
 // 更新資料狀態的函數
 export const updateDataStatus = (setDataStatus) => {
-  chrome.runtime.sendMessage({ action: "getDataStatus" }, (response) => {
+  chrome.runtime.sendMessage({action: "getDataStatus"}, (response) => {
     console.log("DATA STATUS RESPONSE:", response);
 
     if (response && response.dataStatus) {
       // Make a copy to avoid direct state mutation
-      const updatedStatus = { ...response.dataStatus };
+      const updatedStatus = {...response.dataStatus};
 
       // 使用 Map 存儲預期的鍵和默認值
       const expectedKeys = [
@@ -16,7 +16,7 @@ export const updateDataStatus = (setDataStatus) => {
 
       expectedKeys.forEach(key => {
         if (!updatedStatus[key]) {
-          updatedStatus[key] = { status: 'none', count: 0 };
+          updatedStatus[key] = {status: 'none', count: 0};
         }
       });
 
@@ -62,7 +62,7 @@ export const handleSettingChange = (settingName, value, setLocalState, localStat
   }
 
   // Save to Chrome storage
-  chrome.storage.sync.set({ [settingName]: value }, () => {
+  chrome.storage.sync.set({[settingName]: value}, () => {
     console.log(`Setting updated: ${settingName} = ${JSON.stringify(value)}`);
 
     // Special logging for displayLabFormat
@@ -76,7 +76,7 @@ export const handleSettingChange = (settingName, value, setLocalState, localStat
     if (!handleSettingChange.hasLoggedTabsWarning) {
       // Notify content script of setting change
       if (chrome?.tabs?.query) {
-        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
           if (tabs[0]?.id) {
             chrome.tabs.sendMessage(tabs[0].id, {
               action: 'settingChanged',
@@ -94,7 +94,7 @@ export const handleSettingChange = (settingName, value, setLocalState, localStat
     } else {
       // If we've already logged the warning, just silently skip the notification
       if (chrome?.tabs?.query) {
-        chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+        chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
           if (tabs[0]?.id) {
             chrome.tabs.sendMessage(tabs[0].id, {
               action: 'settingChanged',
@@ -115,9 +115,9 @@ handleSettingChange.hasLoggedTabsWarning = false;
 // 手動擷取資料處理函數
 export const handleFetchData = (setDataStatus) => {
   if (chrome?.tabs?.query) {
-    chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+    chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
       if (tabs[0]?.id) {
-        chrome.tabs.sendMessage(tabs[0].id, { action: 'manualDataFetch' },
+        chrome.tabs.sendMessage(tabs[0].id, {action: 'manualDataFetch'},
           (response) => {
             if (response && response.status === 'started') {
               console.log('Manual data fetch initiated');
@@ -158,9 +158,9 @@ export const handleClearData = (setDataStatus) => {
 
     // Notify content script to clear data
     if (chrome?.tabs?.query) {
-      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
         if (tabs[0]?.id) {
-          chrome.tabs.sendMessage(tabs[0].id, { action: 'clearData' });
+          chrome.tabs.sendMessage(tabs[0].id, {action: 'clearData'});
         }
       });
     } else {

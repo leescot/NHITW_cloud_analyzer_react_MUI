@@ -4,7 +4,7 @@ import {imagingProcessor} from './src/utils/imagingProcessor.js';
 
 describe('utils/imagingProcessor', function () {
   describe('.processImagingData', function () {
-    const defaultValue = { withReport: [], withoutReport: [] };
+    const defaultValue = {withReport: [], withoutReport: []};
 
     it('should return default object for invalid input: undefined', function () {
       const input = undefined;

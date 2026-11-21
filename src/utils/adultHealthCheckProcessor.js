@@ -33,10 +33,10 @@ export const adultHealthCheckProcessor = {
       }
 
       // No valid data found
-      return { result_data: null };
+      return {result_data: null};
     } catch (error) {
       console.error('Error processing adult health check data:', error);
-      return { result_data: null };
+      return {result_data: null};
     }
   }
-}; 
+};

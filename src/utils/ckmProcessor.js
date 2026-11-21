@@ -11,7 +11,7 @@ function classifyICD(icdCode) {
   if (!icdCode) return null;
   const code = icdCode.replace(/\./g, '');
   for (const [category, prefixes] of Object.entries(CKM_ICD_PREFIXES)) {
-    for (const { prefix } of prefixes) {
+    for (const {prefix} of prefixes) {
       if (code.startsWith(prefix)) return category;
     }
   }
@@ -20,7 +20,7 @@ function classifyICD(icdCode) {
 
 function classifyATC(atcCode) {
   if (!atcCode) return null;
-  for (const [category, { prefixes }] of Object.entries(CKM_ATC_PREFIXES)) {
+  for (const [category, {prefixes}] of Object.entries(CKM_ATC_PREFIXES)) {
     if (prefixes.some(p => atcCode.startsWith(p))) return category;
   }
   return null;
@@ -141,7 +141,7 @@ function parseAbnormalFlag(value, consultValue) {
 }
 
 export const ckmProcessor = {
-  processCKMData({ groupedMedications, rawLabData, imagingData, dischargeData }) {
+  processCKMData({groupedMedications, rawLabData, imagingData, dischargeData}) {
     console.log('[CKM] processCKMData called', {
       groupedMedications: groupedMedications?.length,
       rawLabData: rawLabData?.rObject?.length,
@@ -150,13 +150,13 @@ export const ckmProcessor = {
     });
 
     const result = {
-      summary: { ckdStage: null, latestEGFR: null, latestHbA1c: null, latestLDL: null, latestUACR: null, latestUPCR: null, lvef: null },
+      summary: {ckdStage: null, latestEGFR: null, latestHbA1c: null, latestLDL: null, latestUACR: null, latestUPCR: null, lvef: null},
       trends: {
-        renal: { egfr: [], uacr: [] },
-        glycemic: { hba1c: [], glucose: [] },
+        renal: {egfr: [], uacr: []},
+        glycemic: {hba1c: [], glucose: []},
         ldl: [],
       },
-      diagnoses: { cardiovascular: [], kidney: [], metabolic: [] },
+      diagnoses: {cardiovascular: [], kidney: [], metabolic: []},
       medications: {},
       labs: {},
       imaging: [],
@@ -179,7 +179,7 @@ export const ckmProcessor = {
       if (!category) return;
       const code = icdCode.replace(/\./g, '');
       if (!seenICD.has(code) || date > seenICD.get(code).date) {
-        seenICD.set(code, { icdCode: code, icdName: icdName || '', date, hospital, category });
+        seenICD.set(code, {icdCode: code, icdName: icdName || '', date, hospital, category});
       }
     };
 
@@ -309,35 +309,35 @@ export const ckmProcessor = {
       if (isNaN(val)) continue;
       const date = parseLabDate(r);
       const isNHI = (r.assay_method || '') === '健保署計算' || /健保署/i.test(name) || r.order_code === 'Y00001';
-      const entry = { value: val, date, sortKey: parseDateToSortable(date), unit: r.unit_data || 'mL/min' };
+      const entry = {value: val, date, sortKey: parseDateToSortable(date), unit: r.unit_data || 'mL/min'};
       if (isNHI) nhiEgfr.push(entry); else hospEgfr.push(entry);
     }
     nhiEgfr.sort((a, b) => a.sortKey.localeCompare(b.sortKey));
     hospEgfr.sort((a, b) => a.sortKey.localeCompare(b.sortKey));
     const egfrForBadge = nhiEgfr.length > 0 ? nhiEgfr[nhiEgfr.length - 1] : (hospEgfr.length > 0 ? hospEgfr[hospEgfr.length - 1] : null);
     if (egfrForBadge) {
-      result.summary.latestEGFR = { value: egfrForBadge.value, unit: egfrForBadge.unit, date: egfrForBadge.date };
+      result.summary.latestEGFR = {value: egfrForBadge.value, unit: egfrForBadge.unit, date: egfrForBadge.date};
       result.summary.ckdStage = getCKDStageFromEGFR(egfrForBadge.value);
     }
     const hba1cPoints = result.trends.glycemic.hba1c;
     if (hba1cPoints.length > 0) {
       const latest = hba1cPoints[hba1cPoints.length - 1];
-      result.summary.latestHbA1c = { value: latest.value, unit: '%', date: latest.date };
+      result.summary.latestHbA1c = {value: latest.value, unit: '%', date: latest.date};
     }
     const ldlPoints = result.trends.ldl;
     if (ldlPoints.length > 0) {
       const latest = ldlPoints[ldlPoints.length - 1];
-      result.summary.latestLDL = { value: latest.value, unit: latest.unit || 'mg/dL', date: latest.date };
+      result.summary.latestLDL = {value: latest.value, unit: latest.unit || 'mg/dL', date: latest.date};
     }
     const pureUacr = extractTrendData(labRecords, 'uacr');
     if (pureUacr.length > 0) {
       const latest = pureUacr[pureUacr.length - 1];
-      result.summary.latestUACR = { value: latest.value, unit: latest.unit || 'mg/g', date: latest.date };
+      result.summary.latestUACR = {value: latest.value, unit: latest.unit || 'mg/g', date: latest.date};
     }
     const pureUpcr = extractTrendData(labRecords, 'upcr');
     if (pureUpcr.length > 0) {
       const latest = pureUpcr[pureUpcr.length - 1];
-      result.summary.latestUPCR = { value: latest.value, unit: latest.unit || 'mg/g', date: latest.date };
+      result.summary.latestUPCR = {value: latest.value, unit: latest.unit || 'mg/g', date: latest.date};
     }
 
     // === 影像 ===
@@ -369,7 +369,7 @@ export const ckmProcessor = {
         const matches = img.reportFull.match(ekgKeywords);
         if (matches && matches.length > 0) {
           const unique = [...new Set(matches.map(m => m.trim()))];
-          ekgAlerts.push({ date: img.date, findings: unique, orderName: img.orderName });
+          ekgAlerts.push({date: img.date, findings: unique, orderName: img.orderName});
         }
       }
       result.ekgAlerts = ekgAlerts;
@@ -382,7 +382,7 @@ export const ckmProcessor = {
         if (match) {
           const val = parseFloat(match[1]);
           if (!isNaN(val) && val > 0 && val <= 100) {
-            result.summary.lvef = { value: val, date: img.date, source: img.orderName };
+            result.summary.lvef = {value: val, date: img.date, source: img.orderName};
             break;
           }
         }

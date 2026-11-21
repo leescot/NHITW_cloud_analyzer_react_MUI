@@ -2,7 +2,7 @@ export const imagingProcessor = {
   processImagingData(data) {
     if (!data || !data.rObject) {
       console.error('Invalid imaging data:', data);
-      return { withReport: [], withoutReport: [] };
+      return {withReport: [], withoutReport: []};
     }
 
     // console.log('Processing imaging data:', data.rObject); // 添加調試信息
@@ -53,20 +53,20 @@ export const imagingProcessor = {
   // 新增方法：合併報告欄位
   combineReportFields(item) {
     let report = '';
-    
+
     // 依序加入 inspect_result, path_diag_2, path_diag_3
     if (item.inspect_result) {
       report += item.inspect_result;
     }
-    
+
     if (item.path_diag_2) {
       report += item.path_diag_2;
     }
-    
+
     if (item.path_diag_3) {
       report += item.path_diag_3;
     }
-    
+
     return report;
   },
 

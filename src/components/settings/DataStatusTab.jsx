@@ -1,4 +1,4 @@
-import React, { useEffect, useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import {
   Grid,
   Paper,
@@ -16,7 +16,7 @@ import AccessTimeIcon from '@mui/icons-material/AccessTime';
 import SummarizeIcon from '@mui/icons-material/Summarize';
 import GrassIcon from '@mui/icons-material/Grass';
 
-const DataStatusTab = ({ dataStatus }) => {
+const DataStatusTab = ({dataStatus}) => {
   const [isLoading, setIsLoading] = useState(false);
 
   // Helper function to get the appropriate icon for each data type
@@ -39,7 +39,7 @@ const DataStatusTab = ({ dataStatus }) => {
   // Monitor for loading state
   useEffect(() => {
     const checkLoadingState = () => {
-      chrome.runtime.sendMessage({ action: "getLoadingState" }, (response) => {
+      chrome.runtime.sendMessage({action: "getLoadingState"}, (response) => {
         if (response && response.isLoading) {
           setIsLoading(response.isLoading);
         } else {
@@ -55,7 +55,7 @@ const DataStatusTab = ({ dataStatus }) => {
   }, []);
 
   return (
-    <Box sx={{ flexGrow: 1, mt: 1 }}>
+    <Box sx={{flexGrow: 1, mt: 1}}>
       <Grid container spacing={2}>
         {Object.entries(dataStatus).map(([key, value]) => (
           !['adultHealthCheck', 'cancerScreening'].includes(key) && (
@@ -74,10 +74,10 @@ const DataStatusTab = ({ dataStatus }) => {
               }}
             >
               {getDataTypeIcon(key)}
-              <Typography variant="subtitle2" sx={{ mt: 1 }}>
+              <Typography variant="subtitle2" sx={{mt: 1}}>
                 {getShortLabel(key)}
               </Typography>
-              <Box sx={{ position: 'relative', minHeight: '24px', display: 'flex', alignItems: 'center' }}>
+              <Box sx={{position: 'relative', minHeight: '24px', display: 'flex', alignItems: 'center'}}>
                 {value.status === 'loading' ? (
                   <CircularProgress size={20} />
                 ) : (

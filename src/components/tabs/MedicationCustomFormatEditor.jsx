@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import {
   Typography,
   Box,
@@ -20,21 +20,21 @@ import RestoreIcon from '@mui/icons-material/Restore';
 import FormatElementsPanel from './medicationCopyFormat/FormatElementsPanel';
 import FormatPreview from './medicationCopyFormat/FormatPreview';
 import useFormatEditorState from './medicationCopyFormat/useFormatEditorState';
-import { createHeaderDragHandlers, createDrugDragHandlers } from './medicationCopyFormat/dragDropHandlers';
+import {createHeaderDragHandlers, createDrugDragHandlers} from './medicationCopyFormat/dragDropHandlers';
 
 // 西藥自訂格式編輯器組件
-const MedicationCustomFormatEditor = ({ appSettings, setAppSettings, generalDisplaySettings }) => {
+const MedicationCustomFormatEditor = ({appSettings, setAppSettings, generalDisplaySettings}) => {
   // 響應式布局
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const isTablet = useMediaQuery(theme.breakpoints.down('md'));
-  
+
   // DOM ref for拖拉元素
   const dragItem = useRef(null);
-  
+
   // Format type selection (horizontal or vertical)
   const [formatType, setFormatType] = useState("customVertical");
-  
+
   // Use the custom hook for state management - now with separate header and drug formats
   const {
     headerFormat,
@@ -98,30 +98,30 @@ const MedicationCustomFormatEditor = ({ appSettings, setAppSettings, generalDisp
       ['header', new Set(['text'])],
       ['text', new Set()]
     ]);
-    
+
     // 檢查標題格式中是否有閉合括號 ']' #zh-TW
     const hasClosingBracket = headerFormat.some(item => {
       const baseId = item.id.split('_')[0];
       const secondPart = item.id.split('_')[1];
-      
+
       const isHeaderTextOrText = (
-        (headerElementTypeMap.has(baseId) && 
+        (headerElementTypeMap.has(baseId) &&
          (secondPart === undefined || headerElementTypeMap.get(baseId).has(secondPart))) ||
         (baseId === 'header' && secondPart === 'text')
       );
-      
+
       return isHeaderTextOrText && item.value === ']';
     });
-    
+
     if (!hasClosingBracket) {
       console.warn('MedicationCustomFormatEditor: Closing bracket missing from header format!');
     }
-    
+
     // Save with format type
     saveChanges({
       formatType // Pass the current format type for medication only
     });
-    
+
     // Log final settings after saving
     console.log('MedicationCustomFormatEditor: Saved format settings:', {
       header: headerFormat,
@@ -134,10 +134,10 @@ const MedicationCustomFormatEditor = ({ appSettings, setAppSettings, generalDisp
   };
 
   return (
-    <Box sx={{ pt: 0, px: 1, pb: 1 }}>
+    <Box sx={{pt: 0, px: 1, pb: 1}}>
       {/* Header with title and buttons */}
-      <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', mb: 1, mt: 0 }}>
-        <Box sx={{ display: 'flex', gap: 1 }}>
+      <Box sx={{display: 'flex', justifyContent: 'flex-end', alignItems: 'center', mb: 1, mt: 0}}>
+        <Box sx={{display: 'flex', gap: 1}}>
           <Button
             variant="outlined"
             color="secondary"
@@ -161,24 +161,24 @@ const MedicationCustomFormatEditor = ({ appSettings, setAppSettings, generalDisp
           </Button>
         </Box>
       </Box>
-      
+
       {/* Preview section */}
-      <Box sx={{ display: 'flex', flexDirection: 'column', bgcolor: '#f8f8f8', pt: 1, px: 2, pb: 1, borderRadius: 1, mb: 1 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-          <Typography variant="subtitle1" fontWeight="medium" sx={{ width: '100%', textAlign: 'center' }}>
+      <Box sx={{display: 'flex', flexDirection: 'column', bgcolor: '#f8f8f8', pt: 1, px: 2, pb: 1, borderRadius: 1, mb: 1}}>
+        <Box sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1}}>
+          <Typography variant="subtitle1" fontWeight="medium" sx={{width: '100%', textAlign: 'center'}}>
             格式類型選擇與預覽
           </Typography>
         </Box>
-        
-        <FormatPreview 
-          headerFormat={headerFormat} 
-          drugFormat={drugFormat} 
+
+        <FormatPreview
+          headerFormat={headerFormat}
+          drugFormat={drugFormat}
           drugSeparator={drugSeparator}
           formatType={formatType}
           onFormatTypeChange={handleFormatTypeChange}
         />
       </Box>
-      
+
       {/* Header format panel */}
       <FormatElementsPanel
         title="標題格式 (只顯示一次)"
@@ -202,7 +202,7 @@ const MedicationCustomFormatEditor = ({ appSettings, setAppSettings, generalDisp
           handleDragEnd: headerDragHandlers.handleHeaderDragEnd
         }}
       />
-      
+
       {/* Drug format panel */}
       <FormatElementsPanel
         title="藥品格式 (每個藥品顯示一次)"
@@ -227,16 +227,16 @@ const MedicationCustomFormatEditor = ({ appSettings, setAppSettings, generalDisp
           handleDragEnd: drugDragHandlers.handleDragEnd
         }}
       />
-      
+
       {/* Notifications */}
-      <Snackbar 
-        open={snackbarOpen} 
-        autoHideDuration={3000} 
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={3000}
         onClose={() => setSnackbarOpen(false)}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        anchorOrigin={{vertical: 'bottom', horizontal: 'center'}}
       >
-        <Alert 
-          onClose={() => setSnackbarOpen(false)} 
+        <Alert
+          onClose={() => setSnackbarOpen(false)}
           severity={snackbarSeverity}
         >
           {snackbarMessage}
@@ -246,4 +246,4 @@ const MedicationCustomFormatEditor = ({ appSettings, setAppSettings, generalDisp
   );
 };
 
-export default MedicationCustomFormatEditor; 
+export default MedicationCustomFormatEditor;

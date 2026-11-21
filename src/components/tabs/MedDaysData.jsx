@@ -10,7 +10,7 @@ import {
 } from "@mui/material";
 import TypographySizeWrapper from "../utils/TypographySizeWrapper";
 
-const MedDaysData = ({ medDaysData, generalDisplaySettings }) => {
+const MedDaysData = ({medDaysData, generalDisplaySettings}) => {
   return (
     <TableContainer component={Paper}>
       <Table size="small">

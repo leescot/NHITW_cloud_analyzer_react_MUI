@@ -1,5 +1,5 @@
 import React from "react";
-import { Grid, Paper } from "@mui/material";
+import {Grid, Paper} from "@mui/material";
 import TypographySizeWrapper from "../../utils/TypographySizeWrapper";
 import MedicationGroup from "./MedicationGroup";
 
@@ -16,7 +16,7 @@ const MedicationTermGroups = ({
     <Grid container spacing={2}>
       {/* 左欄：長期用藥（含有>=14天的藥物） */}
       <Grid item xs={12} md={6}>
-        <Paper elevation={0} variant="outlined" sx={{ p: 2, mb: 2 }}>
+        <Paper elevation={0} variant="outlined" sx={{p: 2, mb: 2}}>
           <TypographySizeWrapper
             variant="h6"
             textSizeType="content"
@@ -55,7 +55,7 @@ const MedicationTermGroups = ({
 
       {/* 右欄：短期用藥（全部<14天的藥物） */}
       <Grid item xs={12} md={6}>
-        <Paper elevation={0} variant="outlined" sx={{ p: 2, mb: 2 }}>
+        <Paper elevation={0} variant="outlined" sx={{p: 2, mb: 2}}>
           <TypographySizeWrapper
             variant="h6"
             textSizeType="content"

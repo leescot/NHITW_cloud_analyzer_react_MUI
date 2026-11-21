@@ -1,17 +1,17 @@
-import React, { useEffect, useState } from "react";
-import { Paper, Typography, Box } from "@mui/material";
+import React, {useEffect, useState} from "react";
+import {Paper, Typography, Box} from "@mui/material";
 import BiotechIcon from "@mui/icons-material/Biotech";
 
 /**
  * Component for displaying Cancer Screening data
- * 
+ *
  * @param {Object} cancerScreeningData - The cancer screening data
  * @param {Object} generalDisplaySettings - Display settings like text sizes
  * @returns {JSX.Element} The component
  */
-const Overview_CancerScreening = ({ cancerScreeningData, generalDisplaySettings = {} }) => {
+const Overview_CancerScreening = ({cancerScreeningData, generalDisplaySettings = {}}) => {
   // Extract display settings with defaults
-  const { titleTextSize = 'medium', contentTextSize = 'medium' } = generalDisplaySettings;
+  const {titleTextSize = 'medium', contentTextSize = 'medium'} = generalDisplaySettings;
 
   // State to store the combined data from props or window global
   const [combinedData, setCombinedData] = useState(cancerScreeningData);
@@ -122,7 +122,7 @@ const Overview_CancerScreening = ({ cancerScreeningData, generalDisplaySettings 
           component="span"
           variant="body2"
           color="text.secondary"
-          sx={{ fontSize: getTextSize(contentTextSize) }}
+          sx={{fontSize: getTextSize(contentTextSize)}}
         >
           {' '}{latestData.func_date} {latestData.hosp_abbr}
         </Typography>
@@ -141,9 +141,9 @@ const Overview_CancerScreening = ({ cancerScreeningData, generalDisplaySettings 
         overflow: "hidden",
       }}
     >
-      <Box sx={{ display: "flex", alignItems: "center", mb: hasData() ? 1 : 0 }}>
+      <Box sx={{display: "flex", alignItems: "center", mb: hasData() ? 1 : 0}}>
         <BiotechIcon
-          sx={{ mr: 1, color: "primary.main", fontSize: "1.5rem" }}
+          sx={{mr: 1, color: "primary.main", fontSize: "1.5rem"}}
         />
         <Typography
           variant="subtitle1"
@@ -157,7 +157,7 @@ const Overview_CancerScreening = ({ cancerScreeningData, generalDisplaySettings 
       </Box>
 
       {hasData() ? (
-        <Box sx={{ pl: 1 }}>
+        <Box sx={{pl: 1}}>
           {renderScreeningItem('colorectal', '糞便潛血')}
           {renderScreeningItem('oralMucosa', '口腔黏膜')}
           {renderScreeningItem('mammography', '乳房攝影')}
@@ -170,7 +170,7 @@ const Overview_CancerScreening = ({ cancerScreeningData, generalDisplaySettings 
         <Typography
           variant="body2"
           color="text.secondary"
-          sx={{ fontSize: getTextSize(contentTextSize), pl: 1, display: "inline-block", ml: 1 }}
+          sx={{fontSize: getTextSize(contentTextSize), pl: 1, display: "inline-block", ml: 1}}
         >
           無資料
         </Typography>
@@ -179,4 +179,4 @@ const Overview_CancerScreening = ({ cancerScreeningData, generalDisplaySettings 
   );
 };
 
-export default Overview_CancerScreening; 
+export default Overview_CancerScreening;

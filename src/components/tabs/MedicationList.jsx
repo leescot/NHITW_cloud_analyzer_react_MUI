@@ -1,10 +1,10 @@
-import React, { useState, useEffect } from "react";
-import { Box, Snackbar } from "@mui/material";
+import React, {useState, useEffect} from "react";
+import {Box, Snackbar} from "@mui/material";
 import TypographySizeWrapper from "../utils/TypographySizeWrapper";
 import MedicationFilters from "./medication/MedicationFilters";
 import MedicationGroup from "./medication/MedicationGroup";
 import MedicationTermGroups from "./medication/MedicationTermGroups";
-import { medicationProcessor } from "../../utils/medicationProcessor.js";
+import {medicationProcessor} from "../../utils/medicationProcessor.js";
 
 const MedicationList = ({
   groupedMedications,
@@ -91,13 +91,13 @@ const MedicationList = ({
     ]);
 
     // 獲取對應的過濾函數
-    const filterFunc = visitTypeFilterMap.get(selectedVisitType) || 
+    const filterFunc = visitTypeFilterMap.get(selectedVisitType) ||
                       ((visitType) => visitTypeFilterMap.get("default")(visitType));
 
     // 執行過濾
-    visitTypeFiltered = selectedVisitType === "" || selectedVisitType === "顯示所有項目" ? 
-                       filterFunc() : 
-                       (selectedVisitType === "門診+急診" || selectedVisitType === "門診" ? 
+    visitTypeFiltered = selectedVisitType === "" || selectedVisitType === "顯示所有項目" ?
+                       filterFunc() :
+                       (selectedVisitType === "門診+急診" || selectedVisitType === "門診" ?
                        filterFunc() : filterFunc(selectedVisitType));
 
     // 如果有搜尋文字，再進一步過濾藥物
@@ -107,7 +107,7 @@ const MedicationList = ({
       // 針對每個藥物組，只保留符合搜尋條件的藥物
       const searchFiltered = visitTypeFiltered.map(group => {
         // 深複製組資料，但不包含medications
-        const newGroup = { ...group };
+        const newGroup = {...group};
 
         // 過濾藥物，只保留符合搜尋條件的
         newGroup.medications = group.medications.filter(med =>
@@ -272,13 +272,13 @@ const MedicationList = ({
     const groupName = group[0];
 
     // 檢查群組是否被分配到顏色
-    const colorGroups = settings.atc5ColorGroups || { red: [], orange: [], green: [] };
+    const colorGroups = settings.atc5ColorGroups || {red: [], orange: [], green: []};
 
     // 使用 Map 來映射顏色組名到顏色值
     const colorMap = new Map([
-      ['red', { name: 'red', color: '#f44336' }],
-      ['orange', { name: 'orange', color: '#ed6c02' }],
-      ['green', { name: 'green', color: '#2e7d32' }]
+      ['red', {name: 'red', color: '#f44336'}],
+      ['orange', {name: 'orange', color: '#ed6c02'}],
+      ['green', {name: 'green', color: '#2e7d32'}]
     ]);
 
     // 檢查群組是否在各顏色組中
@@ -431,7 +431,7 @@ const MedicationList = ({
         autoHideDuration={2000}
         onClose={handleSnackbarClose}
         message={snackbarMessage}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        anchorOrigin={{vertical: "bottom", horizontal: "center"}}
       />
     </>
   );

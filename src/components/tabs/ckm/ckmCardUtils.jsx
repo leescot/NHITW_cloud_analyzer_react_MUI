@@ -1,8 +1,8 @@
 // CKM 卡片共用的展示 helpers（由 CKMData.jsx 抽出）
 import React from 'react';
-import { Box, Typography } from '@mui/material';
+import {Box, Typography} from '@mui/material';
 
-export const cs = { py: 0.25, px: 0.5 };
+export const cs = {py: 0.25, px: 0.5};
 
 export function sd(d) { if (!d) return ''; const p = d.replace(/-/g, '/').split('/'); return p.length === 3 ? `${p[1]}/${p[2]}` : d; }
 
@@ -42,8 +42,8 @@ export function formatOrderName(name) {
   return f.replace(/\s{2,}/g, ' ').trim();
 }
 
-export const SectionTitle = ({ children }) => (
-  <Box sx={{ bgcolor: '#e3f2fd', px: 0.75, py: 0.3, borderRadius: '4px 4px 0 0' }}>
-    <Typography variant="caption" sx={{ fontWeight: 700, color: '#1565c0' }}>{children}</Typography>
+export const SectionTitle = ({children}) => (
+  <Box sx={{bgcolor: '#e3f2fd', px: 0.75, py: 0.3, borderRadius: '4px 4px 0 0'}}>
+    <Typography variant="caption" sx={{fontWeight: 700, color: '#1565c0'}}>{children}</Typography>
   </Box>
 );

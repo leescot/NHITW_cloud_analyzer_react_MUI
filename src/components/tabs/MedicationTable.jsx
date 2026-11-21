@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, {useState, useEffect} from "react";
 import {
   Typography,
   TableContainer,
@@ -21,7 +21,7 @@ import {
 import ImageIcon from "@mui/icons-material/Image";
 import TypographySizeWrapper from "../utils/TypographySizeWrapper";
 
-const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings }) => {
+const MedicationTable = ({groupedMedications, settings, generalDisplaySettings}) => {
   // 添加過濾選項的狀態
   const [dayFilter, setDayFilter] = useState("gte14"); // 默認顯示>=14天藥物
   // 追蹤是否有 ATC5 顏色藥物
@@ -98,14 +98,14 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
     const groupName = group[0];
 
     // 檢查群組是否被分配到顏色
-    const colorGroups = settings.atc5ColorGroups || { red: [], orange: [], green: [] };
+    const colorGroups = settings.atc5ColorGroups || {red: [], orange: [], green: []};
 
     if (colorGroups.red && colorGroups.red.includes(groupName)) {
-      return { name: 'red', color: '#f44336' };
+      return {name: 'red', color: '#f44336'};
     } else if (colorGroups.orange && colorGroups.orange.includes(groupName)) {
-      return { name: 'orange', color: '#ed6c02' };
+      return {name: 'orange', color: '#ed6c02'};
     } else if (colorGroups.green && colorGroups.green.includes(groupName)) {
-      return { name: 'green', color: '#2e7d32' };
+      return {name: 'green', color: '#2e7d32'};
     }
 
     return null;
@@ -171,7 +171,7 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
     const groupName = group[0];
 
     // 檢查群組是否被分配到顏色
-    const colorGroups = settings.atc5ColorGroups || { red: [], orange: [], green: [] };
+    const colorGroups = settings.atc5ColorGroups || {red: [], orange: [], green: []};
 
     // 如果藥物屬於任何有顏色的群組（紅色、橘色或綠色），返回 true
     return (
@@ -193,21 +193,21 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
       const medName = med.name;
       // 創建一個唯一的鍵來表示日期和醫院的組合
       const dateHospKey = `${date}__${hosp}`;
-      
+
       // 若藥名不存在於 Map 中，先建立
       if (!medicineMap.has(medName)) {
         medicineMap.set(medName, new Map());
       }
-      
+
       // 獲取藥物的日期醫院組合 Map
       const dateHospMap = medicineMap.get(medName);
-      
+
       // 建立當前藥物的劑量和頻次資訊
       const currentDosageFreq = {
         perDosage: med.perDosage,
         frequency: med.frequency,
       };
-      
+
       // 檢查該日期醫院組合是否已有此藥物的記錄
       if (!dateHospMap.has(dateHospKey)) {
         // 創建新的藥物記錄
@@ -244,11 +244,11 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
           existingMed.chronicTotal = med.chronicTotal;
         }
       }
-      
+
       // 保存日期醫院組合映射
-      dateHospToKeyMap[dateHospKey] = { date, hosp };
-      keyToDateHospMap[dateHospKey] = { date, hosp };
-      
+      dateHospToKeyMap[dateHospKey] = {date, hosp};
+      keyToDateHospMap[dateHospKey] = {date, hosp};
+
       // 記錄所有日期醫院組合
       allDateHospPairs.add(dateHospKey);
     };
@@ -269,7 +269,7 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
       // 優先按日期排序
       const dateCompare = dateB.localeCompare(dateA);
       if (dateCompare !== 0) return dateCompare;
-      
+
       // 如果日期相同，則按醫院名稱排序
       const hospA = a.split('__')[1];
       const hospB = b.split('__')[1];
@@ -297,19 +297,19 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
       ["gt28", (days) => days > 28],
       ["colored_only", (_, medName) => getMedicationColor(medName) !== null]
     ]),
-    
+
     // 獲取過濾函數
     getFilterFunction(filterName) {
       return this.definitions.get(filterName) || (() => true);
     },
-    
+
     // 檢查藥物是否符合過濾條件
     meetsCriteria(filterName, days, medName) {
       const filterFn = this.getFilterFunction(filterName);
       return filterFn(days, medName);
     }
   };
-  
+
   // 對藥物按天數進行過濾的函數
   const filterMedicinesByDays = (medicines) => {
     return Array.from(medicines).filter(([medName, dateHospMap]) => {
@@ -412,37 +412,37 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
   // 在 TableCell 的渲染部分修改為顯示多種頻次
   const renderMultipleDosages = (dosageFreqs) => {
     // 格式化單個劑量頻次的函數
-    const formatDosageFrequency = (df) => 
+    const formatDosageFrequency = (df) =>
       df.perDosage !== "SPECIAL"
         ? `${df.perDosage}# ${df.frequency}`
         : `總量${df.dosage} ${df.frequency}`;
-    
+
     // 對頻次進行排序，QD 最優先，其次是 Q 開頭的頻次，最後是其他頻次
     const sortedDosageFreqs = [...dosageFreqs].sort((a, b) => {
       // QD 頻次最優先
       if (a.frequency === 'QD' && b.frequency !== 'QD') return -1;
       if (a.frequency !== 'QD' && b.frequency === 'QD') return 1;
-      
+
       // 其次是 Q 開頭的頻次
       const aStartsWithQ = a.frequency.startsWith('Q');
       const bStartsWithQ = b.frequency.startsWith('Q');
-      
+
       if (aStartsWithQ && !bStartsWithQ) return -1;
       if (!aStartsWithQ && bStartsWithQ) return 1;
-      
+
       return 0;
     });
-    
+
     // 將所有劑量頻次格式化為字符串，並用 " + " 連接
     return sortedDosageFreqs.map(formatDosageFrequency).join(" + ");
   };
 
   // 藥物劑量顯示 Cell 組件 - 封裝單個劑量顯示邏輯
-  const MedicationDosageCell = ({ medData, shouldDisplay, generalDisplaySettings }) => {
+  const MedicationDosageCell = ({medData, shouldDisplay, generalDisplaySettings}) => {
     if (!shouldDisplay) {
       return null;
     }
-    
+
     // 藥物劑量的顯示邏輯
     const renderDosage = () => {
       if (!medData.dosageFreqs) {
@@ -451,7 +451,7 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
           ? `${medData.perDosage}# ${medData.frequency}`
           : `總量${medData.dosage} ${medData.frequency}`;
       }
-      
+
       // 處理新的多劑量格式
       return medData.dosageFreqs.length > 1
         ? renderMultipleDosages(medData.dosageFreqs)
@@ -459,11 +459,11 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
             ? `${medData.dosageFreqs[0].perDosage}# ${medData.dosageFreqs[0].frequency}`
             : `總量${medData.dosage} ${medData.dosageFreqs[0].frequency}`);
     };
-    
+
     // 用藥天數的顯示邏輯
     const renderDayInfo = () => {
       const hasRemainingDrug = medData.drug_left > 0;
-      
+
       return (
         <TypographySizeWrapper
           variant="caption"
@@ -480,7 +480,7 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
               component="span"
               textSizeType="note"
               generalDisplaySettings={generalDisplaySettings}
-              sx={{ color: "#1976d2" }}
+              sx={{color: "#1976d2"}}
             >
               {` (餘${medData.drug_left})`}
             </TypographySizeWrapper>
@@ -499,7 +499,7 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
                 ml: 0.4,
                 height: 16,
                 fontSize: "0.65rem",
-                "& .MuiChip-label": { px: 0.5, py: 0 },
+                "& .MuiChip-label": {px: 0.5, py: 0},
                 verticalAlign: "middle"
               }}
             />
@@ -507,14 +507,14 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
         </TypographySizeWrapper>
       );
     };
-    
+
     return (
       <>
         <TypographySizeWrapper
           variant="body2"
           textSizeType="content"
           generalDisplaySettings={generalDisplaySettings}
-          sx={{ whiteSpace: "nowrap" }}
+          sx={{whiteSpace: "nowrap"}}
         >
           {renderDosage()}
         </TypographySizeWrapper>
@@ -526,9 +526,9 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
   // 檢查藥物在特定日期醫院組合是否應該顯示的函數
   const shouldDisplayMedication = (medData, dayFilter, name) => {
     if (!medData) return false;
-    
+
     if (dayFilter === "all") return true;
-    
+
     const days = parseInt(medData.days) || 0;
     return filterConditions.meetsCriteria(dayFilter, days, name);
   };
@@ -546,7 +546,7 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
       ) : (
         <>
           {/* 添加過濾選項 */}
-          <Box sx={{ mb: 2, display: "flex", alignItems: "center" }}>
+          <Box sx={{mb: 2, display: "flex", alignItems: "center"}}>
             <FormControl component="fieldset">
               <RadioGroup
                 row
@@ -565,7 +565,7 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
                       顯示所有藥物
                     </TypographySizeWrapper>
                   }
-                  sx={{ marginY: 0, height: "24px" }}
+                  sx={{marginY: 0, height: "24px"}}
                 />
                 <FormControlLabel
                   value="lte7"
@@ -578,7 +578,7 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
                       只顯示≤7天藥物
                     </TypographySizeWrapper>
                   }
-                  sx={{ marginY: 0, height: "24px" }}
+                  sx={{marginY: 0, height: "24px"}}
                 />
                 <FormControlLabel
                   value="gte7"
@@ -591,7 +591,7 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
                       顯示≥7天藥物
                     </TypographySizeWrapper>
                   }
-                  sx={{ marginY: 0, height: "24px" }}
+                  sx={{marginY: 0, height: "24px"}}
                 />
                 <FormControlLabel
                   value="gte14"
@@ -604,7 +604,7 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
                       只顯示≥14天藥物
                     </TypographySizeWrapper>
                   }
-                  sx={{ marginY: 0, height: "24px" }}
+                  sx={{marginY: 0, height: "24px"}}
                 />
                 {hasATC5ColoredMeds && (
                   <FormControlLabel
@@ -618,7 +618,7 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
                         只顯示ATC5顏色藥物
                       </TypographySizeWrapper>
                     }
-                    sx={{ marginY: 0, height: "24px" }}
+                    sx={{marginY: 0, height: "24px"}}
                   />
                 )}
               </RadioGroup>
@@ -669,10 +669,10 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
                     </TypographySizeWrapper>
                   </TableCell>
                   {visibleDateHospKeys.map((key) => {
-                    const { date, hosp } = processedData.keyToDateHospMap[key];
+                    const {date, hosp} = processedData.keyToDateHospMap[key];
                     // 清理醫院名稱，只取分號前的部分
                     const hospName = hosp.split(';')[0];
-                    
+
                     return (
                       <TableCell
                         key={key}
@@ -688,7 +688,7 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
                           variant="body2"
                           textSizeType="content"
                           generalDisplaySettings={generalDisplaySettings}
-                          sx={{ fontWeight: "medium" }}
+                          sx={{fontWeight: "medium"}}
                         >
                           {date}
                         </TypographySizeWrapper>
@@ -730,7 +730,7 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
                           fontWeight: isBold ? 'bold' : 'normal'
                         }}
                       >
-                        <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                        <Box sx={{display: 'flex', alignItems: 'center'}}>
                           <TypographySizeWrapper
                             textSizeType="content"
                             generalDisplaySettings={generalDisplaySettings}
@@ -769,7 +769,7 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
                       {visibleDateHospKeys.map((key) => {
                         const medData = dateHospMap.get(key);
                         const shouldDisplay = shouldDisplayMedication(medData, dayFilter, name);
-                        
+
                         return (
                           <TableCell
                             key={key}
@@ -780,10 +780,10 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
                               padding: "6px 4px",
                             }}
                           >
-                            <MedicationDosageCell 
-                              medData={medData} 
-                              shouldDisplay={shouldDisplay} 
-                              generalDisplaySettings={generalDisplaySettings} 
+                            <MedicationDosageCell
+                              medData={medData}
+                              shouldDisplay={shouldDisplay}
+                              generalDisplaySettings={generalDisplaySettings}
                             />
                           </TableCell>
                         );
@@ -801,7 +801,7 @@ const MedicationTable = ({ groupedMedications, settings, generalDisplaySettings 
         autoHideDuration={2000}
         onClose={handleSnackbarClose}
         message={snackbarMessage}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        anchorOrigin={{vertical: "bottom", horizontal: "center"}}
       />
     </>
   );

@@ -10,7 +10,7 @@ import {
   TableBody,
 } from "@mui/material";
 
-const DischargeData = ({ dischargeData }) => {
+const DischargeData = ({dischargeData}) => {
   // 檢查日期是否在另一住院期間內（切帳情況）
   const isDateInOtherStayPeriod = (currentIndex, date) => {
     if (!date) return false;

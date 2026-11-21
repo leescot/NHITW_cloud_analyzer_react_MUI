@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import {
   Box,
   Typography,
@@ -38,7 +38,7 @@ const handleDownloadJSON = (setDownloading, setSnackbar) => {
   setDownloading(true);
 
   // 從 content script 獲取所有資料
-  chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+  chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
     if (!tabs || !tabs[0] || !tabs[0].id) {
       setDownloading(false);
       setSnackbar({
@@ -50,7 +50,7 @@ const handleDownloadJSON = (setDownloading, setSnackbar) => {
     }
 
     try {
-      chrome.tabs.sendMessage(tabs[0].id, { action: "getPatientData" }, function(response) {
+      chrome.tabs.sendMessage(tabs[0].id, {action: "getPatientData"}, function (response) {
         setDownloading(false);
 
         // 處理 chrome 錯誤
@@ -104,7 +104,7 @@ const handleDownloadJSON = (setDownloading, setSnackbar) => {
   });
 };
 
-const LoadDataTab = ({ localDataStatus, setSnackbar }) => {
+const LoadDataTab = ({localDataStatus, setSnackbar}) => {
   const [loading, setLoading] = useState(false);
   const [selectedFile, setSelectedFile] = useState(null);
   const [downloading, setDownloading] = useState(false); // 新增下載狀態
@@ -149,7 +149,7 @@ const LoadDataTab = ({ localDataStatus, setSnackbar }) => {
       }
 
       // 獲取當前標籤頁
-      chrome.tabs.query({ active: true, currentWindow: true }, (tabs) => {
+      chrome.tabs.query({active: true, currentWindow: true}, (tabs) => {
         if (!tabs || !tabs[0] || !tabs[0].id) {
           setSnackbar({
             open: true,
@@ -242,13 +242,13 @@ const LoadDataTab = ({ localDataStatus, setSnackbar }) => {
   // };
 
   return (
-    <Box sx={{ display: 'flex', flexDirection: 'column', gap: 2 }}>
+    <Box sx={{display: 'flex', flexDirection: 'column', gap: 2}}>
       {/* <Typography variant="h6" gutterBottom>
         本地資料載入
       </Typography> */}
 
       {/* 新增下載 JSON 資料檔的按鈕 */}
-      <Paper variant="outlined" sx={{ p: 2 }}>
+      <Paper variant="outlined" sx={{p: 2}}>
         <Typography variant="subtitle1" gutterBottom>
           下載雲端資料
         </Typography>
@@ -258,7 +258,7 @@ const LoadDataTab = ({ localDataStatus, setSnackbar }) => {
           startIcon={downloading ? <CircularProgress size={16} color="inherit" /> : <DownloadIcon />}
           onClick={() => handleDownloadJSON(setDownloading, setSnackbar)}
           disabled={downloading}
-          sx={{ width: '100%' }}
+          sx={{width: '100%'}}
         >
           {downloading ? '下載中...' : '下載 JSON 資料檔'}
         </Button>
@@ -268,17 +268,17 @@ const LoadDataTab = ({ localDataStatus, setSnackbar }) => {
       </Paper>
 
       {/* 檔案上傳區 */}
-      <Paper variant="outlined" sx={{ p: 2 }}>
+      <Paper variant="outlined" sx={{p: 2}}>
         <Typography variant="subtitle1" gutterBottom>
           選擇 JSON 檔案
         </Typography>
 
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
+        <Box sx={{display: 'flex', alignItems: 'center', mb: 2}}>
           <Button
             variant="contained"
             component="label"
             startIcon={<FolderOpenIcon />}
-            sx={{ mr: 2 }}
+            sx={{mr: 2}}
           >
             瀏覽...
             <input
@@ -307,9 +307,9 @@ const LoadDataTab = ({ localDataStatus, setSnackbar }) => {
 
       {/* 資料狀態顯示 */}
       {localDataStatus.loaded ? (
-        <Paper variant="outlined" sx={{ p: 2, mb: 2 }}>
-          <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
-            <CheckCircleIcon color="success" sx={{ mr: 1 }} />
+        <Paper variant="outlined" sx={{p: 2, mb: 2}}>
+          <Box sx={{display: 'flex', alignItems: 'center', mb: 1}}>
+            <CheckCircleIcon color="success" sx={{mr: 1}} />
             <Typography variant="subtitle1">
               已載入本地資料
             </Typography>
@@ -317,7 +317,7 @@ const LoadDataTab = ({ localDataStatus, setSnackbar }) => {
           <Typography variant="body2" color="text.secondary" gutterBottom>
             來源: {localDataStatus.source}
           </Typography>
-          <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 1, mt: 1 }}>
+          <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 1, mt: 1}}>
             {localDataStatus.types.map((type) => (
               <Chip
                 key={type}
@@ -339,12 +339,12 @@ const LoadDataTab = ({ localDataStatus, setSnackbar }) => {
           </Button> */}
         </Paper>
       ) : (
-        <Alert severity="info" sx={{ mb: 2 }}>
+        <Alert severity="info" sx={{mb: 2}}>
           請選擇 JSON 檔案並點擊「載入檔案」
         </Alert>
       )}
 
-      
+
     </Box>
   );
 };

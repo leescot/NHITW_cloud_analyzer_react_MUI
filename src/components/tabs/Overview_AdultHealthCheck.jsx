@@ -1,17 +1,17 @@
-import React, { useEffect, useState } from "react";
-import { Paper, Typography, Box } from "@mui/material";
+import React, {useEffect, useState} from "react";
+import {Paper, Typography, Box} from "@mui/material";
 import HealthAndSafetyIcon from "@mui/icons-material/HealthAndSafety";
 
 /**
  * Component for displaying Adult Health Check data
- * 
+ *
  * @param {Object} adultHealthCheckData - The adult health check data
  * @param {Object} generalDisplaySettings - Display settings like text sizes
  * @returns {JSX.Element} The component
  */
-const Overview_AdultHealthCheck = ({ adultHealthCheckData, generalDisplaySettings = {} }) => {
+const Overview_AdultHealthCheck = ({adultHealthCheckData, generalDisplaySettings = {}}) => {
   // Extract display settings with defaults
-  const { titleTextSize = 'medium', contentTextSize = 'medium' } = generalDisplaySettings;
+  const {titleTextSize = 'medium', contentTextSize = 'medium'} = generalDisplaySettings;
 
   // State to store the combined data from props or window global
   const [combinedData, setCombinedData] = useState(adultHealthCheckData);
@@ -86,7 +86,7 @@ const Overview_AdultHealthCheck = ({ adultHealthCheckData, generalDisplaySetting
         return (
           <Typography
             variant="body2"
-            sx={{ fontSize: getTextSize(contentTextSize) }}
+            sx={{fontSize: getTextSize(contentTextSize)}}
           >
             無資料
           </Typography>
@@ -101,7 +101,7 @@ const Overview_AdultHealthCheck = ({ adultHealthCheckData, generalDisplaySetting
           {latestData.title && (
             <Typography
               variant="body2"
-              sx={{ fontSize: getTextSize(contentTextSize), mb: 0.5, fontWeight: 'medium' }}
+              sx={{fontSize: getTextSize(contentTextSize), mb: 0.5, fontWeight: 'medium'}}
             >
               {latestData.title}
             </Typography>
@@ -110,7 +110,7 @@ const Overview_AdultHealthCheck = ({ adultHealthCheckData, generalDisplaySetting
           {/* Physical measurements */}
           <Typography
             variant="body2"
-            sx={{ fontSize: getTextSize(contentTextSize), mb: 0.5 }}
+            sx={{fontSize: getTextSize(contentTextSize), mb: 0.5}}
           >
             身高 {latestData.height || '--'}
             {' '}/體重 {latestData.weight || '--'}
@@ -122,7 +122,7 @@ const Overview_AdultHealthCheck = ({ adultHealthCheckData, generalDisplaySetting
           {/* Blood lipids and glucose */}
           <Typography
             variant="body2"
-            sx={{ fontSize: getTextSize(contentTextSize), mb: 0.5 }}
+            sx={{fontSize: getTextSize(contentTextSize), mb: 0.5}}
           >
             Chol {latestData.cho || '--'}
             {' '}/TG {latestData.blod_tg || '--'}
@@ -134,7 +134,7 @@ const Overview_AdultHealthCheck = ({ adultHealthCheckData, generalDisplaySetting
           {/* Kidney function */}
           <Typography
             variant="body2"
-            sx={{ fontSize: getTextSize(contentTextSize), mb: 0.5 }}
+            sx={{fontSize: getTextSize(contentTextSize), mb: 0.5}}
           >
             BUN {latestData.urine_bun || '--'}
             {' '}/Cr {latestData.blod_creat || '--'}
@@ -145,7 +145,7 @@ const Overview_AdultHealthCheck = ({ adultHealthCheckData, generalDisplaySetting
           {/* Liver function */}
           <Typography
             variant="body2"
-            sx={{ fontSize: getTextSize(contentTextSize) }}
+            sx={{fontSize: getTextSize(contentTextSize)}}
           >
             GOT {latestData.sgot || '--'}
             {' '}/GPT {latestData.sgpt || '--'}
@@ -156,7 +156,7 @@ const Overview_AdultHealthCheck = ({ adultHealthCheckData, generalDisplaySetting
       return (
         <Typography
           variant="body2"
-          sx={{ fontSize: getTextSize(contentTextSize) }}
+          sx={{fontSize: getTextSize(contentTextSize)}}
         >
           資料格式錯誤: {error.message}
         </Typography>
@@ -175,9 +175,9 @@ const Overview_AdultHealthCheck = ({ adultHealthCheckData, generalDisplaySetting
         overflow: "hidden",
       }}
     >
-      <Box sx={{ display: "flex", alignItems: "center", mb: hasData() ? 1 : 0 }}>
+      <Box sx={{display: "flex", alignItems: "center", mb: hasData() ? 1 : 0}}>
         <HealthAndSafetyIcon
-          sx={{ mr: 1, color: "primary.main", fontSize: "1.5rem" }}
+          sx={{mr: 1, color: "primary.main", fontSize: "1.5rem"}}
         />
         <Typography
           variant="subtitle1"
@@ -191,14 +191,14 @@ const Overview_AdultHealthCheck = ({ adultHealthCheckData, generalDisplaySetting
       </Box>
 
       {hasData() ? (
-        <Box sx={{ pl: 1 }}>
+        <Box sx={{pl: 1}}>
           {renderHealthCheckItem()}
         </Box>
       ) : (
         <Typography
           variant="body2"
           color="text.secondary"
-          sx={{ fontSize: getTextSize(contentTextSize), pl: 1, display: "inline-block", ml: 1 }}
+          sx={{fontSize: getTextSize(contentTextSize), pl: 1, display: "inline-block", ml: 1}}
         >
           無資料
         </Typography>
@@ -207,4 +207,4 @@ const Overview_AdultHealthCheck = ({ adultHealthCheckData, generalDisplaySetting
   );
 };
 
-export default Overview_AdultHealthCheck; 
+export default Overview_AdultHealthCheck;

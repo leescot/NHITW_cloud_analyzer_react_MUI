@@ -1,10 +1,10 @@
 import React from 'react';
-import { Chip, Tooltip } from "@mui/material";
+import {Chip, Tooltip} from "@mui/material";
 import ReportRoundedIcon from '@mui/icons-material/ReportRounded';
-import { NOTE_TEXT_SIZES } from "../../utils/textSizeUtils";
+import {NOTE_TEXT_SIZES} from "../../utils/textSizeUtils";
 
 // 腎臟狀態指示器組件
-const KidneyStatusIndicator = ({ stage, fontSize }) => {
+const KidneyStatusIndicator = ({stage, fontSize}) => {
   if (stage === null) return null;
 
   // 使用 NOTE_TEXT_SIZES 並設定默認值
@@ -12,7 +12,7 @@ const KidneyStatusIndicator = ({ stage, fontSize }) => {
 
   // 根據階段決定顏色
   let color;
-  switch(stage) {
+  switch (stage) {
     case 3:
       color = "warning"; // Stage 3 使用橙色
       break;

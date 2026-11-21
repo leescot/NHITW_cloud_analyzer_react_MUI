@@ -13,22 +13,22 @@ const TAB_COLORS = {
   },
   colorful: {
     // FloatingIcon 標籤
-    overview: { primary: "#2196f3", dark: "#0d47a1" }, // 藍色
-    medication: { primary: "#0d47a1", dark: "#0d47a1" }, // 深藍色
-    chineseMed: { primary: "#2e7d32", dark: "#2e7d32" }, // 綠色
-    lab: { primary: "#e65100", dark: "#e65100" }, // 橙色
-    imaging: { primary: "#4a148c", dark: "#4a148c" }, // 紫色
-    medDays: { primary: "#880e4f", dark: "#880e4f" }, // 粉紅色
-    ckm: { primary: "#c62828", dark: "#b71c1c" }, // 紅色（心血管主題）
-    help: { primary: "#2196f3", dark: "#0d47a1" }, // 藍色
-    settings: { primary: "#607d8b", dark: "#455a64" }, // 藍灰色
+    overview: {primary: "#2196f3", dark: "#0d47a1"}, // 藍色
+    medication: {primary: "#0d47a1", dark: "#0d47a1"}, // 深藍色
+    chineseMed: {primary: "#2e7d32", dark: "#2e7d32"}, // 綠色
+    lab: {primary: "#e65100", dark: "#e65100"}, // 橙色
+    imaging: {primary: "#4a148c", dark: "#4a148c"}, // 紫色
+    medDays: {primary: "#880e4f", dark: "#880e4f"}, // 粉紅色
+    ckm: {primary: "#c62828", dark: "#b71c1c"}, // 紅色（心血管主題）
+    help: {primary: "#2196f3", dark: "#0d47a1"}, // 藍色
+    settings: {primary: "#607d8b", dark: "#455a64"}, // 藍灰色
 
     // PopupSettings 標籤 - 各標籤類型使用唯一名稱
-    popupSettings: { primary: "#0d47a1", dark: "#0d47a1" }, // 深藍色
-    dataStatus: { primary: "#e65100", dark: "#e65100" }, // 橙色
-    about: { primary: "#673ab7", dark: "#4a148c" }, // 紫色
-    loadData: { primary: "#2e7d32", dark: "#1b5e20" }, // 綠色
-    testMode: { primary: "#4a148c", dark: "#4a148c" }, // 紫色
+    popupSettings: {primary: "#0d47a1", dark: "#0d47a1"}, // 深藍色
+    dataStatus: {primary: "#e65100", dark: "#e65100"}, // 橙色
+    about: {primary: "#673ab7", dark: "#4a148c"}, // 紫色
+    loadData: {primary: "#2e7d32", dark: "#1b5e20"}, // 綠色
+    testMode: {primary: "#4a148c", dark: "#4a148c"}, // 紫色
 
     disabled: "#9e9e9e", // 灰色
     disabledDark: "#616161", // 深灰色
@@ -46,21 +46,21 @@ export const getTabColor = (generalDisplaySettings, tabType, hasData = true) => 
   // 使用 Map 定義不同配置下的顏色選擇邏輯
   const colorStrategyMap = new Map([
     // 彩色標籤 + 有數據
-    [() => generalDisplaySettings?.useColorfulTabs && hasData, 
-     () => tabType && TAB_COLORS.colorful[tabType] 
-            ? TAB_COLORS.colorful[tabType].primary 
+    [() => generalDisplaySettings?.useColorfulTabs && hasData,
+     () => tabType && TAB_COLORS.colorful[tabType]
+            ? TAB_COLORS.colorful[tabType].primary
             : TAB_COLORS.colorful.overview.primary],
-    
+
     // 彩色標籤 + 無數據
-    [() => generalDisplaySettings?.useColorfulTabs && !hasData, 
+    [() => generalDisplaySettings?.useColorfulTabs && !hasData,
      () => TAB_COLORS.colorful.disabled],
-    
+
     // 默認藍色 + 有數據
-    [() => !generalDisplaySettings?.useColorfulTabs && hasData, 
+    [() => !generalDisplaySettings?.useColorfulTabs && hasData,
      () => TAB_COLORS.default.primary],
-    
+
     // 默認藍色 + 無數據
-    [() => !generalDisplaySettings?.useColorfulTabs && !hasData, 
+    [() => !generalDisplaySettings?.useColorfulTabs && !hasData,
      () => TAB_COLORS.default.disabled]
   ]);
 
@@ -86,21 +86,21 @@ export const getTabSelectedColor = (generalDisplaySettings, tabType, hasData = t
   // 使用 Map 定義不同配置下的顏色選擇邏輯
   const selectedColorStrategyMap = new Map([
     // 彩色標籤 + 有數據
-    [() => generalDisplaySettings?.useColorfulTabs && hasData, 
-     () => tabType && TAB_COLORS.colorful[tabType] 
-            ? TAB_COLORS.colorful[tabType].dark 
+    [() => generalDisplaySettings?.useColorfulTabs && hasData,
+     () => tabType && TAB_COLORS.colorful[tabType]
+            ? TAB_COLORS.colorful[tabType].dark
             : TAB_COLORS.colorful.overview.dark],
-    
+
     // 彩色標籤 + 無數據
-    [() => generalDisplaySettings?.useColorfulTabs && !hasData, 
+    [() => generalDisplaySettings?.useColorfulTabs && !hasData,
      () => TAB_COLORS.colorful.disabledDark],
-    
+
     // 默認藍色 + 有數據
-    [() => !generalDisplaySettings?.useColorfulTabs && hasData, 
+    [() => !generalDisplaySettings?.useColorfulTabs && hasData,
      () => TAB_COLORS.default.primaryDark],
-    
+
     // 默認藍色 + 無數據
-    [() => !generalDisplaySettings?.useColorfulTabs && !hasData, 
+    [() => !generalDisplaySettings?.useColorfulTabs && !hasData,
      () => TAB_COLORS.default.disabledDark]
   ]);
 

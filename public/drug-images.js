@@ -59,7 +59,7 @@ async function fetchDrugData(code) {
           const img = document.createElement('img');
           img.src = imgUrl;
           img.alt = drug.chi_name || '藥品圖片';
-          img.onclick = function() {
+          img.onclick = function () {
             openModal(imgUrl);
           };
 
@@ -112,7 +112,7 @@ function closeModal() {
 document.getElementById('closeModalBtn').addEventListener('click', closeModal);
 
 // 點擊模態框外部關閉
-window.onclick = function(event) {
+window.onclick = function (event) {
   if (event.target === modal) {
     closeModal();
   }

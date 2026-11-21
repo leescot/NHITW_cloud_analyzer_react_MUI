@@ -1,4 +1,4 @@
-import { getRawToken, getTokenPayload } from './tokenUtils';
+import {getRawToken, getTokenPayload} from './tokenUtils';
 
 export const extractUserInfoFromToken = () => {
   try {
@@ -25,7 +25,7 @@ export const extractUserInfoFromToken = () => {
       }
     }
 
-    return { name, userId, gender, birthday, age };
+    return {name, userId, gender, birthday, age};
   } catch (error) {
     console.error("Error extracting user info from token:", error);
     return null;
@@ -35,7 +35,7 @@ export const extractUserInfoFromToken = () => {
 export const formatUserInfoDisplay = (userInfo) => {
   if (!userInfo) return "";
 
-  const { name, userId, gender, age } = userInfo;
+  const {name, userId, gender, age} = userInfo;
   let displayName = name || userId || "";
   if (!displayName) return "";
 

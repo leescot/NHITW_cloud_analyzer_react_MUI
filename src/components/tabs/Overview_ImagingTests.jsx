@@ -5,7 +5,7 @@
  * filtered to only show tests included in the user's focused imaging tests list.
  */
 
-import React, { useMemo, useState } from "react";
+import React, {useMemo, useState} from "react";
 import {
   Card,
   Box,
@@ -39,7 +39,7 @@ import VisibilityIcon from '@mui/icons-material/Visibility';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 
 // 導入從配置文件中移出的常數
-import { DEFAULT_IMAGE_TESTS } from '../../config/imageTests';
+import {DEFAULT_IMAGE_TESTS} from '../../config/imageTests';
 
 // 處理 orderName，移除括號內的內容和分號
 const formatOrderName = (orderName) => {
@@ -92,12 +92,12 @@ const consolidateImagingRecords = (records) => {
 };
 
 const Overview_ImagingTests = ({
-  imagingData = { withReport: [], withoutReport: [] },
-  overviewSettings = { imageTrackingDays: 90, focusedImageTests: DEFAULT_IMAGE_TESTS },
-  generalDisplaySettings = { titleTextSize: 'medium', contentTextSize: 'medium', noteTextSize: 'small' }
+  imagingData = {withReport: [], withoutReport: []},
+  overviewSettings = {imageTrackingDays: 90, focusedImageTests: DEFAULT_IMAGE_TESTS},
+  generalDisplaySettings = {titleTextSize: 'medium', contentTextSize: 'medium', noteTextSize: 'small'}
 }) => {
   // Add state for report dialog
-  const [reportDialog, setReportDialog] = useState({ open: false, content: '', title: '' });
+  const [reportDialog, setReportDialog] = useState({open: false, content: '', title: ''});
   const [copySuccess, setCopySuccess] = useState(false);
 
   // Add function to view image (imported from ImagingData.jsx)
@@ -220,7 +220,7 @@ const Overview_ImagingTests = ({
   }, [imagingData, overviewSettings]);
 
   return (
-    <Paper elevation={1} sx={{ p: 2 }}>
+    <Paper elevation={1} sx={{p: 2}}>
       <Box display="flex" alignItems="center" mb={1}>
         {/* <ImageIcon color="primary" sx={{ mr: 1 }} /> */}
         <TypographySizeWrapper
@@ -237,7 +237,7 @@ const Overview_ImagingTests = ({
           {filteredImagingTests.map((test, index) => (
             <ListItem
               key={`${test.date}-${test.orderName}-${index}`}
-              sx={{ py: 0.5 }}
+              sx={{py: 0.5}}
               secondaryAction={
                 <Stack direction="row" spacing={0.5}>
                   {/* 如果有報告內容，顯示報告按鈕 */}
@@ -273,8 +273,8 @@ const Overview_ImagingTests = ({
                             : highlightedContent;
 
                           return (
-                            <Typography variant="caption" style={{ whiteSpace: 'pre-line' }}>
-                              <div dangerouslySetInnerHTML={{ __html: finalContent }} />
+                            <Typography variant="caption" style={{whiteSpace: 'pre-line'}}>
+                              <div dangerouslySetInnerHTML={{__html: finalContent}} />
                             </Typography>
                           );
                         })()
@@ -298,7 +298,7 @@ const Overview_ImagingTests = ({
                             open: true,
                             title: `${test.orderName} - ${test.date}`,
                             content: processedContent
-                          })
+                          });
                         }}
                       >
                         <DescriptionIcon fontSize="small" />
@@ -360,7 +360,7 @@ const Overview_ImagingTests = ({
       {/* 報告內容對話框 */}
       <Dialog
         open={reportDialog.open}
-        onClose={() => setReportDialog({ ...reportDialog, open: false })}
+        onClose={() => setReportDialog({...reportDialog, open: false})}
         maxWidth="md"
         fullWidth
       >
@@ -376,7 +376,7 @@ const Overview_ImagingTests = ({
           <TypographySizeWrapper
             textSizeType="content"
             generalDisplaySettings={generalDisplaySettings}
-            style={{ whiteSpace: 'pre-line' }}
+            style={{whiteSpace: 'pre-line'}}
           >
             {(() => {
               // Highlight specific terms in red
@@ -393,7 +393,7 @@ const Overview_ImagingTests = ({
               });
 
               // Return content with dangerouslySetInnerHTML
-              return <div dangerouslySetInnerHTML={{ __html: content }} />;
+              return <div dangerouslySetInnerHTML={{__html: content}} />;
             })()}
           </TypographySizeWrapper>
         </DialogContent>
@@ -415,7 +415,7 @@ const Overview_ImagingTests = ({
           >
             {copySuccess ? '已複製' : '複製'}
           </Button>
-          <Button onClick={() => setReportDialog({ ...reportDialog, open: false })}>
+          <Button onClick={() => setReportDialog({...reportDialog, open: false})}>
             關閉
           </Button>
         </DialogActions>

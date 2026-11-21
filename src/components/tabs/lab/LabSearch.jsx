@@ -1,5 +1,5 @@
 import React from "react";
-import { Box, TextField, InputAdornment, Button } from "@mui/material";
+import {Box, TextField, InputAdornment, Button} from "@mui/material";
 import SearchIcon from "@mui/icons-material/Search";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import TypographySizeWrapper from "../../utils/TypographySizeWrapper";
@@ -12,21 +12,21 @@ const LabSearch = ({
   onCopyAll
 }) => {
   return (
-    <Box sx={{ mb: 2, display: 'flex', alignItems: 'center', flexWrap: 'wrap' }}>
+    <Box sx={{mb: 2, display: 'flex', alignItems: 'center', flexWrap: 'wrap'}}>
       {/* 搜尋欄 */}
       <TextField
         size="small"
         placeholder="搜尋檢驗項目名稱、代碼或縮寫..."
         value={searchText}
         onChange={handleSearchChange}
-        sx={{ 
-          mb: 1, 
-          mr: 2, 
-          flexGrow: 1, 
-          maxWidth: { xs: '100%', sm: '300px' },
+        sx={{
+          mb: 1,
+          mr: 2,
+          flexGrow: 1,
+          maxWidth: {xs: '100%', sm: '300px'},
           '& .MuiInputBase-root': {
             height: '24px'
-          } 
+          }
         }}
         InputProps={{
           startAdornment: (
@@ -39,13 +39,13 @@ const LabSearch = ({
 
       {/* 顯示複製全部按鈕，如果設置允許 */}
       {labSettings?.enableLabCopyAll && (
-        <Button 
-          variant="outlined" 
-          size="small" 
+        <Button
+          variant="outlined"
+          size="small"
           onClick={onCopyAll}
-          sx={{ 
-            mb: 1, 
-            mr: 2, 
+          sx={{
+            mb: 1,
+            mr: 2,
             height: '24px',
             position: 'relative',
             fontSize: '0.75rem',
@@ -71,4 +71,4 @@ const LabSearch = ({
   );
 };
 
-export default LabSearch; 
+export default LabSearch;

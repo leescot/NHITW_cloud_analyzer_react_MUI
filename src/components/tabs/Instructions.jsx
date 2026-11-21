@@ -1,5 +1,5 @@
-import React, { useState, useEffect } from 'react';
-import { Box, Typography, Paper, Grid, List, ListItem, ListItemText, Divider } from '@mui/material';
+import React, {useState, useEffect} from 'react';
+import {Box, Typography, Paper, Grid, List, ListItem, ListItemText, Divider} from '@mui/material';
 import ReactMarkdown from 'react-markdown';
 
 // 導入的 JSON 圖片數據，目前選用壓縮率高的 webp 格式，轉為 base64 放進 JSON 中
@@ -72,8 +72,7 @@ IMAGE_PLACEHOLDER(icon128, 點擊「雲」圖示)
 
 IMAGE_PLACEHOLDER(demo_patient, 健保雲端測試病人資料整合資訊)
 
-`
-,
+`,
   },
   {
     id: 'data-export',
@@ -518,7 +517,7 @@ IMAGE_PLACEHOLDER(icon_status, 狀態指示器)
   },
 ];
 
-const Instructions = ({ generalDisplaySettings }) => {
+const Instructions = ({generalDisplaySettings}) => {
   // 當前選中的文檔 ID
   const [selectedDocId, setSelectedDocId] = useState(documents[0].id);
   // 處理後的 markdown 內容
@@ -613,7 +612,7 @@ const Instructions = ({ generalDisplaySettings }) => {
       />
     ),
     img: props => (
-      <Box sx={{ my: 2, textAlign: 'center' }}>
+      <Box sx={{my: 2, textAlign: 'center'}}>
         <img
           {...props}
           alt={props.alt || '圖片'}
@@ -678,7 +677,7 @@ const Instructions = ({ generalDisplaySettings }) => {
         const isReducedSizeImage = reducedSizeImages.includes(imgVarName);
 
         return imgSrc ? (
-          <Box key={`img-${index}`} sx={{ my: 2, textAlign: 'center' }}>
+          <Box key={`img-${index}`} sx={{my: 2, textAlign: 'center'}}>
             <img
               src={imgSrc}
               alt={captionText}
@@ -716,11 +715,11 @@ const Instructions = ({ generalDisplaySettings }) => {
         height: '100%'
       }}
     >
-      <Grid container spacing={3} sx={{ height: '100%' }}>
+      <Grid container spacing={3} sx={{height: '100%'}}>
         {/* 左側導航列表 */}
         <Grid item xs={12} md={3} sx={{
-          borderRight: { md: '1px solid #e0e0e0' },
-          pr: { md: 2 },
+          borderRight: {md: '1px solid #e0e0e0'},
+          pr: {md: 2},
           height: '100%'
         }}>
           <Typography
@@ -766,8 +765,8 @@ const Instructions = ({ generalDisplaySettings }) => {
         </Grid>
 
         {/* 右側內容區域 */}
-        <Grid item xs={12} md={9} sx={{ height: '100%', overflowY: 'auto' }}>
-          <Box sx={{ height: '100%' }}>
+        <Grid item xs={12} md={9} sx={{height: '100%', overflowY: 'auto'}}>
+          <Box sx={{height: '100%'}}>
             {renderContent()}
           </Box>
         </Grid>

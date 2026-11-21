@@ -1,10 +1,10 @@
 import fs from 'fs';
 import path from 'path';
-import { fileURLToPath } from 'url';
-import { execSync } from 'child_process';
-import { parseArgs } from 'node:util';
+import {fileURLToPath} from 'url';
+import {execSync} from 'child_process';
+import {parseArgs} from 'node:util';
 
-import { build } from 'esbuild';
+import {build} from 'esbuild';
 
 // Get the directory name in ESM
 const __filename = fileURLToPath(import.meta.url);
@@ -53,7 +53,7 @@ async function bundleContentScript({sourcemap = false, minify = true} = {}) {
 // Copy a file and automatically create parent folders
 function copyFileSync(source, target) {
   if (!fs.existsSync(path.dirname(target))) {
-    fs.mkdirSync(path.dirname(target), { recursive: true });
+    fs.mkdirSync(path.dirname(target), {recursive: true});
   }
 
   fs.copyFileSync(source, target);
@@ -62,7 +62,7 @@ function copyFileSync(source, target) {
 // Copy a directory recursively
 function copyFolderSync(source, target) {
   if (!fs.existsSync(target)) {
-    fs.mkdirSync(target, { recursive: true });
+    fs.mkdirSync(target, {recursive: true});
   }
 
   if (fs.lstatSync(source).isDirectory()) {
@@ -96,7 +96,7 @@ function copyExtensionFiles() {
     // Create images directory if it doesn't exist
     const distImagesDir = path.resolve(ROOT, 'dist', 'images');
     if (!fs.existsSync(distImagesDir)) {
-      fs.mkdirSync(distImagesDir, { recursive: true });
+      fs.mkdirSync(distImagesDir, {recursive: true});
     }
 
     // Check if the images directory exists in public
@@ -123,7 +123,7 @@ function createZip(filename) {
     // Create zip directory if it doesn't exist
     const zipDir = path.resolve(ROOT, 'zip');
     if (!fs.existsSync(zipDir)) {
-      fs.mkdirSync(zipDir, { recursive: true });
+      fs.mkdirSync(zipDir, {recursive: true});
     }
 
     const zipFilePath = path.resolve(zipDir, filename);
@@ -164,7 +164,7 @@ async function createTest() {
 
   // modify manifest.json
   const hosts = ["http://localhost/*"];
-  const { default: manifest } = await import('../public/manifest.json', {with: {type: 'json'}});
+  const {default: manifest} = await import('../public/manifest.json', {with: {type: 'json'}});
   manifest.name += " - 本地端版本";
   manifest.host_permissions.push(...hosts);
   manifest.content_scripts[0].matches.push(...hosts);

@@ -1,9 +1,9 @@
 import React from "react";
-import { Box, Divider, IconButton, Tooltip, Chip } from "@mui/material";
+import {Box, Divider, IconButton, Tooltip, Chip} from "@mui/material";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import TypographySizeWrapper from "../../utils/TypographySizeWrapper";
 import MedicationItem from "./MedicationItem";
-import { getVisitTypeColor, handleCopyMedications } from "./MedicationHelpers";
+import {getVisitTypeColor, handleCopyMedications} from "./MedicationHelpers";
 
 const MedicationGroup = ({
   group,
@@ -19,7 +19,7 @@ const MedicationGroup = ({
     group.medications.every((m) => m.isChronicSynthesized === true);
 
   return (
-    <Box sx={{ mb: 1.5 }}>
+    <Box sx={{mb: 1.5}}>
       <Box>
         <TypographySizeWrapper
           variant="subtitle1"
@@ -39,7 +39,7 @@ const MedicationGroup = ({
                 ml: 0.8,
                 height: 18,
                 fontSize: "0.7rem",
-                "& .MuiChip-label": { px: 0.7, py: 0 },
+                "& .MuiChip-label": {px: 0.7, py: 0},
                 verticalAlign: "middle"
               }}
             />
@@ -64,7 +64,7 @@ const MedicationGroup = ({
                 onClick={() =>
                   handleCopyMedications(group.medications, group, settings, setSnackbarMessage, setSnackbarOpen)
                 }
-                sx={{ ml: 1, verticalAlign: "middle" }}
+                sx={{ml: 1, verticalAlign: "middle"}}
               >
                 <ContentCopyIcon fontSize="small" />
               </IconButton>
@@ -84,7 +84,7 @@ const MedicationGroup = ({
         />
       ))}
 
-      {!isLast && <Divider sx={{ my: 1.0 }} />}
+      {!isLast && <Divider sx={{my: 1.0}} />}
     </Box>
   );
 };

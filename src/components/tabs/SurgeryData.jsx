@@ -10,7 +10,7 @@ import {
   TableBody,
 } from "@mui/material";
 
-const SurgeryData = ({ surgeryData }) => {
+const SurgeryData = ({surgeryData}) => {
   return (
     <TableContainer component={Paper}>
       <Table size="small">

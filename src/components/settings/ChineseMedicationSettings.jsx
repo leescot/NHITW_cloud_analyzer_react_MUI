@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   Typography,
   Switch,
@@ -13,7 +13,7 @@ import {
 } from '@mui/material';
 import LocalPharmacyIcon from '@mui/icons-material/LocalPharmacy';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { handleSettingChange } from '../../utils/settingsHelper';
+import {handleSettingChange} from '../../utils/settingsHelper';
 
 const ChineseMedicationSettings = () => {
   const [settings, setSettings] = useState({
@@ -47,7 +47,7 @@ const ChineseMedicationSettings = () => {
         aria-controls="chinesemed-settings-content"
         id="chinesemed-settings-header"
       >
-        <LocalPharmacyIcon sx={{ mr: 1, color: 'primary.main' }} />
+        <LocalPharmacyIcon sx={{mr: 1, color: 'primary.main'}} />
         <Typography>中藥顯示設定</Typography>
       </AccordionSummary>
       <AccordionDetails>
@@ -71,7 +71,7 @@ const ChineseMedicationSettings = () => {
           label="顯示效能名稱"
         />
 
-        <FormControl fullWidth sx={{ mt: 2 }}>
+        <FormControl fullWidth sx={{mt: 2}}>
           <InputLabel id="chinesemed-dose-format-label">劑量顯示格式</InputLabel>
           <Select
             labelId="chinesemed-dose-format-label"
@@ -85,7 +85,7 @@ const ChineseMedicationSettings = () => {
           </Select>
         </FormControl>
 
-        <FormControl fullWidth sx={{ mt: 2 }}>
+        <FormControl fullWidth sx={{mt: 2}}>
           <InputLabel id="chinesemed-copy-format-label">中藥複製格式</InputLabel>
           <Select
             labelId="chinesemed-copy-format-label"

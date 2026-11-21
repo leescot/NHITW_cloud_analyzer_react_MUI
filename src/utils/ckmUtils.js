@@ -1,16 +1,16 @@
 // CKM 共用邏輯（由 CKMData.jsx 抽出，供 Overview 與 CKM 元件共用）
 // 注意：本檔會被瀏覽器內 Mocha 測試直接 import，不可 import 任何 npm 套件
-import { CKM_ATC_PREFIXES } from '../config/ckmDefinitions.js';
+import {CKM_ATC_PREFIXES} from '../config/ckmDefinitions.js';
 
 export const KEY_DRUG_CLASSES = [
-  { label: 'ACEI', prefixes: ['C09A', 'C09B'] },
-  { label: 'ARNI', prefixes: ['C09DX04'] },
-  { label: 'ARB', prefixes: ['C09C', 'C09D'] },
-  { label: 'MRA', prefixes: ['C03DA', 'C03DB'] },
-  { label: 'Statin', prefixes: ['C10AA', 'C10BA', 'C10BX'] },
-  { label: 'PCSK9i', prefixes: ['C10AX13', 'C10AX14'] },
-  { label: 'SGLT2i', prefixes: ['A10BK', 'A10BD15', 'A10BD19', 'A10BD20', 'A10BD21', 'A10BD23', 'A10BD24', 'A10BD25', 'A10BD27'] },
-  { label: 'GLP1', prefixes: ['A10BJ', 'A10AE54', 'A10AE56'] },
+  {label: 'ACEI', prefixes: ['C09A', 'C09B']},
+  {label: 'ARNI', prefixes: ['C09DX04']},
+  {label: 'ARB', prefixes: ['C09C', 'C09D']},
+  {label: 'MRA', prefixes: ['C03DA', 'C03DB']},
+  {label: 'Statin', prefixes: ['C10AA', 'C10BA', 'C10BX']},
+  {label: 'PCSK9i', prefixes: ['C10AX13', 'C10AX14']},
+  {label: 'SGLT2i', prefixes: ['A10BK', 'A10BD15', 'A10BD19', 'A10BD20', 'A10BD21', 'A10BD23', 'A10BD24', 'A10BD25', 'A10BD27']},
+  {label: 'GLP1', prefixes: ['A10BJ', 'A10AE54', 'A10AE56']},
 ];
 
 export function getKeyDrugLabel(atcCode) {
@@ -37,7 +37,7 @@ export function getRecentKeyDrugs(medications) {
       const atc = med.atcCode || '';
       for (const cls of KEY_DRUG_CLASSES) {
         if (cls.prefixes.some(p => atc.startsWith(p)) && !found.has(cls.label)) {
-          found.set(cls.label, { label: cls.label, drugName: med.drugName || '', dosage: med.dosage || '', date: med.date });
+          found.set(cls.label, {label: cls.label, drugName: med.drugName || '', dosage: med.dosage || '', date: med.date});
         }
       }
     }
@@ -46,29 +46,29 @@ export function getRecentKeyDrugs(medications) {
 }
 
 export const CKM_LAB_ITEMS = [
-  { orderCode: '08011C-Hb', displayName: 'Hb' },
-  { orderCode: '09002C', displayName: 'BUN' },
-  { orderCode: '09015C', displayName: 'Cr', special: true },
-  { orderCode: '09015C', displayName: 'eGFR', special: true },
-  { orderCode: '09015C', displayName: 'eGFR(健保署)', special: true },
-  { orderCode: '09038C', displayName: 'Alb' },
-  { orderCode: '09040C', displayName: 'UPCR', special: true },
-  { orderCode: '12111C', displayName: 'UACR', special: true },
-  { orderCode: '09005C', displayName: 'Glucose' },
-  { orderCode: '09006C', displayName: 'HbA1c' },
-  { orderCode: '09001C', displayName: 'Chol' },
-  { orderCode: '09004C', displayName: 'TG' },
-  { orderCode: '09043C', displayName: 'HDL' },
-  { orderCode: '09044C', displayName: 'LDL' },
-  { orderCode: '09013C', displayName: 'U.A' },
-  { orderCode: '09021C', displayName: 'Na' },
-  { orderCode: '09022C', displayName: 'K' },
-  { orderCode: '09098B', displayName: 'Tro-T' },
-  { orderCode: '09099C', displayName: 'Tro-I' },
-  { orderCode: '12193C', displayName: 'NT-proBNP', special: true },
-  { orderCode: '12193C', displayName: 'BNP', special: true },
-  { orderCode: '09071C', displayName: 'CK-MB' },
-  { orderCode: '08079B', displayName: 'D-dimer' },
+  {orderCode: '08011C-Hb', displayName: 'Hb'},
+  {orderCode: '09002C', displayName: 'BUN'},
+  {orderCode: '09015C', displayName: 'Cr', special: true},
+  {orderCode: '09015C', displayName: 'eGFR', special: true},
+  {orderCode: '09015C', displayName: 'eGFR(健保署)', special: true},
+  {orderCode: '09038C', displayName: 'Alb'},
+  {orderCode: '09040C', displayName: 'UPCR', special: true},
+  {orderCode: '12111C', displayName: 'UACR', special: true},
+  {orderCode: '09005C', displayName: 'Glucose'},
+  {orderCode: '09006C', displayName: 'HbA1c'},
+  {orderCode: '09001C', displayName: 'Chol'},
+  {orderCode: '09004C', displayName: 'TG'},
+  {orderCode: '09043C', displayName: 'HDL'},
+  {orderCode: '09044C', displayName: 'LDL'},
+  {orderCode: '09013C', displayName: 'U.A'},
+  {orderCode: '09021C', displayName: 'Na'},
+  {orderCode: '09022C', displayName: 'K'},
+  {orderCode: '09098B', displayName: 'Tro-T'},
+  {orderCode: '09099C', displayName: 'Tro-I'},
+  {orderCode: '12193C', displayName: 'NT-proBNP', special: true},
+  {orderCode: '12193C', displayName: 'BNP', special: true},
+  {orderCode: '09071C', displayName: 'CK-MB'},
+  {orderCode: '08079B', displayName: 'D-dimer'},
 ];
 
 // 需要 classifyLabItem 細分的 orderCode（Cr/eGFR、UPCR、UACR、Hb、BNP/NT-proBNP）
@@ -125,7 +125,7 @@ export function getCKMMedicationGroups(groupedMedications, trackingDays = 90) {
   const categories = {};
   for (const key of Object.keys(CKM_ATC_PREFIXES)) categories[key] = [];
   const medKeySet = new Set();
-  if (!groupedMedications || !Array.isArray(groupedMedications)) return { categories, medKeySet };
+  if (!groupedMedications || !Array.isArray(groupedMedications)) return {categories, medKeySet};
 
   const cutoff = Date.now() - trackingDays * 24 * 60 * 60 * 1000;
   const seen = new Map();
@@ -139,7 +139,7 @@ export function getCKMMedicationGroups(groupedMedications, trackingDays = 90) {
 
       const atc = med.atc_code || '';
       let category = null;
-      for (const [cat, { prefixes }] of Object.entries(CKM_ATC_PREFIXES)) {
+      for (const [cat, {prefixes}] of Object.entries(CKM_ATC_PREFIXES)) {
         if (prefixes.some(p => atc.startsWith(p))) { category = cat; break; }
       }
       if (!category) return;
@@ -178,5 +178,5 @@ export function getCKMMedicationGroups(groupedMedications, trackingDays = 90) {
   for (const cat of Object.keys(categories)) {
     categories[cat].sort((a, b) => new Date(b.prescriptions[0].date) - new Date(a.prescriptions[0].date));
   }
-  return { categories, medKeySet };
+  return {categories, medKeySet};
 }

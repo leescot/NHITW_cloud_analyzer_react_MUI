@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   Box,
   Typography,
@@ -33,8 +33,8 @@ import ArrowCircleDownIcon from '@mui/icons-material/ArrowCircleDown';
 import ImageIcon from '@mui/icons-material/Image';
 
 // 導入從配置文件中移出的常數
-import { DEFAULT_LAB_TESTS } from '../../config/labTests';
-import { DEFAULT_IMAGE_TESTS } from '../../config/imageTests';
+import {DEFAULT_LAB_TESTS} from '../../config/labTests';
+import {DEFAULT_IMAGE_TESTS} from '../../config/imageTests';
 
 /**
  * FALLBACK_LAB_TESTS - 極簡版的檢驗項目配置
@@ -43,11 +43,11 @@ import { DEFAULT_IMAGE_TESTS } from '../../config/imageTests';
  * 這個配置應與 DEFAULT_LAB_TESTS 中最重要的幾個項目保持一致。
  */
 export const FALLBACK_LAB_TESTS = [
-  { orderCode: '09002C', displayName: 'BUN', enabled: true },
-  { orderCode: '09015C', displayName: 'Cr & GFR', enabled: true },
-  { orderCode: '09001C', displayName: 'Chol', enabled: true },
-  { orderCode: '09004C', displayName: 'TG', enabled: true },
-  { orderCode: '09044C', displayName: 'LDL', enabled: true },
+  {orderCode: '09002C', displayName: 'BUN', enabled: true},
+  {orderCode: '09015C', displayName: 'Cr & GFR', enabled: true},
+  {orderCode: '09001C', displayName: 'Chol', enabled: true},
+  {orderCode: '09004C', displayName: 'TG', enabled: true},
+  {orderCode: '09044C', displayName: 'LDL', enabled: true},
 ];
 
 /**
@@ -72,10 +72,10 @@ export const SPECIAL_LAB_CODES = [
  */
 export const resetLabTestsToDefault = (callback = () => {}) => {
   chrome.storage.sync.set(
-    { focusedLabTests: DEFAULT_LAB_TESTS },
+    {focusedLabTests: DEFAULT_LAB_TESTS},
     () => {
       // 通知其他組件設定已更改
-      chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+      chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
         if (tabs[0]) {
           chrome.tabs.sendMessage(tabs[0].id, {
             action: "dataFetchCompleted",
@@ -98,8 +98,8 @@ export const resetLabTestsToDefault = (callback = () => {}) => {
  * 這個配置應與 DEFAULT_IMAGE_TESTS 中最重要的幾個項目保持一致。
  */
 export const FALLBACK_IMAGE_TESTS = [
-  { orderCode: '33072B,33070B', displayName: '電腦斷層(CT)', enabled: true },
-  { orderCode: '33085B,33084B', displayName: '磁振造影(MRI)', enabled: true },
+  {orderCode: '33072B,33070B', displayName: '電腦斷層(CT)', enabled: true},
+  {orderCode: '33085B,33084B', displayName: '磁振造影(MRI)', enabled: true},
 ];
 
 /**
@@ -107,10 +107,10 @@ export const FALLBACK_IMAGE_TESTS = [
  */
 export const resetImageTestsToDefault = (callback = () => {}) => {
   chrome.storage.sync.set(
-    { focusedImageTests: DEFAULT_IMAGE_TESTS },
+    {focusedImageTests: DEFAULT_IMAGE_TESTS},
     () => {
       // 通知其他組件設定已更改
-      chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+      chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
         if (tabs[0]) {
           chrome.tabs.sendMessage(tabs[0].id, {
             action: "dataFetchCompleted",
@@ -165,10 +165,10 @@ const OverviewSettings = () => {
     const newValue = parseInt(event.target.value, 10);
     if (newValue > 0) {
       setMedicationTrackingDays(newValue);
-      chrome.storage.sync.set({ medicationTrackingDays: newValue });
+      chrome.storage.sync.set({medicationTrackingDays: newValue});
 
       // 發送消息給 FloatingIcon 組件更新
-      chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+      chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
         if (tabs[0]) {
           chrome.tabs.sendMessage(tabs[0].id, {
             action: "settingChanged",
@@ -191,10 +191,10 @@ const OverviewSettings = () => {
     const newValue = parseInt(event.target.value, 10);
     if (newValue > 0) {
       setLabTrackingDays(newValue);
-      chrome.storage.sync.set({ labTrackingDays: newValue });
+      chrome.storage.sync.set({labTrackingDays: newValue});
 
       // 發送消息給 FloatingIcon 組件更新
-      chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+      chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
         if (tabs[0]) {
           chrome.tabs.sendMessage(tabs[0].id, {
             action: "settingChanged",
@@ -217,10 +217,10 @@ const OverviewSettings = () => {
     const newValue = parseInt(event.target.value, 10);
     if (newValue > 0) {
       setImageTrackingDays(newValue);
-      chrome.storage.sync.set({ imageTrackingDays: newValue });
+      chrome.storage.sync.set({imageTrackingDays: newValue});
 
       // 發送消息給 FloatingIcon 組件更新
-      chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+      chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
         if (tabs[0]) {
           chrome.tabs.sendMessage(tabs[0].id, {
             action: "settingChanged",
@@ -252,10 +252,10 @@ const OverviewSettings = () => {
   // 保存關注檢驗清單設置
   const handleSaveLabTests = () => {
     setFocusedLabTests(tempLabTests);
-    chrome.storage.sync.set({ focusedLabTests: tempLabTests });
+    chrome.storage.sync.set({focusedLabTests: tempLabTests});
 
     // 發送消息給 FloatingIcon 組件更新
-    chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+    chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
       if (tabs[0]) {
         chrome.tabs.sendMessage(tabs[0].id, {
           action: "settingChanged",
@@ -317,10 +317,10 @@ const OverviewSettings = () => {
   // 保存關注影像清單設置
   const handleSaveImageTests = () => {
     setFocusedImageTests(tempImageTests);
-    chrome.storage.sync.set({ focusedImageTests: tempImageTests });
+    chrome.storage.sync.set({focusedImageTests: tempImageTests});
 
     // 發送消息給 FloatingIcon 組件更新
-    chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+    chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
       if (tabs[0]) {
         chrome.tabs.sendMessage(tabs[0].id, {
           action: "settingChanged",
@@ -341,7 +341,7 @@ const OverviewSettings = () => {
 
   const medicationHelperText = (
     <span>
-      <span style={{ color: 'red' }}>關注藥物清單請至西藥ACT分類設定</span>
+      <span style={{color: 'red'}}>關注藥物清單請至西藥ACT分類設定</span>
       /範圍: 1~180天
     </span>
   );
@@ -360,49 +360,49 @@ const OverviewSettings = () => {
         aria-controls="overview-settings-content"
         id="overview-settings-header"
       >
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <DashboardCustomizeIcon sx={{ mr: 1, color: 'primary.main' }} />
+        <Box sx={{display: 'flex', alignItems: 'center'}}>
+          <DashboardCustomizeIcon sx={{mr: 1, color: 'primary.main'}} />
           <Typography>總覽顯示設定</Typography>
         </Box>
       </AccordionSummary>
       <AccordionDetails>
-        <Box sx={{ mb: 2 }}>
+        <Box sx={{mb: 2}}>
           {/* <Typography variant="body2" color="text.secondary" paragraph>
             設定總覽頁面中的資料顯示範圍
           </Typography> */}
 
-          <FormControl fullWidth sx={{ mb: 2 }}>
+          <FormControl fullWidth sx={{mb: 2}}>
           <TextField
             id="medication-tracking-days"
             label="關注藥物追蹤天數"
             type="number"
             value={medicationTrackingDays}
             onChange={handleMedicationDaysChange}
-            inputProps={{ min: 1, max: 180 }}
+            inputProps={{min: 1, max: 180}}
             helperText={medicationHelperText}
           />
           </FormControl>
 
-          <FormControl fullWidth sx={{ mb: 2 }}>
+          <FormControl fullWidth sx={{mb: 2}}>
             <TextField
               id="lab-tracking-days"
               label="關注檢驗追蹤天數"
               type="number"
               value={labTrackingDays}
               onChange={handleLabDaysChange}
-              inputProps={{ min: 1, max: 365 }}
+              inputProps={{min: 1, max: 365}}
               helperText="總覽頁面最多顯示七組資料/範圍: 1~365天"
             />
           </FormControl>
 
-          <FormControl fullWidth sx={{ mb: 2 }}>
+          <FormControl fullWidth sx={{mb: 2}}>
             <TextField
               id="image-tracking-days"
               label="關注影像追蹤天數"
               type="number"
               value={imageTrackingDays}
               onChange={handleImageDaysChange}
-              inputProps={{ min: 1, max: 365 }}
+              inputProps={{min: 1, max: 365}}
               helperText="範圍: 1~365天"
             />
           </FormControl>
@@ -413,11 +413,11 @@ const OverviewSettings = () => {
             startIcon={<ScienceIcon />}
             onClick={handleOpenLabDialog}
             fullWidth
-            sx={{ mb: 2 }}
+            sx={{mb: 2}}
           >
             關注檢驗清單設定
           </Button>
-          <Typography variant="caption" color="text.secondary" sx={{ display: 'block', mb: 2 }}>
+          <Typography variant="caption" color="text.secondary" sx={{display: 'block', mb: 2}}>
             設定要在總覽頁面顯示的檢驗項目及其排序
           </Typography>
 
@@ -427,7 +427,7 @@ const OverviewSettings = () => {
             startIcon={<ImageIcon />}
             onClick={handleOpenImageDialog}
             fullWidth
-            sx={{ mb: 1 }}
+            sx={{mb: 1}}
           >
             關注影像清單設定
           </Button>
@@ -448,7 +448,7 @@ const OverviewSettings = () => {
             <Typography variant="body2" color="text.secondary" paragraph>
               勾選需要顯示的檢驗項目，並使用上下箭頭調整顯示順序。
             </Typography>
-            <List sx={{ width: '100%' }}>
+            <List sx={{width: '100%'}}>
               {tempLabTests.map((test, index) => (
                 <ListItem key={test.orderCode} divider>
                   <ListItemIcon>
@@ -515,7 +515,7 @@ const OverviewSettings = () => {
             <Button
               onClick={handleResetLabTests}
               color="secondary"
-              sx={{ mr: 'auto' }}
+              sx={{mr: 'auto'}}
             >
               重置為預設
             </Button>
@@ -537,7 +537,7 @@ const OverviewSettings = () => {
             <Typography variant="body2" color="text.secondary" paragraph>
               勾選需要顯示的影像檢查項目。
             </Typography>
-            <List sx={{ width: '100%' }}>
+            <List sx={{width: '100%'}}>
               {tempImageTests.map((test, index) => (
                 <ListItem key={test.orderCode} divider>
                   <ListItemIcon>
@@ -561,7 +561,7 @@ const OverviewSettings = () => {
             <Button
               onClick={handleResetImageTests}
               color="secondary"
-              sx={{ mr: 'auto' }}
+              sx={{mr: 'auto'}}
             >
               重置為預設
             </Button>

@@ -34,10 +34,10 @@ export const cancerScreeningProcessor = {
       }
 
       // No valid data found
-      return { result_data: null };
+      return {result_data: null};
     } catch (error) {
       console.error('Error processing cancer screening data:', error);
-      return { result_data: null };
+      return {result_data: null};
     }
   }
 };

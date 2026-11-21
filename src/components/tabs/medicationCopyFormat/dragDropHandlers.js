@@ -2,15 +2,15 @@
 
 // Header format drag and drop handlers
 export const createHeaderDragHandlers = (headerFormat, setHeaderFormat) => {
-  const headerDragItem = { current: null };
-  const headerDragOverItem = { current: null };
+  const headerDragItem = {current: null};
+  const headerDragOverItem = {current: null};
 
   const handleHeaderDragStart = (e, index) => {
     headerDragItem.current = index;
     e.dataTransfer.effectAllowed = 'move';
     e.target.style.opacity = '0.6';
   };
-  
+
   const handleHeaderDragEnter = (e, index) => {
     headerDragOverItem.current = index;
     e.preventDefault();
@@ -19,12 +19,12 @@ export const createHeaderDragHandlers = (headerFormat, setHeaderFormat) => {
       currentItems[index].style.borderTop = '2px solid #1976d2';
     }
   };
-  
+
   const handleHeaderDragOver = (e) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
   };
-  
+
   const handleHeaderDragLeave = (e, index) => {
     e.preventDefault();
     const currentItems = document.querySelectorAll('.header-format-item');
@@ -32,7 +32,7 @@ export const createHeaderDragHandlers = (headerFormat, setHeaderFormat) => {
       currentItems[index].style.borderTop = '';
     }
   };
-  
+
   const handleHeaderDrop = (e) => {
     e.preventDefault();
     const copyItems = [...headerFormat];
@@ -42,7 +42,7 @@ export const createHeaderDragHandlers = (headerFormat, setHeaderFormat) => {
     headerDragItem.current = null;
     headerDragOverItem.current = null;
     setHeaderFormat(copyItems);
-    
+
     // Reset all item styles
     const currentItems = document.querySelectorAll('.header-format-item');
     currentItems.forEach(item => {
@@ -50,7 +50,7 @@ export const createHeaderDragHandlers = (headerFormat, setHeaderFormat) => {
       item.style.opacity = '1';
     });
   };
-  
+
   const handleHeaderDragEnd = (e) => {
     e.target.style.opacity = '1';
     // Reset all item styles
@@ -72,15 +72,15 @@ export const createHeaderDragHandlers = (headerFormat, setHeaderFormat) => {
 
 // Drug format drag and drop handlers
 export const createDrugDragHandlers = (drugFormat, setDrugFormat) => {
-  const drugDragItem = { current: null };
-  const drugDragOverItem = { current: null };
+  const drugDragItem = {current: null};
+  const drugDragOverItem = {current: null};
 
   const handleDrugDragStart = (e, index) => {
     drugDragItem.current = index;
     e.dataTransfer.effectAllowed = 'move';
     e.target.style.opacity = '0.6';
   };
-  
+
   const handleDrugDragEnter = (e, index) => {
     drugDragOverItem.current = index;
     e.preventDefault();
@@ -89,12 +89,12 @@ export const createDrugDragHandlers = (drugFormat, setDrugFormat) => {
       currentItems[index].style.borderTop = '2px solid #1976d2';
     }
   };
-  
+
   const handleDrugDragOver = (e) => {
     e.preventDefault();
     e.dataTransfer.dropEffect = 'move';
   };
-  
+
   const handleDrugDragLeave = (e, index) => {
     e.preventDefault();
     const currentItems = document.querySelectorAll('.drug-format-item');
@@ -102,7 +102,7 @@ export const createDrugDragHandlers = (drugFormat, setDrugFormat) => {
       currentItems[index].style.borderTop = '';
     }
   };
-  
+
   const handleDrugDrop = (e) => {
     e.preventDefault();
     const copyItems = [...drugFormat];
@@ -112,7 +112,7 @@ export const createDrugDragHandlers = (drugFormat, setDrugFormat) => {
     drugDragItem.current = null;
     drugDragOverItem.current = null;
     setDrugFormat(copyItems);
-    
+
     // Reset all item styles
     const currentItems = document.querySelectorAll('.drug-format-item');
     currentItems.forEach(item => {
@@ -120,7 +120,7 @@ export const createDrugDragHandlers = (drugFormat, setDrugFormat) => {
       item.style.opacity = '1';
     });
   };
-  
+
   const handleDrugDragEnd = (e) => {
     e.target.style.opacity = '1';
     // Reset all item styles
@@ -138,4 +138,4 @@ export const createDrugDragHandlers = (drugFormat, setDrugFormat) => {
     handleDrugDrop,
     handleDrugDragEnd
   };
-}; 
+};

@@ -2,7 +2,7 @@ import fs from 'fs';
 import path from 'path';
 import url from 'url';
 import http from 'http';
-import { parseArgs } from 'node:util';
+import {parseArgs} from 'node:util';
 
 import mime from 'mime-types';
 

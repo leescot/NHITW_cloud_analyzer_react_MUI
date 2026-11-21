@@ -1,7 +1,7 @@
 // hbcvdataProcessor.js
 // 處理B、C肝炎專區資料
 
-import { parseReferenceRange } from './labProcessorModules/referenceRangeUtils.js';
+import {parseReferenceRange} from './labProcessorModules/referenceRangeUtils.js';
 
 /**
  * 從 assay_value 中提取數值
@@ -40,7 +40,7 @@ export const checkAbnormalValue = (assayValue, consultValue) => {
 
     // 如果無法提取數值，視為正常（非數值型資料）
     if (numericValue === null) {
-        return { isAbnormal: false, status: 'normal' };
+        return {isAbnormal: false, status: 'normal'};
     }
 
     // 解析參考範圍
@@ -48,21 +48,21 @@ export const checkAbnormalValue = (assayValue, consultValue) => {
 
     // 如果無法解析參考範圍，視為正常
     if (!range) {
-        return { isAbnormal: false, status: 'normal' };
+        return {isAbnormal: false, status: 'normal'};
     }
 
-    const { min, max } = range;
+    const {min, max} = range;
 
     // 檢查是否超出範圍
     if (max !== null && numericValue > max) {
-        return { isAbnormal: true, status: 'high' };
+        return {isAbnormal: true, status: 'high'};
     }
 
     if (min !== null && numericValue < min) {
-        return { isAbnormal: true, status: 'low' };
+        return {isAbnormal: true, status: 'low'};
     }
 
-    return { isAbnormal: false, status: 'normal' };
+    return {isAbnormal: false, status: 'normal'};
 };
 
 /**

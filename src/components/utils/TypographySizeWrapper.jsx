@@ -1,5 +1,5 @@
 import React from 'react';
-import { Typography } from '@mui/material';
+import {Typography} from '@mui/material';
 
 // 不同顯示設置的字體大小映射
 const TITLE_TEXT_SIZES = {
@@ -48,7 +48,7 @@ const SIZE_TYPE_TO_SIZES = new Map([
  * @returns {JSX.Element} - 具有正確字體大小的 Typography 組件
  */
 const TypographySizeWrapper = ({
-  generalDisplaySettings = { titleTextSize: 'medium', contentTextSize: 'medium', noteTextSize: 'small' },
+  generalDisplaySettings = {titleTextSize: 'medium', contentTextSize: 'medium', noteTextSize: 'small'},
   variant = 'body1',
   sx = {},
   children,
@@ -56,18 +56,18 @@ const TypographySizeWrapper = ({
   ...rest
 }) => {
   // 確保 generalDisplaySettings 已定義
-  const settings = generalDisplaySettings || { titleTextSize: 'medium', contentTextSize: 'medium', noteTextSize: 'small' };
+  const settings = generalDisplaySettings || {titleTextSize: 'medium', contentTextSize: 'medium', noteTextSize: 'small'};
 
   // 根據變體或明確的 textSizeType 確定要使用的文字大小類型
   const sizeType = textSizeType || VARIANT_TO_SIZE_TYPE.get(variant) || 'content';
 
   // 從設置中獲取正確的字體大小
   const sizeMap = SIZE_TYPE_TO_SIZES.get(sizeType);
-  
+
   // 根據 sizeType 獲取相應的設置屬性名
   const settingKey = `${sizeType}TextSize`;
   const sizeSetting = settings[settingKey] || (sizeType === 'title' ? 'medium' : sizeType === 'note' ? 'small' : 'medium');
-  
+
   const fontSize = sizeMap[sizeSetting];
 
   // 將 fontSize 合併到現有的 sx 屬性中
