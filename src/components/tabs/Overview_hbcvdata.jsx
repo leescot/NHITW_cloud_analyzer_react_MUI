@@ -1,18 +1,18 @@
-import React, { useEffect, useState } from "react";
-import { Paper, Typography, Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow } from "@mui/material";
+import React, {useEffect, useState} from "react";
+import {Paper, Typography, Box, Table, TableBody, TableCell, TableContainer, TableHead, TableRow} from "@mui/material";
 import VaccinesIcon from "@mui/icons-material/Vaccines";
-import { checkAbnormalValue, extractHospitalName } from "../../utils/hbcvdataProcessor.js";
+import {checkAbnormalValue, extractHospitalName} from "../../utils/hbcvdataProcessor.js";
 
 /**
  * Component for displaying Hepatitis B & C data
- * 
+ *
  * @param {Object} hbcvData - The hepatitis B & C data containing result_data and med_data
  * @param {Object} generalDisplaySettings - Display settings like text sizes
  * @returns {JSX.Element} The component
  */
-const Overview_hbcvdata = ({ hbcvData, generalDisplaySettings = {} }) => {
+const Overview_hbcvdata = ({hbcvData, generalDisplaySettings = {}}) => {
     // Extract display settings with defaults
-    const { titleTextSize = 'medium', contentTextSize = 'medium' } = generalDisplaySettings;
+    const {titleTextSize = 'medium', contentTextSize = 'medium'} = generalDisplaySettings;
 
     // State to store the combined data from props or window global
     const [combinedData, setCombinedData] = useState(hbcvData);
@@ -93,7 +93,7 @@ const Overview_hbcvdata = ({ hbcvData, generalDisplaySettings = {} }) => {
         }
 
         return (
-            <Box sx={{ mb: 2 }}>
+            <Box sx={{mb: 2}}>
                 <Typography
                     variant="subtitle2"
                     sx={{
@@ -105,10 +105,10 @@ const Overview_hbcvdata = ({ hbcvData, generalDisplaySettings = {} }) => {
                 >
                     檢驗結果
                 </Typography>
-                <Box sx={{ pl: 1 }}>
+                <Box sx={{pl: 1}}>
                     {actualData.result_data.map((item, index) => {
                         // 檢查是否異常
-                        const { isAbnormal, status } = checkAbnormalValue(item.assay_value, item.consult_value);
+                        const {isAbnormal, status} = checkAbnormalValue(item.assay_value, item.consult_value);
 
                         return (
                             <Typography
@@ -125,7 +125,7 @@ const Overview_hbcvdata = ({ hbcvData, generalDisplaySettings = {} }) => {
                                     component="span"
                                     variant="body2"
                                     color="text.secondary"
-                                    sx={{ fontSize: getTextSize(contentTextSize) }}
+                                    sx={{fontSize: getTextSize(contentTextSize)}}
                                 >
                                     {' '}({item.real_inspect_date})
                                 </Typography>
@@ -157,7 +157,7 @@ const Overview_hbcvdata = ({ hbcvData, generalDisplaySettings = {} }) => {
                 >
                     治療藥物
                 </Typography>
-                <Box sx={{ pl: 1 }}>
+                <Box sx={{pl: 1}}>
                     {actualData.med_data.map((item, index) => (
                         <Typography
                             key={index}
@@ -172,7 +172,7 @@ const Overview_hbcvdata = ({ hbcvData, generalDisplaySettings = {} }) => {
                                 component="span"
                                 variant="body2"
                                 color="text.secondary"
-                                sx={{ fontSize: getTextSize(contentTextSize) }}
+                                sx={{fontSize: getTextSize(contentTextSize)}}
                             >
                                 {' '}({item.func_date} {extractHospitalName(item.hosp)})
                             </Typography>
@@ -193,9 +193,9 @@ const Overview_hbcvdata = ({ hbcvData, generalDisplaySettings = {} }) => {
                 overflow: "hidden",
             }}
         >
-            <Box sx={{ display: "flex", alignItems: "center", mb: hasData() ? 1 : 0 }}>
+            <Box sx={{display: "flex", alignItems: "center", mb: hasData() ? 1 : 0}}>
                 <VaccinesIcon
-                    sx={{ mr: 1, color: "primary.main", fontSize: "1.5rem" }}
+                    sx={{mr: 1, color: "primary.main", fontSize: "1.5rem"}}
                 />
                 <Typography
                     variant="subtitle1"
@@ -209,7 +209,7 @@ const Overview_hbcvdata = ({ hbcvData, generalDisplaySettings = {} }) => {
             </Box>
 
             {hasData() ? (
-                <Box sx={{ pl: 1 }}>
+                <Box sx={{pl: 1}}>
                     {renderResultsTable()}
                     {renderMedicationsTable()}
                 </Box>
@@ -217,7 +217,7 @@ const Overview_hbcvdata = ({ hbcvData, generalDisplaySettings = {} }) => {
                 <Typography
                     variant="body2"
                     color="text.secondary"
-                    sx={{ fontSize: getTextSize(contentTextSize), pl: 1, display: "inline-block", ml: 1 }}
+                    sx={{fontSize: getTextSize(contentTextSize), pl: 1, display: "inline-block", ml: 1}}
                 >
                     無資料
                 </Typography>

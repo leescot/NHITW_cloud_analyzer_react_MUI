@@ -8,9 +8,9 @@ import {
 } from "@mui/material";
 import TypographySizeWrapper from "../utils/TypographySizeWrapper";
 
-const Overview_PatientSummary = ({ patientSummaryData = [], generalDisplaySettings }) => {
+const Overview_PatientSummary = ({patientSummaryData = [], generalDisplaySettings}) => {
   return (
-    <Paper sx={{ p: 2 }}>
+    <Paper sx={{p: 2}}>
       <TypographySizeWrapper variant="h6" gutterBottom generalDisplaySettings={generalDisplaySettings}>
         註記資訊
       </TypographySizeWrapper>
@@ -34,7 +34,7 @@ const Overview_PatientSummary = ({ patientSummaryData = [], generalDisplaySettin
               const displayText = matches.length > 0 ? matches.join('、') : item.text;
 
               return (
-                <ListItem key={index} sx={{ py: 0.5 }}>
+                <ListItem key={index} sx={{py: 0.5}}>
                   <ListItemText
                     primary={
                       <TypographySizeWrapper

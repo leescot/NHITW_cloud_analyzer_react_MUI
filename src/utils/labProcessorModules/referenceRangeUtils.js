@@ -1,5 +1,5 @@
 // 參考範圍處理相關函數
-import { getCustomReferenceRange } from './customReferenceRanges.js';
+import {getCustomReferenceRange} from './customReferenceRanges.js';
 
 // Helper function to check if a reference range is of the form [0.000][0.000]
 const isZeroReferenceRange = (referenceStr) => {
@@ -33,8 +33,8 @@ const shouldUseCustomRange = (orderCode, hosp) => {
 
 // 使用 Map 來處理 HDL 膽固醇 (09043C) 參考值的特殊情況
 const hdlReferenceValues = new Map([
-  ["40", { value: 40, display: ">40" }],
-  ["50", { value: 50, display: ">50" }]
+  ["40", {value: 40, display: ">40"}],
+  ["50", {value: 50, display: ">50"}]
 ]);
 
 // Special handler for HDL cholesterol (09043C) reference values
@@ -42,9 +42,9 @@ const processHDLReferenceRange = (referenceStr) => {
   if (!referenceStr) return null;
 
   // 使用 Map 查找而不是多個 if-else
-  for (const [key, { value }] of hdlReferenceValues.entries()) {
+  for (const [key, {value}] of hdlReferenceValues.entries()) {
     if (referenceStr.includes(key)) {
-      return { min: value, max: null }; // For HDL, we want it HIGHER than the lower limit
+      return {min: value, max: null}; // For HDL, we want it HIGHER than the lower limit
     }
   }
 
@@ -56,7 +56,7 @@ const formatHDLReferenceRange = (referenceStr) => {
   if (!referenceStr) return '';
 
   // 使用 Map 查找而不是多個 if-else
-  for (const [key, { display }] of hdlReferenceValues.entries()) {
+  for (const [key, {display}] of hdlReferenceValues.entries()) {
     if (referenceStr.includes(key)) {
       return display; // Return the display format (">40" or ">50")
     }
@@ -74,7 +74,7 @@ const referenceRangeStrategies = new Map([
     }
     return null;
   }],
-  
+
   // 策略 2: 特殊處理 HDL 膽固醇 (09043C)
   ["hdlCholesterol", (cleanStr, orderCode) => {
     if (orderCode === "09043C") {
@@ -82,7 +82,7 @@ const referenceRangeStrategies = new Map([
     }
     return null;
   }],
-  
+
   // 策略 3: 特殊情況 - [0][0] 或 [0.000][0.000]
   ["zeroRange", (cleanStr) => {
     if (isZeroReferenceRange(cleanStr)) {
@@ -90,7 +90,7 @@ const referenceRangeStrategies = new Map([
     }
     return null;
   }],
-  
+
   // 策略 4: 特殊情況: [無][無] 格式
   ["noValueRange", (cleanStr) => {
     if (cleanStr === '[無][無]') {
@@ -98,19 +98,19 @@ const referenceRangeStrategies = new Map([
     }
     return null;
   }],
-  
+
   // 策略 5: 特殊情況: [<140 mg/dl][] 格式 - 單括號中含有單位和小於符號
   ["singleBracketLessThan", (cleanStr) => {
     const singleBracketLessThanMatch = cleanStr.match(/\[<\s*(\d*\.?\d+)(?:\s*\w+\/?\w*)?\]\[\]/);
     if (singleBracketLessThanMatch) {
       const maxValue = parseFloat(singleBracketLessThanMatch[1]);
       if (!isNaN(maxValue)) {
-        return { min: null, max: maxValue };
+        return {min: null, max: maxValue};
       }
     }
     return null;
   }],
-  
+
   // 策略 6: 特殊情況: [無][＜XX] 或 [無][<XX] 格式
   ["specialNoMin", (cleanStr) => {
     const specialNoMinPattern = /\[(無|NA|-|)\]\[(＜|<)?(\d*\.?\d+)\]/;
@@ -118,12 +118,12 @@ const referenceRangeStrategies = new Map([
     if (specialMatch) {
       const maxValue = specialMatch[3];
       if (maxValue) {
-        return { min: null, max: parseFloat(maxValue) };
+        return {min: null, max: parseFloat(maxValue)};
       }
     }
     return null;
   }],
-  
+
   // 策略 7: 參考值寫在同一個中括號內，格式如 [7~25] 或 [7~52][]
   ["singleBracketRange", (cleanStr) => {
     const singleBracketMatch = cleanStr.match(/\[(\d*\.?\d+)~(\d*\.?\d+)\](\[\])?/);
@@ -131,12 +131,12 @@ const referenceRangeStrategies = new Map([
       const min = cleanNumericValue(singleBracketMatch[1]);
       const max = cleanNumericValue(singleBracketMatch[2]);
       if (!isNaN(min) && !isNaN(max)) {
-        return { min, max };
+        return {min, max};
       }
     }
     return null;
   }],
-  
+
   // 策略 8: 參考值分別寫在兩個中括號內，格式如 [150][400] 或 [7.000][52.000]
   ["doubleBracketRange", (cleanStr) => {
     const doubleBracketMatch = cleanStr.match(/\[([^[\]]*)\]\[([^[\]]*)\]/);
@@ -183,36 +183,36 @@ const referenceRangeStrategies = new Map([
 
       // If we have at least one valid bound, return the reference range
       if (min !== null || max !== null) {
-        return { min, max };
+        return {min, max};
       }
     }
     return null;
   }],
-  
+
   // 策略 9: 直接處理 [<140 mg/dl] 格式 (單一括號含小於符號)
   ["directLessThan", (cleanStr) => {
     const directLessThanMatch = cleanStr.match(/\[<\s*(\d*\.?\d+)(?:\s*\w+\/?\w*)?\]/);
     if (directLessThanMatch) {
       const maxValue = parseFloat(directLessThanMatch[1]);
       if (!isNaN(maxValue)) {
-        return { min: null, max: maxValue };
+        return {min: null, max: maxValue};
       }
     }
     return null;
   }],
-  
+
   // 策略 10: 特殊情況 - 只有單一值，格式如 [60.0]
   ["singleValue", (cleanStr) => {
     const singleValueMatch = cleanStr.match(/\[(\d*\.?\d+)\]/);
     if (singleValueMatch) {
       const value = cleanNumericValue(singleValueMatch[1]);
       if (!isNaN(value)) {
-        return { min: value, max: null };
+        return {min: value, max: null};
       }
     }
     return null;
   }],
-  
+
   // 策略 11: 特殊情況 - 無參考值或特殊標記，格式如 [無][]
   ["noReference", (cleanStr) => {
     if (cleanStr.includes('[無]') || cleanStr === '[0][]') {
@@ -220,7 +220,7 @@ const referenceRangeStrategies = new Map([
     }
     return null;
   }],
-  
+
   // 策略 12: 特殊情況 - 定性檢驗，格式如 [0][9999]
   ["qualitativeTest", (cleanStr) => {
     if (cleanStr.match(/\[0\]\[9999\]/)) {
@@ -266,7 +266,7 @@ const displayFormatStrategies = new Map([
     }
     return null;
   }],
-  
+
   // HDL 膽固醇特殊處理
   ["hdlCholesterol", (referenceStr, orderCode) => {
     if (orderCode === "09043C") {
@@ -274,7 +274,7 @@ const displayFormatStrategies = new Map([
     }
     return null;
   }],
-  
+
   // 零參考值
   ["zeroRange", (cleanStr) => {
     if (isZeroReferenceRange(cleanStr)) {
@@ -282,7 +282,7 @@ const displayFormatStrategies = new Map([
     }
     return null;
   }],
-  
+
   // [無][無] 格式
   ["noValueRange", (cleanStr) => {
     if (cleanStr === '[無][無]') {
@@ -290,7 +290,7 @@ const displayFormatStrategies = new Map([
     }
     return null;
   }],
-  
+
   // [<140 mg/dl][] 格式
   ["singleBracketLessThan", (cleanStr) => {
     const singleBracketLessThanMatch = cleanStr.match(/\[<\s*(\d*\.?\d+)(?:\s*\w+\/?\w*)?\]\[\]/);
@@ -302,7 +302,7 @@ const displayFormatStrategies = new Map([
     }
     return null;
   }],
-  
+
   // [<140 mg/dl] 格式
   ["directLessThan", (cleanStr) => {
     const directLessThanMatch = cleanStr.match(/\[<\s*(\d*\.?\d+)(?:\s*\w+\/?\w*)?\]/);
@@ -314,7 +314,7 @@ const displayFormatStrategies = new Map([
     }
     return null;
   }],
-  
+
   // [無][＜XX] 或 [無][<XX] 格式
   ["specialNoMin", (cleanStr) => {
     const specialNoMinPattern = /\[(無|NA|-|)\]\[(＜|<)?(\d*\.?\d+)\]/;
@@ -335,7 +335,7 @@ const formatReferenceRangeForDisplay = (referenceStr, orderCode = null, hosp = n
 
   // 清理字串
   const cleanStr = referenceStr.trim();
-  
+
   // 按順序嘗試每個格式化策略
   for (const [_, strategy] of displayFormatStrategies) {
     const result = strategy(cleanStr, orderCode, hosp);
@@ -371,7 +371,7 @@ const formatReferenceRangeForDisplay = (referenceStr, orderCode = null, hosp = n
   }
 
   // 格式化參考範圍
-  const { min, max } = parsed;
+  const {min, max} = parsed;
 
   if (min !== null && max !== null) {
     return `${min}-${max}`;
@@ -398,7 +398,7 @@ const getReferenceRangeDisplayText = (referenceStr, orderCode = null, hosp = nul
       }
       return null;
     }],
-    
+
     // [無][無] 格式
     ["noValueRange", () => {
       if (referenceStr.trim() === '[無][無]') {
@@ -406,7 +406,7 @@ const getReferenceRangeDisplayText = (referenceStr, orderCode = null, hosp = nul
       }
       return null;
     }],
-    
+
     // [<140 mg/dl][] 格式
     ["singleBracketLessThan", () => {
       const singleBracketLessThanMatch = referenceStr?.match(/\[<\s*(\d*\.?\d+)(?:\s*\w+\/?\w*)?\]\[\]/);
@@ -418,7 +418,7 @@ const getReferenceRangeDisplayText = (referenceStr, orderCode = null, hosp = nul
       }
       return null;
     }],
-    
+
     // [<140 mg/dl] 格式
     ["directLessThan", () => {
       const directLessThanMatch = referenceStr?.match(/\[<\s*(\d*\.?\d+)(?:\s*\w+\/?\w*)?\]/);
@@ -430,7 +430,7 @@ const getReferenceRangeDisplayText = (referenceStr, orderCode = null, hosp = nul
       }
       return null;
     }],
-    
+
     // [無][＜XX] 或 [無][<XX] 格式
     ["specialNoMin", () => {
       const specialNoMinPattern = /\[(無|NA|-|)\]\[(＜|<)?(\d*\.?\d+)\]/;

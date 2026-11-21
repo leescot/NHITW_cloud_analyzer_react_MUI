@@ -1,7 +1,7 @@
-import { useState, useRef } from "react";
-import { Box, Popover, Typography } from "@mui/material";
-import { LineChart } from "@mui/x-charts/LineChart";
-import { useXScale, useYScale, useDrawingArea } from "@mui/x-charts/hooks";
+import {useState, useRef} from "react";
+import {Box, Popover, Typography} from "@mui/material";
+import {LineChart} from "@mui/x-charts/LineChart";
+import {useXScale, useYScale, useDrawingArea} from "@mui/x-charts/hooks";
 
 const MIN_WIDTH = 660;
 const MAX_WIDTH = 900;
@@ -10,10 +10,10 @@ const MIN_PX_GAP = 62; // 足以容納最長數值標籤（~50px）加上間距
 
 // 合併數值標籤與 X 軸日期標籤，共用同一套 pixel-distance 過濾邏輯
 // 依優先級排序候選點，相鄰間距 < MIN_PX_GAP 的點略過
-const ChartLabels = ({ chartData, candidateIndices }) => {
+const ChartLabels = ({chartData, candidateIndices}) => {
   const xScale = useXScale();
   const yScale = useYScale();
-  const { top, height } = useDrawingArea();
+  const {top, height} = useDrawingArea();
   const dateY = top + height + 22;
 
   // 依優先級逐一放置，太近則跳過
@@ -50,7 +50,7 @@ const ChartLabels = ({ chartData, candidateIndices }) => {
               strokeWidth={4}
               strokeLinejoin="round"
               paintOrder="stroke"
-              style={{ pointerEvents: "none", userSelect: "none" }}
+              style={{pointerEvents: "none", userSelect: "none"}}
             >
               {d.value}
             </text>
@@ -64,7 +64,7 @@ const ChartLabels = ({ chartData, candidateIndices }) => {
               strokeWidth={3}
               strokeLinejoin="round"
               paintOrder="stroke"
-              style={{ pointerEvents: "none", userSelect: "none" }}
+              style={{pointerEvents: "none", userSelect: "none"}}
             >
               {d.label}
             </text>
@@ -76,7 +76,7 @@ const ChartLabels = ({ chartData, candidateIndices }) => {
 };
 
 // 所有重計算集中在此，只在 hasOpened 後才掛載
-const TrendChartContent = ({ chartData, unit }) => {
+const TrendChartContent = ({chartData, unit}) => {
   const chartWidth = Math.min(MAX_WIDTH, Math.max(MIN_WIDTH, chartData.length * PX_PER_POINT));
   const needsScroll = chartWidth >= MAX_WIDTH;
 
@@ -145,22 +145,22 @@ const TrendChartContent = ({ chartData, unit }) => {
   });
 
   return (
-    <Box sx={needsScroll ? { overflowX: "auto", maxWidth: MAX_WIDTH } : {}}>
+    <Box sx={needsScroll ? {overflowX: "auto", maxWidth: MAX_WIDTH} : {}}>
       <LineChart
         xAxis={[{
           data: chartData.map(d => d.label),
           scaleType: "point",
-          tickLabelStyle: { display: "none" },
+          tickLabelStyle: {display: "none"},
         }]}
-        yAxis={[{ min: yMin, max: yMax, tickLabelStyle: { fontSize: 15 } }]}
+        yAxis={[{min: yMin, max: yMax, tickLabelStyle: {fontSize: 15}}]}
         series={series}
         height={420}
         width={chartWidth}
-        margin={{ left: 65, right: 55, top: 30, bottom: 65 }}
-        slotProps={{ legend: { hidden: true } }}
-        tooltip={{ trigger: "axis" }}
+        margin={{left: 65, right: 55, top: 30, bottom: 65}}
+        slotProps={{legend: {hidden: true}}}
+        tooltip={{trigger: "axis"}}
         sx={{
-          "& svg": { overflow: "visible" },
+          "& svg": {overflow: "visible"},
           "& .MuiLineElement-series-refMax": {
             strokeDasharray: "6 3",
             strokeWidth: 1.5,
@@ -177,7 +177,7 @@ const TrendChartContent = ({ chartData, unit }) => {
   );
 };
 
-const LabItemTrendPopover = ({ item, dates, children }) => {
+const LabItemTrendPopover = ({item, dates, children}) => {
   const [anchorEl, setAnchorEl] = useState(null);
   const [hasOpened, setHasOpened] = useState(false);
   const closeTimer = useRef(null);
@@ -227,7 +227,7 @@ const LabItemTrendPopover = ({ item, dates, children }) => {
         onMouseEnter={openPopover}
         onMouseLeave={scheduleClose}
         onClick={(e) => setAnchorEl(anchorEl ? null : e.currentTarget)}
-        sx={{ cursor: "pointer", display: "inline-block" }}
+        sx={{cursor: "pointer", display: "inline-block"}}
       >
         {children}
       </Box>
@@ -235,21 +235,21 @@ const LabItemTrendPopover = ({ item, dates, children }) => {
       <Popover
         open={Boolean(anchorEl)}
         anchorEl={anchorEl}
-        anchorOrigin={{ vertical: "center", horizontal: "right" }}
-        transformOrigin={{ vertical: "center", horizontal: "left" }}
+        anchorOrigin={{vertical: "center", horizontal: "right"}}
+        transformOrigin={{vertical: "center", horizontal: "left"}}
         disableRestoreFocus
         disableScrollLock
-        sx={{ pointerEvents: "none" }}
+        sx={{pointerEvents: "none"}}
         slotProps={{
           paper: {
             onMouseEnter: cancelClose,
             onMouseLeave: scheduleClose,
-            sx: { pointerEvents: "auto", p: 1.5, ml: 2 },
+            sx: {pointerEvents: "auto", p: 1.5, ml: 2},
             elevation: 4,
           },
         }}
       >
-        <Typography variant="subtitle2" color="primary" sx={{ fontSize: "1.2rem", fontWeight: 600 }}>
+        <Typography variant="subtitle2" color="primary" sx={{fontSize: "1.2rem", fontWeight: 600}}>
           {item.displayName}
           {unit ? ` (${unit})` : ""}
         </Typography>

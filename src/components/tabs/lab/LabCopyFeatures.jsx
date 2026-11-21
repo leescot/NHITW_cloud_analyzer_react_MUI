@@ -1,6 +1,6 @@
-import { useState } from 'react';
-import { formatLabItemForCopy, formatDate } from '../../utils/lab/LabUtilities';
-import { labCopyFormatter } from '../../../utils/labCopyFormatter';
+import {useState} from 'react';
+import {formatLabItemForCopy, formatDate} from '../../utils/lab/LabUtilities';
+import {labCopyFormatter} from '../../../utils/labCopyFormatter';
 
 // Custom hook for handling copy functionality
 export const useCopyLabData = () => {
@@ -14,7 +14,7 @@ export const useCopyLabData = () => {
 
   // 複製所有檢驗數據的函數
   const handleSectionLabData = (group, labSettings) => {
-    const { copyLabFormat, showUnit, showReference } = labSettings;
+    const {copyLabFormat, showUnit, showReference} = labSettings;
     let formattedText = '';
 
     // 確保自定義格式的設定是完整的
@@ -66,14 +66,14 @@ export const useCopyLabData = () => {
   const applyStandardVerticalFormat = (group, showUnit, showReference) => {
     // 格式化日期，從 YYYY-MM-DD 轉換為 YYYY/MM/DD
     const formattedDate = formatDate(group.date);
-    
+
     let formattedText = `${formattedDate} - ${group.hosp}\n`;
-    
+
     // 垂直格式：每個項目一行
     group.labs.forEach((lab) => {
       formattedText += `${formatLabItemForCopy(lab, showUnit, showReference)}\n`;
     });
-    
+
     return formattedText;
   };
 
@@ -81,19 +81,19 @@ export const useCopyLabData = () => {
   const applyStandardHorizontalFormat = (group, showUnit, showReference) => {
     // 格式化日期，從 YYYY-MM-DD 轉換為 YYYY/MM/DD
     const formattedDate = formatDate(group.date);
-    
+
     let formattedText = `${formattedDate} - ${group.hosp}\n`;
-    
+
     // 水平格式：項目在同一行，用空格分隔
     let labItems = group.labs.map((lab) => formatLabItemForCopy(lab, showUnit, showReference));
     formattedText += labItems.join(" ");
-    
+
     return formattedText;
   };
 
   // 複製使用者選擇的檢驗數據的函數
   const handleCopyUserSelectedLabData = (group, groupIndex, selectedLabItems, labSettings) => {
-    const { copyLabFormat, showUnit, showReference } = labSettings;
+    const {copyLabFormat, showUnit, showReference} = labSettings;
 
     if (!selectedLabItems[groupIndex]) {
       setSnackbarMessage("未選擇任何項目進行複製");

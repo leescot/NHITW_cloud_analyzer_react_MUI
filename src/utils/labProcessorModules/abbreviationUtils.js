@@ -41,7 +41,7 @@ const specialHandlers = new Map([
   ["tc_hdl_ratio", (orderCode, itemName) => {
     return (orderCode === "09043C" || orderCode === "09044C") && itemName.includes("/HDL") ? "TC/HDL Ratio" : null;
   }],
-  
+
   // 特殊處理 09015C (肌酐/GFR)
   // 一張就醫紀錄可能有最多 3 筆 09015C：Creatinine、院所上傳 eGFR、健保署計算 eGFR。
   // 健保署計算的識別依據：assay_method === "健保署計算"（NHI 算的 CKD-EPI eGFR）。
@@ -54,11 +54,11 @@ const specialHandlers = new Map([
     if (assayMethod === "健保署計算") return "eGFR(健保署)";
     return "eGFR";
   }],
-  
+
   // 特殊處理 09040C（尿液總蛋白相關）
   ["09040C", (_, itemName) => {
     if (!itemName) return null;
-    
+
     // UPCR 相關判斷
     if (itemName === "Urine protein/Creatinine ratio(UPCR)" ||
         itemName.includes("UPCR") ||
@@ -67,13 +67,13 @@ const specialHandlers = new Map([
         itemName === "總蛋白/肌酸酐比值") {
       return "UPCR";
     }
-    
+
     // 尿液肌酐相關判斷
     if (itemName === "Urine creatinine" ||
         (itemName.includes("creatinine") && itemName.includes("Urine"))) {
       return "Cr(Urine)";
     }
-    
+
     // 尿液總蛋白相關判斷
     if (itemName === "Micro Total Protein_Urine" ||
         itemName.includes("Total Protein") ||
@@ -83,15 +83,15 @@ const specialHandlers = new Map([
         (itemName.includes("Protein") && (itemName.includes("Urine") || itemName.includes("尿")))) {
       return "T.Protein(U)";
     }
-    
+
     // 默認值
     return "T.Protein";
   }],
-  
+
   // 特殊處理 12111C（尿液微量白蛋白相關）
   ["12111C", (_, itemName) => {
     if (!itemName) return null;
-    
+
     // UACR 相關判斷
     if (itemName.toLowerCase().includes("u-acr") ||
         itemName.toLowerCase().includes("albumin/creatinine") ||
@@ -99,7 +99,7 @@ const specialHandlers = new Map([
         itemName.toLowerCase().includes("acr-u")) {
       return "UACR";
     }
-    
+
     // 尿液白蛋白相關判斷
     if (itemName === "microalbumin" ||
         itemName === "Microalbumin(U)" ||
@@ -113,11 +113,11 @@ const specialHandlers = new Map([
 
     return null;
   }],
-  
+
   // 特殊處理 09041B（血液氣體分析相關）
   ["09041B", (_, itemName) => {
     if (!itemName) return null;
-    
+
     // 血液氣體分析項目映射
     const gasAnalysisMap = new Map([
       ["ph", "pH"],
@@ -129,7 +129,7 @@ const specialHandlers = new Map([
       ["be", "BE"],
       ["hco3", "HCO3"]
     ]);
-    
+
     // 嘗試從映射中獲取縮寫
     const lowerItemName = itemName.toLowerCase();
     return gasAnalysisMap.get(lowerItemName) || itemName;

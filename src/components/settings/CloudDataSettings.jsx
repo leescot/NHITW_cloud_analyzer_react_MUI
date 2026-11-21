@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   Typography,
   Switch,
@@ -11,8 +11,8 @@ import {
 } from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import CloudQueueIcon from '@mui/icons-material/CloudQueue';
-import { handleSettingChange } from '../../utils/settingsHelper';
-import { DEFAULT_SETTINGS } from '../../config/defaultSettings';
+import {handleSettingChange} from '../../utils/settingsHelper';
+import {DEFAULT_SETTINGS} from '../../config/defaultSettings';
 
 const CloudDataSettings = () => {
   const [settings, setSettings] = useState({
@@ -54,14 +54,14 @@ const CloudDataSettings = () => {
         aria-controls="cloud-data-settings-content"
         id="cloud-data-settings-header"
       >
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <CloudQueueIcon sx={{ mr: 1, color: 'primary.main' }} />
+        <Box sx={{display: 'flex', alignItems: 'center'}}>
+          <CloudQueueIcon sx={{mr: 1, color: 'primary.main'}} />
           <Typography>雲端資料設定</Typography>
         </Box>
       </AccordionSummary>
       <AccordionDetails>
-        <Box sx={{ mb: 2 }}>
-          <FormHelperText sx={{ color: 'warning.main', mb: 1 }}>
+        <Box sx={{mb: 2}}>
+          <FormHelperText sx={{color: 'warning.main', mb: 1}}>
             此頁設定需重新讀卡才會抓取資料
           </FormHelperText>
 
@@ -109,4 +109,4 @@ const CloudDataSettings = () => {
   );
 };
 
-export default CloudDataSettings; 
+export default CloudDataSettings;

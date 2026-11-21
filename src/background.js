@@ -4,20 +4,20 @@
 chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
   if (message.action === 'openPopup') {
     chrome.action.openPopup();
-    sendResponse({ status: 'ok' });
+    sendResponse({status: 'ok'});
     return true;
   }
 
   if (message.action === 'setBadge') {
-    chrome.action.setBadgeText({ text: message.text || '' });
+    chrome.action.setBadgeText({text: message.text || ''});
     if (message.color) {
-      chrome.action.setBadgeBackgroundColor({ color: message.color });
+      chrome.action.setBadgeBackgroundColor({color: message.color});
     }
-    sendResponse({ status: 'ok' });
+    sendResponse({status: 'ok'});
     return true;
   }
 
-  sendResponse({ status: 'received' });
+  sendResponse({status: 'received'});
   return true;
 });
 
@@ -25,6 +25,6 @@ chrome.tabs.onUpdated.addListener((tabId, changeInfo) => {
   if (changeInfo.url && (
     changeInfo.url.includes('medcloud2.nhi.gov.tw/imu/login') ||
     changeInfo.url.includes('medcloud2.nhi.gov.tw/imu/IMUE1000/IMUE0001'))) {
-    chrome.action.setBadgeText({ text: '' });
+    chrome.action.setBadgeText({text: ''});
   }
 });

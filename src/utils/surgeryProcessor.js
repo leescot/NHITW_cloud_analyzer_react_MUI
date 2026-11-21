@@ -19,7 +19,7 @@ export const surgeryProcessor = {
             const dateB = new Date(b.date);
             return dateB - dateA;
           } catch (error) {
-            console.error('Error sorting dates:', error, 'Data:', { a, b });
+            console.error('Error sorting dates:', error, 'Data:', {a, b});
             return 0;
           }
         });

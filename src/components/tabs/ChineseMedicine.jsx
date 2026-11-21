@@ -1,8 +1,8 @@
-import React, { useState, useEffect } from "react";
-import { Box, Divider, IconButton, Tooltip, Snackbar, Grid } from "@mui/material";
+import React, {useState, useEffect} from "react";
+import {Box, Divider, IconButton, Tooltip, Snackbar, Grid} from "@mui/material";
 import ContentCopyIcon from "@mui/icons-material/ContentCopy";
 import TypographySizeWrapper from "../utils/TypographySizeWrapper";
-import { chineseMedProcessor } from "../../utils/chineseMedProcessor";
+import {chineseMedProcessor} from "../../utils/chineseMedProcessor";
 
 const ChineseMedicine = ({
   groupedChineseMeds,
@@ -56,15 +56,15 @@ const ChineseMedicine = ({
           const sortedMedications = chineseMedProcessor.sortMedicationsByDosage(group.medications);
 
           return (
-            <Box key={index} sx={{ mb: 3 }}>
-              <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <Box key={index} sx={{mb: 3}}>
+              <Box sx={{display: 'flex', alignItems: 'center'}}>
                 <TypographySizeWrapper
                   variant="h6"
                   textSizeType="content"
                   generalDisplaySettings={generalDisplaySettings}
                   color="primary"
                   gutterBottom={false}
-                  sx={{ mb: 0 }}
+                  sx={{mb: 0}}
                 >
                   {group.date} - {group.hosp}
                 </TypographySizeWrapper>
@@ -118,7 +118,7 @@ const ChineseMedicine = ({
                       onClick={() =>
                         handleCopyChineseMedications(group.medications, group)
                       }
-                      sx={{ ml: 1, verticalAlign: "middle", mb: 0 }}
+                      sx={{ml: 1, verticalAlign: "middle", mb: 0}}
                     >
                       <ContentCopyIcon fontSize="small" />
                     </IconButton>
@@ -127,7 +127,7 @@ const ChineseMedicine = ({
               </Box>
 
               {sortedMedications.map((med, medIndex) => (
-                <Box key={medIndex} sx={{ ml: 2, mb: 1, display: 'flex', alignItems: 'center' }}>
+                <Box key={medIndex} sx={{ml: 2, mb: 1, display: 'flex', alignItems: 'center'}}>
                   <TypographySizeWrapper
                     variant="body1"
                     textSizeType="content"
@@ -135,7 +135,7 @@ const ChineseMedicine = ({
                     // 調整這裡的 mr 值可以改變藥名和劑量之間的間距
                     // mr: 1 表示很小的間距，mr: 10 表示很大的間距
                     // 目前設定為 mr: 10，可以根據需要調整
-                    sx={{ minWidth: '120px', maxWidth: '200px', mr: 10 }}
+                    sx={{minWidth: '120px', maxWidth: '200px', mr: 10}}
                   >
                     {med.name}
                   </TypographySizeWrapper>
@@ -144,7 +144,7 @@ const ChineseMedicine = ({
                     component="span"
                     textSizeType="content"
                     generalDisplaySettings={generalDisplaySettings}
-                    sx={{ color: "text.secondary" }}
+                    sx={{color: "text.secondary"}}
                   >
                     {chineseMedSettings.doseFormat === 'perDose' ? med.perDosage : med.dailyDosage}g
                   </TypographySizeWrapper>
@@ -165,7 +165,7 @@ const ChineseMedicine = ({
                 </Box>
               ))}
               {index < groupedChineseMeds.length - 1 && (
-                <Divider sx={{ my: 2 }} />
+                <Divider sx={{my: 2}} />
               )}
             </Box>
           );
@@ -176,7 +176,7 @@ const ChineseMedicine = ({
         autoHideDuration={2000}
         onClose={handleSnackbarClose}
         message={snackbarMessage}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        anchorOrigin={{vertical: "bottom", horizontal: "center"}}
       />
     </>
   );

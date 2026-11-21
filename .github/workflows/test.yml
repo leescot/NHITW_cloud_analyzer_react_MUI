@@ -1,0 +1,125 @@
+name: Run Tests
+
+on:
+  push:
+  pull_request:
+  workflow_dispatch:
+
+concurrency:
+  # https://docs.github.com/en/actions/writing-workflows/workflow-syntax-for-github-actions#concurrency
+  # https://docs.github.com/en/actions/reference/workflows-and-actions/contexts
+  group: ${{ github.workflow }}-${{ github.head_ref || github.ref }}
+  cancel-in-progress: true
+
+env:
+  TIMEZONE: Asia/Taipei
+
+jobs:
+  lint:
+    name: Check coding style
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Verify no code issue
+        run: npm run lint
+
+  test:
+    name: Test Chrome ${{ matrix.version }}
+    runs-on: windows-latest
+    continue-on-error: ${{ matrix.allow_failure || false }}
+
+    strategy:
+      fail-fast: false
+      matrix:
+        version: 
+          - 'latest'
+          - '113.0.5672.63'
+          - '98.0.4695.0'
+          - '94.0.4580.0'
+
+    steps:
+      - name: Checkout code
+        uses: actions/checkout@v7
+
+      - name: Set up Node.js
+        uses: actions/setup-node@v7
+        with:
+          node-version: '24'
+
+      - name: Install dependencies
+        run: npm ci
+
+      - name: Set up browser
+        shell: pwsh
+        run: |
+          $version = "${{ matrix.version }}"
+
+          $targetDir = "$env:USERPROFILE/browsers"
+          New-Item -ItemType Directory -Force -Path $targetDir | Out-Null
+
+          if ($version -eq "latest") {
+            echo "Searching for the latest version of Chrome for Testing ..."
+            $data = Invoke-RestMethod `
+                -Uri "https://googlechromelabs.github.io/chrome-for-testing/last-known-good-versions-with-downloads.json"
+            $stable = $data.channels.Stable
+            $version = $stable.version
+            $appSrc = $stable.downloads.chrome |
+                Where-Object platform -eq "win64" |
+                Select-Object -ExpandProperty url
+            $appSubpath = "chrome-win64/chrome.exe"
+            echo "version: $version"
+            echo "appSrc: $appSrc"
+            echo "appSubpath: $appSubpath"
+          }
+          elseif ([version]$version -ge [version]"113.0") {
+            # Use Chrome for Testing when available
+            # https://googlechromelabs.github.io/chrome-for-testing/
+            $data = Invoke-RestMethod `
+                -Uri "https://googlechromelabs.github.io/chrome-for-testing/known-good-versions-with-downloads.json"
+            $item = $data.versions | Where-Object { $_.version -eq $version }
+            $appSrc = $item.downloads.chrome |
+                Where-Object platform -eq "win64" |
+                Select-Object -ExpandProperty url
+            $appSubpath = "chrome-win64/chrome.exe"
+            echo "appSrc: $appSrc"
+            echo "appSubpath: $appSubpath"
+          }
+          else {
+            # Use portable Chromium
+            # https://www.chromium.org/getting-involved/download-chromium/
+            $data = Invoke-RestMethod `
+                -Uri "https://github.com/vikyd/chromium-history-version-position/raw/refs/heads/master/json/ver-pos-os/version-position-Win_x64.json"
+            $position = $data.$version
+            # $appDir = "https://commondatastorage.googleapis.com/chromium-browser-snapshots/index.html?prefix=Win_x64/${position}/"
+            $appSrc = "https://www.googleapis.com/download/storage/v1/b/chromium-browser-snapshots/o/Win_x64%2F${position}%2Fchrome-win.zip?alt=media"
+            $appSubpath = "chrome-win/chrome.exe"
+            echo "appSrc: $appSrc"
+            echo "appSubpath: $appSubpath"
+          }
+
+          $appZip = "$targetDir/chrome.zip"
+          $appDir = "$targetDir/chrome"
+          Invoke-WebRequest -Uri $appSrc -OutFile $appZip
+          Expand-Archive -Path $appZip -DestinationPath $appDir -Force
+          echo "NHITW_BROWSER_EXE=$appDir/$appSubpath" >> $env:GITHUB_ENV
+
+      - name: Run unit tests
+        shell: pwsh
+        run: npx vitest run
+
+      - name: Run e2e tests
+        shell: pwsh
+        env:
+          CI: ''
+        run: npm run test:e2e

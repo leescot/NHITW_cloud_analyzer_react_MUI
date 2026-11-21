@@ -53,17 +53,17 @@ const contributors = [
 
 const AboutTab = () => {
   return (
-    <Box sx={{ p: 2 }}>
-      <Paper elevation={1} sx={{ p: 2, mb: 2 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-          <PeopleIcon color="primary" sx={{ mr: 1 }} />
+    <Box sx={{p: 2}}>
+      <Paper elevation={1} sx={{p: 2, mb: 2}}>
+        <Box sx={{display: 'flex', alignItems: 'center', mb: 2}}>
+          <PeopleIcon color="primary" sx={{mr: 1}} />
           <Typography variant="h6">貢獻者</Typography>
         </Box>
-        <Divider sx={{ mb: 2 }} />
+        <Divider sx={{mb: 2}} />
 
         <List disablePadding>
           {contributors.map((contributor, index) => (
-            <ListItem key={index} sx={{ py: 1.5 }}>
+            <ListItem key={index} sx={{py: 1.5}}>
               <Grid container alignItems="center">
                 <Grid item>
                   {contributor.avatar.includes('/') ? (
@@ -71,23 +71,23 @@ const AboutTab = () => {
                     <Avatar
                       src={contributor.avatar}
                       alt={contributor.name.split(' ')[0]}
-                      sx={{ width: 50, height: 50, mr: 2 }}
+                      sx={{width: 50, height: 50, mr: 2}}
                     />
                   ) : (
                     // 如果是文字
-                    <Avatar sx={{ width: 50, height: 50, fontSize: '1.2rem', bgcolor: 'grey.400', mr: 2 }}>
+                    <Avatar sx={{width: 50, height: 50, fontSize: '1.2rem', bgcolor: 'grey.400', mr: 2}}>
                       {contributor.avatar}
                     </Avatar>
                   )}
                 </Grid>
                 <Grid item xs>
                   <Box>
-                    <Box sx={{ display: 'flex', alignItems: 'flex-start' }}>
-                      <Box sx={{ flexGrow: 1 }}>
-                        <Typography variant="h6" sx={{ fontSize: '1.1rem', fontWeight: 'bold', mb: 0.2 }}>
+                    <Box sx={{display: 'flex', alignItems: 'flex-start'}}>
+                      <Box sx={{flexGrow: 1}}>
+                        <Typography variant="h6" sx={{fontSize: '1.1rem', fontWeight: 'bold', mb: 0.2}}>
                           {contributor.name}
                         </Typography>
-                        <Typography variant="body2" color="text.secondary" sx={{ fontSize: '0.75rem', mb: 0.5 }}>
+                        <Typography variant="body2" color="text.secondary" sx={{fontSize: '0.75rem', mb: 0.5}}>
                           {contributor.englishName}
                         </Typography>
                         {Array.isArray(contributor.role) ? (
@@ -96,18 +96,18 @@ const AboutTab = () => {
                               key={roleIndex}
                               variant="body2"
                               color="primary"
-                              sx={{ fontWeight: 500, lineHeight: 1.2, mb: roleIndex < contributor.role.length - 1 ? 0.5 : 0 }}
+                              sx={{fontWeight: 500, lineHeight: 1.2, mb: roleIndex < contributor.role.length - 1 ? 0.5 : 0}}
                             >
                               {role}
                             </Typography>
                           ))
                         ) : (
-                          <Typography variant="body2" color="primary" sx={{ fontWeight: 500 }}>
+                          <Typography variant="body2" color="primary" sx={{fontWeight: 500}}>
                             {contributor.role}
                           </Typography>
                         )}
                       </Box>
-                      <Stack direction="column" spacing={0.5} sx={{ ml: 1 }}>
+                      <Stack direction="column" spacing={0.5} sx={{ml: 1}}>
                         {contributor.github && (
                           <Tooltip title="GitHub">
                             <IconButton
@@ -117,7 +117,7 @@ const AboutTab = () => {
                               href={contributor.github}
                               target="_blank"
                               rel="noopener noreferrer"
-                              sx={{ color: '#24292e', p: 0.5 }}
+                              sx={{color: '#24292e', p: 0.5}}
                             >
                               <GitHubIcon fontSize="small" />
                             </IconButton>
@@ -132,7 +132,7 @@ const AboutTab = () => {
                               href={contributor.blog}
                               target="_blank"
                               rel="noopener noreferrer"
-                              sx={{ color: '#0078d7', p: 0.5 }}
+                              sx={{color: '#0078d7', p: 0.5}}
                             >
                               <LanguageIcon fontSize="small" />
                             </IconButton>
@@ -148,12 +148,12 @@ const AboutTab = () => {
         </List>
       </Paper>
 
-      <Paper elevation={1} sx={{ p: 2, mb: 2 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-          <EmailIcon color="primary" sx={{ mr: 1 }} />
+      <Paper elevation={1} sx={{p: 2, mb: 2}}>
+        <Box sx={{display: 'flex', alignItems: 'center', mb: 2}}>
+          <EmailIcon color="primary" sx={{mr: 1}} />
           <Typography variant="h6">聯絡方式</Typography>
         </Box>
-        <Divider sx={{ mb: 2 }} />
+        <Divider sx={{mb: 2}} />
 
         <Typography variant="body1" paragraph>
           如有任何問題、建議或錯誤回報，請透過以下方式聯絡我們：
@@ -170,14 +170,14 @@ const AboutTab = () => {
             <ListItemText
               primary="GitHub"
               secondary={
-                <Box sx={{ wordBreak: 'break-word' }}>
+                <Box sx={{wordBreak: 'break-word'}}>
                   <Link
                     href="https://github.com/leescot/NHITW_cloud_analyzer_react_MUI"
                     target="_blank"
                     rel="noopener noreferrer"
-                    sx={{ display: 'flex', alignItems: 'center' }}
+                    sx={{display: 'flex', alignItems: 'center'}}
                   >
-                    <GitHubIcon sx={{ mr: 0.5, fontSize: '1rem', flexShrink: 0 }} />
+                    <GitHubIcon sx={{mr: 0.5, fontSize: '1rem', flexShrink: 0}} />
                     <Typography
                       variant="body2"
                       component="span"
@@ -197,12 +197,12 @@ const AboutTab = () => {
         </List>
       </Paper>
 
-      <Paper elevation={1} sx={{ p: 2 }}>
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 2 }}>
-          <InfoIcon color="primary" sx={{ mr: 1 }} />
+      <Paper elevation={1} sx={{p: 2}}>
+        <Box sx={{display: 'flex', alignItems: 'center', mb: 2}}>
+          <InfoIcon color="primary" sx={{mr: 1}} />
           <Typography variant="h6">關於擴充功能</Typography>
         </Box>
-        <Divider sx={{ mb: 2 }} />
+        <Divider sx={{mb: 2}} />
 
         <Grid container spacing={2}>
           <Grid item xs={4}>

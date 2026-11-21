@@ -1,22 +1,22 @@
 import React from 'react';
-import { Box, Typography, Accordion, AccordionSummary, AccordionDetails } from '@mui/material';
+import {Box, Typography, Accordion, AccordionSummary, AccordionDetails} from '@mui/material';
 import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
-import { LineChart } from '@mui/x-charts/LineChart';
+import {LineChart} from '@mui/x-charts/LineChart';
 
 const CHART_HEIGHT = 300;
 const MIN_WIDTH = 500;
 const MAX_WIDTH = 900;
 const PX_PER_POINT = 45;
 
-const DualAxisTrendChart = ({ title, leftData, rightData, leftLabel, rightLabel, leftColor, rightColor, leftUnit, rightUnit, referenceLines }) => {
+const DualAxisTrendChart = ({title, leftData, rightData, leftLabel, rightLabel, leftColor, rightColor, leftUnit, rightUnit, referenceLines}) => {
   if (leftData.length < 2 && rightData.length < 2) return null;
 
   const dateMap = new Map();
   for (const p of leftData) {
-    if (!dateMap.has(p.date)) dateMap.set(p.date, { date: p.date, label: p.label, sortKey: p.sortKey });
+    if (!dateMap.has(p.date)) dateMap.set(p.date, {date: p.date, label: p.label, sortKey: p.sortKey});
   }
   for (const p of rightData) {
-    if (!dateMap.has(p.date)) dateMap.set(p.date, { date: p.date, label: p.label, sortKey: p.sortKey });
+    if (!dateMap.has(p.date)) dateMap.set(p.date, {date: p.date, label: p.label, sortKey: p.sortKey});
   }
   const allDates = [...dateMap.values()].sort((a, b) => a.sortKey.localeCompare(b.sortKey));
   const labels = allDates.map(d => d.label);
@@ -39,7 +39,7 @@ const DualAxisTrendChart = ({ title, leftData, rightData, leftLabel, rightLabel,
       scaleType: 'linear',
       position: 'left',
       label: `${leftLabel} (${leftUnit})`,
-      tickLabelStyle: { fontSize: 12 },
+      tickLabelStyle: {fontSize: 12},
     });
     series.push({
       id: 'left',
@@ -59,7 +59,7 @@ const DualAxisTrendChart = ({ title, leftData, rightData, leftLabel, rightLabel,
       scaleType: 'linear',
       position: 'right',
       label: `${rightLabel} (${rightUnit})`,
-      tickLabelStyle: { fontSize: 12 },
+      tickLabelStyle: {fontSize: 12},
     });
     series.push({
       id: 'right',
@@ -78,25 +78,25 @@ const DualAxisTrendChart = ({ title, leftData, rightData, leftLabel, rightLabel,
   return (
     <Accordion defaultExpanded>
       <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-        <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+        <Typography variant="subtitle2" sx={{fontWeight: 600}}>
           {title}
         </Typography>
       </AccordionSummary>
-      <AccordionDetails sx={{ p: 0.5 }}>
-        <Box sx={needsScroll ? { overflowX: 'auto', maxWidth: MAX_WIDTH } : {}}>
+      <AccordionDetails sx={{p: 0.5}}>
+        <Box sx={needsScroll ? {overflowX: 'auto', maxWidth: MAX_WIDTH} : {}}>
           <LineChart
             xAxis={[{
               data: labels,
               scaleType: 'point',
-              tickLabelStyle: { fontSize: 11, angle: -45 },
+              tickLabelStyle: {fontSize: 11, angle: -45},
             }]}
             yAxis={yAxis}
             series={series}
             height={CHART_HEIGHT}
             width={chartWidth}
-            margin={{ left: 60, right: rightData.length >= 2 ? 60 : 20, top: 20, bottom: 50 }}
-            tooltip={{ trigger: 'axis' }}
-            slotProps={{ legend: { hidden: false, position: { vertical: 'top', horizontal: 'right' } } }}
+            margin={{left: 60, right: rightData.length >= 2 ? 60 : 20, top: 20, bottom: 50}}
+            tooltip={{trigger: 'axis'}}
+            slotProps={{legend: {hidden: false, position: {vertical: 'top', horizontal: 'right'}}}}
           />
         </Box>
       </AccordionDetails>
@@ -104,7 +104,7 @@ const DualAxisTrendChart = ({ title, leftData, rightData, leftLabel, rightLabel,
   );
 };
 
-const SingleAxisTrendChart = ({ title, data, label, color, unit, referenceValues }) => {
+const SingleAxisTrendChart = ({title, data, label, color, unit, referenceValues}) => {
   if (data.length < 2) return null;
 
   const labels = data.map(d => d.label);
@@ -146,34 +146,34 @@ const SingleAxisTrendChart = ({ title, data, label, color, unit, referenceValues
   return (
     <Accordion defaultExpanded>
       <AccordionSummary expandIcon={<ExpandMoreIcon />}>
-        <Typography variant="subtitle2" sx={{ fontWeight: 600 }}>
+        <Typography variant="subtitle2" sx={{fontWeight: 600}}>
           {title}
         </Typography>
       </AccordionSummary>
-      <AccordionDetails sx={{ p: 0.5 }}>
-        <Box sx={needsScroll ? { overflowX: 'auto', maxWidth: MAX_WIDTH } : {}}>
+      <AccordionDetails sx={{p: 0.5}}>
+        <Box sx={needsScroll ? {overflowX: 'auto', maxWidth: MAX_WIDTH} : {}}>
           <LineChart
             xAxis={[{
               data: labels,
               scaleType: 'point',
-              tickLabelStyle: { fontSize: 11, angle: -45 },
+              tickLabelStyle: {fontSize: 11, angle: -45},
             }]}
             yAxis={[{
               min: Math.max(0, rangeMin - pad),
               max: rangeMax + pad,
-              tickLabelStyle: { fontSize: 12 },
+              tickLabelStyle: {fontSize: 12},
             }]}
             series={series}
             height={CHART_HEIGHT}
             width={chartWidth}
-            margin={{ left: 60, right: 20, top: 20, bottom: 50 }}
-            tooltip={{ trigger: 'axis' }}
+            margin={{left: 60, right: 20, top: 20, bottom: 50}}
+            tooltip={{trigger: 'axis'}}
             slotProps={{
-              legend: { hidden: false, position: { vertical: 'top', horizontal: 'right' } },
+              legend: {hidden: false, position: {vertical: 'top', horizontal: 'right'}},
             }}
             sx={{
-              '& .MuiLineElement-series-ref_100': { strokeDasharray: '6 3', strokeWidth: 1.5 },
-              '& .MuiLineElement-series-ref_70': { strokeDasharray: '6 3', strokeWidth: 1.5 },
+              '& .MuiLineElement-series-ref_100': {strokeDasharray: '6 3', strokeWidth: 1.5},
+              '& .MuiLineElement-series-ref_70': {strokeDasharray: '6 3', strokeWidth: 1.5},
             }}
           />
         </Box>
@@ -182,7 +182,7 @@ const SingleAxisTrendChart = ({ title, data, label, color, unit, referenceValues
   );
 };
 
-const CKMTrendChart = ({ trends }) => {
+const CKMTrendChart = ({trends}) => {
   if (!trends) return null;
 
   const hasRenal = trends.renal.egfr.length >= 2 || trends.renal.uacr.length >= 2;
@@ -192,7 +192,7 @@ const CKMTrendChart = ({ trends }) => {
   if (!hasRenal && !hasGlycemic && !hasLDL) return null;
 
   return (
-    <Box sx={{ mb: 1 }}>
+    <Box sx={{mb: 1}}>
       {hasRenal && (
         <DualAxisTrendChart
           title="腎功能趨勢"
@@ -227,8 +227,8 @@ const CKMTrendChart = ({ trends }) => {
           color="#d32f2f"
           unit="mg/dL"
           referenceValues={[
-            { value: 100, label: '一般目標 (100)', color: '#ed6c02' },
-            { value: 70, label: '高風險目標 (70)', color: '#d32f2f' },
+            {value: 100, label: '一般目標 (100)', color: '#ed6c02'},
+            {value: 70, label: '高風險目標 (70)', color: '#d32f2f'},
           ]}
         />
       )}

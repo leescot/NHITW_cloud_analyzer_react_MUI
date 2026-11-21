@@ -1,5 +1,5 @@
 export const dashboardProcessor = {
-  processDashboardData({ medicationData, chineseMedData }) {
+  processDashboardData({medicationData, chineseMedData}) {
     // console.log('Starting to process dashboard data');
 
     const now = new Date();
@@ -16,7 +16,7 @@ export const dashboardProcessor = {
       console.error('Error processing dashboard data:', error);
       return {
         diagnoses: [],
-        recentMedications: { western: [], chinese: [] },
+        recentMedications: {western: [], chinese: []},
         labSummary: {}
       };
     }

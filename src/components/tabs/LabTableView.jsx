@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   Table,
   TableBody,
@@ -14,11 +14,11 @@ import {
   Radio,
   FormControl
 } from '@mui/material';
-import { labProcessor } from '../../utils/labProcessor';
+import {labProcessor} from '../../utils/labProcessor';
 import TypographySizeWrapper from "../utils/TypographySizeWrapper";
 import LabItemTrendPopover from "./lab/LabItemTrendPopover";
 
-const LabTableView = ({ groupedLabs, labSettings, generalDisplaySettings }) => {
+const LabTableView = ({groupedLabs, labSettings, generalDisplaySettings}) => {
   // console.log("LabTableView rendering with lab settings:", labSettings);
   // 獲取所有可用的檢驗類型
   const allLabTypes = labProcessor.getAllLabTypes(groupedLabs);
@@ -49,10 +49,10 @@ const LabTableView = ({ groupedLabs, labSettings, generalDisplaySettings }) => {
   }
 
   // 添加"所有檢驗"選項（放在最後）
-  const radioOptions = [...labTypes, { label: "所有檢驗", value: "all" }];
+  const radioOptions = [...labTypes, {label: "所有檢驗", value: "all"}];
 
   // 根據選擇的類型準備表格數據
-  const { dates, items } = labProcessor.prepareLabTableData(
+  const {dates, items} = labProcessor.prepareLabTableData(
     groupedLabs,
     selectedType === 'all' ? null : selectedType
   );
@@ -96,13 +96,13 @@ const LabTableView = ({ groupedLabs, labSettings, generalDisplaySettings }) => {
   const formatDateHeader = (dateStr) => {
     // 日期為空的情況
     if (!dateStr) return dateFormatterMap.get('empty')();
-    
+
     // 嘗試分割日期字串
     const parts = dateStr.split('-');
-    
+
     // 判斷日期格式是否有效
     const dateStatus = parts.length === 3 ? 'valid' : 'invalid';
-    
+
     // 使用 Map 獲取對應的格式化函數
     return dateFormatterMap.get(dateStatus)(dateStatus === 'valid' ? parts : dateStr);
   };
@@ -139,8 +139,8 @@ const LabTableView = ({ groupedLabs, labSettings, generalDisplaySettings }) => {
 
   if (dates.length === 0 || items.length === 0) {
     return (
-      <Box sx={{ height: 'calc(100vh - 210px)', display: 'flex', flexDirection: 'column' }}>
-        <FormControl component="fieldset" sx={{ m: 1, mt: 0.5 }}>
+      <Box sx={{height: 'calc(100vh - 210px)', display: 'flex', flexDirection: 'column'}}>
+        <FormControl component="fieldset" sx={{m: 1, mt: 0.5}}>
           <RadioGroup
             row
             name="lab-type-group"
@@ -168,7 +168,7 @@ const LabTableView = ({ groupedLabs, labSettings, generalDisplaySettings }) => {
           textSizeType="content"
           generalDisplaySettings={generalDisplaySettings}
           color="text.secondary"
-          sx={{ m: 2 }}
+          sx={{m: 2}}
         >
           沒有可顯示的檢驗數據
         </TypographySizeWrapper>
@@ -178,9 +178,9 @@ const LabTableView = ({ groupedLabs, labSettings, generalDisplaySettings }) => {
 
   return (
     // 調整容器高度，減少重疊問題
-    <Box sx={{ height: 'calc(100vh - 220px)', display: 'flex', flexDirection: 'column', overflow: 'hidden' }}>
+    <Box sx={{height: 'calc(100vh - 220px)', display: 'flex', flexDirection: 'column', overflow: 'hidden'}}>
       {/* 縮小類型選擇器間距 */}
-      <FormControl component="fieldset" sx={{ mx: 1, my: 0.5 }}>
+      <FormControl component="fieldset" sx={{mx: 1, my: 0.5}}>
         <RadioGroup
           row
           name="lab-type-group"
@@ -200,7 +200,7 @@ const LabTableView = ({ groupedLabs, labSettings, generalDisplaySettings }) => {
                   {option.label.replace(/檢查/g, '')}
                 </TypographySizeWrapper>
               }
-              sx={{ mr: 1 }}
+              sx={{mr: 1}}
             />
           ))}
         </RadioGroup>
@@ -290,7 +290,7 @@ const LabTableView = ({ groupedLabs, labSettings, generalDisplaySettings }) => {
                             textSizeType="content"
                             generalDisplaySettings={generalDisplaySettings}
                             fontWeight="medium"
-                            sx={{ textDecoration: 'underline dotted', textDecorationColor: '#bdbdbd', cursor: 'pointer' }}
+                            sx={{textDecoration: 'underline dotted', textDecorationColor: '#bdbdbd', cursor: 'pointer'}}
                           >
                             {item.displayName}
                           </TypographySizeWrapper>
@@ -346,7 +346,7 @@ const LabTableView = ({ groupedLabs, labSettings, generalDisplaySettings }) => {
                                 component="span"
                                 textSizeType="note"
                                 generalDisplaySettings={generalDisplaySettings}
-                                sx={{ color: "gray" }}
+                                sx={{color: "gray"}}
                               >
                                 {` ${value.unit}`}
                               </TypographySizeWrapper>
@@ -357,7 +357,7 @@ const LabTableView = ({ groupedLabs, labSettings, generalDisplaySettings }) => {
                                   component="span"
                                   textSizeType="note"
                                   generalDisplaySettings={generalDisplaySettings}
-                                  sx={{ color: "gray" }}
+                                  sx={{color: "gray"}}
                                 >
                                   {` (${value.formattedReference})`}
                                 </TypographySizeWrapper>
@@ -366,7 +366,7 @@ const LabTableView = ({ groupedLabs, labSettings, generalDisplaySettings }) => {
                                   component="span"
                                   textSizeType="note"
                                   generalDisplaySettings={generalDisplaySettings}
-                                  sx={{ color: "gray" }}
+                                  sx={{color: "gray"}}
                                 >
                                   {` (${value.referenceMin}${
                                     value.referenceMax !== null

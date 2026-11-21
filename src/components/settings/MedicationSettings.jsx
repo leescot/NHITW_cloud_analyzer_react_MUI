@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, {useState, useEffect} from "react";
 import {
   Typography,
   Switch,
@@ -37,10 +37,10 @@ import AddIcon from "@mui/icons-material/Add";
 import ColorLensIcon from "@mui/icons-material/ColorLens";
 import DragIndicatorIcon from "@mui/icons-material/DragIndicator";
 import FormatListBulletedIcon from "@mui/icons-material/FormatListBulleted";
-import { handleSettingChange } from "../../utils/settingsHelper";
+import {handleSettingChange} from "../../utils/settingsHelper";
 
 // 导入默认配置
-import { DEFAULT_ATC5_GROUPS, DEFAULT_ATC5_COLOR_GROUPS } from "../../config/medicationGroups";
+import {DEFAULT_ATC5_GROUPS, DEFAULT_ATC5_COLOR_GROUPS} from "../../config/medicationGroups";
 
 const MedicationSettings = () => {
   const [settings, setSettings] = useState({
@@ -56,20 +56,20 @@ const MedicationSettings = () => {
     showExternalDrugImage: false,
     enableMedicationCustomCopyFormat: false,
     customMedicationHeaderCopyFormat: [
-      { id: 'date', display: '日期' },
-      { id: 'separator', value: ' - ', display: ' - ' },
-      { id: 'hosp', display: '醫院' },
-      { id: 'newline', display: '換行' },
+      {id: 'date', display: '日期'},
+      {id: 'separator', value: ' - ', display: ' - '},
+      {id: 'hosp', display: '醫院'},
+      {id: 'newline', display: '換行'},
     ],
     customMedicationDrugCopyFormat: [
-      { id: 'name', display: '藥物名稱' },
-      { id: 'space', display: ' ' },
-      { id: 'perDosage', display: '單次劑量' },
-      { id: 'space', display: ' ' },
-      { id: 'frequency', display: '頻次' },
-      { id: 'space', display: ' ' },
-      { id: 'days', display: '天數' },
-      { id: 'text', value: '天', display: '天' }
+      {id: 'name', display: '藥物名稱'},
+      {id: 'space', display: ' '},
+      {id: 'perDosage', display: '單次劑量'},
+      {id: 'space', display: ' '},
+      {id: 'frequency', display: '頻次'},
+      {id: 'space', display: ' '},
+      {id: 'days', display: '天數'},
+      {id: 'text', value: '天', display: '天'}
     ]
   });
 
@@ -80,7 +80,7 @@ const MedicationSettings = () => {
 
   // 统一的 ATC5 分组对话框
   const [atc5GroupsDialogOpen, setAtc5GroupsDialogOpen] = useState(false);
-  
+
   // ATC5 Group 编辑状态
   const [editingGroup, setEditingGroup] = useState(null);
   const [newGroupName, setNewGroupName] = useState("");
@@ -104,20 +104,20 @@ const MedicationSettings = () => {
         showExternalDrugImage: false,
         enableMedicationCustomCopyFormat: false,
         customMedicationHeaderCopyFormat: [
-          { id: 'date', display: '日期' },
-          { id: 'separator', value: ' - ', display: ' - ' },
-          { id: 'hosp', display: '醫院' },
-          { id: 'newline', display: '換行' },
+          {id: 'date', display: '日期'},
+          {id: 'separator', value: ' - ', display: ' - '},
+          {id: 'hosp', display: '醫院'},
+          {id: 'newline', display: '換行'},
         ],
         customMedicationDrugCopyFormat: [
-          { id: 'name', display: '藥物名稱' },
-          { id: 'space', display: ' ' },
-          { id: 'perDosage', display: '單次劑量' },
-          { id: 'space', display: ' ' },
-          { id: 'frequency', display: '頻次' },
-          { id: 'space', display: ' ' },
-          { id: 'days', display: '天數' },
-          { id: 'text', value: '天', display: '天' }
+          {id: 'name', display: '藥物名稱'},
+          {id: 'space', display: ' '},
+          {id: 'perDosage', display: '單次劑量'},
+          {id: 'space', display: ' '},
+          {id: 'frequency', display: '頻次'},
+          {id: 'space', display: ' '},
+          {id: 'days', display: '天數'},
+          {id: 'text', value: '天', display: '天'}
         ]
       },
       (items) => {
@@ -141,7 +141,7 @@ const MedicationSettings = () => {
 
     // Listen for real-time setting changes from other components
     const handleSettingChangedEvent = (event) => {
-      const { key, value } = event.detail;
+      const {key, value} = event.detail;
       if (key === 'enableMedicationCustomCopyFormat') {
         setSettings(prev => ({
           ...prev,
@@ -191,7 +191,7 @@ const MedicationSettings = () => {
       [settings.atc5ColorGroups.orange.includes(groupName), "orange"],
       [settings.atc5ColorGroups.green.includes(groupName), "green"]
     ]);
-    
+
     // 找出第一個符合條件的顏色，或返回 "none"
     return colorMap.get(true) || "none";
   };
@@ -206,14 +206,14 @@ const MedicationSettings = () => {
   };
 
   const handleDeleteGroup = (groupName) => {
-    const updatedGroups = { ...settings.atc5Groups };
+    const updatedGroups = {...settings.atc5Groups};
     delete updatedGroups[groupName];
 
     // 首先更新 ATC5 分组
     handleLocalSettingChange('atc5Groups', updatedGroups);
 
     // 然后从任何颜色分配中删除已删除的组
-    const updatedColorGroups = { ...settings.atc5ColorGroups };
+    const updatedColorGroups = {...settings.atc5ColorGroups};
 
     // 检查所有颜色类别并删除组（如果存在）
     ['red', 'orange', 'green'].forEach(color => {
@@ -249,7 +249,7 @@ const MedicationSettings = () => {
       return;
     }
 
-    const updatedGroups = { ...settings.atc5Groups };
+    const updatedGroups = {...settings.atc5Groups};
     const oldGroupName = editingGroup;
 
     // 更新分组
@@ -261,7 +261,7 @@ const MedicationSettings = () => {
     handleLocalSettingChange('atc5Groups', updatedGroups);
 
     // 更新颜色分配
-    const updatedColorGroups = { ...settings.atc5ColorGroups };
+    const updatedColorGroups = {...settings.atc5ColorGroups};
 
     // 从所有颜色组中删除旧的组名（如果存在）
     ['red', 'orange', 'green'].forEach(color => {
@@ -321,16 +321,16 @@ const MedicationSettings = () => {
     const rows = [];
     for (let i = 0; i < codes.length; i += 2) {
       // # zh-TW: 使用條件運算符替代 if-else 邏輯，更簡潔
-      const pair = i + 1 < codes.length 
+      const pair = i + 1 < codes.length
         ? [codes[i], codes[i + 1]]  // 如果有一對
         : [codes[i]];               // 如果最後有奇數
       rows.push(pair);
     }
 
     return (
-      <Box sx={{ width: '100%' }}>
+      <Box sx={{width: '100%'}}>
         {rows.map((row, rowIndex) => (
-          <Box key={rowIndex} sx={{ display: 'flex', mb: 0.5 }}>
+          <Box key={rowIndex} sx={{display: 'flex', mb: 0.5}}>
             {row.map((code, codeIndex) => (
               <Typography
                 key={codeIndex}
@@ -355,17 +355,17 @@ const MedicationSettings = () => {
   const getColorChip = (groupName) => {
     // # zh-TW: 使用 Map 代替物件映射，保持一致性並提高查詢效率
     const colorMap = new Map([
-      ["red", { color: "error", label: "紅" }],
-      ["orange", { color: "warning", label: "橘" }],
-      ["green", { color: "success", label: "綠" }],
-      ["none", { color: "default", label: "無" }]
+      ["red", {color: "error", label: "紅"}],
+      ["orange", {color: "warning", label: "橘"}],
+      ["green", {color: "success", label: "綠"}],
+      ["none", {color: "default", label: "無"}]
     ]);
 
     const groupColor = getGroupColor(groupName);
     // 如果顏色是 none 則不顯示芯片
     if (groupColor === "none") return null;
-    
-    const { color, label } = colorMap.get(groupColor);
+
+    const {color, label} = colorMap.get(groupColor);
 
     return (
       <Chip
@@ -374,7 +374,7 @@ const MedicationSettings = () => {
         color={color}
         variant="outlined"
         icon={<ColorLensIcon />}
-        sx={{ ml: 1 }}
+        sx={{ml: 1}}
       />
     );
   };
@@ -392,34 +392,34 @@ const MedicationSettings = () => {
 
     // # zh-TW: 使用 Map 代替 switch-case，提高可讀性和維護性
     const styleMap = new Map([
-      ["red", { ...baseStyle, bgcolor: '#ffebee', color: 'error.main', border: '1px solid', borderColor: 'error.light' }],
-      ["orange", { ...baseStyle, bgcolor: '#fff3e0', color: 'warning.main', border: '1px solid', borderColor: 'warning.light' }],
-      ["green", { ...baseStyle, bgcolor: '#e8f5e9', color: 'success.main', border: '1px solid', borderColor: 'success.light' }]
+      ["red", {...baseStyle, bgcolor: '#ffebee', color: 'error.main', border: '1px solid', borderColor: 'error.light'}],
+      ["orange", {...baseStyle, bgcolor: '#fff3e0', color: 'warning.main', border: '1px solid', borderColor: 'warning.light'}],
+      ["green", {...baseStyle, bgcolor: '#e8f5e9', color: 'success.main', border: '1px solid', borderColor: 'success.light'}]
     ]);
-    
+
     // 返回對應顏色的樣式，如果找不到則返回預設樣式
-    return styleMap.get(color) || { ...baseStyle, bgcolor: 'grey.100', color: 'text.secondary', border: '1px solid', borderColor: 'grey.300' };
+    return styleMap.get(color) || {...baseStyle, bgcolor: 'grey.100', color: 'text.secondary', border: '1px solid', borderColor: 'grey.300'};
   };
 
   // 打开 FloatingIcon 的自訂設定标签
   const openCustomFormatEditor = () => {
     // Only proceed if enableMedicationCustomCopyFormat is true
     if (!settings.enableMedicationCustomCopyFormat) return;
-    
+
     // 发送消息给 background script 或直接调用 FloatingIcon 的方法
     if (window.openFloatingIconDialog) {
       window.openFloatingIconDialog();
       // 等对话框打开后，切换到自訂設定标签（索引为9）
       setTimeout(() => {
-        chrome.runtime.sendMessage({ 
+        chrome.runtime.sendMessage({
           action: 'switchToCustomFormatTab',
           tabIndex: 9
         });
       }, 100);
     } else {
       // 如果全局方法不可用，则发送消息给背景脚本处理
-      chrome.runtime.sendMessage({ 
-        action: 'openCustomFormatEditor' 
+      chrome.runtime.sendMessage({
+        action: 'openCustomFormatEditor'
       });
     }
   };
@@ -434,7 +434,7 @@ const MedicationSettings = () => {
         aria-controls="medication-settings-content"
         id="medication-settings-header"
       >
-        <MedicationIcon sx={{ mr: 1, color: 'primary.main' }}/>
+        <MedicationIcon sx={{mr: 1, color: 'primary.main'}}/>
         <Typography>西藥顯示設定</Typography>
       </AccordionSummary>
       <AccordionDetails>
@@ -525,7 +525,7 @@ const MedicationSettings = () => {
           label="開啟ATC5變色功能"
         />
         {settings.enableATC5Colors && (
-          <Box sx={{ mt: 1, mb: 2, ml: 4 }}>
+          <Box sx={{mt: 1, mb: 2, ml: 4}}>
             <Button
               variant="outlined"
               onClick={handleOpenAtc5GroupsDialog}
@@ -537,14 +537,14 @@ const MedicationSettings = () => {
 
         {/* Remove the duplicate switch for enableMedicationCustomCopyFormat since it's now in AdvancedSettings */}
         {settings.enableMedicationCustomCopyFormat && (
-          <Box sx={{ mt: 1, mb: 2, ml: 4 }}>
+          <Box sx={{mt: 1, mb: 2, ml: 4}}>
             <Typography variant="body2" color="text.secondary">
               請在「進階設定」中設置自訂格式。
             </Typography>
           </Box>
         )}
 
-        <FormControl fullWidth sx={{ mt: 2 }}>
+        <FormControl fullWidth sx={{mt: 2}}>
           <InputLabel id="medication-copy-format-label">
             藥物複製格式
           </InputLabel>
@@ -567,14 +567,14 @@ const MedicationSettings = () => {
             <MenuItem value="nameWithDosageHorizontal">
               複製商品名+使用量(橫式)
             </MenuItem>
-            <MenuItem 
-              value="customVertical" 
+            <MenuItem
+              value="customVertical"
               disabled={!settings.enableMedicationCustomCopyFormat}
             >
               自訂西藥複製格式(直式)
             </MenuItem>
-            <MenuItem 
-              value="customHorizontal" 
+            <MenuItem
+              value="customHorizontal"
               disabled={!settings.enableMedicationCustomCopyFormat}
             >
               自訂西藥複製格式(橫式)
@@ -594,13 +594,13 @@ const MedicationSettings = () => {
             {/* <Typography variant="body1" gutterBottom>
               設定ATC組合群組與顏色
             </Typography> */}
-            <Typography variant="body2" gutterBottom sx={{ color: 'text.secondary' }}>
+            <Typography variant="body2" gutterBottom sx={{color: 'text.secondary'}}>
               每個群組可以選擇一種顏色或不指定顏色(暫不分組)
             </Typography>
 
             {!editMode ? (
-              <Box sx={{ mt: 2 }}>
-                <Box sx={{ display: 'flex', justifyContent: 'flex-end', mb: 2 }}>
+              <Box sx={{mt: 2}}>
+                <Box sx={{display: 'flex', justifyContent: 'flex-end', mb: 2}}>
                   <Button
                     variant="contained"
                     startIcon={<AddIcon />}
@@ -610,7 +610,7 @@ const MedicationSettings = () => {
                   </Button>
                 </Box>
 
-                <List sx={{ width: '100%' }}>
+                <List sx={{width: '100%'}}>
                   {Object.entries(settings.atc5Groups).map(([groupName, codes], index) => (
                     <React.Fragment key={groupName}>
                       {index > 0 && <Divider />}
@@ -621,12 +621,12 @@ const MedicationSettings = () => {
                           display: 'block'
                         }}
                       >
-                        <Box sx={{ display: 'flex', alignItems: 'center', mb: 0.5 }}>
+                        <Box sx={{display: 'flex', alignItems: 'center', mb: 0.5}}>
                           <Typography variant="subtitle1" fontWeight="medium">
                             {groupName}
                           </Typography>
                           {getColorChip(groupName)}
-                          <Box sx={{ display: 'flex', ml: 'auto' }}>
+                          <Box sx={{display: 'flex', ml: 'auto'}}>
                             <IconButton size="small" onClick={() => handleEditGroup(groupName)}>
                               <EditIcon fontSize="small" />
                             </IconButton>
@@ -644,7 +644,7 @@ const MedicationSettings = () => {
                 </List>
               </Box>
             ) : (
-              <Box sx={{ mt: 2 }}>
+              <Box sx={{mt: 2}}>
                 <Grid container spacing={2}>
                   <Grid item xs={12}>
                     <TextField
@@ -718,14 +718,14 @@ const MedicationSettings = () => {
                     </RadioGroup>
                   </Grid>
                 </Grid>
-                <Box sx={{ display: 'flex', justifyContent: 'flex-end', mt: 2, gap: 1 }}>
+                <Box sx={{display: 'flex', justifyContent: 'flex-end', mt: 2, gap: 1}}>
                   <Button onClick={handleCancelEdit}>取消</Button>
                   <Button variant="contained" onClick={handleSaveGroup}>儲存</Button>
                 </Box>
               </Box>
             )}
           </DialogContent>
-          <DialogActions sx={{ justifyContent: 'center' }}>
+          <DialogActions sx={{justifyContent: 'center'}}>
             <Button
               onClick={handleResetSettings}
               color="secondary"

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, {useState, useEffect, useRef} from 'react';
 import {
   Typography,
   Box,
@@ -20,21 +20,21 @@ import RestoreIcon from '@mui/icons-material/Restore';
 import FormatElementsPanel from './labCopyFormat/FormatElementsPanel';
 import FormatPreview from './labCopyFormat/FormatPreview';
 import useFormatEditorState from './labCopyFormat/useFormatEditorState';
-import { createHeaderLabHandlers, createItemLabHandlers } from './labCopyFormat/dragDropHandlers';
+import {createHeaderLabHandlers, createItemLabHandlers} from './labCopyFormat/dragDropHandlers';
 
 // 檢驗報告自訂格式編輯器組件
-const LabCustomFormatEditor = ({ appSettings, setAppSettings, generalDisplaySettings }) => {
+const LabCustomFormatEditor = ({appSettings, setAppSettings, generalDisplaySettings}) => {
   // 響應式布局
   const theme = useTheme();
   const isMobile = useMediaQuery(theme.breakpoints.down('sm'));
   const isTablet = useMediaQuery(theme.breakpoints.down('md'));
-  
+
   // DOM ref for拖拉元素
   const dragItem = useRef(null);
-  
+
   // Format type selection (horizontal or vertical)
   const [formatType, setFormatType] = useState("customVertical");
-  
+
   // Use the custom hook for state management - now with separate header and item formats
   const {
     headerFormat,
@@ -81,7 +81,7 @@ const LabCustomFormatEditor = ({ appSettings, setAppSettings, generalDisplaySett
       } else {
         setFormatType("customVertical");
       }
-      
+
       // Log the current itemSeparator from settings
       console.log(`LabCustomFormatEditor: Initial itemSeparator from settings: "${appSettings.lab.itemSeparator || ','}"`);
     }
@@ -97,7 +97,7 @@ const LabCustomFormatEditor = ({ appSettings, setAppSettings, generalDisplaySett
     const newFormatType = event.target ? event.target.value : event;
     console.log("LabCustomFormatEditor: Format type changed to:", newFormatType);
     setFormatType(newFormatType);
-    
+
     // We no longer immediately update settings here - will be saved with saveChanges
   };
 
@@ -108,33 +108,33 @@ const LabCustomFormatEditor = ({ appSettings, setAppSettings, generalDisplaySett
       ['header', new Set(['text'])],
       ['text', new Set()]
     ]);
-    
+
     // 檢查標題格式中是否有閉合括號 ']' #zh-TW
     const hasClosingBracket = headerFormat.some(item => {
       const baseId = item.id.split('_')[0];
       const secondPart = item.id.split('_')[1];
-      
+
       const isHeaderTextOrText = (
-        (headerElementTypeMap.has(baseId) && 
+        (headerElementTypeMap.has(baseId) &&
          (secondPart === undefined || headerElementTypeMap.get(baseId).has(secondPart))) ||
         (baseId === 'header' && secondPart === 'text')
       );
-      
+
       return isHeaderTextOrText && item.value === ']';
     });
-    
+
     // if (!hasClosingBracket) {
     //   console.warn('LabCustomFormatEditor: Closing bracket missing from header format!');
     // }
-    
+
     // Log the current itemSeparator before saving
     // console.log(`LabCustomFormatEditor: Current itemSeparator before saving: "${itemSeparator}" (${typeof itemSeparator})`);
-    
+
     // Save with format type
     saveChanges({
       formatType // Pass the current format type for lab only
     });
-    
+
     // Log final settings after saving
     // console.log('LabCustomFormatEditor: Saved format settings:', {
     //   header: headerFormat,
@@ -145,7 +145,7 @@ const LabCustomFormatEditor = ({ appSettings, setAppSettings, generalDisplaySett
     //   }
     // });
   };
-  
+
   // For directly testing separator
   // const testCurrentSeparator = () => {
   //   console.log(`====== LAB SEPARATOR TEST ======`);
@@ -155,10 +155,10 @@ const LabCustomFormatEditor = ({ appSettings, setAppSettings, generalDisplaySett
   // };
 
   return (
-    <Box sx={{ pt: 0, px: 1, pb: 1 }}>
+    <Box sx={{pt: 0, px: 1, pb: 1}}>
       {/* Header with title and buttons */}
-      <Box sx={{ display: 'flex', justifyContent: 'flex-end', alignItems: 'center', mb: 1, mt: 0 }}>
-        <Box sx={{ display: 'flex', gap: 1 }}>
+      <Box sx={{display: 'flex', justifyContent: 'flex-end', alignItems: 'center', mb: 1, mt: 0}}>
+        <Box sx={{display: 'flex', gap: 1}}>
           <Button
             variant="outlined"
             color="secondary"
@@ -192,24 +192,24 @@ const LabCustomFormatEditor = ({ appSettings, setAppSettings, generalDisplaySett
           </Button>
         </Box>
       </Box>
-      
+
       {/* Preview section */}
-      <Box sx={{ display: 'flex', flexDirection: 'column', bgcolor: '#f8f8f8', pt: 1, px: 2, pb: 1, borderRadius: 1, mb: 1 }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-          <Typography variant="subtitle1" fontWeight="medium" sx={{ width: '100%', textAlign: 'center' }}>
+      <Box sx={{display: 'flex', flexDirection: 'column', bgcolor: '#f8f8f8', pt: 1, px: 2, pb: 1, borderRadius: 1, mb: 1}}>
+        <Box sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1}}>
+          <Typography variant="subtitle1" fontWeight="medium" sx={{width: '100%', textAlign: 'center'}}>
             格式類型選擇與預覽
           </Typography>
         </Box>
-        
-        <FormatPreview 
-          headerFormat={headerFormat} 
-          itemFormat={itemFormat} 
+
+        <FormatPreview
+          headerFormat={headerFormat}
+          itemFormat={itemFormat}
           itemSeparator={itemSeparator}
           formatType={formatType}
           onFormatTypeChange={handleFormatTypeChange}
         />
       </Box>
-      
+
       {/* Header format panel */}
       <FormatElementsPanel
         title="標題格式 (只顯示一次)"
@@ -233,7 +233,7 @@ const LabCustomFormatEditor = ({ appSettings, setAppSettings, generalDisplaySett
           handleDragEnd: headerLabHandlers.handleHeaderDragEnd
         }}
       />
-      
+
       {/* Lab item format panel */}
       <FormatElementsPanel
         title="檢驗項目格式 (每個檢驗項目顯示一次)"
@@ -258,16 +258,16 @@ const LabCustomFormatEditor = ({ appSettings, setAppSettings, generalDisplaySett
           handleDragEnd: itemLabHandlers.handleItemDragEnd
         }}
       />
-      
+
       {/* Notifications */}
-      <Snackbar 
-        open={snackbarOpen} 
-        autoHideDuration={3000} 
+      <Snackbar
+        open={snackbarOpen}
+        autoHideDuration={3000}
         onClose={() => setSnackbarOpen(false)}
-        anchorOrigin={{ vertical: 'bottom', horizontal: 'center' }}
+        anchorOrigin={{vertical: 'bottom', horizontal: 'center'}}
       >
-        <Alert 
-          onClose={() => setSnackbarOpen(false)} 
+        <Alert
+          onClose={() => setSnackbarOpen(false)}
           severity={snackbarSeverity}
         >
           {snackbarMessage}
@@ -277,4 +277,4 @@ const LabCustomFormatEditor = ({ appSettings, setAppSettings, generalDisplaySett
   );
 };
 
-export default LabCustomFormatEditor; 
+export default LabCustomFormatEditor;

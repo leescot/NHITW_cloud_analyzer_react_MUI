@@ -1,18 +1,18 @@
 // dataManager.js
 // 統一管理所有數據處理相關的函數
 
-import { medicationProcessor } from "./medicationProcessor";
-import { labProcessor } from "./labProcessor";
-import { chineseMedProcessor } from "./chineseMedProcessor";
-import { imagingProcessor } from "./imagingProcessor";
-import { allergyProcessor } from "./allergyProcessor";
-import { surgeryProcessor } from "./surgeryProcessor";
-import { dischargeProcessor } from "./dischargeProcessor";
-import { medDaysProcessor } from "./medDaysProcessor";
-import { patientSummaryProcessor } from "./patientSummaryProcessor";
-import { cancerScreeningProcessor } from "./cancerScreeningProcessor";
-import { adultHealthCheckProcessor } from "./adultHealthCheckProcessor";
-import { hbcvdataProcessor } from "./hbcvdataProcessor";
+import {medicationProcessor} from "./medicationProcessor";
+import {labProcessor} from "./labProcessor";
+import {chineseMedProcessor} from "./chineseMedProcessor";
+import {imagingProcessor} from "./imagingProcessor";
+import {allergyProcessor} from "./allergyProcessor";
+import {surgeryProcessor} from "./surgeryProcessor";
+import {dischargeProcessor} from "./dischargeProcessor";
+import {medDaysProcessor} from "./medDaysProcessor";
+import {patientSummaryProcessor} from "./patientSummaryProcessor";
+import {cancerScreeningProcessor} from "./cancerScreeningProcessor";
+import {adultHealthCheckProcessor} from "./adultHealthCheckProcessor";
+import {hbcvdataProcessor} from "./hbcvdataProcessor";
 
 /**
  * 安全調用setter，如果setter不存在則寫入window全局變量
@@ -201,7 +201,7 @@ export const handleAllData = async (dataSources, settings, setters) => {
     ]);
 
     // 處理每個資料類型
-    for (const [dataType, { process }] of dataProcessors) {
+    for (const [dataType, {process}] of dataProcessors) {
       await process();
     }
 

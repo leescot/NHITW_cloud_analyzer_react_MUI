@@ -1,12 +1,12 @@
-import React, { useMemo, useEffect } from 'react';
-import { Box, Typography, Grid } from '@mui/material';
-import { previewDrugs, previewHeader, renderElem, ELEMENT_SECTIONS } from './formatEditorConfig';
+import React, {useMemo, useEffect} from 'react';
+import {Box, Typography, Grid} from '@mui/material';
+import {previewDrugs, previewHeader, renderElem, ELEMENT_SECTIONS} from './formatEditorConfig';
 
 // Component to render a single element in the preview
-const RenderPreviewElement = ({ item, index, drugData }) => {
+const RenderPreviewElement = ({item, index, drugData}) => {
   // Special handling for section-specific elements
   let baseId = item.id.split('_')[0];
-  
+
   // Extract actual element type for section-specific elements
   if (baseId === 'header' || baseId === 'drug') {
     const parts = item.id.split('_');
@@ -18,19 +18,19 @@ const RenderPreviewElement = ({ item, index, drugData }) => {
   } else if (item.id.includes('icdname')) {
     baseId = 'icdname';
   }
-  
+
   if (baseId === 'newline') {
     return <br key={index} />;
   }
-  
+
   // For format group elements, prioritize using the value directly
   if (item.group === 'format' && item.value) {
     return <React.Fragment key={index}>{item.value}</React.Fragment>;
   }
-  
+
   // Use renderElem for all other elements
   let displayValue = renderElem(item, index, drugData);
-  
+
   return (
     <React.Fragment key={index}>
       {displayValue}
@@ -39,31 +39,31 @@ const RenderPreviewElement = ({ item, index, drugData }) => {
 };
 
 // Vertical (stacked) preview format
-const VerticalPreview = ({ headerFormat, drugFormat, sx }) => {
+const VerticalPreview = ({headerFormat, drugFormat, sx}) => {
   return (
-    <Typography variant="body1" component="div" sx={{ whiteSpace: 'pre-wrap', p: 0.5, border: '1px solid #e0e0e0', borderRadius: 1, bgcolor: '#fafafa', ...sx }}>
+    <Typography variant="body1" component="div" sx={{whiteSpace: 'pre-wrap', p: 0.5, border: '1px solid #e0e0e0', borderRadius: 1, bgcolor: '#fafafa', ...sx}}>
       {/* Display header format */}
       {headerFormat.map((item, index) => (
-        <RenderPreviewElement 
-          key={`header-${index}`} 
-          item={item} 
-          index={`header-${index}`} 
-          drugData={previewDrugs[0]} 
+        <RenderPreviewElement
+          key={`header-${index}`}
+          item={item}
+          index={`header-${index}`}
+          drugData={previewDrugs[0]}
         />
       ))}
-      
+
       {/* Always add newline after header for vertical format */}
       <br />
-      
+
       {/* Display each drug's format */}
       {previewDrugs.map((drug, drugIndex) => (
         <React.Fragment key={`drug-${drugIndex}`}>
           {drugFormat.map((item, itemIndex) => (
-            <RenderPreviewElement 
-              key={`drug-${drugIndex}-${itemIndex}`} 
-              item={item} 
-              index={`drug-${drugIndex}-${itemIndex}`} 
-              drugData={drug} 
+            <RenderPreviewElement
+              key={`drug-${drugIndex}-${itemIndex}`}
+              item={item}
+              index={`drug-${drugIndex}-${itemIndex}`}
+              drugData={drug}
             />
           ))}
           {drugIndex < previewDrugs.length - 1 && <br />}
@@ -74,24 +74,24 @@ const VerticalPreview = ({ headerFormat, drugFormat, sx }) => {
 };
 
 // Horizontal (inline) preview format
-const HorizontalPreview = ({ headerFormat, drugFormat, drugSeparator, sx }) => {
+const HorizontalPreview = ({headerFormat, drugFormat, drugSeparator, sx}) => {
   return (
-    <Typography variant="body1" component="div" sx={{ whiteSpace: 'pre-wrap', p: 0.5, border: '1px solid #e0e0e0', borderRadius: 1, bgcolor: '#fafafa', ...sx }}>
+    <Typography variant="body1" component="div" sx={{whiteSpace: 'pre-wrap', p: 0.5, border: '1px solid #e0e0e0', borderRadius: 1, bgcolor: '#fafafa', ...sx}}>
       {/* All content in single line with simple structure */}
-      <Box sx={{ display: 'inline' }}>
+      <Box sx={{display: 'inline'}}>
         {/* Header section */}
         {headerFormat.map((item, index) => (
-          <RenderPreviewElement 
-            key={`header-${index}`} 
-            item={item} 
-            index={`header-${index}`} 
-            drugData={previewDrugs[0]} 
+          <RenderPreviewElement
+            key={`header-${index}`}
+            item={item}
+            index={`header-${index}`}
+            drugData={previewDrugs[0]}
           />
         ))}
-        
+
         {/* Never add line break for horizontal format */}
         <span> </span>
-        
+
         {/* Drugs inline with separators */}
         {previewDrugs.map((drug, drugIndex) => (
           <React.Fragment key={`drug-${drugIndex}`}>
@@ -99,14 +99,14 @@ const HorizontalPreview = ({ headerFormat, drugFormat, drugSeparator, sx }) => {
             {drugIndex > 0 && (
               <span>{drugSeparator}</span>
             )}
-            
+
             {/* Drug elements */}
             {drugFormat.map((item, itemIndex) => (
-              <RenderPreviewElement 
-                key={`drug-${drugIndex}-${itemIndex}`} 
-                item={item} 
-                index={`drug-${drugIndex}-${itemIndex}`} 
-                drugData={drug} 
+              <RenderPreviewElement
+                key={`drug-${drugIndex}-${itemIndex}`}
+                item={item}
+                index={`drug-${drugIndex}-${itemIndex}`}
+                drugData={drug}
               />
             ))}
           </React.Fragment>
@@ -117,9 +117,9 @@ const HorizontalPreview = ({ headerFormat, drugFormat, drugSeparator, sx }) => {
 };
 
 // Combined preview component
-const FormatPreview = ({ 
-  headerFormat, 
-  drugFormat, 
+const FormatPreview = ({
+  headerFormat,
+  drugFormat,
   drugSeparator,
   formatType = 'customVertical', // Add formatType prop with default value
   onFormatTypeChange // Add new prop for handling format type changes
@@ -132,7 +132,7 @@ const FormatPreview = ({
         console.warn(`Header format contains element with incorrect section: ${item.id}`, item);
       }
     });
-    
+
     // Validate all drug elements have the correct section
     drugFormat.forEach(item => {
       if (item.section !== ELEMENT_SECTIONS.DRUG && item.section !== ELEMENT_SECTIONS.BOTH) {
@@ -140,20 +140,20 @@ const FormatPreview = ({
       }
     });
   }, [headerFormat, drugFormat]);
-  
+
   // Check for proper bracket formatting
   const hasBracketOpen = headerFormat.some(item => {
     const baseId = item.id.split('_')[0];
     const isText = baseId === 'text' || (baseId === 'header' && item.id.includes('_text'));
     return isText && item.value === '[';
   });
-  
+
   const hasBracketClose = headerFormat.some(item => {
     const baseId = item.id.split('_')[0];
     const isText = baseId === 'text' || (baseId === 'header' && item.id.includes('_text'));
     return isText && item.value === ']';
   });
-  
+
   // 使用 Map 來處理格式類型與選擇狀態，提高可讀性和可擴展性 #zh-TW
   const formatTypesMap = new Map([
     ['customVertical', {
@@ -167,19 +167,19 @@ const FormatPreview = ({
       handler: () => onFormatTypeChange && onFormatTypeChange('customHorizontal')
     }]
   ]);
-  
+
   // 從 Map 取得所需的格式類型數據 #zh-TW
   const verticalFormat = formatTypesMap.get('customVertical');
   const horizontalFormat = formatTypesMap.get('customHorizontal');
-  
+
   return (
-    <Box sx={{ mb: 0 }}>
+    <Box sx={{mb: 0}}>
       {/* Title moved to parent component to avoid duplication */}
       <Grid container spacing={1}>
         <Grid item xs={12} md={6}>
-          <Box 
+          <Box
             onClick={verticalFormat.handler}
-            sx={{ 
+            sx={{
               border: verticalFormat.isSelected ? '2px solid #1976d2' : '1px solid #e0e0e0',
               borderRadius: 1,
               p: 0.5,
@@ -193,10 +193,10 @@ const FormatPreview = ({
               transition: 'all 0.2s'
             }}
           >
-            <Typography 
-              variant="subtitle2" 
-              align="center" 
-              sx={{ 
+            <Typography
+              variant="subtitle2"
+              align="center"
+              sx={{
                 mb: 0.25,
                 px: 1,
                 py: 0.25,
@@ -208,8 +208,8 @@ const FormatPreview = ({
             >
               {verticalFormat.name} {verticalFormat.isSelected && <>(已選擇)</>}
             </Typography>
-            <VerticalPreview 
-              headerFormat={headerFormat} 
+            <VerticalPreview
+              headerFormat={headerFormat}
               drugFormat={drugFormat}
               sx={{
                 border: 'none',
@@ -220,9 +220,9 @@ const FormatPreview = ({
           </Box>
         </Grid>
         <Grid item xs={12} md={6}>
-          <Box 
+          <Box
             onClick={horizontalFormat.handler}
-            sx={{ 
+            sx={{
               border: horizontalFormat.isSelected ? '2px solid #1976d2' : '1px solid #e0e0e0',
               borderRadius: 1,
               p: 0.5,
@@ -236,10 +236,10 @@ const FormatPreview = ({
               transition: 'all 0.2s'
             }}
           >
-            <Typography 
-              variant="subtitle2" 
-              align="center" 
-              sx={{ 
+            <Typography
+              variant="subtitle2"
+              align="center"
+              sx={{
                 mb: 0.25,
                 px: 1,
                 py: 0.25,
@@ -251,9 +251,9 @@ const FormatPreview = ({
             >
               {horizontalFormat.name} {horizontalFormat.isSelected && <>(已選擇)</>}
             </Typography>
-            <HorizontalPreview 
-              headerFormat={headerFormat} 
-              drugFormat={drugFormat} 
+            <HorizontalPreview
+              headerFormat={headerFormat}
+              drugFormat={drugFormat}
               drugSeparator={drugSeparator}
               sx={{
                 border: 'none',
@@ -268,4 +268,4 @@ const FormatPreview = ({
   );
 };
 
-export default FormatPreview; 
+export default FormatPreview;

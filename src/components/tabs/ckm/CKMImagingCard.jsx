@@ -1,5 +1,5 @@
 // CKM 影像卡片（含 EKG alert / LVEF 標註、報告 tooltip 與 dialog）— 由 CKMData.jsx 抽出
-import React, { useState, useMemo } from 'react';
+import React, {useState, useMemo} from 'react';
 import {
   Paper, Typography, Tooltip, IconButton, List, ListItem, ListItemText,
   Dialog, DialogTitle, DialogContent, DialogActions, Button, Box, Chip,
@@ -7,10 +7,10 @@ import {
 import DescriptionIcon from '@mui/icons-material/Description';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
 import TypographySizeWrapper from '../../utils/TypographySizeWrapper';
-import { SectionTitle, highlightReport, formatOrderName } from './ckmCardUtils';
+import {SectionTitle, highlightReport, formatOrderName} from './ckmCardUtils';
 
-const CKMImagingCard = ({ imaging, ekgAlerts, lvef, gds }) => {
-  const [reportDialog, setReportDialog] = useState({ open: false, content: '', title: '' });
+const CKMImagingCard = ({imaging, ekgAlerts, lvef, gds}) => {
+  const [reportDialog, setReportDialog] = useState({open: false, content: '', title: ''});
   const [copySuccess, setCopySuccess] = useState(false);
 
   const withReportOnly = useMemo(() => {
@@ -39,7 +39,7 @@ const CKMImagingCard = ({ imaging, ekgAlerts, lvef, gds }) => {
   if (withReportOnly.length === 0) return null;
 
   return (
-    <Paper variant="outlined" sx={{ borderRadius:1, mb:0.75, overflow:'hidden' }}>
+    <Paper variant="outlined" sx={{borderRadius: 1, mb: 0.75, overflow: 'hidden'}}>
       <SectionTitle>影像</SectionTitle>
       <List dense disablePadding>
         {withReportOnly.map((img, i) => {
@@ -47,11 +47,11 @@ const CKMImagingCard = ({ imaging, ekgAlerts, lvef, gds }) => {
           return (
           <ListItem
             key={i}
-            sx={{ py: 0.3, borderBottom: i < withReportOnly.length - 1 ? '1px solid #eee' : 0, alignItems: 'flex-start' }}
+            sx={{py: 0.3, borderBottom: i < withReportOnly.length - 1 ? '1px solid #eee' : 0, alignItems: 'flex-start'}}
             secondaryAction={
               <Tooltip
                 title={
-                  <Typography variant="caption" style={{whiteSpace:'pre-line'}}>
+                  <Typography variant="caption" style={{whiteSpace: 'pre-line'}}>
                     <div dangerouslySetInnerHTML={{__html: highlightReport(img.reportFull || img.reportExcerpt)}} />
                   </Typography>
                 }
@@ -79,20 +79,20 @@ const CKMImagingCard = ({ imaging, ekgAlerts, lvef, gds }) => {
           >
             <ListItemText
               primary={
-                <Box sx={{ display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 0.5 }}>
+                <Box sx={{display: 'flex', alignItems: 'center', flexWrap: 'wrap', gap: 0.5}}>
                   <TypographySizeWrapper textSizeType="content" generalDisplaySettings={gds}>
                     {formatOrderName(img.orderName)}
                   </TypographySizeWrapper>
                   <Chip
                     size="small"
                     label={`${img.date}${img.hospital ? ` ${img.hospital}` : ''}`}
-                    sx={{ fontSize: '0.7rem', height: 'auto', minHeight: '20px', bgcolor: 'transparent', border: '1px solid', borderColor: 'grey.300' }}
+                    sx={{fontSize: '0.7rem', height: 'auto', minHeight: '20px', bgcolor: 'transparent', border: '1px solid', borderColor: 'grey.300'}}
                   />
                 </Box>
               }
               secondary={
                 notes.length > 0 ? (
-                  <TypographySizeWrapper textSizeType="note" generalDisplaySettings={gds} sx={{ display: 'block', color: 'text.primary' }}>
+                  <TypographySizeWrapper textSizeType="note" generalDisplaySettings={gds} sx={{display: 'block', color: 'text.primary'}}>
                     {notes.join('；')}
                   </TypographySizeWrapper>
                 ) : null
@@ -103,20 +103,20 @@ const CKMImagingCard = ({ imaging, ekgAlerts, lvef, gds }) => {
         })}
       </List>
 
-      <Dialog open={reportDialog.open} onClose={() => setReportDialog({...reportDialog, open:false})} maxWidth="md" fullWidth>
+      <Dialog open={reportDialog.open} onClose={() => setReportDialog({...reportDialog, open: false})} maxWidth="md" fullWidth>
         <DialogTitle>
           <TypographySizeWrapper textSizeType="title" generalDisplaySettings={gds}>{reportDialog.title}</TypographySizeWrapper>
         </DialogTitle>
         <DialogContent dividers>
-          <TypographySizeWrapper textSizeType="content" generalDisplaySettings={gds} style={{whiteSpace:'pre-line'}}>
+          <TypographySizeWrapper textSizeType="content" generalDisplaySettings={gds} style={{whiteSpace: 'pre-line'}}>
             <div dangerouslySetInnerHTML={{__html: highlightReport(reportDialog.content)}} />
           </TypographySizeWrapper>
         </DialogContent>
         <DialogActions>
           <Button startIcon={<ContentCopyIcon/>} onClick={() => {
-            navigator.clipboard.writeText(reportDialog.content).then(() => { setCopySuccess(true); setTimeout(()=>setCopySuccess(false),2000); });
+            navigator.clipboard.writeText(reportDialog.content).then(() => { setCopySuccess(true); setTimeout(() => setCopySuccess(false), 2000); });
           }}>{copySuccess ? '已複製' : '複製'}</Button>
-          <Button onClick={() => setReportDialog({...reportDialog, open:false})}>關閉</Button>
+          <Button onClick={() => setReportDialog({...reportDialog, open: false})}>關閉</Button>
         </DialogActions>
       </Dialog>
     </Paper>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useMemo } from "react";
+import React, {useState, useEffect, useMemo} from "react";
 import {
   Box,
   Typography,
@@ -15,21 +15,21 @@ import {
   Tooltip,
   IconButton
 } from "@mui/material";
-import { styled } from '@mui/material/styles';
+import {styled} from '@mui/material/styles';
 import PrintIcon from '@mui/icons-material/Print';
-import { formatDate, formatDateShort, isWithinLast90Days } from './Overview_utils';
-import { FALLBACK_LAB_TESTS, SPECIAL_LAB_CODES } from '../settings/OverviewSettings';
+import {formatDate, formatDateShort, isWithinLast90Days} from './Overview_utils';
+import {FALLBACK_LAB_TESTS, SPECIAL_LAB_CODES} from '../settings/OverviewSettings';
 import TypographySizeWrapper from "../utils/TypographySizeWrapper";
 import LabItemTrendPopover from "./lab/LabItemTrendPopover";
-import { CKM_LAB_ITEMS, CKM_SPECIAL_LAB_CODES, classifyLabItem } from "../../utils/ckmUtils";
-import { buildNephroReport, renderNephroReportHTML, attachNephroReportHandlers } from "../../utils/nephroReportBuilder";
+import {CKM_LAB_ITEMS, CKM_SPECIAL_LAB_CODES, classifyLabItem} from "../../utils/ckmUtils";
+import {buildNephroReport, renderNephroReportHTML, attachNephroReportHandlers} from "../../utils/nephroReportBuilder";
 
 const Overview_LabTests = ({
   groupedLabs = [],
   labData,
   overviewSettings = {},
   generalDisplaySettings,
-  labSettings = { highlightAbnormalLab: true },
+  labSettings = {highlightAbnormalLab: true},
   enableCKM = false,
   userInfo = null
 }) => {
@@ -106,14 +106,14 @@ const Overview_LabTests = ({
   };
 
   return (
-    <Paper sx={{ p: 2, height: "auto" }}>
-      <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start' }}>
+    <Paper sx={{p: 2, height: "auto"}}>
+      <Box sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'flex-start'}}>
         <TypographySizeWrapper variant="h6" gutterBottom generalDisplaySettings={generalDisplaySettings}>
           關注檢驗 - {trackingDays} 天內
         </TypographySizeWrapper>
         {enableCKM && generalDisplaySettings?.enableNephroReport && (
           <Tooltip title="開新分頁顯示腎臟檢驗報告（可列印）">
-            <IconButton size="small" sx={{ color: '#1565c0' }} onClick={handleOpenNephroReport}>
+            <IconButton size="small" sx={{color: '#1565c0'}} onClick={handleOpenNephroReport}>
               <PrintIcon fontSize="small" />
             </IconButton>
           </Tooltip>
@@ -219,7 +219,6 @@ const Overview_LabTests = ({
                         lab.itemName.toLowerCase().includes('complete blood count') ||
                         lab.itemName.toLowerCase().includes('血球計數')
                       ))) {
-
                     // console.log("Debug - Found CBC lab item:", lab);
 
                     // Process based on the item details using our helper functions
@@ -257,9 +256,9 @@ const Overview_LabTests = ({
               // 使用 some() 方法檢查是否包含任何目標文本
               return targets.some(target => {
                 const lowerTarget = target.toLowerCase();
-                
+
                 // 使用多種匹配方式：包含、完全匹配、邊界匹配等
-                return lowerSource.includes(lowerTarget) || 
+                return lowerSource.includes(lowerTarget) ||
                        lowerSource === lowerTarget ||
                        lowerSource.startsWith(lowerTarget + ' ') ||
                        lowerSource.endsWith(' ' + lowerTarget) ||
@@ -297,23 +296,23 @@ const Overview_LabTests = ({
                   for (const [type, config] of cbcItemTypes.entries()) {
                     if (containsText(item.itemName, config.keywords)) {
                       foundItems.set(type, {
-                        ...item, 
-                        orderCode: config.orderCode, 
-                        date, 
+                        ...item,
+                        orderCode: config.orderCode,
+                        date,
                         displayName: config.displayName
                       });
                     }
                   }
                 }
-              } 
+              }
               // 如果是直接的實驗室項目（實驗室本身是 WBC、Hb 或 PLT）
               else {
                 for (const [type, config] of cbcItemTypes.entries()) {
                   if (containsText(lab.itemName, config.keywords)) {
                     foundItems.set(type, {
-                      ...lab, 
-                      orderCode: config.orderCode, 
-                      date, 
+                      ...lab,
+                      orderCode: config.orderCode,
+                      date,
                       displayName: config.displayName
                     });
                   }
@@ -432,10 +431,10 @@ const Overview_LabTests = ({
                   if (code === '08011C' && !wantHb) return;
                   const dn = classifyLabItem(lab);
                   if (!dn || !extraNames.has(dn)) return;
-                  ckmTests.push({ ...lab, date: labGroup.date, displayName: dn });
+                  ckmTests.push({...lab, date: labGroup.date, displayName: dn});
                 } else if (extraPlainCodes.has(code)) {
                   const item = extraItems.find(i => i.orderCode === code && !i.special);
-                  if (item) ckmTests.push({ ...lab, date: labGroup.date, displayName: item.displayName });
+                  if (item) ckmTests.push({...lab, date: labGroup.date, displayName: item.displayName});
                 }
               });
             });
@@ -562,11 +561,11 @@ const Overview_LabTests = ({
                   if (test.displayName) {
                     displayOrder[test.displayName] = index;
                   }
-                  
+
                   // 處理特殊映射的情況
                   if (orderCodeToDisplayMap.has(orderCode)) {
                     const displayNames = orderCodeToDisplayMap.get(orderCode);
-                    
+
                     if (Array.isArray(displayNames)) {
                       // 處理多個顯示名稱的情況 (例如 09015C -> Cr 及 GFR)
                       displayNames.forEach((name, offset) => {
@@ -627,8 +626,8 @@ const Overview_LabTests = ({
             const trendDateSet = new Set();
             [...matchingTests, ...ckmTests].forEach(test => {
               const dateKey = `${test.date}_`;
-              trendDateSet.add(JSON.stringify({ date: test.date, hosp: '' }));
-              if (!trendItems[test.displayName]) trendItems[test.displayName] = { displayName: test.displayName, values: {} };
+              trendDateSet.add(JSON.stringify({date: test.date, hosp: ''}));
+              if (!trendItems[test.displayName]) trendItems[test.displayName] = {displayName: test.displayName, values: {}};
               if (!trendItems[test.displayName].values[dateKey]) {
                 trendItems[test.displayName].values[dateKey] = {
                   value: test.value || test.result || '',
@@ -657,7 +656,7 @@ const Overview_LabTests = ({
                 } else if (lab.orderCode === '12111C') {
                   if (lab.abbrName === 'UACR' || (lab.itemName && (lab.itemName.toLowerCase().includes('u-acr') || lab.itemName.toLowerCase().includes('albumin/creatinine') || lab.itemName.toLowerCase().includes('/cre')))) dn = 'UACR';
                 } else if (isCBCCode(lab.orderCode)) {
-                  const n = ((lab.itemName||'') + ' ' + (lab.abbrName||'')).toLowerCase();
+                  const n = ((lab.itemName || '') + ' ' + (lab.abbrName || '')).toLowerCase();
                   if (/\bwbc\b|白血球/.test(n)) dn = 'WBC';
                   else if (/\bhb\b|hemoglobin|血色素/.test(n)) dn = 'Hb';
                   else if (/platelet|plt|血小板/.test(n)) dn = 'PLT';
@@ -666,7 +665,7 @@ const Overview_LabTests = ({
                 }
                 if (!dn || !trendItems[dn]) return;
                 const dateKey = `${labGroup.date}_`;
-                trendDateSet.add(JSON.stringify({ date: labGroup.date, hosp: '' }));
+                trendDateSet.add(JSON.stringify({date: labGroup.date, hosp: ''}));
                 if (!trendItems[dn].values[dateKey]) {
                   trendItems[dn].values[dateKey] = {
                     value: lab.value || lab.result || '',
@@ -696,7 +695,7 @@ const Overview_LabTests = ({
                         項目
                       </TableCell>
                       {uniqueDates.map(date => (
-                        <TableCell key={date} align="right" sx={{ py: 0.1, px: 1 }} >
+                        <TableCell key={date} align="right" sx={{py: 0.1, px: 1}} >
                           {formatDateShort(date)}
                         </TableCell>
                       ))}
@@ -723,7 +722,7 @@ const Overview_LabTests = ({
                             if (numericCount >= 2) {
                               return (
                                 <LabItemTrendPopover item={ti} dates={trendDates}>
-                                  <TypographySizeWrapper variant="body2" generalDisplaySettings={generalDisplaySettings} sx={{ textDecoration: 'underline dotted', textDecorationColor: '#bdbdbd', cursor: 'pointer' }}>
+                                  <TypographySizeWrapper variant="body2" generalDisplaySettings={generalDisplaySettings} sx={{textDecoration: 'underline dotted', textDecorationColor: '#bdbdbd', cursor: 'pointer'}}>
                                     {displayName}
                                   </TypographySizeWrapper>
                                 </LabItemTrendPopover>
@@ -758,7 +757,7 @@ const Overview_LabTests = ({
                                         return minDec <= maxDec ? min : max;
                                       })()
                                     : (test.value || test.result || '')
-                                ) : <span style={{ color: '#aaaaaa' }}>—</span>}
+                                ) : <span style={{color: '#aaaaaa'}}>—</span>}
                               </TypographySizeWrapper>
                             </TableCell>
                           );
@@ -768,8 +767,8 @@ const Overview_LabTests = ({
                     {/* CKM 追加列：細分隔線 + 小標題「CKM」 */}
                     {ckmRowNames.length > 0 && (
                       <TableRow>
-                        <TableCell colSpan={uniqueDates.length + 1} sx={{ py: 0.2, px: 1, borderTop: '2px solid #90caf9', bgcolor: '#f5f9ff' }}>
-                          <TypographySizeWrapper variant="caption" generalDisplaySettings={generalDisplaySettings} sx={{ fontWeight: 700, color: '#1565c0' }}>
+                        <TableCell colSpan={uniqueDates.length + 1} sx={{py: 0.2, px: 1, borderTop: '2px solid #90caf9', bgcolor: '#f5f9ff'}}>
+                          <TypographySizeWrapper variant="caption" generalDisplaySettings={generalDisplaySettings} sx={{fontWeight: 700, color: '#1565c0'}}>
                             CKM
                           </TypographySizeWrapper>
                         </TableCell>
@@ -780,7 +779,7 @@ const Overview_LabTests = ({
                         <TableCell
                           component="th"
                           scope="row"
-                          sx={{ py: 0.1, px: 1, position: 'sticky', left: 0, backgroundColor: 'background.paper', zIndex: 1 }}
+                          sx={{py: 0.1, px: 1, position: 'sticky', left: 0, backgroundColor: 'background.paper', zIndex: 1}}
                         >
                           {(() => {
                             const ti = trendItems[displayName];
@@ -788,7 +787,7 @@ const Overview_LabTests = ({
                             if (numericCount >= 2) {
                               return (
                                 <LabItemTrendPopover item={ti} dates={trendDates}>
-                                  <TypographySizeWrapper variant="body2" generalDisplaySettings={generalDisplaySettings} sx={{ textDecoration: 'underline dotted', textDecorationColor: '#bdbdbd', cursor: 'pointer' }}>
+                                  <TypographySizeWrapper variant="body2" generalDisplaySettings={generalDisplaySettings} sx={{textDecoration: 'underline dotted', textDecorationColor: '#bdbdbd', cursor: 'pointer'}}>
                                     {displayName}
                                   </TypographySizeWrapper>
                                 </LabItemTrendPopover>
@@ -807,7 +806,7 @@ const Overview_LabTests = ({
                           return (
                             <TableCell key={date} align="right" sx={cellStyles}>
                               <TypographySizeWrapper variant="body2" generalDisplaySettings={generalDisplaySettings}>
-                                {test ? (test.value || test.result || '') : <span style={{ color: '#aaaaaa' }}>—</span>}
+                                {test ? (test.value || test.result || '') : <span style={{color: '#aaaaaa'}}>—</span>}
                               </TypographySizeWrapper>
                             </TableCell>
                           );

@@ -44,7 +44,7 @@ const getValueStatus = (value, min, max) => {
       return statusFn();
     }
   }
-  
+
   return "normal";
 };
 

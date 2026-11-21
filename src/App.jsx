@@ -1,6 +1,6 @@
-import React, { useEffect } from 'react';
+import React, {useEffect} from 'react';
 
-import { updateDataStatus } from './utils/settingsHelper.js';
+import {updateDataStatus} from './utils/settingsHelper.js';
 
 function App() {
   useEffect(() => {

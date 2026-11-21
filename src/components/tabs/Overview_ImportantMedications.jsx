@@ -1,4 +1,4 @@
-import React, { useEffect } from "react";
+import React, {useEffect} from "react";
 import {
   Typography,
   Paper,
@@ -23,20 +23,20 @@ import LocalPharmacyIcon from '@mui/icons-material/LocalPharmacy';
 import HealingIcon from '@mui/icons-material/Healing';
 import HealthAndSafetyIcon from '@mui/icons-material/HealthAndSafety';
 import ImageIcon from '@mui/icons-material/Image';
-import { isWithinLast90Days, getMedicationColorGroup, formatDate } from "./Overview_utils";
+import {isWithinLast90Days, getMedicationColorGroup, formatDate} from "./Overview_utils";
 import TypographySizeWrapper from "../utils/TypographySizeWrapper";
 
 // Import default settings to use as fallbacks
-import { DEFAULT_SETTINGS } from "../../config/defaultSettings";
-import { DEFAULT_ATC5_GROUPS, DEFAULT_ATC5_COLOR_GROUPS } from "../../config/medicationGroups";
-import { getCKMMedicationGroups, buildMedKey } from "../../utils/ckmUtils";
-import { CKM_ATC_PREFIXES } from "../../config/ckmDefinitions";
+import {DEFAULT_SETTINGS} from "../../config/defaultSettings";
+import {DEFAULT_ATC5_GROUPS, DEFAULT_ATC5_COLOR_GROUPS} from "../../config/medicationGroups";
+import {getCKMMedicationGroups, buildMedKey} from "../../utils/ckmUtils";
+import {CKM_ATC_PREFIXES} from "../../config/ckmDefinitions";
 
 const Overview_ImportantMedications = ({
   groupedMedications = [],
   settings = {},
   overviewSettings = {},
-  generalDisplaySettings = { titleTextSize: 'medium', contentTextSize: 'medium', noteTextSize: 'small' },
+  generalDisplaySettings = {titleTextSize: 'medium', contentTextSize: 'medium', noteTextSize: 'small'},
   enableCKMBadge = false
 }) => {
   // Get tracking days from overviewSettings, fall back to 90 days if not set
@@ -45,7 +45,7 @@ const Overview_ImportantMedications = ({
   // CKM 關鍵用藥區：不受 ATC5 群組設定限制，直接以 CKM_ATC_PREFIXES 篩選
   const ckmGroups = enableCKMBadge
     ? getCKMMedicationGroups(groupedMedications, trackingDays)
-    : { categories: {}, medKeySet: new Set() };
+    : {categories: {}, medKeySet: new Set()};
   const hasCKMSection = enableCKMBadge &&
     Object.values(ckmGroups.categories).some(arr => arr.length > 0);
 
@@ -53,7 +53,7 @@ const Overview_ImportantMedications = ({
   // 同群組共用一個 rowSpan label
   const ckmTableData = [];
   if (hasCKMSection) {
-    for (const [cat, { label }] of Object.entries(CKM_ATC_PREFIXES)) {
+    for (const [cat, {label}] of Object.entries(CKM_ATC_PREFIXES)) {
       const items = ckmGroups.categories[cat] || [];
       items.forEach((med, i) => ckmTableData.push({
         category: cat,
@@ -137,7 +137,7 @@ const Overview_ImportantMedications = ({
           [() => dateStr.includes('/'), () => {
             const parts = dateStr.split('/');
             // 假設 YYYY/MM/DD 如果第一部分是 4 位數
-            return parts[0].length === 4 
+            return parts[0].length === 4
               ? new Date(parts[0], parts[1] - 1, parts[2])
               : new Date(parts[2], parts[1] - 1, parts[0]); // 否則假設 DD/MM/YYYY
           }],
@@ -208,8 +208,8 @@ const Overview_ImportantMedications = ({
       return;
     }
 
-    const { colorGroup } = med;
-    const { colorName } = colorGroup;
+    const {colorGroup} = med;
+    const {colorName} = colorGroup;
 
     if (!colorGroupedMeds[colorName]) {
       colorGroupedMeds[colorName] = {
@@ -326,14 +326,14 @@ const Overview_ImportantMedications = ({
   // 修改 getCategoryIcon 函數，使用 Map 代替 if-else
   const getCategoryIcon = (groupName) => {
     const iconMap = new Map([
-      ['NSAID', <MedicationIcon fontSize="small" sx={{ fontSize: '0.85rem' }} />],
-      ['ACEI', <LocalPharmacyIcon fontSize="small" sx={{ fontSize: '0.85rem' }} />],
-      ['ARB', <HealingIcon fontSize="small" sx={{ fontSize: '0.85rem' }} />],
-      ['STATIN', <HealthAndSafetyIcon fontSize="small" sx={{ fontSize: '0.85rem' }} />]
+      ['NSAID', <MedicationIcon fontSize="small" sx={{fontSize: '0.85rem'}} />],
+      ['ACEI', <LocalPharmacyIcon fontSize="small" sx={{fontSize: '0.85rem'}} />],
+      ['ARB', <HealingIcon fontSize="small" sx={{fontSize: '0.85rem'}} />],
+      ['STATIN', <HealthAndSafetyIcon fontSize="small" sx={{fontSize: '0.85rem'}} />]
     ]);
 
     // 返回對應圖標或預設藥物圖標
-    return iconMap.get(groupName) || <MedicationIcon fontSize="small" sx={{ fontSize: '0.85rem' }} />;
+    return iconMap.get(groupName) || <MedicationIcon fontSize="small" sx={{fontSize: '0.85rem'}} />;
   };
 
   // Helper function to create category badge
@@ -365,7 +365,7 @@ const Overview_ImportantMedications = ({
           boxShadow: '0 1px 2px rgba(0,0,0,0.1)'
         }}
       >
-        <Box component="span" sx={{ fontWeight: 600, fontSize: '0.7rem' }}>
+        <Box component="span" sx={{fontWeight: 600, fontSize: '0.7rem'}}>
           {groupName}
         </Box>
       </Box>
@@ -374,12 +374,12 @@ const Overview_ImportantMedications = ({
 
   // CKM 治療群組配色：血糖藍 / 血壓紅 / 利尿青 / 血脂橘 / 血栓紫 / 心臟淡紅
   const CKM_CATEGORY_COLORS = {
-    antidiabetic:     { light: alpha('#1565c0', 0.12), medium: '#1565c0', dark: '#0d47a1', name: '藍色' },
-    antihypertensive: { light: alpha('#c62828', 0.12), medium: '#c62828', dark: '#8e0000', name: '紅色' },
-    diuretic:         { light: alpha('#00897b', 0.12), medium: '#00897b', dark: '#005b4f', name: '青色' },
-    lipidLowering:    { light: alpha('#ef6c00', 0.15), medium: '#ef6c00', dark: '#b53d00', name: '橘色' },
-    antithrombotic:   { light: alpha('#6a1b9a', 0.12), medium: '#6a1b9a', dark: '#38006b', name: '紫色' },
-    cardiac:          { light: alpha('#ad1457', 0.12), medium: '#ad1457', dark: '#78002e', name: '淡紅' },
+    antidiabetic: {light: alpha('#1565c0', 0.12), medium: '#1565c0', dark: '#0d47a1', name: '藍色'},
+    antihypertensive: {light: alpha('#c62828', 0.12), medium: '#c62828', dark: '#8e0000', name: '紅色'},
+    diuretic: {light: alpha('#00897b', 0.12), medium: '#00897b', dark: '#005b4f', name: '青色'},
+    lipidLowering: {light: alpha('#ef6c00', 0.15), medium: '#ef6c00', dark: '#b53d00', name: '橘色'},
+    antithrombotic: {light: alpha('#6a1b9a', 0.12), medium: '#6a1b9a', dark: '#38006b', name: '紫色'},
+    cardiac: {light: alpha('#ad1457', 0.12), medium: '#ad1457', dark: '#78002e', name: '淡紅'},
   };
   const getCKMColorInfo = (category) =>
     CKM_CATEGORY_COLORS[category] || CKM_CATEGORY_COLORS.antidiabetic;
@@ -480,13 +480,13 @@ const Overview_ImportantMedications = ({
   };
 
   return (
-    <Paper sx={{ p: 2, height: "auto" }}>
+    <Paper sx={{p: 2, height: "auto"}}>
       <TypographySizeWrapper variant="h6" gutterBottom generalDisplaySettings={generalDisplaySettings}>
         關注西藥 - {trackingDays} 天內
       </TypographySizeWrapper>
       {/* CKM 關鍵用藥區：按六大治療群組分類，關鍵藥物加 badge */}
       {hasCKMSection && (
-        <TableContainer sx={{ mb: hasData || hasMedicationsButNoGroups ? 1.5 : 0 }}>
+        <TableContainer sx={{mb: hasData || hasMedicationsButNoGroups ? 1.5 : 0}}>
           <Table size="small" stickyHeader>
             <TableBody>
               {ckmTableData.map((row, index) => {
@@ -507,11 +507,11 @@ const Overview_ImportantMedications = ({
                       {getCategoryBadge(row.categoryLabel, ckmColorInfo)}
                     </TableCell>
                   )}
-                  <TableCell sx={{ py: 0.75 }}>
-                    <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+                  <TableCell sx={{py: 0.75}}>
+                    <Box sx={{display: 'flex', flexDirection: 'column'}}>
                       <TypographySizeWrapper
                         variant="body2"
-                        sx={{ fontWeight: 'medium' }}
+                        sx={{fontWeight: 'medium'}}
                         generalDisplaySettings={generalDisplaySettings}
                       >
                         {formatMedicationName(row.medication.name)}
@@ -519,7 +519,7 @@ const Overview_ImportantMedications = ({
                           <Chip
                             label={row.medication.keyDrugLabel}
                             size="small"
-                            sx={{ height: 16, fontSize: '0.6rem', ml: 0.5, bgcolor: ckmColorInfo.medium, color: '#fff', '& .MuiChip-label': { px: 0.4 } }}
+                            sx={{height: 16, fontSize: '0.6rem', ml: 0.5, bgcolor: ckmColorInfo.medium, color: '#fff', '& .MuiChip-label': {px: 0.4}}}
                           />
                         )}
                         {safeSettings.showExternalDrugImage && row.medication.drugcode && (
@@ -533,7 +533,7 @@ const Overview_ImportantMedications = ({
                                 padding: "2px",
                                 display: "inline-flex",
                                 verticalAlign: "text-top",
-                                '&:hover': { opacity: 1 }
+                                '&:hover': {opacity: 1}
                               }}
                             >
                               <ImageIcon sx={{
@@ -551,8 +551,8 @@ const Overview_ImportantMedications = ({
                         <TypographySizeWrapper
                           variant="caption"
                           color="text.secondary"
-                          sx={{ mt: 0.25 }}
-                          style={{ fontSize: '0.7rem', lineHeight: 1.3 }}
+                          sx={{mt: 0.25}}
+                          style={{fontSize: '0.7rem', lineHeight: 1.3}}
                           generalDisplaySettings={generalDisplaySettings}
                         >
                           {row.medication.genericName}
@@ -560,8 +560,8 @@ const Overview_ImportantMedications = ({
                       )}
                     </Box>
                   </TableCell>
-                  <TableCell sx={{ py: 0.75, width: '36%' }}>
-                    <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                  <TableCell sx={{py: 0.75, width: '36%'}}>
+                    <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 0.5}}>
                       {row.medication.prescriptions.slice(0, 3).map((prescription, i) => {
                         const hasRemainingMed = prescription.drug_left > 0;
                         return (
@@ -578,7 +578,7 @@ const Overview_ImportantMedications = ({
                             <Chip
                               size="small"
                               label={
-                                <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                <Box sx={{display: 'flex', alignItems: 'center'}}>
                                   <span>{`${formatDate(prescription.date)}${prescription.hospital ? ` ${prescription.hospital}` : ''}`}</span>
                                   {hasRemainingMed && (
                                     <Box component="span" sx={{
@@ -588,7 +588,7 @@ const Overview_ImportantMedications = ({
                                       fontSize: '0.65rem',
                                       color: ckmColorInfo.dark
                                     }}>
-                                      <LocalPharmacyIcon sx={{ fontSize: '0.75rem', mr: 0.2 }} />
+                                      <LocalPharmacyIcon sx={{fontSize: '0.75rem', mr: 0.2}} />
                                       {prescription.drug_left}天
                                     </Box>
                                   )}
@@ -615,7 +615,7 @@ const Overview_ImportantMedications = ({
                           <Chip
                             size="small"
                             label={`+${row.medication.prescriptions.length - 3}`}
-                            sx={{ fontSize: '0.7rem', height: '20px', bgcolor: 'grey.100' }}
+                            sx={{fontSize: '0.7rem', height: '20px', bgcolor: 'grey.100'}}
                           />
                         </Tooltip>
                       )}
@@ -657,7 +657,7 @@ const Overview_ImportantMedications = ({
 
                 return (
                   <TableRow key={index} sx={{
-                    '& > *': { borderBottom: row.isGroupHeader && index < tableData.length - 1 && tableData[index + 1].isGroupHeader === false ? 0 : 1 },
+                    '& > *': {borderBottom: row.isGroupHeader && index < tableData.length - 1 && tableData[index + 1].isGroupHeader === false ? 0 : 1},
                   }}>
                     <TableCell
                       align="center"
@@ -707,11 +707,11 @@ const Overview_ImportantMedications = ({
                         })()
                       )}
                     </TableCell>
-                    <TableCell sx={{ py: 0.75 }}>
-                      <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+                    <TableCell sx={{py: 0.75}}>
+                      <Box sx={{display: 'flex', flexDirection: 'column'}}>
                         <TypographySizeWrapper
                           variant="body2"
-                          sx={{ fontWeight: 'medium' }}
+                          sx={{fontWeight: 'medium'}}
                           generalDisplaySettings={generalDisplaySettings}
                         >
                           {formatMedicationName(row.medication.name)}
@@ -746,7 +746,7 @@ const Overview_ImportantMedications = ({
                           <TypographySizeWrapper
                             variant="caption"
                             color="text.secondary"
-                            sx={{ mt: 0.25 }}
+                            sx={{mt: 0.25}}
                             generalDisplaySettings={generalDisplaySettings}
                           >
                             {row.medication.genericName}
@@ -754,8 +754,8 @@ const Overview_ImportantMedications = ({
                         )}
                       </Box>
                     </TableCell>
-                    <TableCell sx={{ py: 0.75 }}>
-                      <Box sx={{ display: 'flex', flexWrap: 'wrap', gap: 0.5 }}>
+                    <TableCell sx={{py: 0.75}}>
+                      <Box sx={{display: 'flex', flexWrap: 'wrap', gap: 0.5}}>
                         {row.medication.prescriptions.slice(0, 3).map((prescription, i) => {
                           // Determine if this prescription has remaining medication
                           const hasRemainingMed = prescription.drug_left > 0;
@@ -790,7 +790,7 @@ const Overview_ImportantMedications = ({
                               <Chip
                                 size="small"
                                 label={
-                                  <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                                  <Box sx={{display: 'flex', alignItems: 'center'}}>
                                     <span>{`${formatDate(prescription.date)}${prescription.hospital ? ` ${prescription.hospital}` : ''}`}</span>
                                     {hasRemainingMed && (
                                       <Box component="span" sx={{
@@ -800,7 +800,7 @@ const Overview_ImportantMedications = ({
                                         fontSize: '0.65rem',
                                         color: chipColorInfo?.dark || 'text.secondary'
                                       }}>
-                                        <LocalPharmacyIcon sx={{ fontSize: '0.75rem', mr: 0.2 }} />
+                                        <LocalPharmacyIcon sx={{fontSize: '0.75rem', mr: 0.2}} />
                                         {prescription.drug_left}天
                                       </Box>
                                     )}
@@ -849,8 +849,8 @@ const Overview_ImportantMedications = ({
           <Table size="small" stickyHeader>
             <TableHead>
               <TableRow>
-                <TableCell sx={{ fontWeight: 'bold', width: '40%' }}>藥物名稱</TableCell>
-                <TableCell sx={{ fontWeight: 'bold', width: '60%' }}>使用日期資訊</TableCell>
+                <TableCell sx={{fontWeight: 'bold', width: '40%'}}>藥物名稱</TableCell>
+                <TableCell sx={{fontWeight: 'bold', width: '60%'}}>使用日期資訊</TableCell>
               </TableRow>
             </TableHead>
             <TableBody>
@@ -859,11 +859,11 @@ const Overview_ImportantMedications = ({
 
                 return (
                   <TableRow key={index}>
-                    <TableCell sx={{ py: 0.75 }}>
-                      <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+                    <TableCell sx={{py: 0.75}}>
+                      <Box sx={{display: 'flex', flexDirection: 'column'}}>
                         <TypographySizeWrapper
                           variant="body2"
-                          sx={{ fontWeight: 'medium' }}
+                          sx={{fontWeight: 'medium'}}
                           generalDisplaySettings={generalDisplaySettings}
                         >
                           {formatMedicationName(med.name)}
@@ -898,7 +898,7 @@ const Overview_ImportantMedications = ({
                           <TypographySizeWrapper
                             variant="caption"
                             color="text.secondary"
-                            sx={{ mt: 0.25 }}
+                            sx={{mt: 0.25}}
                             generalDisplaySettings={generalDisplaySettings}
                           >
                             {med.days}天
@@ -906,12 +906,12 @@ const Overview_ImportantMedications = ({
                         )}
                       </Box>
                     </TableCell>
-                    <TableCell sx={{ py: 0.75 }}>
+                    <TableCell sx={{py: 0.75}}>
                       <Tooltip title={hasRemainingMed ? `餘藥 ${med.drug_left} 天${med.days ? ` | 用藥 ${med.days} 天` : ''}` : med.days ? `用藥 ${med.days} 天` : ''}>
                         <Chip
                           size="small"
                           label={
-                            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+                            <Box sx={{display: 'flex', alignItems: 'center'}}>
                               <span>{`${formatDate(med.date)}${med.hospital ? ` ${med.hospital}` : ''}`}</span>
                               {hasRemainingMed && (
                                 <Box component="span" sx={{
@@ -921,7 +921,7 @@ const Overview_ImportantMedications = ({
                                   fontSize: '0.65rem',
                                   color: 'text.secondary'
                                 }}>
-                                  <LocalPharmacyIcon sx={{ fontSize: '0.75rem', mr: 0.2 }} />
+                                  <LocalPharmacyIcon sx={{fontSize: '0.75rem', mr: 0.2}} />
                                   {med.drug_left}天
                                 </Box>
                               )}
@@ -979,7 +979,7 @@ const Overview_ImportantMedications = ({
         autoHideDuration={2000}
         onClose={handleSnackbarClose}
         message={snackbarMessage}
-        anchorOrigin={{ vertical: "bottom", horizontal: "center" }}
+        anchorOrigin={{vertical: "bottom", horizontal: "center"}}
       />
     </Paper>
   );

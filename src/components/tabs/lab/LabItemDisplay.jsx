@@ -1,7 +1,7 @@
 import React from "react";
-import { Box, Checkbox, FormControlLabel } from "@mui/material";
+import {Box, Checkbox, FormControlLabel} from "@mui/material";
 import TypographySizeWrapper from "../../utils/TypographySizeWrapper";
-import { getStatusColor, formatReferenceRange } from "../../utils/lab/LabUtilities";
+import {getStatusColor, formatReferenceRange} from "../../utils/lab/LabUtilities";
 
 // 生成測試項目顯示
 const LabItemDisplay = ({
@@ -32,8 +32,8 @@ const LabItemDisplay = ({
   const displayComponents = new Map([
     // 顯示帶有複選框的版本 - 當啟用自定義複製且顯示格式不是垂直或水平
     [
-      () => enableLabChooseCopy && 
-            (displayLabFormat !== 'vertical' && 
+      () => enableLabChooseCopy &&
+            (displayLabFormat !== 'vertical' &&
              displayLabFormat !== 'horizontal'),
       () => (
         <FormControlLabel
@@ -66,11 +66,11 @@ const LabItemDisplay = ({
               }}
             >
               {enableLabAbbrev ? (lab.abbrName || lab.itemName) : lab.itemName}{" "}
-              <span style={{ fontWeight: 'medium' }}>
+              <span style={{fontWeight: 'medium'}}>
                 {lab.value}
               </span>
               {showUnit && lab.unit && (
-                <span style={{ color: "gray" }}>{` ${lab.unit}`}</span>
+                <span style={{color: "gray"}}>{` ${lab.unit}`}</span>
               )}
               {formatReferenceRange(lab, showReference)}
             </TypographySizeWrapper>
@@ -107,11 +107,11 @@ const LabItemDisplay = ({
           }}
         >
           {enableLabAbbrev ? (lab.abbrName || lab.itemName) : lab.itemName}{" "}
-          <span style={{ fontWeight: 'medium' }}>
+          <span style={{fontWeight: 'medium'}}>
             {lab.value}
           </span>
           {showUnit && lab.unit && (
-            <span style={{ color: "gray" }}>{` ${lab.unit}`}</span>
+            <span style={{color: "gray"}}>{` ${lab.unit}`}</span>
           )}
           {formatReferenceRange(lab, showReference)}
         </TypographySizeWrapper>

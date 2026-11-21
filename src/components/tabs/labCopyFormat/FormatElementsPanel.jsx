@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, {useState} from 'react';
 import {
   Box,
   Typography,
@@ -27,13 +27,13 @@ import DragIndicatorIcon from '@mui/icons-material/DragIndicator';
 import SortIcon from '@mui/icons-material/Sort';
 import FilterAltIcon from '@mui/icons-material/FilterAlt';
 import TextFormatIcon from '@mui/icons-material/TextFormat';
-import { elementGroups, ELEMENT_SECTIONS } from './formatEditorConfig';
+import {elementGroups, ELEMENT_SECTIONS} from './formatEditorConfig';
 
 // Format element component
-const FormatElement = ({ 
-  item, 
-  index, 
-  onRemove, 
+const FormatElement = ({
+  item,
+  index,
+  onRemove,
   formatClass,
   dragHandlers = {}
 }) => {
@@ -43,13 +43,13 @@ const FormatElement = ({
   };
 
   // Destructure drag handlers for cleaner code
-  const { 
-    handleDragStart, 
-    handleDragEnter, 
-    handleDragOver, 
-    handleDragLeave, 
-    handleDrop, 
-    handleDragEnd 
+  const {
+    handleDragStart,
+    handleDragEnter,
+    handleDragOver,
+    handleDragLeave,
+    handleDrop,
+    handleDragEnd
   } = dragHandlers;
 
   const isNewline = item.id.includes('newline');
@@ -57,7 +57,7 @@ const FormatElement = ({
   // Use specific styling for newline elements
   if (isNewline) {
     return (
-      <Box 
+      <Box
         className={`newline-item ${formatClass}`}
         sx={{
           display: 'flex',
@@ -92,7 +92,7 @@ const FormatElement = ({
         onDrop={handleDrop}
         onDragEnd={handleDragEnd}
       >
-        <DragIndicatorIcon sx={{ mr: 0.5, color: 'text.secondary', fontSize: '1rem' }} />
+        <DragIndicatorIcon sx={{mr: 0.5, color: 'text.secondary', fontSize: '1rem'}} />
         <Typography
           variant="body2"
           sx={{
@@ -104,12 +104,12 @@ const FormatElement = ({
         >
           {item.display}
         </Typography>
-        <IconButton 
-          size="small" 
+        <IconButton
+          size="small"
           onClick={() => onRemove(index)}
-          sx={{ p: 0.25 }}
+          sx={{p: 0.25}}
         >
-          <DeleteIcon sx={{ fontSize: '1rem' }} />
+          <DeleteIcon sx={{fontSize: '1rem'}} />
         </IconButton>
       </Box>
     );
@@ -142,7 +142,7 @@ const FormatElement = ({
       onDrop={(e) => handleDrop && handleDrop(e)}
       onDragEnd={(e) => handleDragEnd && handleDragEnd(e)}
     >
-      <DragIndicatorIcon sx={{ mr: 0.5, color: 'text.secondary', fontSize: '1rem' }} />
+      <DragIndicatorIcon sx={{mr: 0.5, color: 'text.secondary', fontSize: '1rem'}} />
       <Typography
         variant="body2"
         sx={{
@@ -154,12 +154,12 @@ const FormatElement = ({
       >
         {item.value !== undefined ? item.value : item.display}
       </Typography>
-      <IconButton 
-        size="small" 
+      <IconButton
+        size="small"
         onClick={() => onRemove(index)}
-        sx={{ p: 0.25 }}
+        sx={{p: 0.25}}
       >
-        <DeleteIcon sx={{ fontSize: '1rem' }} />
+        <DeleteIcon sx={{fontSize: '1rem'}} />
       </IconButton>
     </Box>
   );
@@ -190,9 +190,9 @@ const FormatElementsPanel = ({
   const [tempSeparator, setTempSeparator] = useState(itemSeparator || ', ');
   // Add local text value for input field
   const [localTextValue, setLocalTextValue] = useState('');
-  
+
   const isHorizontalFormat = currentFormatType === 'customHorizontal';
-  
+
   // Get the element section based on format type
   const getElementSection = () => {
     return formatType === 'header' ? ELEMENT_SECTIONS.LABHEADER : ELEMENT_SECTIONS.LABCONTENT;
@@ -223,26 +223,26 @@ const FormatElementsPanel = ({
   const handleSaveSeparator = () => {
     if (setItemSeparator) {
       console.log(`FormatElementsPanel: Updating itemSeparator from "${itemSeparator}" to "${tempSeparator}"`);
-      
+
       // Ensure we're passing a string and use a default if empty
       const sanitizedSeparator = String(tempSeparator || ', ');
-      
+
       // Ensure the separator is visible in logs by showing escaped characters
       const loggableSeparator = sanitizedSeparator
         .replace(/\n/g, '\\n')
         .replace(/\r/g, '\\r')
         .replace(/\t/g, '\\t');
-      
+
       console.log(`FormatElementsPanel: Final sanitized separator: "${loggableSeparator}" (${typeof sanitizedSeparator})`);
-      
+
       // Call the setter function
       setItemSeparator(sanitizedSeparator);
-      
+
       // Verify the value was updated in the local state
       setTimeout(() => {
         console.log(`FormatElementsPanel: After update, itemSeparator is now: "${itemSeparator}"`);
       }, 0);
-      
+
       // Close the dialog after saving
       setSeparatorDialogOpen(false);
     } else {
@@ -255,12 +255,12 @@ const FormatElementsPanel = ({
   const renderHeaderElements = () => {
     // Find element by ID and section
     const findElement = (id, group) => {
-      return availableElements.find(item => 
-        (item.id === id || item.id === 'header_' + id) && 
+      return availableElements.find(item =>
+        (item.id === id || item.id === 'header_' + id) &&
         item.section === ELEMENT_SECTIONS.LABHEADER
       );
     };
-    
+
     const dateElement = findElement('date', 'header');
     const hospElement = findElement('hosp', 'header');
     const spaceElement = findElement('space', 'format') || findElement('header_space', 'format');
@@ -277,18 +277,18 @@ const FormatElementsPanel = ({
         onAddItem(itemToAdd);
       }
     };
-    
+
     return (
       <>
         {/* Row 1: Date and Hospital */}
-        <Box sx={{ display: 'flex', gap: 0.5, mb: 0.5 }}>
+        <Box sx={{display: 'flex', gap: 0.5, mb: 0.5}}>
           {dateElement && (
-            <Box sx={{ flex: 1, bgcolor: elementGroups.header.lightColor, borderRadius: 1, border: '1px solid', borderColor: 'divider' }}>
+            <Box sx={{flex: 1, bgcolor: elementGroups.header.lightColor, borderRadius: 1, border: '1px solid', borderColor: 'divider'}}>
               <Button
                 fullWidth
                 size="small"
                 variant="text"
-                startIcon={<AddIcon sx={{ fontSize: '0.8rem' }} />}
+                startIcon={<AddIcon sx={{fontSize: '0.8rem'}} />}
                 onClick={() => addElement(dateElement)}
                 sx={{
                   justifyContent: 'flex-start',
@@ -304,12 +304,12 @@ const FormatElementsPanel = ({
             </Box>
           )}
           {hospElement && (
-            <Box sx={{ flex: 1, bgcolor: elementGroups.header.lightColor, borderRadius: 1, border: '1px solid', borderColor: 'divider' }}>
+            <Box sx={{flex: 1, bgcolor: elementGroups.header.lightColor, borderRadius: 1, border: '1px solid', borderColor: 'divider'}}>
               <Button
                 fullWidth
                 size="small"
                 variant="text"
-                startIcon={<AddIcon sx={{ fontSize: '0.8rem' }} />}
+                startIcon={<AddIcon sx={{fontSize: '0.8rem'}} />}
                 onClick={() => addElement(hospElement)}
                 sx={{
                   justifyContent: 'flex-start',
@@ -325,21 +325,21 @@ const FormatElementsPanel = ({
             </Box>
           )}
         </Box>
-        
+
         {/* Space element */}
         {spaceElement && (
-          <Box sx={{ 
-            mb: 0.5, 
-            bgcolor: elementGroups.format.mediumColor, 
-            borderRadius: 1, 
-            border: '1px solid', 
-            borderColor: 'divider' 
+          <Box sx={{
+            mb: 0.5,
+            bgcolor: elementGroups.format.mediumColor,
+            borderRadius: 1,
+            border: '1px solid',
+            borderColor: 'divider'
           }}>
             <Button
               fullWidth
               size="small"
               variant="text"
-              startIcon={<AddIcon sx={{ fontSize: '0.8rem' }} />}
+              startIcon={<AddIcon sx={{fontSize: '0.8rem'}} />}
               onClick={() => addElement(spaceElement)}
               sx={{
                 justifyContent: 'flex-start',
@@ -354,14 +354,14 @@ const FormatElementsPanel = ({
             </Button>
           </Box>
         )}
-        
+
         {/* Text input field */}
         <TextField
           size="small"
           placeholder="輸入標題文字"
           value={localTextValue}
           onChange={(e) => setLocalTextValue(e.target.value)}
-          sx={{ 
+          sx={{
             fontSize: '0.8rem',
             height: '28px',
             '& .MuiOutlinedInput-root': {
@@ -379,7 +379,7 @@ const FormatElementsPanel = ({
                   size="small"
                   onClick={handleAddCustomText}
                   disabled={!localTextValue.trim()}
-                  sx={{ color: elementGroups.format.color, padding: '1px' }}
+                  sx={{color: elementGroups.format.color, padding: '1px'}}
                 >
                   <AddIcon fontSize="small" />
                 </IconButton>
@@ -395,19 +395,19 @@ const FormatElementsPanel = ({
   const renderLabElements = () => {
     // Find element by ID and section
     const findElement = (id, group) => {
-      return availableElements.find(item => 
-        (item.id === id || item.id === 'lab_' + id) && 
+      return availableElements.find(item =>
+        (item.id === id || item.id === 'lab_' + id) &&
         item.section === ELEMENT_SECTIONS.LABCONTENT
       );
     };
-    
+
     const itemNameElement = findElement('itemName', 'labItem');
     const orderCodeElement = findElement('orderCode', 'labItem');
     const valueElement = findElement('value', 'labValue');
     const unitElement = findElement('unit', 'labValue');
     const consultValueElement = findElement('consultValue', 'labValue');
     const spaceElement = findElement('space', 'format') || findElement('lab_space', 'format');
-    
+
     // Function to add an element to the format
     const addElement = (item) => {
       if (item) {
@@ -419,18 +419,18 @@ const FormatElementsPanel = ({
         onAddItem(itemToAdd);
       }
     };
-    
+
     return (
       <>
         {/* Row 1: Item Name and Value */}
-        <Box sx={{ display: 'flex', gap: 0.5, mb: 0.5 }}>
+        <Box sx={{display: 'flex', gap: 0.5, mb: 0.5}}>
           {itemNameElement && (
-            <Box sx={{ flex: 1, bgcolor: elementGroups.labItem.lightColor, borderRadius: 1, border: '1px solid', borderColor: 'divider' }}>
+            <Box sx={{flex: 1, bgcolor: elementGroups.labItem.lightColor, borderRadius: 1, border: '1px solid', borderColor: 'divider'}}>
               <Button
                 fullWidth
                 size="small"
                 variant="text"
-                startIcon={<AddIcon sx={{ fontSize: '0.8rem' }} />}
+                startIcon={<AddIcon sx={{fontSize: '0.8rem'}} />}
                 onClick={() => addElement(itemNameElement)}
                 sx={{
                   justifyContent: 'flex-start',
@@ -446,12 +446,12 @@ const FormatElementsPanel = ({
             </Box>
           )}
           {valueElement && (
-            <Box sx={{ flex: 1, bgcolor: elementGroups.labValue.lightColor, borderRadius: 1, border: '1px solid', borderColor: 'divider' }}>
+            <Box sx={{flex: 1, bgcolor: elementGroups.labValue.lightColor, borderRadius: 1, border: '1px solid', borderColor: 'divider'}}>
               <Button
                 fullWidth
                 size="small"
                 variant="text"
-                startIcon={<AddIcon sx={{ fontSize: '0.8rem' }} />}
+                startIcon={<AddIcon sx={{fontSize: '0.8rem'}} />}
                 onClick={() => addElement(valueElement)}
                 sx={{
                   justifyContent: 'flex-start',
@@ -467,16 +467,16 @@ const FormatElementsPanel = ({
             </Box>
           )}
         </Box>
-        
+
         {/* Row 2: Order Code and Unit */}
-        <Box sx={{ display: 'flex', gap: 0.5, mb: 0.5 }}>
+        <Box sx={{display: 'flex', gap: 0.5, mb: 0.5}}>
           {orderCodeElement && (
-            <Box sx={{ flex: 1, bgcolor: elementGroups.labItem.lightColor, borderRadius: 1, border: '1px solid', borderColor: 'divider' }}>
+            <Box sx={{flex: 1, bgcolor: elementGroups.labItem.lightColor, borderRadius: 1, border: '1px solid', borderColor: 'divider'}}>
               <Button
                 fullWidth
                 size="small"
                 variant="text"
-                startIcon={<AddIcon sx={{ fontSize: '0.8rem' }} />}
+                startIcon={<AddIcon sx={{fontSize: '0.8rem'}} />}
                 onClick={() => addElement(orderCodeElement)}
                 sx={{
                   justifyContent: 'flex-start',
@@ -492,12 +492,12 @@ const FormatElementsPanel = ({
             </Box>
           )}
           {unitElement && (
-            <Box sx={{ flex: 1, bgcolor: elementGroups.labValue.lightColor, borderRadius: 1, border: '1px solid', borderColor: 'divider' }}>
+            <Box sx={{flex: 1, bgcolor: elementGroups.labValue.lightColor, borderRadius: 1, border: '1px solid', borderColor: 'divider'}}>
               <Button
                 fullWidth
                 size="small"
                 variant="text"
-                startIcon={<AddIcon sx={{ fontSize: '0.8rem' }} />}
+                startIcon={<AddIcon sx={{fontSize: '0.8rem'}} />}
                 onClick={() => addElement(unitElement)}
                 sx={{
                   justifyContent: 'flex-start',
@@ -513,16 +513,16 @@ const FormatElementsPanel = ({
             </Box>
           )}
         </Box>
-        
+
         {/* Row 3: Consult Value and Space */}
-        <Box sx={{ display: 'flex', flexDirection: 'column', gap: 0.5, mb: 0.5 }}>
+        <Box sx={{display: 'flex', flexDirection: 'column', gap: 0.5, mb: 0.5}}>
           {consultValueElement && (
-            <Box sx={{ bgcolor: elementGroups.labValue.lightColor, borderRadius: 1, border: '1px solid', borderColor: 'divider' }}>
+            <Box sx={{bgcolor: elementGroups.labValue.lightColor, borderRadius: 1, border: '1px solid', borderColor: 'divider'}}>
               <Button
                 fullWidth
                 size="small"
                 variant="text"
-                startIcon={<AddIcon sx={{ fontSize: '0.8rem' }} />}
+                startIcon={<AddIcon sx={{fontSize: '0.8rem'}} />}
                 onClick={() => addElement(consultValueElement)}
                 sx={{
                   justifyContent: 'flex-start',
@@ -538,17 +538,17 @@ const FormatElementsPanel = ({
             </Box>
           )}
           {spaceElement && (
-            <Box sx={{ 
-              bgcolor: elementGroups.format.mediumColor, 
-              borderRadius: 1, 
-              border: '1px solid', 
-              borderColor: 'divider' 
+            <Box sx={{
+              bgcolor: elementGroups.format.mediumColor,
+              borderRadius: 1,
+              border: '1px solid',
+              borderColor: 'divider'
             }}>
               <Button
                 fullWidth
                 size="small"
                 variant="text"
-                startIcon={<AddIcon sx={{ fontSize: '0.8rem' }} />}
+                startIcon={<AddIcon sx={{fontSize: '0.8rem'}} />}
                 onClick={() => addElement(spaceElement)}
                 sx={{
                   justifyContent: 'flex-start',
@@ -564,14 +564,14 @@ const FormatElementsPanel = ({
             </Box>
           )}
         </Box>
-        
+
         {/* Text input field */}
         <TextField
           size="small"
           placeholder="輸入檢驗項目文字"
           value={localTextValue}
           onChange={(e) => setLocalTextValue(e.target.value)}
-          sx={{ 
+          sx={{
             fontSize: '0.8rem',
             height: '28px',
             '& .MuiOutlinedInput-root': {
@@ -589,7 +589,7 @@ const FormatElementsPanel = ({
                   size="small"
                   onClick={handleAddCustomText}
                   disabled={!localTextValue.trim()}
-                  sx={{ color: elementGroups.format.color, padding: '1px' }}
+                  sx={{color: elementGroups.format.color, padding: '1px'}}
                 >
                   <AddIcon fontSize="small" />
                 </IconButton>
@@ -602,17 +602,17 @@ const FormatElementsPanel = ({
   };
 
   return (
-    <Card variant="outlined" sx={{ mb: 2 }}>
-      <CardContent sx={{ p: 1, '&:last-child': { pb: 1 } }}>
-        <Box sx={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1 }}>
-          <Typography variant="h6" sx={{ fontSize: '1rem', m: 0 }}>{title}</Typography>
-          
+    <Card variant="outlined" sx={{mb: 2}}>
+      <CardContent sx={{p: 1, '&:last-child': {pb: 1}}}>
+        <Box sx={{display: 'flex', justifyContent: 'space-between', alignItems: 'center', mb: 1}}>
+          <Typography variant="h6" sx={{fontSize: '1rem', m: 0}}>{title}</Typography>
+
           {/* Lab separator settings - only for lab content in horizontal mode */}
           {formatType === 'lab' && currentFormatType === 'customHorizontal' && setItemSeparator && (
-            <Box sx={{ display: 'flex', alignItems: 'center' }}>
-              <Typography 
-                variant="body2" 
-                sx={{ 
+            <Box sx={{display: 'flex', alignItems: 'center'}}>
+              <Typography
+                variant="body2"
+                sx={{
                   mr: 1,
                   fontWeight: isHorizontalFormat ? 'medium' : 'normal',
                   color: isHorizontalFormat ? 'primary.main' : 'text.secondary'
@@ -624,7 +624,7 @@ const FormatElementsPanel = ({
                 size="small"
                 value={itemSeparator}
                 onChange={(e) => setItemSeparator(e.target.value)}
-                sx={{ 
+                sx={{
                   width: '80px',
                   '& .MuiInputBase-root': {
                     height: '30px',
@@ -638,21 +638,21 @@ const FormatElementsPanel = ({
                 }}
               />
               {isHorizontalFormat && (
-                <Typography 
-                  variant="caption" 
-                  sx={{ ml: 1, color: 'primary.main', fontSize: '0.7rem' }}
+                <Typography
+                  variant="caption"
+                  sx={{ml: 1, color: 'primary.main', fontSize: '0.7rem'}}
                 >
                   (橫式使用)
                 </Typography>
               )}
             </Box>
           )}
-          
+
           {/* Add preset group button for header format */}
           {formatType === 'header' && onAddPresetGroup && (
-            <Button 
-              size="small" 
-              variant="outlined" 
+            <Button
+              size="small"
+              variant="outlined"
               color="primary"
               onClick={onAddPresetGroup}
             >
@@ -660,9 +660,9 @@ const FormatElementsPanel = ({
             </Button>
           )}
         </Box>
-        
-        <Divider sx={{ mb: 1 }} />
-        
+
+        <Divider sx={{mb: 1}} />
+
         {/* Two-column layout */}
         <Grid container spacing={1}>
           {/* Left side - Elements List (75%) */}
@@ -679,13 +679,13 @@ const FormatElementsPanel = ({
               }}
             >
               {elements.length === 0 ? (
-                <Typography color="text.secondary" align="center" sx={{ py: 3 }}>
+                <Typography color="text.secondary" align="center" sx={{py: 3}}>
                   尚未設定任何元素，請從右方選擇元素加入
                 </Typography>
               ) : (
-                <Box sx={{ 
-                  display: 'flex', 
-                  flexWrap: 'wrap', 
+                <Box sx={{
+                  display: 'flex',
+                  flexWrap: 'wrap',
                   gap: 1,
                   [`& > .${formatClass}`]: {
                     flex: '0 0 auto',
@@ -711,13 +711,13 @@ const FormatElementsPanel = ({
               )}
             </Paper>
           </Grid>
-          
+
           {/* Right side - Available Elements (25%) */}
           <Grid item xs={12} md={3}>
-            <Paper 
-              variant="outlined" 
-              sx={{ 
-                p: 0.25, 
+            <Paper
+              variant="outlined"
+              sx={{
+                p: 0.25,
                 height: 'auto',
                 minHeight: formatType === 'lab' ? '180px' : '150px',
                 maxHeight: formatType === 'lab' ? '180px' : '150px',
@@ -727,9 +727,9 @@ const FormatElementsPanel = ({
                 overflow: 'hidden'
               }}
             >
-              <Typography 
-                variant="subtitle2" 
-                sx={{ 
+              <Typography
+                variant="subtitle2"
+                sx={{
                   bgcolor: formatType === 'header' ? elementGroups.header.color : elementGroups.labItem.color,
                   px: 0.5,
                   py: 0.2,
@@ -743,14 +743,14 @@ const FormatElementsPanel = ({
               >
                 可用元素
               </Typography>
-              
+
               {/* Elements in specific layout */}
-              <Box sx={{ 
-                flex: 1, 
-                overflow: 'hidden', 
+              <Box sx={{
+                flex: 1,
+                overflow: 'hidden',
                 overflowY: 'auto',
-                px: 0.25, 
-                pb: 0, 
+                px: 0.25,
+                pb: 0,
                 pt: 0,
                 mt: 0
               }}>
@@ -759,7 +759,7 @@ const FormatElementsPanel = ({
             </Paper>
           </Grid>
         </Grid>
-        
+
         {/* Custom text dialog */}
         <Dialog open={textDialogOpen} onClose={handleCloseTextDialog}>
           <DialogTitle>添加自訂文字</DialogTitle>
@@ -779,7 +779,7 @@ const FormatElementsPanel = ({
             <Button onClick={handleAddCustomText} variant="contained">添加</Button>
           </DialogActions>
         </Dialog>
-        
+
         {/* Separator dialog */}
         <Dialog open={separatorDialogOpen} onClose={handleCloseSeparatorDialog}>
           <DialogTitle>設定檢驗項目分隔符</DialogTitle>
@@ -794,7 +794,7 @@ const FormatElementsPanel = ({
               onChange={(e) => setTempSeparator(e.target.value)}
               helperText="此分隔符會在水平格式下用於分隔檢驗項目"
             />
-            <Alert severity="info" sx={{ mt: 2 }}>
+            <Alert severity="info" sx={{mt: 2}}>
               常用分隔符: 逗號加空格 ", " 或是斜線加空格 " / "
             </Alert>
           </DialogContent>
@@ -808,4 +808,4 @@ const FormatElementsPanel = ({
   );
 };
 
-export default FormatElementsPanel; 
+export default FormatElementsPanel;

@@ -7,46 +7,46 @@ export const colorSettings = {
   medicationBase: '#e8f5e9',
   dosageBase: '#fff3e0',
   formatBase: '#f3e5f5', // 這是粉色系
-  
+
   // Transparency levels
   transparency: {
     light: '40',    // 25% opacity
     medium: '80',   // 50% opacity
     full: ''        // 100% opacity
   },
-  
+
   // Special element colors
   spaceColor: '#f3e5f5',
-  
+
   // Hover effects
   hoverEffect: 'rgba(0, 0, 0, 0.05)',
-  
+
   // Text color for add button
   addButtonColor: '#9c27b0'
 };
 
 // Element groups with styling information - now with expanded color settings
 export const elementGroups = {
-  header: { 
-    name: '標題元素', 
+  header: {
+    name: '標題元素',
     color: colorSettings.headerBase,
     lightColor: colorSettings.headerBase + colorSettings.transparency.light,
     mediumColor: colorSettings.headerBase + colorSettings.transparency.medium,
   },
-  medication: { 
-    name: '藥物元素', 
+  medication: {
+    name: '藥物元素',
     color: colorSettings.medicationBase,
     lightColor: colorSettings.medicationBase + colorSettings.transparency.light,
     mediumColor: colorSettings.medicationBase + colorSettings.transparency.medium,
   },
-  dosage: { 
-    name: '劑量元素', 
+  dosage: {
+    name: '劑量元素',
     color: colorSettings.dosageBase,
     lightColor: colorSettings.dosageBase + colorSettings.transparency.light,
     mediumColor: colorSettings.dosageBase + colorSettings.transparency.medium,
   },
-  format: { 
-    name: '格式元素', 
+  format: {
+    name: '格式元素',
     color: colorSettings.formatBase,
     lightColor: colorSettings.formatBase + colorSettings.transparency.light,
     mediumColor: colorSettings.formatBase + colorSettings.transparency.medium,
@@ -63,25 +63,25 @@ export const ELEMENT_SECTIONS = {
 // All possible elements that can be used, with explicit section property
 const allElements = [
   // Header specific elements
-  { id: 'date', display: '日期', group: 'header', section: ELEMENT_SECTIONS.HEADER },
-  { id: 'hosp', display: '醫院', group: 'header', section: ELEMENT_SECTIONS.HEADER },
-  { id: 'icdcode', display: 'ICD代碼', group: 'header', section: ELEMENT_SECTIONS.HEADER },
-  { id: 'icdname', display: 'ICD名稱', group: 'header', section: ELEMENT_SECTIONS.HEADER },
-  
+  {id: 'date', display: '日期', group: 'header', section: ELEMENT_SECTIONS.HEADER},
+  {id: 'hosp', display: '醫院', group: 'header', section: ELEMENT_SECTIONS.HEADER},
+  {id: 'icdcode', display: 'ICD代碼', group: 'header', section: ELEMENT_SECTIONS.HEADER},
+  {id: 'icdname', display: 'ICD名稱', group: 'header', section: ELEMENT_SECTIONS.HEADER},
+
   // Drug specific elements
-  { id: 'name', display: '藥物名稱', group: 'medication', section: ELEMENT_SECTIONS.DRUG },
-  { id: 'simplifiedname', display: '簡化藥名', group: 'medication', section: ELEMENT_SECTIONS.DRUG },
-  { id: 'ingredient', display: '成份名', group: 'medication', section: ELEMENT_SECTIONS.DRUG },
-  { id: 'perDosage', display: '單次劑量', group: 'dosage', section: ELEMENT_SECTIONS.DRUG },
-  { id: 'frequency', display: '頻次', group: 'dosage', section: ELEMENT_SECTIONS.DRUG },
-  { id: 'days', display: '天數', group: 'dosage', section: ELEMENT_SECTIONS.DRUG },
-  
+  {id: 'name', display: '藥物名稱', group: 'medication', section: ELEMENT_SECTIONS.DRUG},
+  {id: 'simplifiedname', display: '簡化藥名', group: 'medication', section: ELEMENT_SECTIONS.DRUG},
+  {id: 'ingredient', display: '成份名', group: 'medication', section: ELEMENT_SECTIONS.DRUG},
+  {id: 'perDosage', display: '單次劑量', group: 'dosage', section: ELEMENT_SECTIONS.DRUG},
+  {id: 'frequency', display: '頻次', group: 'dosage', section: ELEMENT_SECTIONS.DRUG},
+  {id: 'days', display: '天數', group: 'dosage', section: ELEMENT_SECTIONS.DRUG},
+
   // Shared elements with unique section-specific IDs
-  { id: 'header_space', display: '(空格)', value: ' ', group: 'format', section: ELEMENT_SECTIONS.HEADER },
-  { id: 'drug_space', display: '(空格)', value: ' ', group: 'format', section: ELEMENT_SECTIONS.DRUG },
-  { id: 'header_text', display: '自訂文字', value: '自訂文字', group: 'format', section: ELEMENT_SECTIONS.HEADER },
-  { id: 'drug_text', display: '自訂文字', value: '自訂文字', group: 'format', section: ELEMENT_SECTIONS.DRUG },
-  { id: 'newline', display: '換行', group: 'format', section: ELEMENT_SECTIONS.DRUG } // Newline for drug section only
+  {id: 'header_space', display: '(空格)', value: ' ', group: 'format', section: ELEMENT_SECTIONS.HEADER},
+  {id: 'drug_space', display: '(空格)', value: ' ', group: 'format', section: ELEMENT_SECTIONS.DRUG},
+  {id: 'header_text', display: '自訂文字', value: '自訂文字', group: 'format', section: ELEMENT_SECTIONS.HEADER},
+  {id: 'drug_text', display: '自訂文字', value: '自訂文字', group: 'format', section: ELEMENT_SECTIONS.DRUG},
+  {id: 'newline', display: '換行', group: 'format', section: ELEMENT_SECTIONS.DRUG} // Newline for drug section only
 ];
 
 // Helper function to get elements by section
@@ -99,40 +99,40 @@ export const getDrugElements = () => getElementsBySection(ELEMENT_SECTIONS.DRUG)
 export const getAvailableElements = (drugSeparator, formatType = 'all') => {
   // Determine which elements to include based on format type
   let elements = [];
-  
+
   if (formatType === 'header') {
     // Only include header elements
     elements = getHeaderElements();
   } else if (formatType === 'drug') {
     // Only include drug elements and drug separator
     elements = getDrugElements();
-    
+
     // Create a drugsep element for drug separator
-    const drugsepElement = { 
-      id: 'drugsep', 
-      display: '藥品分隔符', 
-      value: drugSeparator || ',', 
+    const drugsepElement = {
+      id: 'drugsep',
+      display: '藥品分隔符',
+      value: drugSeparator || ',',
       group: 'format',
       section: ELEMENT_SECTIONS.DRUG
     };
-    
+
     elements.push(drugsepElement);
   } else {
     // Include all elements
     elements = [...allElements];
-    
+
     // Add drug separator
-    const drugsepElement = { 
-      id: 'drugsep', 
-      display: '藥品分隔符', 
-      value: drugSeparator || ',', 
+    const drugsepElement = {
+      id: 'drugsep',
+      display: '藥品分隔符',
+      value: drugSeparator || ',',
       group: 'format',
       section: ELEMENT_SECTIONS.DRUG
     };
-    
+
     elements.push(drugsepElement);
   }
-  
+
   return elements;
 };
 
@@ -180,15 +180,15 @@ export const getDefaultHeaderFormat = () => {
   // Reset counter for default format
   defaultIdCounter = 1;
   return [
-    { id: `date_${defaultIdCounter++}`, display: '日期', group: 'header', section: ELEMENT_SECTIONS.HEADER },
-    { id: `header_text_${defaultIdCounter++}`, value: ' - ', display: ' - ', group: 'format', section: ELEMENT_SECTIONS.HEADER },
-    { id: `hosp_${defaultIdCounter++}`, display: '醫院', group: 'header', section: ELEMENT_SECTIONS.HEADER },
-    { id: `header_space_${defaultIdCounter++}`, display: '(空格)', value: ' ', group: 'format', section: ELEMENT_SECTIONS.HEADER },
-    { id: `header_text_${defaultIdCounter++}`, value: '[', display: '[', group: 'format', section: ELEMENT_SECTIONS.HEADER },
-    { id: `icdcode_${defaultIdCounter++}`, display: 'ICD代碼', group: 'header', section: ELEMENT_SECTIONS.HEADER },
-    { id: `header_space_${defaultIdCounter++}`, display: '(空格)', value: ' ', group: 'format', section: ELEMENT_SECTIONS.HEADER },
-    { id: `icdname_${defaultIdCounter++}`, display: 'ICD名稱', group: 'header', section: ELEMENT_SECTIONS.HEADER },
-    { id: `header_text_${defaultIdCounter++}`, value: ']', display: ']', group: 'format', section: ELEMENT_SECTIONS.HEADER }
+    {id: `date_${defaultIdCounter++}`, display: '日期', group: 'header', section: ELEMENT_SECTIONS.HEADER},
+    {id: `header_text_${defaultIdCounter++}`, value: ' - ', display: ' - ', group: 'format', section: ELEMENT_SECTIONS.HEADER},
+    {id: `hosp_${defaultIdCounter++}`, display: '醫院', group: 'header', section: ELEMENT_SECTIONS.HEADER},
+    {id: `header_space_${defaultIdCounter++}`, display: '(空格)', value: ' ', group: 'format', section: ELEMENT_SECTIONS.HEADER},
+    {id: `header_text_${defaultIdCounter++}`, value: '[', display: '[', group: 'format', section: ELEMENT_SECTIONS.HEADER},
+    {id: `icdcode_${defaultIdCounter++}`, display: 'ICD代碼', group: 'header', section: ELEMENT_SECTIONS.HEADER},
+    {id: `header_space_${defaultIdCounter++}`, display: '(空格)', value: ' ', group: 'format', section: ELEMENT_SECTIONS.HEADER},
+    {id: `icdname_${defaultIdCounter++}`, display: 'ICD名稱', group: 'header', section: ELEMENT_SECTIONS.HEADER},
+    {id: `header_text_${defaultIdCounter++}`, value: ']', display: ']', group: 'format', section: ELEMENT_SECTIONS.HEADER}
   ];
 };
 
@@ -196,15 +196,15 @@ export const getDefaultHeaderFormat = () => {
 export const getDefaultDrugFormat = () => {
   // Continue counter from header format
   return [
-    { id: `simplifiedname_${defaultIdCounter++}`, display: '簡化藥名', group: 'medication', section: ELEMENT_SECTIONS.DRUG },
-    { id: `drug_space_${defaultIdCounter++}`, display: '(空格)', value: ' ', group: 'format', section: ELEMENT_SECTIONS.DRUG },
-    { id: `perDosage_${defaultIdCounter++}`, display: '單次劑量', group: 'dosage', section: ELEMENT_SECTIONS.DRUG },
-    { id: `drug_text_${defaultIdCounter++}`, value: '#', display: '#', group: 'format', section: ELEMENT_SECTIONS.DRUG },
-    { id: `drug_space_${defaultIdCounter++}`, display: '(空格)', value: ' ', group: 'format', section: ELEMENT_SECTIONS.DRUG },
-    { id: `frequency_${defaultIdCounter++}`, display: '頻次', group: 'dosage', section: ELEMENT_SECTIONS.DRUG },
-    { id: `drug_space_${defaultIdCounter++}`, display: '(空格)', value: ' ', group: 'format', section: ELEMENT_SECTIONS.DRUG },
-    { id: `days_${defaultIdCounter++}`, display: '天數', group: 'dosage', section: ELEMENT_SECTIONS.DRUG },
-    { id: `drug_text_${defaultIdCounter++}`, value: '天', display: '天', group: 'format', section: ELEMENT_SECTIONS.DRUG }
+    {id: `simplifiedname_${defaultIdCounter++}`, display: '簡化藥名', group: 'medication', section: ELEMENT_SECTIONS.DRUG},
+    {id: `drug_space_${defaultIdCounter++}`, display: '(空格)', value: ' ', group: 'format', section: ELEMENT_SECTIONS.DRUG},
+    {id: `perDosage_${defaultIdCounter++}`, display: '單次劑量', group: 'dosage', section: ELEMENT_SECTIONS.DRUG},
+    {id: `drug_text_${defaultIdCounter++}`, value: '#', display: '#', group: 'format', section: ELEMENT_SECTIONS.DRUG},
+    {id: `drug_space_${defaultIdCounter++}`, display: '(空格)', value: ' ', group: 'format', section: ELEMENT_SECTIONS.DRUG},
+    {id: `frequency_${defaultIdCounter++}`, display: '頻次', group: 'dosage', section: ELEMENT_SECTIONS.DRUG},
+    {id: `drug_space_${defaultIdCounter++}`, display: '(空格)', value: ' ', group: 'format', section: ELEMENT_SECTIONS.DRUG},
+    {id: `days_${defaultIdCounter++}`, display: '天數', group: 'dosage', section: ELEMENT_SECTIONS.DRUG},
+    {id: `drug_text_${defaultIdCounter++}`, value: '天', display: '天', group: 'format', section: ELEMENT_SECTIONS.DRUG}
   ];
 };
 
@@ -213,7 +213,7 @@ export const getDefaultDrugFormat = () => {
 export const renderElem = (item, index, drugData) => {
   // Special handling for ICD elements which have underscore in their base ID
   let baseId = item.id.split('_')[0];
-  
+
   // Handle section-specific elements
   if (baseId === 'header' || baseId === 'drug') {
     // Extract the actual element type after the section prefix
@@ -226,7 +226,7 @@ export const renderElem = (item, index, drugData) => {
   } else if (item.id.includes('icdname')) {
     baseId = 'icdname';
   }
-  
+
   // 使用 Map 數據結構代替多個 if-else 或 switch-case 語句 #zh-TW
   const elementValuesMap = new Map([
     ['date', previewHeader.date],
@@ -245,12 +245,12 @@ export const renderElem = (item, index, drugData) => {
     ['separator', item.value],
     ['text', item.value]
   ]);
-  
+
   // 優先使用格式元素的值（如果存在） #zh-TW
   if (item.group === 'format' && item.value) {
     return item.value;
   }
-  
+
   // 從 Map 中獲取值，如果找不到則返回空字符串 #zh-TW
   return elementValuesMap.get(baseId) || '';
-}; 
+};

@@ -10,7 +10,7 @@ import {
 } from "@mui/material";
 import TypographySizeWrapper from "../utils/TypographySizeWrapper";
 
-const Overview_DischargeRecords = ({ dischargeData = [], generalDisplaySettings, collapsedCount = null }) => {
+const Overview_DischargeRecords = ({dischargeData = [], generalDisplaySettings, collapsedCount = null}) => {
   // collapsedCount 有值時預設只顯示前 N 筆，點擊可展開/收合
   const [expanded, setExpanded] = React.useState(false);
   const visibleData = collapsedCount && !expanded
@@ -100,7 +100,7 @@ const Overview_DischargeRecords = ({ dischargeData = [], generalDisplaySettings,
   };
 
   return (
-    <Paper sx={{ p: 2 }}>
+    <Paper sx={{p: 2}}>
       <TypographySizeWrapper
         variant="h6"
         textSizeType="title"
@@ -114,17 +114,17 @@ const Overview_DischargeRecords = ({ dischargeData = [], generalDisplaySettings,
           {visibleData.map((item, index) => (
             <ListItem
               key={index}
-              sx={{ py: 0.5 }}
+              sx={{py: 0.5}}
               secondaryAction={
                 item.mds_file ? (
                   <Tooltip title="開啟出院病摘">
-                    <Box component="span" sx={{ display: 'inline-block' }}>
+                    <Box component="span" sx={{display: 'inline-block'}}>
                       <Chip
                         label="病摘"
                         size="small"
                         color="primary"
                         onClick={() => handleOpenMedicalAbstract(item.mds_file)}
-                        sx={{ cursor: 'pointer' }}
+                        sx={{cursor: 'pointer'}}
                       />
                     </Box>
                   </Tooltip>
@@ -168,7 +168,7 @@ const Overview_DischargeRecords = ({ dischargeData = [], generalDisplaySettings,
           textSizeType="note"
           generalDisplaySettings={generalDisplaySettings}
           onClick={() => setExpanded(!expanded)}
-          sx={{ display: 'block', mt: 0.5, color: 'primary.main', cursor: 'pointer' }}
+          sx={{display: 'block', mt: 0.5, color: 'primary.main', cursor: 'pointer'}}
         >
           {expanded ? '收合' : `顯示全部（還有 ${hiddenCount} 筆）`}
         </TypographySizeWrapper>

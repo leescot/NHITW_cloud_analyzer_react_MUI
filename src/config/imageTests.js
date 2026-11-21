@@ -13,12 +13,12 @@
  * 2. 若要更新所有使用者的設定，需要實現版本升級機制
  */
 export const DEFAULT_IMAGE_TESTS = [
-  { orderCode: '33085B,33084B', displayName: '磁振造影(MRI)', enabled: true },
-  { orderCode: '33072B,33070B', displayName: '電腦斷層(CT)', enabled: true },
-  { orderCode: '19009C,19001C', displayName: '腹部超音波', enabled: true },
-  { orderCode: '19009C', displayName: '其他超音波', enabled: true },
-  { orderCode: '18006C', displayName: '心臟超音波', enabled: true },
-  { orderCode: '28016C', displayName: '胃鏡', enabled: true },
-  { orderCode: '32001C', displayName: 'CXR', enabled: false },
-  { orderCode: '18001C', displayName: 'EKG', enabled: false },
+  {orderCode: '33085B,33084B', displayName: '磁振造影(MRI)', enabled: true},
+  {orderCode: '33072B,33070B', displayName: '電腦斷層(CT)', enabled: true},
+  {orderCode: '19009C,19001C', displayName: '腹部超音波', enabled: true},
+  {orderCode: '19009C', displayName: '其他超音波', enabled: true},
+  {orderCode: '18006C', displayName: '心臟超音波', enabled: true},
+  {orderCode: '28016C', displayName: '胃鏡', enabled: true},
+  {orderCode: '32001C', displayName: 'CXR', enabled: false},
+  {orderCode: '18001C', displayName: 'EKG', enabled: false},
 ];

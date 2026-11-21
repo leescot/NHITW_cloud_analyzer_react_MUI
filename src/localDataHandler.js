@@ -39,7 +39,7 @@ function triggerDataFetchCompleted(dataType) {
   // 使用 setTimeout 確保變量已完全初始化後再觸發事件
   setTimeout(() => {
     const customEvent = new CustomEvent("dataFetchCompleted", {
-      detail: { type: dataType },
+      detail: {type: dataType},
     });
     window.dispatchEvent(customEvent);
   }, 100);
@@ -130,7 +130,7 @@ export async function processLocalData(jsonData, filename) {
 
       // 如果資料有 originalData，移除它
       if (data.originalData) {
-        const { originalData, ...cleanedData } = data;
+        const {originalData, ...cleanedData} = data;
         return cleanedData;
       }
 
@@ -368,7 +368,7 @@ export function clearLocalData() {
  * @returns {Object} - 本地資料狀態
  */
 export function getLocalDataStatus() {
-  return { ...localDataStatus };
+  return {...localDataStatus};
 }
 
 // 匯出本地資料處理器
@@ -449,7 +449,6 @@ export const localDataHandler = {
       // 更新處理狀態
       localDataStatus.success = true;
       localDataStatus.message = `成功載入 ${localDataStatus.loadedTypes.length} 種資料`;
-
     } catch (error) {
       console.error("檢測資料類型時出錯:", error);
       localDataStatus.message = `檢測資料類型時出錯: ${error.message}`;

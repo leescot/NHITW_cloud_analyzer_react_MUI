@@ -27,7 +27,7 @@ export const medDaysProcessor = {
             const dateB = new Date(b.expiryDate.replace(/\//g, '-'));
             return dateA - dateB; // 依到期日升序排序
           } catch (error) {
-            console.error('Error sorting dates:', error, 'Data:', { a, b });
+            console.error('Error sorting dates:', error, 'Data:', {a, b});
             return 0;
           }
         });

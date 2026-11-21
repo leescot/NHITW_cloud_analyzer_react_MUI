@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from "react";
+import React, {useState, useEffect} from "react";
 import {
   Typography,
   Grid,
@@ -247,7 +247,7 @@ const processImagingData = (data) => {
 };
 
 // ImagingTable 組件 - 處理待取報告
-const PendingImagingTable = ({ data, generalDisplaySettings }) => {
+const PendingImagingTable = ({data, generalDisplaySettings}) => {
   return (
     <TableContainer component={Paper}>
       <Table size="small">
@@ -348,7 +348,7 @@ const PendingImagingTable = ({ data, generalDisplaySettings }) => {
 };
 
 // ImagingTable 組件 - 處理已有報告
-const ReportImagingTable = ({ data, generalDisplaySettings }) => {
+const ReportImagingTable = ({data, generalDisplaySettings}) => {
   // 管理每個報告的展開/收合狀態
   const [expandedRows, setExpandedRows] = useState({});
 
@@ -436,7 +436,7 @@ const ReportImagingTable = ({ data, generalDisplaySettings }) => {
                       variant="body2"
                       textSizeType="content"
                       generalDisplaySettings={generalDisplaySettings}
-                      sx={{ mt: 0.5 }}
+                      sx={{mt: 0.5}}
                     >
                       {formattedName}
                     </TypographySizeWrapper>
@@ -454,7 +454,7 @@ const ReportImagingTable = ({ data, generalDisplaySettings }) => {
                   </Box>
                 </TableCell>
                 <TableCell>
-                  <Box sx={{ position: 'relative' }}>
+                  <Box sx={{position: 'relative'}}>
                     {/* 展開/收合按鈕 - 只在報告有被縮減時顯示 */}
                     {isReportReduced && (
                       <IconButton
@@ -475,7 +475,7 @@ const ReportImagingTable = ({ data, generalDisplaySettings }) => {
                     <TypographySizeWrapper
                       textSizeType="content"
                       generalDisplaySettings={generalDisplaySettings}
-                      sx={{ pr: isReportReduced ? 4 : 0 }}
+                      sx={{pr: isReportReduced ? 4 : 0}}
                     >
                       {(() => {
                         // Highlight specific terms in red
@@ -492,7 +492,7 @@ const ReportImagingTable = ({ data, generalDisplaySettings }) => {
                         });
 
                         // Return content with dangerouslySetInnerHTML
-                        return <div dangerouslySetInnerHTML={{ __html: content }} />;
+                        return <div dangerouslySetInnerHTML={{__html: content}} />;
                       })()}
                     </TypographySizeWrapper>
                   </Box>
@@ -527,14 +527,14 @@ const ReportImagingTable = ({ data, generalDisplaySettings }) => {
                             {item.images.slice(rowIndex * 5, (rowIndex + 1) * 5).map((img, colIndex) => {
                               const imgIndex = rowIndex * 5 + colIndex;
                               return (
-                                <Tooltip key={imgIndex} title={`查看影像 ${imgIndex+1}`}>
+                                <Tooltip key={imgIndex} title={`查看影像 ${imgIndex + 1}`}>
                                   <IconButton
                                     color="primary"
                                     size="small"
                                     onClick={() => {
                                       viewImage(`${img.ipl_case_seq_no}@${img.read_pos}@${img.ctmri_mark}@${img.file_type}@${img.file_qty}`);
                                     }}
-                                    sx={{ mx: 0.25 }}
+                                    sx={{mx: 0.25}}
                                   >
                                     {imgIndex === 0 ? (
                                       <PhotoLibraryIcon fontSize="small" />
@@ -543,7 +543,7 @@ const ReportImagingTable = ({ data, generalDisplaySettings }) => {
                                         variant="caption"
                                         textSizeType="content"
                                         generalDisplaySettings={generalDisplaySettings}
-                                        sx={{ fontSize: '0.7rem', fontWeight: 'bold' }}
+                                        sx={{fontSize: '0.7rem', fontWeight: 'bold'}}
                                       >
                                         {imgIndex + 1}
                                       </TypographySizeWrapper>
@@ -580,7 +580,7 @@ const ReportImagingTable = ({ data, generalDisplaySettings }) => {
   );
 };
 
-const ImagingData = ({ imagingData, generalDisplaySettings }) => {
+const ImagingData = ({imagingData, generalDisplaySettings}) => {
   // 確保資料存在
   const initialData = {
     withReport: imagingData?.withReport || [],
@@ -624,11 +624,11 @@ const ImagingData = ({ imagingData, generalDisplaySettings }) => {
     // # zh-TW: 顯示所有報告
     ['all', () => processedData.withReport],
     // # zh-TW: 只顯示 CT & MRI 的報告
-    ['ctmri', () => processedData.withReport.filter(item => 
+    ['ctmri', () => processedData.withReport.filter(item =>
       ctMriOrderCodes.includes(item.order_code)
     )],
     // # zh-TW: 只顯示超音波的報告
-    ['ultrasound', () => processedData.withReport.filter(item => 
+    ['ultrasound', () => processedData.withReport.filter(item =>
       ultrasoundOrderCodes.includes(item.order_code)
     )]
   ]), [processedData.withReport, ctMriOrderCodes, ultrasoundOrderCodes]);
@@ -639,7 +639,7 @@ const ImagingData = ({ imagingData, generalDisplaySettings }) => {
     if (!shouldShowFilter) {
       return processedData.withReport;
     }
-    
+
     // # zh-TW: 從 Map 獲取對應的過濾函數並執行
     const filterFunction = filterMap.get(filterOption);
     return filterFunction ? filterFunction() : processedData.withReport;
@@ -698,18 +698,18 @@ const ImagingData = ({ imagingData, generalDisplaySettings }) => {
         )}
       </Grid>
       <Grid item xs={12} md={reportColSize}>
-        <Box sx={{ display: 'flex', alignItems: 'center', mb: 1 }}>
+        <Box sx={{display: 'flex', alignItems: 'center', mb: 1}}>
           <TypographySizeWrapper
             variant="h6"
             textSizeType="title"
             generalDisplaySettings={generalDisplaySettings}
-            sx={{ mr: 2 }}
+            sx={{mr: 2}}
           >
             已有報告 ({filteredReportData.length})
           </TypographySizeWrapper>
 
           {shouldShowFilter && (
-            <Box sx={{ display: 'flex', alignItems: 'center' }}>
+            <Box sx={{display: 'flex', alignItems: 'center'}}>
               <FormControlLabel
                 control={
                   <Radio
@@ -727,7 +727,7 @@ const ImagingData = ({ imagingData, generalDisplaySettings }) => {
                     顯示所有
                   </TypographySizeWrapper>
                 }
-                sx={{ mr: 2 }}
+                sx={{mr: 2}}
               />
 
               {hasCTMRIReports && (
@@ -748,7 +748,7 @@ const ImagingData = ({ imagingData, generalDisplaySettings }) => {
                       只顯示 CT & MRI
                     </TypographySizeWrapper>
                   }
-                  sx={{ mr: 2 }}
+                  sx={{mr: 2}}
                 />
               )}
 

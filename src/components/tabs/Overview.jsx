@@ -15,8 +15,8 @@
  * This file serves as the integration point for all the separate components.
  */
 
-import React, { useMemo, useEffect } from "react";
-import { Grid, Box } from "@mui/material";
+import React, {useMemo, useEffect} from "react";
+import {Grid, Box} from "@mui/material";
 
 // Import individual components
 import Overview_RecentDiagnosis from "./Overview_RecentDiagnosis";
@@ -33,8 +33,8 @@ import CKMExtraLabCard from "./ckm/CKMExtraLabCard";
 import CKMImagingCard from "./ckm/CKMImagingCard";
 
 // 導入從配置文件中移出的常數
-import { DEFAULT_LAB_TESTS } from '../../config/labTests';
-import { DEFAULT_IMAGE_TESTS } from '../../config/imageTests';
+import {DEFAULT_LAB_TESTS} from '../../config/labTests';
+import {DEFAULT_IMAGE_TESTS} from '../../config/imageTests';
 
 const Overview = ({
   dashboardData,
@@ -46,7 +46,7 @@ const Overview = ({
   groupedChineseMeds = [],
   groupedLabs = [],
   labData,
-  imagingData = { withReport: [], withoutReport: [] },
+  imagingData = {withReport: [], withoutReport: []},
   adultHealthCheckData = null,
   cancerScreeningData = null,
   hbcvData = null,
@@ -58,9 +58,9 @@ const Overview = ({
     focusedLabTests: DEFAULT_LAB_TESTS,
     focusedImageTests: DEFAULT_IMAGE_TESTS
   },
-  generalDisplaySettings = { titleTextSize: 'medium', contentTextSize: 'medium', noteTextSize: 'small' },
+  generalDisplaySettings = {titleTextSize: 'medium', contentTextSize: 'medium', noteTextSize: 'small'},
   labSettings = {},
-  cloudSettings = { fetchAdultHealthCheck: true, fetchCancerScreening: true, fetchHbcvdata: true },
+  cloudSettings = {fetchAdultHealthCheck: true, fetchCancerScreening: true, fetchHbcvdata: true},
   ckmData = null,
   enableCKMTab = false,
   userInfo = null
@@ -80,7 +80,7 @@ const Overview = ({
   }, [adultHealthCheckData, cancerScreeningData, hbcvData, cloudSettings]);
 
   return (
-    <Box sx={{ p: 0 }}>
+    <Box sx={{p: 0}}>
       {/* CKM 摘要列：僅在 CKM 功能開啟且有 CKM 資料時顯示 */}
       {enableCKMTab && ckmData?.hasCKMData && (
         <CKMSummaryBar

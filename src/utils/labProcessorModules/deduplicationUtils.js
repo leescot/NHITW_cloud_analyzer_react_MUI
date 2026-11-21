@@ -1,13 +1,13 @@
 // 資料去重處理相關函數
-import { normalizeValue } from './valueUtils.js';
-import { isGFRItem } from './abbreviationUtils.js';
+import {normalizeValue} from './valueUtils.js';
+import {isGFRItem} from './abbreviationUtils.js';
 
 // 新的去重邏輯，處理特殊情況
 const deduplicateLabData = (labArray) => {
   // 預處理：針對特定檢驗碼的數值處理
   const preprocessedLabArray = labArray.map(lab => {
     // 複製lab對象，避免直接修改原始數據
-    const processedLab = { ...lab };
+    const processedLab = {...lab};
 
     // 特殊處理 09005C：只保留 assay_value 中的數字部分
     if (processedLab.order_code === "09005C" && processedLab.assay_value) {

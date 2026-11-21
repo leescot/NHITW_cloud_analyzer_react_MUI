@@ -39,19 +39,19 @@ export const createHeaderLabHandlers = (elements, setElements) => {
   // 放下
   const handleHeaderDrop = (e) => {
     e.preventDefault();
-    
+
     if (dragItem !== null && dragOverItem !== null && dragItem !== dragOverItem) {
       const itemsCopy = [...elements];
       const dragItemContent = itemsCopy[dragItem];
-      
+
       // 從原位置移除並插入到目標位置
       itemsCopy.splice(dragItem, 1);
       itemsCopy.splice(dragOverItem, 0, dragItemContent);
-      
+
       // 更新狀態
       setElements(itemsCopy);
     }
-    
+
     // 重設
     e.target.classList.remove('drag-over');
     dragItem = null;
@@ -114,19 +114,19 @@ export const createItemLabHandlers = (elements, setElements) => {
   // 放下
   const handleItemDrop = (e) => {
     e.preventDefault();
-    
+
     if (dragItem !== null && dragOverItem !== null && dragItem !== dragOverItem) {
       const itemsCopy = [...elements];
       const dragItemContent = itemsCopy[dragItem];
-      
+
       // 從原位置移除並插入到目標位置
       itemsCopy.splice(dragItem, 1);
       itemsCopy.splice(dragOverItem, 0, dragItemContent);
-      
+
       // 更新狀態
       setElements(itemsCopy);
     }
-    
+
     // 重設
     e.target.classList.remove('drag-over');
     dragItem = null;
@@ -148,4 +148,4 @@ export const createItemLabHandlers = (elements, setElements) => {
     handleItemDrop,
     handleItemDragEnd
   };
-}; 
+};

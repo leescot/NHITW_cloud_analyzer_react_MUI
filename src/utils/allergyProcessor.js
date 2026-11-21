@@ -20,7 +20,7 @@ export const allergyProcessor = {
             const dateB = this.convertTWDate(b.date);
             return new Date(dateB) - new Date(dateA);
           } catch (error) {
-            console.error('Error sorting dates:', error, 'Data:', { a, b });
+            console.error('Error sorting dates:', error, 'Data:', {a, b});
             return 0;
           }
         });
@@ -47,8 +47,8 @@ export const allergyProcessor = {
     ]);
 
     // 檢查 drug_name
-    if (!item.drugName || 
-        invalidDrugNames.has(item.drugName) || 
+    if (!item.drugName ||
+        invalidDrugNames.has(item.drugName) ||
         item.drugName.includes('未過敏')) {
       return false;
     }

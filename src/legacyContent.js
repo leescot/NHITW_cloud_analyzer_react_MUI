@@ -9,7 +9,7 @@ import {
   getTokenPayload,
   isTokenExpired,
 } from './utils/tokenUtils';
-import { DEFAULT_SETTINGS } from './config/defaultSettings';
+import {DEFAULT_SETTINGS} from './config/defaultSettings';
 
 console.log("Content script loaded for NHI data extractor (Refactored Version)");
 
@@ -176,7 +176,7 @@ function watchPatientSwitchButtons() {
 function onPatientSwitchRequested() {
   console.log("病患切換按鈕被點擊，開始等待新 token");
   clearAllData();
-  window.dispatchEvent(new CustomEvent("dataFetchCompleted", { detail: { switching: true } }));
+  window.dispatchEvent(new CustomEvent("dataFetchCompleted", {detail: {switching: true}}));
 
   if (switchPollTimer) clearInterval(switchPollTimer);
 
@@ -251,7 +251,7 @@ function shouldFetchSpecialData(dataType) {
   // 避免使用者從未進入設定頁時「抓了但不顯示」的不一致行為
   const defaultVal = DEFAULT_SETTINGS.cloud[key];
   return new Promise((resolve) => {
-    chrome.storage.sync.get({ [key]: defaultVal }, (items) => {
+    chrome.storage.sync.get({[key]: defaultVal}, (items) => {
       resolve(items[key]);
     });
   });
@@ -311,12 +311,12 @@ function fetchAllDataTypes() {
     .then(results => {
       saveToLocalStorage();
 
-      const event = new CustomEvent("dataFetchCompleted", { detail: results });
+      const event = new CustomEvent("dataFetchCompleted", {detail: results});
       window.dispatchEvent(event);
 
-      chrome.runtime.sendMessage({ action: 'setBadge', text: '✓', color: '#4CAF50' });
+      chrome.runtime.sendMessage({action: 'setBadge', text: '✓', color: '#4CAF50'});
 
-      chrome.storage.sync.get({ autoOpenPage: false }, function (items) {
+      chrome.storage.sync.get({autoOpenPage: false}, function (items) {
         if (items.autoOpenPage && window.openFloatingIconDialog) {
           setTimeout(() => window.openFloatingIconDialog(), 500);
         }
@@ -358,7 +358,7 @@ function fetchSingleDataType(dataType) {
     })
     .then(data => {
       if (lastPatientId !== requestPatientId) {
-        return { status: "stale", recordCount: 0, dataType };
+        return {status: "stale", recordCount: 0, dataType};
       }
 
       const normalizedData = normalizeResponseData(data, dataType);
@@ -381,22 +381,22 @@ function normalizeResponseData(data, dataType) {
   const recordsArray = data.rObject || data.robject;
 
   if (dataType === "medDays" || dataType === "labdraw") {
-    return { rObject: Array.isArray(data) ? data : [data] };
+    return {rObject: Array.isArray(data) ? data : [data]};
   }
 
   if (dataType === "patientsummary") {
-    return { rObject: Array.isArray(recordsArray) ? recordsArray : (recordsArray ? [recordsArray] : []) };
+    return {rObject: Array.isArray(recordsArray) ? recordsArray : (recordsArray ? [recordsArray] : [])};
   }
 
   if (dataType === "chronicMed") {
-    return { rObject: [data] };
+    return {rObject: [data]};
   }
 
   if (dataType === "adultHealthCheck" || dataType === "cancerScreening" || dataType === "hbcvdata") {
-    return { rObject: recordsArray ? [recordsArray] : [] };
+    return {rObject: recordsArray ? [recordsArray] : []};
   }
 
-  return { rObject: Array.isArray(recordsArray) ? recordsArray : [] };
+  return {rObject: Array.isArray(recordsArray) ? recordsArray : []};
 }
 
 // ===== 資料管理 =====
@@ -407,21 +407,21 @@ function clearAllData() {
   }
   window.lastInterceptedMasterMenuData = null;
 
-  chrome.runtime.sendMessage({ action: 'setBadge', text: '' });
+  chrome.runtime.sendMessage({action: 'setBadge', text: ''});
 }
 
 function createEmptyDataResult(dataType) {
-  const emptyData = { rObject: [] };
+  const emptyData = {rObject: []};
   const varName = DATA_VAR_MAP.get(dataType);
   if (varName) {
     window[varName] = emptyData;
   }
-  return { status: "nodata", recordCount: 0, dataType, data: emptyData };
+  return {status: "nodata", recordCount: 0, dataType, data: emptyData};
 }
 
 function saveToLocalStorage() {
   try {
-    const dataToShare = { timestamp: Date.now() };
+    const dataToShare = {timestamp: Date.now()};
     for (const [dataType, varName] of DATA_VAR_MAP.entries()) {
       const storageKey = dataType === 'labdata' ? 'lab' : dataType;
       dataToShare[storageKey] = window[varName];
@@ -439,13 +439,13 @@ function setupMessageListeners() {
   chrome.runtime.onMessage.addListener((message, sender, sendResponse) => {
     if (message.action === "manualFetchData") {
       fetchAllDataTypes();
-      sendResponse({ status: "fetching" });
+      sendResponse({status: "fetching"});
       return true;
     }
 
     if (message.action === "dataCleared") {
       clearAllData();
-      sendResponse({ status: "cleared" });
+      sendResponse({status: "cleared"});
       return true;
     }
 
@@ -453,9 +453,9 @@ function setupMessageListeners() {
       const floatingIcon = document.querySelector("#nhi-floating-root button");
       if (floatingIcon) {
         floatingIcon.click();
-        sendResponse({ status: "opened" });
+        sendResponse({status: "opened"});
       } else {
-        sendResponse({ status: "error", message: "Dashboard component not found" });
+        sendResponse({status: "error", message: "Dashboard component not found"});
       }
       return true;
     }
@@ -484,7 +484,7 @@ function setupMessageListeners() {
           }));
         }, 100);
       }
-      sendResponse({ status: "setting_updated" });
+      sendResponse({status: "setting_updated"});
       return true;
     }
 
@@ -514,7 +514,7 @@ function setupMessageListeners() {
           const uid = patientData.UserID || 'unknown';
           const fileName = `${ts}_${uid}.json`;
           const jsonString = JSON.stringify(patientData, null, 2);
-          const blob = new Blob([jsonString], { type: "application/json" });
+          const blob = new Blob([jsonString], {type: "application/json"});
           const url = URL.createObjectURL(blob);
           const downloadLink = document.createElement("a");
           downloadLink.href = url;
@@ -526,17 +526,17 @@ function setupMessageListeners() {
             document.body.removeChild(downloadLink);
             URL.revokeObjectURL(url);
           }, 100);
-          sendResponse({ status: "success", message: "已直接處理下載", directDownload: true });
+          sendResponse({status: "success", message: "已直接處理下載", directDownload: true});
         } else {
-          sendResponse({ error: "無法獲取病人資料", status: "error" });
+          sendResponse({error: "無法獲取病人資料", status: "error"});
         }
       } catch (err) {
-        sendResponse({ error: "處理下載時發生錯誤: " + err.message, status: "error" });
+        sendResponse({error: "處理下載時發生錯誤: " + err.message, status: "error"});
       }
       return true;
     }
 
-    sendResponse({ status: "received" });
+    sendResponse({status: "received"});
     return true;
   });
 }

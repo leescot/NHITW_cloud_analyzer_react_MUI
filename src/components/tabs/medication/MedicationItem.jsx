@@ -1,8 +1,8 @@
 import React from "react";
-import { Box, Tooltip, IconButton, Chip } from "@mui/material";
+import {Box, Tooltip, IconButton, Chip} from "@mui/material";
 import ImageIcon from "@mui/icons-material/Image";
 import TypographySizeWrapper from "../../utils/TypographySizeWrapper";
-import { getMedicationColor, shouldBeBold, handleDrugImageClick } from "./MedicationHelpers";
+import {getMedicationColor, shouldBeBold, handleDrugImageClick} from "./MedicationHelpers";
 
 const MedicationItem = ({
   med,
@@ -17,7 +17,7 @@ const MedicationItem = ({
   const isBold = shouldBeBold(med, settings);
 
   return (
-    <Box sx={{ ml: 2, mb: 1 }}>
+    <Box sx={{ml: 2, mb: 1}}>
       <TypographySizeWrapper
         variant="body2"
         textSizeType="content"
@@ -91,7 +91,7 @@ const MedicationItem = ({
               ml: 0.6,
               height: 18,
               fontSize: "0.7rem",
-              "& .MuiChip-label": { px: 0.7, py: 0 },
+              "& .MuiChip-label": {px: 0.7, py: 0},
               verticalAlign: "middle"
             }}
           />

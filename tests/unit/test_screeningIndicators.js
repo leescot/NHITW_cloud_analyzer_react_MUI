@@ -1,4 +1,4 @@
-import {assert} from './lib/chai.js';
+import {describe, it, assert} from 'vitest';
 
 import {
   computeFib4, fib4Band,
@@ -6,7 +6,7 @@ import {
   computeHomaIr, homaIrBand,
   computeKfre, kfreBand,
   computeScreeningIndicators,
-} from './src/utils/screeningIndicators.js';
+} from '../../src/utils/screeningIndicators.js';
 
 function daysAgo(n) {
   const d = new Date(Date.now() - n * 24 * 60 * 60 * 1000);
@@ -74,20 +74,20 @@ describe('utils/screeningIndicators', function () {
   });
 
   describe('.computeScreeningIndicators', function () {
-    const userInfo = { age: 50, gender: 'M' };
+    const userInfo = {age: 50, gender: 'M'};
 
     it('should compute FIB-4 and TyG only from a same-date draw', function () {
       const groupedLabs = [{
         date: daysAgo(3),
         labs: [
-          { orderCode: '09025C', value: '40', unit: 'U/L' },        // AST
-          { orderCode: '09026C', value: '30', unit: 'U/L' },        // ALT
-          { orderCode: '08011C', itemName: 'Platelet', value: '200', unit: 'x10^3/uL' },
-          { orderCode: '09004C', value: '150', unit: 'mg/dL' },     // TG
-          { orderCode: '09005C', value: '100', unit: 'mg/dL' },     // Glucose
+          {orderCode: '09025C', value: '40', unit: 'U/L'},        // AST
+          {orderCode: '09026C', value: '30', unit: 'U/L'},        // ALT
+          {orderCode: '08011C', itemName: 'Platelet', value: '200', unit: 'x10^3/uL'},
+          {orderCode: '09004C', value: '150', unit: 'mg/dL'},     // TG
+          {orderCode: '09005C', value: '100', unit: 'mg/dL'},     // Glucose
         ],
       }];
-      const r = computeScreeningIndicators({ groupedLabs, summary: null, userInfo });
+      const r = computeScreeningIndicators({groupedLabs, summary: null, userInfo});
       assert.isNotNull(r.fib4);
       assert.isTrue(near(r.fib4.value, 1.826));
       assert.isNotNull(r.tyg);
@@ -98,54 +98,54 @@ describe('utils/screeningIndicators', function () {
 
     it('should NOT compute FIB-4 when components span different dates', function () {
       const groupedLabs = [
-        { date: daysAgo(3), labs: [{ orderCode: '09025C', value: '40', unit: 'U/L' }] },
-        { date: daysAgo(10), labs: [{ orderCode: '09026C', value: '30', unit: 'U/L' }, { orderCode: '08011C', itemName: '血小板', value: '200', unit: 'x10^3/uL' }] },
+        {date: daysAgo(3), labs: [{orderCode: '09025C', value: '40', unit: 'U/L'}]},
+        {date: daysAgo(10), labs: [{orderCode: '09026C', value: '30', unit: 'U/L'}, {orderCode: '08011C', itemName: '血小板', value: '200', unit: 'x10^3/uL'}]},
       ];
-      const r = computeScreeningIndicators({ groupedLabs, summary: null, userInfo });
+      const r = computeScreeningIndicators({groupedLabs, summary: null, userInfo});
       assert.isNull(r.fib4);
     });
 
     it('should pair HOMA-IR insulin with glucose within 7 days but not 8', function () {
       const within = [
-        { date: daysAgo(2), labs: [{ orderCode: '09086B', value: '15', unit: 'uIU/mL' }] },
-        { date: daysAgo(5), labs: [{ orderCode: '09005C', value: '100', unit: 'mg/dL' }] },
+        {date: daysAgo(2), labs: [{orderCode: '09086B', value: '15', unit: 'uIU/mL'}]},
+        {date: daysAgo(5), labs: [{orderCode: '09005C', value: '100', unit: 'mg/dL'}]},
       ];
-      assert.isNotNull(computeScreeningIndicators({ groupedLabs: within, summary: null, userInfo }).homaIr);
+      assert.isNotNull(computeScreeningIndicators({groupedLabs: within, summary: null, userInfo}).homaIr);
 
       const beyond = [
-        { date: daysAgo(2), labs: [{ orderCode: '09086B', value: '15', unit: 'uIU/mL' }] },
-        { date: daysAgo(11), labs: [{ orderCode: '09005C', value: '100', unit: 'mg/dL' }] },
+        {date: daysAgo(2), labs: [{orderCode: '09086B', value: '15', unit: 'uIU/mL'}]},
+        {date: daysAgo(11), labs: [{orderCode: '09005C', value: '100', unit: 'mg/dL'}]},
       ];
-      assert.isNull(computeScreeningIndicators({ groupedLabs: beyond, summary: null, userInfo }).homaIr);
+      assert.isNull(computeScreeningIndicators({groupedLabs: beyond, summary: null, userInfo}).homaIr);
     });
 
     it('should compute KFRE only when eGFR<60 and UACR present', function () {
-      const summaryLow = { latestEGFR: { value: 45, date: daysAgo(5) }, latestUACR: { value: 100, date: daysAgo(5) } };
-      assert.isNotNull(computeScreeningIndicators({ groupedLabs: [], summary: summaryLow, userInfo }).kfre);
+      const summaryLow = {latestEGFR: {value: 45, date: daysAgo(5)}, latestUACR: {value: 100, date: daysAgo(5)}};
+      assert.isNotNull(computeScreeningIndicators({groupedLabs: [], summary: summaryLow, userInfo}).kfre);
 
-      const summaryHigh = { latestEGFR: { value: 80, date: daysAgo(5) }, latestUACR: { value: 100, date: daysAgo(5) } };
-      assert.isNull(computeScreeningIndicators({ groupedLabs: [], summary: summaryHigh, userInfo }).kfre, 'eGFR>=60 → no KFRE');
+      const summaryHigh = {latestEGFR: {value: 80, date: daysAgo(5)}, latestUACR: {value: 100, date: daysAgo(5)}};
+      assert.isNull(computeScreeningIndicators({groupedLabs: [], summary: summaryHigh, userInfo}).kfre, 'eGFR>=60 → no KFRE');
     });
 
     it('should convert mmol/L glucose and pmol/L insulin', function () {
       const groupedLabs = [{
         date: daysAgo(1),
         labs: [
-          { orderCode: '09086B', value: '104.2', unit: 'pmol/L' },  // ~15 uIU/mL
-          { orderCode: '09005C', value: '5.55', unit: 'mmol/L' },   // ~100 mg/dL
+          {orderCode: '09086B', value: '104.2', unit: 'pmol/L'},  // ~15 uIU/mL
+          {orderCode: '09005C', value: '5.55', unit: 'mmol/L'},   // ~100 mg/dL
         ],
       }];
-      const r = computeScreeningIndicators({ groupedLabs, summary: null, userInfo });
+      const r = computeScreeningIndicators({groupedLabs, summary: null, userInfo});
       assert.isNotNull(r.homaIr);
       assert.isTrue(near(r.homaIr.value, 3.704, 0.05));
     });
 
     it('should skip FIB-4 when age missing', function () {
-      const groupedLabs = [{ date: daysAgo(1), labs: [
-        { orderCode: '09025C', value: '40' }, { orderCode: '09026C', value: '30' },
-        { orderCode: '08011C', itemName: 'Platelet', value: '200' },
-      ] }];
-      assert.isNull(computeScreeningIndicators({ groupedLabs, summary: null, userInfo: { gender: 'M' } }).fib4);
+      const groupedLabs = [{date: daysAgo(1), labs: [
+        {orderCode: '09025C', value: '40'}, {orderCode: '09026C', value: '30'},
+        {orderCode: '08011C', itemName: 'Platelet', value: '200'},
+      ]}];
+      assert.isNull(computeScreeningIndicators({groupedLabs, summary: null, userInfo: {gender: 'M'}}).fib4);
     });
   });
 });

@@ -2,23 +2,20 @@ import fs from 'fs';
 import path from 'path';
 import url from 'url';
 import http from 'http';
-import { parseArgs } from 'node:util';
+import {parseArgs} from 'node:util';
 
 import mime from 'mime-types';
 
-const ROOT = path.resolve(url.fileURLToPath(import.meta.url), '..');
-const PORT = 5173;
+import {ROOT, PORT} from './common.js';
 
 async function serve({root = ROOT, port = PORT, verbose}) {
   root = path.resolve(root);
   const server = http.createServer((req, res) => {
-    let pathname = `.${url.parse(req.url).pathname}`;
+    let pathname = url.parse(req.url).pathname;
 
     // simple routing
-    if (pathname === './') {
-      pathname = './index.html';
-    } else if (pathname.startsWith('./src/')) {
-      pathname = '../' + pathname.slice(2);
+    if (pathname === '/') {
+      pathname = '/index.html';
     }
 
     const filePath = path.join(root, pathname);

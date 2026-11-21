@@ -1,26 +1,26 @@
-import React, { useEffect } from 'react';
+import React, {useEffect} from 'react';
 import {
   Box,
   Typography,
   Grid,
   Paper
 } from '@mui/material';
-import { renderElem, previewLabItems } from './formatEditorConfig';
+import {renderElem, previewLabItems} from './formatEditorConfig';
 
 // Vertical (stacked) preview format
-const VerticalPreview = ({ headerFormat, itemFormat, sx }) => {
+const VerticalPreview = ({headerFormat, itemFormat, sx}) => {
   return (
-    <Typography variant="body1" component="div" sx={{ whiteSpace: 'pre-wrap', p: 0.5, border: '1px solid #e0e0e0', borderRadius: 1, bgcolor: '#fafafa', ...sx }}>
+    <Typography variant="body1" component="div" sx={{whiteSpace: 'pre-wrap', p: 0.5, border: '1px solid #e0e0e0', borderRadius: 1, bgcolor: '#fafafa', ...sx}}>
       {/* Display header format */}
       {headerFormat.map((item, index) => (
         <React.Fragment key={`header-${index}`}>
           {renderElem(item, index)}
         </React.Fragment>
       ))}
-      
+
       {/* Always add newline after header for vertical format */}
       <br />
-      
+
       {/* Display each lab item's format */}
       {previewLabItems.map((item, itemIndex) => (
         <React.Fragment key={`lab-${itemIndex}`}>
@@ -37,21 +37,21 @@ const VerticalPreview = ({ headerFormat, itemFormat, sx }) => {
 };
 
 // Horizontal (inline) preview format
-const HorizontalPreview = ({ headerFormat, itemFormat, itemSeparator, sx }) => {
+const HorizontalPreview = ({headerFormat, itemFormat, itemSeparator, sx}) => {
   return (
-    <Typography variant="body1" component="div" sx={{ whiteSpace: 'pre-wrap', p: 0.5, border: '1px solid #e0e0e0', borderRadius: 1, bgcolor: '#fafafa', ...sx }}>
+    <Typography variant="body1" component="div" sx={{whiteSpace: 'pre-wrap', p: 0.5, border: '1px solid #e0e0e0', borderRadius: 1, bgcolor: '#fafafa', ...sx}}>
       {/* All content in single line with simple structure */}
-      <Box sx={{ display: 'inline' }}>
+      <Box sx={{display: 'inline'}}>
         {/* Header section */}
         {headerFormat.map((item, index) => (
           <React.Fragment key={`header-${index}`}>
             {renderElem(item, index)}
           </React.Fragment>
         ))}
-        
+
         {/* Never add line break for horizontal format */}
         <span> </span>
-        
+
         {/* Lab items inline with separators */}
         {previewLabItems.map((labItem, itemIndex) => (
           <React.Fragment key={`lab-${itemIndex}`}>
@@ -59,7 +59,7 @@ const HorizontalPreview = ({ headerFormat, itemFormat, itemSeparator, sx }) => {
             {itemIndex > 0 && (
               <span>{itemSeparator}</span>
             )}
-            
+
             {/* Lab item elements */}
             {itemFormat.map((formatItem, formatIndex) => (
               <React.Fragment key={`lab-${itemIndex}-${formatIndex}`}>
@@ -73,10 +73,10 @@ const HorizontalPreview = ({ headerFormat, itemFormat, itemSeparator, sx }) => {
   );
 };
 
-const FormatPreview = ({ 
-  headerFormat, 
-  itemFormat, 
-  itemSeparator = ', ', 
+const FormatPreview = ({
+  headerFormat,
+  itemFormat,
+  itemSeparator = ', ',
   formatType = "customVertical",
   onFormatTypeChange
 }) => {
@@ -84,7 +84,7 @@ const FormatPreview = ({
   useEffect(() => {
     console.log(`FormatPreview: formatType changed to ${formatType}`);
   }, [formatType]);
-  
+
   // Format type map for easier management
   const formatTypesMap = {
     customVertical: {
@@ -98,18 +98,18 @@ const FormatPreview = ({
       handler: () => onFormatTypeChange && onFormatTypeChange('customHorizontal')
     }
   };
-  
+
   const verticalFormat = formatTypesMap.customVertical;
   const horizontalFormat = formatTypesMap.customHorizontal;
 
   return (
-    <Box sx={{ mb: 0 }}>
+    <Box sx={{mb: 0}}>
       <Grid container spacing={1}>
         {/* Vertical preview on the left */}
         <Grid item xs={12} md={6}>
-          <Box 
+          <Box
             onClick={verticalFormat.handler}
-            sx={{ 
+            sx={{
               border: verticalFormat.isSelected ? '2px solid #1976d2' : '1px solid #e0e0e0',
               borderRadius: 1,
               p: 0.5,
@@ -123,10 +123,10 @@ const FormatPreview = ({
               transition: 'all 0.2s'
             }}
           >
-            <Typography 
-              variant="subtitle2" 
-              align="center" 
-              sx={{ 
+            <Typography
+              variant="subtitle2"
+              align="center"
+              sx={{
                 mb: 0.25,
                 px: 1,
                 py: 0.25,
@@ -138,8 +138,8 @@ const FormatPreview = ({
             >
               {verticalFormat.name} {verticalFormat.isSelected && <>(已選擇)</>}
             </Typography>
-            <VerticalPreview 
-              headerFormat={headerFormat} 
+            <VerticalPreview
+              headerFormat={headerFormat}
               itemFormat={itemFormat}
               sx={{
                 border: 'none',
@@ -149,12 +149,12 @@ const FormatPreview = ({
             />
           </Box>
         </Grid>
-        
+
         {/* Horizontal preview on the right */}
         <Grid item xs={12} md={6}>
-          <Box 
+          <Box
             onClick={horizontalFormat.handler}
-            sx={{ 
+            sx={{
               border: horizontalFormat.isSelected ? '2px solid #1976d2' : '1px solid #e0e0e0',
               borderRadius: 1,
               p: 0.5,
@@ -168,10 +168,10 @@ const FormatPreview = ({
               transition: 'all 0.2s'
             }}
           >
-            <Typography 
-              variant="subtitle2" 
-              align="center" 
-              sx={{ 
+            <Typography
+              variant="subtitle2"
+              align="center"
+              sx={{
                 mb: 0.25,
                 px: 1,
                 py: 0.25,
@@ -183,9 +183,9 @@ const FormatPreview = ({
             >
               {horizontalFormat.name} {horizontalFormat.isSelected && <>(已選擇)</>}
             </Typography>
-            <HorizontalPreview 
-              headerFormat={headerFormat} 
-              itemFormat={itemFormat} 
+            <HorizontalPreview
+              headerFormat={headerFormat}
+              itemFormat={itemFormat}
               itemSeparator={itemSeparator}
               sx={{
                 border: 'none',
@@ -196,14 +196,14 @@ const FormatPreview = ({
           </Box>
         </Grid>
       </Grid>
-      
-      <Box sx={{ mt: 1, display: 'flex', flexDirection: 'column', gap: 0.5 }}>
+
+      <Box sx={{mt: 1, display: 'flex', flexDirection: 'column', gap: 0.5}}>
         <Typography variant="caption" color="text.secondary">
           此為預覽，實際複製效果可能略有不同
         </Typography>
         <Typography variant="caption" color="text.secondary">
-          {formatType === 'customHorizontal' ? 
-            `檢驗項目分隔符號: "${itemSeparator}"` : 
+          {formatType === 'customHorizontal' ?
+            `檢驗項目分隔符號: "${itemSeparator}"` :
             '每個檢驗項目獨立一行顯示'}
         </Typography>
       </Box>
@@ -211,4 +211,4 @@ const FormatPreview = ({
   );
 };
 
-export default FormatPreview; 
+export default FormatPreview;

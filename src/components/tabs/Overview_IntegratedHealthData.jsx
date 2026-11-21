@@ -1,12 +1,12 @@
-import React, { useEffect, useState } from "react";
-import { Paper, Typography, Box, Table, TableBody, TableCell, TableContainer, TableRow } from "@mui/material";
-import { alpha } from "@mui/material/styles";
+import React, {useEffect, useState} from "react";
+import {Paper, Typography, Box, Table, TableBody, TableCell, TableContainer, TableRow} from "@mui/material";
+import {alpha} from "@mui/material/styles";
 import HealthAndSafetyIcon from "@mui/icons-material/HealthAndSafety";
-import { checkAbnormalValue, extractHospitalName } from "../../utils/hbcvdataProcessor.js";
+import {checkAbnormalValue, extractHospitalName} from "../../utils/hbcvdataProcessor.js";
 
 /**
  * Integrated component for displaying Adult Health Check, Cancer Screening, and Hepatitis B & C data
- * 
+ *
  * @param {Object} adultHealthCheckData - The adult health check data
  * @param {Object} cancerScreeningData - The cancer screening data
  * @param {Object} hbcvData - The hepatitis B & C data
@@ -22,7 +22,7 @@ const Overview_IntegratedHealthData = ({
     generalDisplaySettings = {}
 }) => {
     // Extract display settings with defaults
-    const { titleTextSize = 'medium', contentTextSize = 'medium' } = generalDisplaySettings;
+    const {titleTextSize = 'medium', contentTextSize = 'medium'} = generalDisplaySettings;
 
     // Determine which sections to show based on cloudSettings
     const showAdultHealthCheck = cloudSettings?.fetchAdultHealthCheck === true;
@@ -118,14 +118,14 @@ const Overview_IntegratedHealthData = ({
         const content = (
             <>
                 {latestData.title && (
-                    <Typography variant="body2" sx={{ fontSize: getTextSize(contentTextSize), mb: 0.5, fontWeight: 'medium' }}>
+                    <Typography variant="body2" sx={{fontSize: getTextSize(contentTextSize), mb: 0.5, fontWeight: 'medium'}}>
                         {latestData.title}
                     </Typography>
                 )}
-                <Typography variant="body2" sx={{ fontSize: getTextSize(contentTextSize), mb: 0.5 }}>
+                <Typography variant="body2" sx={{fontSize: getTextSize(contentTextSize), mb: 0.5}}>
                     H {latestData.height || '--'} W {latestData.weight || '--'} BMI {latestData.bmi || '--'} 腰 {latestData.waistline || '--'} BP {latestData.base_sbp || '--'}/{latestData.base_ebp || '--'}
                 </Typography>
-                <Typography variant="body2" sx={{ fontSize: getTextSize(contentTextSize) }}>
+                <Typography variant="body2" sx={{fontSize: getTextSize(contentTextSize)}}>
                     Chol {latestData.cho || '--'} / TG {latestData.blod_tg || '--'} / LDL {latestData.ldl || '--'} / HDL {latestData.hdl || '--'} / GOT {latestData.sgot || '--'} / GPT {latestData.sgpt || '--'} / Glu {latestData.s_09005c || '--'} / BUN {latestData.urine_bun || '--'} / Cr {latestData.blod_creat || '--'} / GFR {latestData.egfr || '--'} / 尿蛋白 {latestData.urine_protein || '--'}
                 </Typography>
             </>
@@ -171,39 +171,39 @@ const Overview_IntegratedHealthData = ({
         const actualData = dataFromRObject || dataFromOriginal || dataFromDirect;
 
         const screeningItems = [
-            { type: 'colorectal', label: '糞便潛血' },
-            { type: 'oralMucosa', label: '口腔黏膜' },
-            { type: 'mammography', label: '乳房攝影' },
-            { type: 'papSmears', label: '子宮頸癌' },
-            { type: 'lungCancer', label: '肺癌篩檢' },
-            { type: 'papillomavirus', label: '乳突病毒' },
-            { type: 'helicobacter', label: '幽門桿菌' }
+            {type: 'colorectal', label: '糞便潛血'},
+            {type: 'oralMucosa', label: '口腔黏膜'},
+            {type: 'mammography', label: '乳房攝影'},
+            {type: 'papSmears', label: '子宮頸癌'},
+            {type: 'lungCancer', label: '肺癌篩檢'},
+            {type: 'papillomavirus', label: '乳突病毒'},
+            {type: 'helicobacter', label: '幽門桿菌'}
         ];
 
         // Separate items with data and items without data
         const itemsWithData = [];
         const itemsWithoutData = [];
 
-        screeningItems.forEach(({ type, label }) => {
+        screeningItems.forEach(({type, label}) => {
             if (!actualData[type] || !actualData[type].subData || !Array.isArray(actualData[type].subData) || actualData[type].subData.length === 0) {
                 itemsWithoutData.push(label);
             } else {
                 const latestData = actualData[type].subData[0];
-                itemsWithData.push({ type, label, data: latestData });
+                itemsWithData.push({type, label, data: latestData});
             }
         });
 
         const content = (
             <>
-                {itemsWithData.map(({ type, label, data }) => {
+                {itemsWithData.map(({type, label, data}) => {
                     return (
                         <Typography
                             key={type}
                             variant="body2"
-                            sx={{ fontSize: getTextSize(contentTextSize), mb: 0.5, color: getResultColor(data.result) }}
+                            sx={{fontSize: getTextSize(contentTextSize), mb: 0.5, color: getResultColor(data.result)}}
                         >
                             {label}: {data.result}
-                            <Typography component="span" variant="body2" color="text.secondary" sx={{ fontSize: getTextSize(contentTextSize) }}>
+                            <Typography component="span" variant="body2" color="text.secondary" sx={{fontSize: getTextSize(contentTextSize)}}>
                                 {' '}{data.func_date} {data.hosp_abbr}
                             </Typography>
                         </Typography>
@@ -212,7 +212,7 @@ const Overview_IntegratedHealthData = ({
                 {itemsWithoutData.length > 0 && (
                     <Typography
                         variant="body2"
-                        sx={{ fontSize: getTextSize(contentTextSize), mb: 0.5, color: getResultColor("無資料") }}
+                        sx={{fontSize: getTextSize(contentTextSize), mb: 0.5, color: getResultColor("無資料")}}
                     >
                         {itemsWithoutData.join(' / ')}: 無資料
                     </Typography>
@@ -265,13 +265,13 @@ const Overview_IntegratedHealthData = ({
         // Add test results in compact format
         if (actualData.result_data && actualData.result_data.length > 0) {
             const results = actualData.result_data.map((item) => {
-                const { isAbnormal } = checkAbnormalValue(item.assay_value, item.consult_value);
+                const {isAbnormal} = checkAbnormalValue(item.assay_value, item.consult_value);
                 return {
                     text: `${item.assay_item_name}: ${item.assay_value} (${item.real_inspect_date})`,
                     isAbnormal
                 };
             });
-            contentParts.push({ type: 'results', data: results });
+            contentParts.push({type: 'results', data: results});
         }
 
         // Add medications in compact format
@@ -279,7 +279,7 @@ const Overview_IntegratedHealthData = ({
             const medications = actualData.med_data.map((item) =>
                 `${item.drug_ing_name} (${item.func_date} ${extractHospitalName(item.hosp)})`
             );
-            contentParts.push({ type: 'medications', data: medications });
+            contentParts.push({type: 'medications', data: medications});
         }
 
         const content = (
@@ -287,7 +287,7 @@ const Overview_IntegratedHealthData = ({
                 {contentParts.map((part, index) => {
                     if (part.type === 'results') {
                         return (
-                            <Box key="results" sx={{ mb: contentParts.length > 1 ? 0.5 : 0 }}>
+                            <Box key="results" sx={{mb: contentParts.length > 1 ? 0.5 : 0}}>
                                 {part.data.map((result, idx) => (
                                     <Typography
                                         key={idx}
@@ -308,7 +308,7 @@ const Overview_IntegratedHealthData = ({
                             <Typography
                                 key="medications"
                                 variant="body2"
-                                sx={{ fontSize: getTextSize(contentTextSize) }}
+                                sx={{fontSize: getTextSize(contentTextSize)}}
                             >
                                 Rx: {part.data.join(' / ')}
                             </Typography>
@@ -367,9 +367,9 @@ const Overview_IntegratedHealthData = ({
                 overflow: "hidden",
             }}
         >
-            <Box sx={{ display: "flex", alignItems: "center", mb: hasAnyData() ? 1 : 0 }}>
+            <Box sx={{display: "flex", alignItems: "center", mb: hasAnyData() ? 1 : 0}}>
                 <HealthAndSafetyIcon
-                    sx={{ mr: 1, color: "primary.main", fontSize: "1.5rem" }}
+                    sx={{mr: 1, color: "primary.main", fontSize: "1.5rem"}}
                 />
                 <Typography
                     variant="subtitle1"
@@ -384,7 +384,7 @@ const Overview_IntegratedHealthData = ({
 
             {hasAnyData() ? (
                 <TableContainer>
-                    <Table size="small" sx={{ '& .MuiTableCell-root': { padding: '4px 8px' } }}>
+                    <Table size="small" sx={{'& .MuiTableCell-root': {padding: '4px 8px'}}}>
                         <TableBody>
                             {renderAdultHealthCheckRows()}
                             {renderCancerScreeningRows()}
@@ -396,7 +396,7 @@ const Overview_IntegratedHealthData = ({
                 <Typography
                     variant="body2"
                     color="text.secondary"
-                    sx={{ fontSize: getTextSize(contentTextSize), pl: 1, display: "inline-block", ml: 1 }}
+                    sx={{fontSize: getTextSize(contentTextSize), pl: 1, display: "inline-block", ml: 1}}
                 >
                     無資料
                 </Typography>

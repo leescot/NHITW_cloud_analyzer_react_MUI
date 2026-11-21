@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   Box,
   Typography,
@@ -20,7 +20,7 @@ import OpenInNewIcon from '@mui/icons-material/OpenInNew';
 import VolunteerActivismIcon from '@mui/icons-material/VolunteerActivism';
 
 // 引入標籤顏色工具函數
-import { getTabColor, getTabSelectedColor } from '../utils/tabColorUtils';
+import {getTabColor, getTabSelectedColor} from '../utils/tabColorUtils';
 
 // 導入拆分出的組件
 // DataStatusTab 已隱藏（保留 dataStatus 狀態機，方便日後重啟）
@@ -33,22 +33,22 @@ import OverviewSettings from './settings/OverviewSettings';
 import AboutTab from './settings/AboutTab';
 import AdvancedSettings from './settings/AdvancedSettings';
 import CloudDataSettings from './settings/CloudDataSettings';
-import { updateDataStatus } from '../utils/settingsHelper';
+import {updateDataStatus} from '../utils/settingsHelper';
 import LoadDataTab from './settings/LoadDataTab';
 
 const PopupSettings = () => {
   const [dataStatus, setDataStatus] = useState({
-    medication: { status: 'none', count: 0 },
-    labData: { status: 'none', count: 0 },
-    chineseMed: { status: 'none', count: 0 },
-    imaging: { status: 'none', count: 0 },
-    allergy: { status: 'none', count: 0 },
-    surgery: { status: 'none', count: 0 },
-    discharge: { status: 'none', count: 0 },
-    medDays: { status: 'none', count: 0 },
-    patientSummary: { status: 'none', count: 0 },
-    adultHealthCheck: { status: 'none', count: 0 },
-    cancerScreening: { status: 'none', count: 0 }
+    medication: {status: 'none', count: 0},
+    labData: {status: 'none', count: 0},
+    chineseMed: {status: 'none', count: 0},
+    imaging: {status: 'none', count: 0},
+    allergy: {status: 'none', count: 0},
+    surgery: {status: 'none', count: 0},
+    discharge: {status: 'none', count: 0},
+    medDays: {status: 'none', count: 0},
+    patientSummary: {status: 'none', count: 0},
+    adultHealthCheck: {status: 'none', count: 0},
+    cancerScreening: {status: 'none', count: 0}
   });
 
   // 添加一般顯示設定狀態
@@ -90,7 +90,7 @@ const PopupSettings = () => {
   // 「雲端」是動作鍵（開啟外部 NHI 頁面），不對應內容 map。
   const tabContentMap = new Map([
     [0, (
-      <Box sx={{ display: 'flex', flexDirection: 'column' }}>
+      <Box sx={{display: 'flex', flexDirection: 'column'}}>
         <GeneralDisplaySettings />
         <CloudDataSettings />
         <OverviewSettings />
@@ -108,23 +108,23 @@ const PopupSettings = () => {
     [2, (
       <Box>
         <Typography variant="h6" align="center" gutterBottom>贊助我們</Typography>
-        <Typography paragraph  align="center">
+        <Typography paragraph align="center">
           感謝您使用「更好的健保雲端2.0」</Typography><Typography paragraph align="center">
           如果您覺得這個工具對您醫療上有所幫助，您可以考慮贊助我們，幫助我們持續改進和維護這個專案。
         </Typography>
-        <Box sx={{ display: 'flex', flexDirection: 'column', alignItems: 'center', mt: 2 }}>
-          <Box sx={{ mb: 2, maxWidth: '200px', maxHeight: '200px' }}>
+        <Box sx={{display: 'flex', flexDirection: 'column', alignItems: 'center', mt: 2}}>
+          <Box sx={{mb: 2, maxWidth: '200px', maxHeight: '200px'}}>
             <img
               src="/images/buymeacoffee_qr.png"
               alt="Buy Me A Coffee QR Code"
-              style={{ width: '100%', height: 'auto', borderRadius: '8px' }}
+              style={{width: '100%', height: 'auto', borderRadius: '8px'}}
             />
           </Box>
           <Button
             variant="contained"
             color="primary"
             startIcon={<VolunteerActivismIcon />}
-            onClick={() => chrome.tabs.create({ url: 'https://buymeacoffee.com/leescot' })}
+            onClick={() => chrome.tabs.create({url: 'https://buymeacoffee.com/leescot'})}
           >
             前往贊助頁面
           </Button>
@@ -149,13 +149,13 @@ const PopupSettings = () => {
       openNHIMedCloud();
       return;
     }
-    
+
     // 正常切換標籤
     setActiveTab(newValue);
   };
 
   const handleCloseSnackbar = () => {
-    setSnackbar(prev => ({ ...prev, open: false }));
+    setSnackbar(prev => ({...prev, open: false}));
   };
 
   // 使用 Map 處理開發者模式的不同點擊次數情況
@@ -164,15 +164,15 @@ const PopupSettings = () => {
       action: (currentMode) => {
         const newMode = !currentMode;
         setDeveloperMode(newMode);
-        
+
         // 儲存開發者模式狀態
-        chrome.storage.local.set({ developerMode: newMode });
-        
+        chrome.storage.local.set({developerMode: newMode});
+
         // 如果關閉開發者模式，且當前在開發頁面 (idx=3)，切換回設定頁面
         if (!newMode && activeTab === 3) {
           setActiveTab(0);
         }
-        
+
         return {
           message: newMode ? '開發者模式已啟用' : '開發者模式已關閉',
           severity: newMode ? 'success' : 'info'
@@ -190,8 +190,8 @@ const PopupSettings = () => {
     // 使用 Map 處理開發者模式的點擊邏輯
     const actionConfig = handleDeveloperModeActions.get(newCount);
     if (actionConfig) {
-      const { message, severity } = actionConfig.action(developerMode);
-      
+      const {message, severity} = actionConfig.action(developerMode);
+
       // 顯示通知
       setSnackbar({
         open: true,
@@ -228,7 +228,7 @@ const PopupSettings = () => {
 
   // Function to open NHI MedCloud website
   const openNHIMedCloud = () => {
-    chrome.tabs.create({ url: 'https://medcloud2.nhi.gov.tw/imu/IMUE1000/' });
+    chrome.tabs.create({url: 'https://medcloud2.nhi.gov.tw/imu/IMUE1000/'});
   };
 
   // 消息處理 Map
@@ -317,7 +317,7 @@ const PopupSettings = () => {
   }, []);
 
   return (
-    <Box sx={{ width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}>
+    <Box sx={{width: '100%', height: '100%', display: 'flex', flexDirection: 'column'}}>
       <AppBar position="static" color="default" elevation={0}>
         <Tabs
           value={activeTab}
@@ -407,7 +407,7 @@ const PopupSettings = () => {
       {/* 使用 Map 渲染標籤內容 */}
       {activeTab === 0 && tabContentMap.get(0)}
 
-      <Box sx={{ flexGrow: 1, overflow: 'auto', p: 2 }}>
+      <Box sx={{flexGrow: 1, overflow: 'auto', p: 2}}>
         {/* 使用 Map 渲染其他標籤內容 */}
         {activeTab === 1 && tabContentMap.get(1)}
         {activeTab === 2 && tabContentMap.get(2)}
@@ -435,7 +435,7 @@ const PopupSettings = () => {
         >
           更好的健保雲端2.0
           {developerMode && (
-            <span style={{ fontSize: '0.8em', marginLeft: '4px' }}>
+            <span style={{fontSize: '0.8em', marginLeft: '4px'}}>
               (開發模式)
             </span>
           )}
@@ -447,7 +447,7 @@ const PopupSettings = () => {
         open={snackbar.open}
         autoHideDuration={snackbar.autoHideDuration || 3000}
         onClose={handleCloseSnackbar}
-        anchorOrigin={{ vertical: 'top', horizontal: 'center' }}
+        anchorOrigin={{vertical: 'top', horizontal: 'center'}}
         sx={{
           top: '50% !important',
           bottom: 'auto !important',
@@ -458,7 +458,7 @@ const PopupSettings = () => {
           }
         }}
       >
-        <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{ width: '100%' }}>
+        <Alert onClose={handleCloseSnackbar} severity={snackbar.severity} sx={{width: '100%'}}>
           {snackbar.message}
         </Alert>
       </Snackbar>

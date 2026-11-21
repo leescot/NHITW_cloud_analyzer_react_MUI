@@ -24,7 +24,7 @@ export const formatReferenceRange = (lab, showReference) => {
     [
       () => lab.formattedReference,
       () => (
-        <span style={{ color: "gray", fontSize: "0.8em" }}>
+        <span style={{color: "gray", fontSize: "0.8em"}}>
           {" "}({lab.formattedReference})
         </span>
       )
@@ -33,7 +33,7 @@ export const formatReferenceRange = (lab, showReference) => {
     [
       () => lab.referenceMin !== null,
       () => (
-        <span style={{ color: "gray", fontSize: "0.8em" }}>
+        <span style={{color: "gray", fontSize: "0.8em"}}>
           {" "}
           ({lab.referenceMin}
           {lab.referenceMax !== null ? `-${lab.referenceMax}` : ""})

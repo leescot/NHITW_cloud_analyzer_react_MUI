@@ -9,7 +9,7 @@
  * - 疫苗記錄（ICD Z23-Z27）單獨顯示在各自的類別中
  */
 
-import React, { useMemo } from "react";
+import React, {useMemo} from "react";
 import {
   Box,
   Card,
@@ -24,7 +24,7 @@ import {
   Divider,
   Chip
 } from "@mui/material";
-import { alpha } from "@mui/material/styles";
+import {alpha} from "@mui/material/styles";
 import InfoIcon from '@mui/icons-material/Info';
 import GrassIcon from '@mui/icons-material/Grass';
 import TypographySizeWrapper from "../utils/TypographySizeWrapper";
@@ -367,7 +367,7 @@ const Overview_RecentDiagnosis = ({
 
     // 從Map中獲取類別配置
     const config = categoryConfig.get(title) || categoryConfig.get("門診"); // 默認為門診配置
-    const { shortTitle, color, bgColor, isInpatient, isEmergency, isVaccine, isEnrollment } = config;
+    const {shortTitle, color, bgColor, isInpatient, isEmergency, isVaccine, isEnrollment} = config;
 
     return (
       <TableRow>
@@ -402,16 +402,16 @@ const Overview_RecentDiagnosis = ({
             <TypographySizeWrapper
               textSizeType="content"
               generalDisplaySettings={generalDisplaySettings}
-              sx={{ fontSize: '0.85rem', fontWeight: 'bold', lineHeight: 1 }}
+              sx={{fontSize: '0.85rem', fontWeight: 'bold', lineHeight: 1}}
             >
               {shortTitle}
             </TypographySizeWrapper>
           </Box>
         </TableCell>
-        <TableCell sx={{ borderBottom: 'none', padding: '8px 0' }}>
+        <TableCell sx={{borderBottom: 'none', padding: '8px 0'}}>
           <Box>
             {visibleDiagnoses.map((diagnosis, index) => (
-              <Box key={diagnosis.key} sx={{ display: 'flex', alignItems: 'center', mb: 0.8 }}>
+              <Box key={diagnosis.key} sx={{display: 'flex', alignItems: 'center', mb: 0.8}}>
                 {(isInpatient || isEmergency) && (
                   <Chip
                     size="small"
@@ -424,7 +424,7 @@ const Overview_RecentDiagnosis = ({
                       border: '1px solid',
                       borderColor: color,
                       color: color,
-                      '& .MuiChip-label': { px: 1 }
+                      '& .MuiChip-label': {px: 1}
                     }}
                   />
                 )}
@@ -441,7 +441,7 @@ const Overview_RecentDiagnosis = ({
                       border: '1px solid',
                       borderColor: color,
                       color: color,
-                      '& .MuiChip-label': { px: 1 }
+                      '& .MuiChip-label': {px: 1}
                     }}
                   />
                 )}
@@ -449,7 +449,7 @@ const Overview_RecentDiagnosis = ({
                 <TypographySizeWrapper
                   textSizeType="content"
                   generalDisplaySettings={generalDisplaySettings}
-                  sx={{ mr: 1, display: 'flex', alignItems: 'center' }}
+                  sx={{mr: 1, display: 'flex', alignItems: 'center'}}
                 >
                   {isEnrollment ? (
                     // 對於收案，顯示程式名稱和醫院
@@ -467,7 +467,7 @@ const Overview_RecentDiagnosis = ({
                             color: color,
                             border: '1px solid',
                             borderColor: alpha(color, 0.3),
-                            '& .MuiChip-label': { px: 1 }
+                            '& .MuiChip-label': {px: 1}
                           }}
                         />
                       )}
@@ -490,7 +490,7 @@ const Overview_RecentDiagnosis = ({
                     <GrassIcon
                       fontSize="small"
                       color="primary"
-                      sx={{ fontSize: '0.9rem', mr: 1.5, opacity: 0.7 }}
+                      sx={{fontSize: '0.9rem', mr: 1.5, opacity: 0.7}}
                     />
                   </Tooltip>
                 )}
@@ -518,7 +518,7 @@ const Overview_RecentDiagnosis = ({
                 title={
                   <Box>
                     {diagnoses.slice(maxVisible).map((diagnosis) => (
-                      <Box key={diagnosis.key} sx={{ mb: 0.5 }}>
+                      <Box key={diagnosis.key} sx={{mb: 0.5}}>
                         {isEnrollment ? (
                           <>{diagnosis.programName} {diagnosis.hospital}</>
                         ) : isVaccine ? (
@@ -537,8 +537,8 @@ const Overview_RecentDiagnosis = ({
                 }
                 arrow
               >
-                <Box sx={{ display: 'flex', alignItems: 'center', cursor: 'pointer' }}>
-                  <InfoIcon fontSize="small" color="action" sx={{ mr: 0.5 }} />
+                <Box sx={{display: 'flex', alignItems: 'center', cursor: 'pointer'}}>
+                  <InfoIcon fontSize="small" color="action" sx={{mr: 0.5}} />
                   <TypographySizeWrapper
                     textSizeType="note"
                     generalDisplaySettings={generalDisplaySettings}
@@ -556,8 +556,8 @@ const Overview_RecentDiagnosis = ({
   };
 
   return (
-    <Card variant="outlined" sx={{ mb: 2 }}>
-      <CardContent sx={{ p: 2, "&:last-child": { pb: 2 } }}>
+    <Card variant="outlined" sx={{mb: 2}}>
+      <CardContent sx={{p: 2, "&:last-child": {pb: 2}}}>
         <TypographySizeWrapper
           variant="h6"
           textSizeType="title"
@@ -576,7 +576,7 @@ const Overview_RecentDiagnosis = ({
             無近期診斷資料
           </TypographySizeWrapper>
         ) : (
-          <Table size="small" sx={{ '& .MuiTableCell-root': { padding: '4px 8px' } }}>
+          <Table size="small" sx={{'& .MuiTableCell-root': {padding: '4px 8px'}}}>
             <TableBody>
               {/* 渲染門診診斷 */}
               {renderDiagnosisCategory("門診", diagnosisData.outpatient)}
@@ -587,7 +587,7 @@ const Overview_RecentDiagnosis = ({
                   diagnosisData.inpatient.length > 0 ||
                   diagnosisData.vaccines.length > 0) && (
                   <TableRow>
-                    <TableCell colSpan={2} sx={{ padding: '4px 0' }}>
+                    <TableCell colSpan={2} sx={{padding: '4px 0'}}>
                       <Divider />
                     </TableCell>
                   </TableRow>
@@ -601,7 +601,7 @@ const Overview_RecentDiagnosis = ({
                 (diagnosisData.inpatient.length > 0 ||
                   diagnosisData.vaccines.length > 0) && (
                   <TableRow>
-                    <TableCell colSpan={2} sx={{ padding: '4px 0' }}>
+                    <TableCell colSpan={2} sx={{padding: '4px 0'}}>
                       <Divider />
                     </TableCell>
                   </TableRow>
@@ -614,7 +614,7 @@ const Overview_RecentDiagnosis = ({
               {diagnosisData.inpatient.length > 0 &&
                 diagnosisData.vaccines.length > 0 && (
                   <TableRow>
-                    <TableCell colSpan={2} sx={{ padding: '4px 0' }}>
+                    <TableCell colSpan={2} sx={{padding: '4px 0'}}>
                       <Divider />
                     </TableCell>
                   </TableRow>
@@ -630,7 +630,7 @@ const Overview_RecentDiagnosis = ({
                 diagnosisData.vaccines.length > 0) &&
                 diagnosisData.enrollment.length > 0 && (
                   <TableRow>
-                    <TableCell colSpan={2} sx={{ padding: '4px 0' }}>
+                    <TableCell colSpan={2} sx={{padding: '4px 0'}}>
                       <Divider />
                     </TableCell>
                   </TableRow>

@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   Typography,
   Switch,
@@ -28,18 +28,18 @@ import ExpandMoreIcon from '@mui/icons-material/ExpandMore';
 import ViewColumnIcon from '@mui/icons-material/ViewColumn';
 import CategoryIcon from '@mui/icons-material/Category';
 import ContentCopyIcon from '@mui/icons-material/ContentCopy';
-import { handleSettingChange } from '../../utils/settingsHelper';
-import { DEFAULT_LAB_COPY_ITEMS } from '../../config/labTests';
+import {handleSettingChange} from '../../utils/settingsHelper';
+import {DEFAULT_LAB_COPY_ITEMS} from '../../config/labTests';
 
 /**
  * 重置用戶的檢驗複製項目設定為預設值
  */
 export const resetLabCopyItemsToDefault = (callback = () => {}) => {
   chrome.storage.sync.set(
-    { labChooseCopyItems: DEFAULT_LAB_COPY_ITEMS },
+    {labChooseCopyItems: DEFAULT_LAB_COPY_ITEMS},
     () => {
       // 通知其他組件設定已更改
-      chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+      chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
         if (tabs[0]) {
           chrome.tabs.sendMessage(tabs[0].id, {
             action: "settingChanged",
@@ -66,17 +66,17 @@ const LabSettings = () => {
     labChooseCopyItems: DEFAULT_LAB_COPY_ITEMS,
     enableLabCustomCopyFormat: false,
     customLabHeaderCopyFormat: [
-      { id: 'date', display: '日期' },
-      { id: 'separator', value: ' - ', display: ' - ' },
-      { id: 'hosp', display: '醫院' },
-      { id: 'newline', display: '換行' },
+      {id: 'date', display: '日期'},
+      {id: 'separator', value: ' - ', display: ' - '},
+      {id: 'hosp', display: '醫院'},
+      {id: 'newline', display: '換行'},
     ],
     customLabItemCopyFormat: [
-      { id: 'itemName', display: '項目名稱' },
-      { id: 'space', display: ' ' },
-      { id: 'value', display: '數值' },
-      { id: 'space', display: ' ' },
-      { id: 'unit', display: '單位' },
+      {id: 'itemName', display: '項目名稱'},
+      {id: 'space', display: ' '},
+      {id: 'value', display: '數值'},
+      {id: 'space', display: ' '},
+      {id: 'unit', display: '單位'},
     ]
   });
 
@@ -96,17 +96,17 @@ const LabSettings = () => {
       labChooseCopyItems: DEFAULT_LAB_COPY_ITEMS,
       enableLabCustomCopyFormat: false,
       customLabHeaderCopyFormat: [
-        { id: 'date', display: '日期' },
-        { id: 'separator', value: ' - ', display: ' - ' },
-        { id: 'hosp', display: '醫院' },
-        { id: 'newline', display: '換行' },
+        {id: 'date', display: '日期'},
+        {id: 'separator', value: ' - ', display: ' - '},
+        {id: 'hosp', display: '醫院'},
+        {id: 'newline', display: '換行'},
       ],
       customLabItemCopyFormat: [
-        { id: 'itemName', display: '項目名稱' },
-        { id: 'space', display: ' ' },
-        { id: 'value', display: '數值' },
-        { id: 'space', display: ' ' },
-        { id: 'unit', display: '單位' },
+        {id: 'itemName', display: '項目名稱'},
+        {id: 'space', display: ' '},
+        {id: 'value', display: '數值'},
+        {id: 'space', display: ' '},
+        {id: 'unit', display: '單位'},
       ]
     }, (items) => {
       setSettings({
@@ -126,7 +126,7 @@ const LabSettings = () => {
 
     // Listen for real-time setting changes from other components
     const handleSettingChangedEvent = (event) => {
-      const { key, value } = event.detail;
+      const {key, value} = event.detail;
       if (key === 'enableLabCustomCopyFormat') {
         setSettings(prev => ({
           ...prev,
@@ -162,9 +162,9 @@ const LabSettings = () => {
     };
 
     setSettings(updatedSettings);
-    chrome.storage.sync.set({ labChooseCopyItems: tempCustomCopyItems }, () => {
+    chrome.storage.sync.set({labChooseCopyItems: tempCustomCopyItems}, () => {
       // 發送消息給其他組件更新
-      chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+      chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
         if (tabs[0]) {
           chrome.tabs.sendMessage(tabs[0].id, {
             action: "settingChanged",
@@ -204,21 +204,21 @@ const LabSettings = () => {
   const openLabCustomFormatEditor = () => {
     // Only proceed if enableLabCustomCopyFormat is true
     if (!settings.enableLabCustomCopyFormat) return;
-    
+
     // 發送消息給 background script 或直接調用 FloatingIcon 的方法
     if (window.openFloatingIconDialog) {
       window.openFloatingIconDialog();
       // 等對話框打開後，切換到檢驗自訂格式標籤（索引為10）
       setTimeout(() => {
-        chrome.runtime.sendMessage({ 
+        chrome.runtime.sendMessage({
           action: 'switchToLabCustomFormatTab',
           tabIndex: 10
         });
       }, 100);
     } else {
       // 如果全局方法不可用，則發送消息給背景脚本處理
-      chrome.runtime.sendMessage({ 
-        action: 'openLabCustomFormatEditor' 
+      chrome.runtime.sendMessage({
+        action: 'openLabCustomFormatEditor'
       });
     }
   };
@@ -230,7 +230,7 @@ const LabSettings = () => {
         aria-controls="lab-settings-content"
         id="lab-settings-header"
       >
-        <ScienceIcon sx={{ mr: 1, color: 'primary.main' }}/>
+        <ScienceIcon sx={{mr: 1, color: 'primary.main'}}/>
         <Typography>檢驗報告設定</Typography>
       </AccordionSummary>
       <AccordionDetails>
@@ -294,23 +294,23 @@ const LabSettings = () => {
             startIcon={<ContentCopyIcon />}
             onClick={handleOpenCustomCopyDialog}
             fullWidth
-            sx={{ mt: 1, mb: 1 }}
+            sx={{mt: 1, mb: 1}}
           >
             選擇要複製的檢驗項目
           </Button>
         )}
 
         {settings.enableLabCustomCopyFormat && (
-          <Box sx={{ mt: 1, mb: 2, ml: 4 }}>
+          <Box sx={{mt: 1, mb: 2, ml: 4}}>
             <Typography variant="body2" color="text.secondary">
               請在「進階設定」中設置自訂格式。
             </Typography>
           </Box>
         )}
 
-        <Divider sx={{ my: 1.5 }} />
+        <Divider sx={{my: 1.5}} />
 
-        <FormControl fullWidth sx={{ mb: 2 }}>
+        <FormControl fullWidth sx={{mb: 2}}>
           <InputLabel id="lab-display-format-label">檢驗報告呈現方式</InputLabel>
           <Select
             labelId="lab-display-format-label"
@@ -320,10 +320,10 @@ const LabSettings = () => {
             onChange={(e) => {
               const newValue = e.target.value;
               console.log(`Changing displayLabFormat to: ${newValue}`);
-              
+
               // Call the handleSettingChange with detailed logging
               handleSettingChange('displayLabFormat', newValue, setSettings, 'displayLabFormat', 'labsettings');
-              
+
               // Verify the change was saved in storage
               setTimeout(() => {
                 chrome.storage.sync.get(['displayLabFormat'], (items) => {
@@ -340,7 +340,7 @@ const LabSettings = () => {
           </Select>
         </FormControl>
 
-        <FormControl fullWidth sx={{ mb: 2 }}>
+        <FormControl fullWidth sx={{mb: 2}}>
           <InputLabel id="lab-copy-format-label">檢驗報告複製格式</InputLabel>
           <Select
             labelId="lab-copy-format-label"
@@ -351,14 +351,14 @@ const LabSettings = () => {
           >
             <MenuItem value="vertical">直式格式 (每項檢驗獨立一行)</MenuItem>
             <MenuItem value="horizontal">橫式格式 (檢驗項目並排顯示)</MenuItem>
-            <MenuItem 
-              value="customVertical" 
+            <MenuItem
+              value="customVertical"
               disabled={!settings.enableLabCustomCopyFormat}
             >
               自訂檢驗複製格式(直式)
             </MenuItem>
-            <MenuItem 
-              value="customHorizontal" 
+            <MenuItem
+              value="customHorizontal"
               disabled={!settings.enableLabCustomCopyFormat}
             >
               自訂檢驗複製格式(橫式)
@@ -379,7 +379,7 @@ const LabSettings = () => {
             <Typography variant="body2" color="text.secondary" paragraph>
               此處勾選的項目會在複製操作時自動先勾選。
             </Typography>
-            <List sx={{ width: '100%' }}>
+            <List sx={{width: '100%'}}>
               {tempCustomCopyItems.map((item, index) => (
                 <ListItem key={`${item.orderCode}-${index}`} divider>
                   <ListItemIcon>
@@ -403,7 +403,7 @@ const LabSettings = () => {
             <Button
               onClick={handleResetCustomCopyItems}
               color="secondary"
-              sx={{ mr: 'auto' }}
+              sx={{mr: 'auto'}}
             >
               重置為預設
             </Button>

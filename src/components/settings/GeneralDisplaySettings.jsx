@@ -1,4 +1,4 @@
-import React, { useState, useEffect } from 'react';
+import React, {useState, useEffect} from 'react';
 import {
   Box,
   Typography,
@@ -55,10 +55,10 @@ const GeneralDisplaySettings = () => {
   const handleAutoOpenPageChange = (event) => {
     const newValue = event.target.checked;
     setAutoOpenPage(newValue);
-    chrome.storage.sync.set({ autoOpenPage: newValue });
+    chrome.storage.sync.set({autoOpenPage: newValue});
 
     // Notify FloatingIcon component of the change
-    chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+    chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
       if (tabs[0]) {
         chrome.tabs.sendMessage(tabs[0].id, {
           action: "settingChanged",
@@ -84,10 +84,10 @@ const GeneralDisplaySettings = () => {
   const handleTitleTextSizeChange = (event) => {
     const newValue = event.target.value;
     setTitleTextSize(newValue);
-    chrome.storage.sync.set({ titleTextSize: newValue });
+    chrome.storage.sync.set({titleTextSize: newValue});
 
     // Notify FloatingIcon component of the change
-    chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+    chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
       if (tabs[0]) {
         chrome.tabs.sendMessage(tabs[0].id, {
           action: "settingChanged",
@@ -113,10 +113,10 @@ const GeneralDisplaySettings = () => {
   const handleContentTextSizeChange = (event) => {
     const newValue = event.target.value;
     setContentTextSize(newValue);
-    chrome.storage.sync.set({ contentTextSize: newValue });
+    chrome.storage.sync.set({contentTextSize: newValue});
 
     // Notify FloatingIcon component of the change
-    chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+    chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
       if (tabs[0]) {
         chrome.tabs.sendMessage(tabs[0].id, {
           action: "settingChanged",
@@ -142,10 +142,10 @@ const GeneralDisplaySettings = () => {
   const handleNoteTextSizeChange = (event) => {
     const newValue = event.target.value;
     setNoteTextSize(newValue);
-    chrome.storage.sync.set({ noteTextSize: newValue });
+    chrome.storage.sync.set({noteTextSize: newValue});
 
     // Notify FloatingIcon component of the change
-    chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+    chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
       if (tabs[0]) {
         chrome.tabs.sendMessage(tabs[0].id, {
           action: "settingChanged",
@@ -171,10 +171,10 @@ const GeneralDisplaySettings = () => {
   const handleFloatingIconPositionChange = (event) => {
     const newValue = event.target.value;
     setFloatingIconPosition(newValue);
-    chrome.storage.sync.set({ floatingIconPosition: newValue });
+    chrome.storage.sync.set({floatingIconPosition: newValue});
 
     // Notify FloatingIcon component of the change
-    chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+    chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
       if (tabs[0]) {
         chrome.tabs.sendMessage(tabs[0].id, {
           action: "settingChanged",
@@ -200,10 +200,10 @@ const GeneralDisplaySettings = () => {
   const handleAlwaysOpenOverviewTabChange = (event) => {
     const newValue = event.target.checked;
     setAlwaysOpenOverviewTab(newValue);
-    chrome.storage.sync.set({ alwaysOpenOverviewTab: newValue });
+    chrome.storage.sync.set({alwaysOpenOverviewTab: newValue});
 
     // Notify FloatingIcon component of the change
-    chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+    chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
       if (tabs[0]) {
         chrome.tabs.sendMessage(tabs[0].id, {
           action: "settingChanged",
@@ -229,10 +229,10 @@ const GeneralDisplaySettings = () => {
   const handleColorfulTabsChange = (event) => {
     const newValue = event.target.checked;
     setUseColorfulTabs(newValue);
-    chrome.storage.sync.set({ useColorfulTabs: newValue });
+    chrome.storage.sync.set({useColorfulTabs: newValue});
 
     // Notify FloatingIcon component of the change
-    chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+    chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
       if (tabs[0]) {
         chrome.tabs.sendMessage(tabs[0].id, {
           action: "settingChanged",
@@ -257,9 +257,9 @@ const GeneralDisplaySettings = () => {
   const handleEnableCKMTabChange = (event) => {
     const newValue = event.target.checked;
     setEnableCKMTab(newValue);
-    chrome.storage.sync.set({ enableCKMTab: newValue });
+    chrome.storage.sync.set({enableCKMTab: newValue});
 
-    chrome.tabs.query({ active: true, currentWindow: true }, function(tabs) {
+    chrome.tabs.query({active: true, currentWindow: true}, function (tabs) {
       if (tabs[0]) {
         chrome.tabs.sendMessage(tabs[0].id, {
           action: "settingChanged",
@@ -288,13 +288,13 @@ const GeneralDisplaySettings = () => {
         aria-controls="general-display-settings-content"
         id="general-display-settings-header"
       >
-        <Box sx={{ display: 'flex', alignItems: 'center' }}>
-          <DisplaySettingsIcon sx={{ mr: 1, color: 'primary.main' }} />
+        <Box sx={{display: 'flex', alignItems: 'center'}}>
+          <DisplaySettingsIcon sx={{mr: 1, color: 'primary.main'}} />
           <Typography>一般顯示設定</Typography>
         </Box>
       </AccordionSummary>
       <AccordionDetails>
-        <Box sx={{ mb: 2 }}>
+        <Box sx={{mb: 2}}>
           <FormHelperText>此頁所有設定需重新載入網頁才會生效</FormHelperText>
           <FormControlLabel
             control={
@@ -334,9 +334,9 @@ const GeneralDisplaySettings = () => {
             label="自動開啟資料頁面"
           />
           <FormHelperText>讀卡後進入雲端網站自動開啟資料頁面</FormHelperText>
-          <Divider sx={{ my: 2 }} />
+          <Divider sx={{my: 2}} />
 
-          <FormControl fullWidth sx={{ mb: 1 }}>
+          <FormControl fullWidth sx={{mb: 1}}>
             <InputLabel id="floating-icon-position-label">浮動圖標位置</InputLabel>
             <Select
               labelId="floating-icon-position-label"
@@ -351,9 +351,9 @@ const GeneralDisplaySettings = () => {
             </Select>
             <FormHelperText>設定浮動圖標在螢幕上的顯示位置</FormHelperText>
           </FormControl>
-          <Typography variant="subtitle1" sx={{ mb: 1 }}>文字大小設定</Typography>
-          <Box sx={{ display: 'flex', gap: 1, mb: 1 }}>
-            <FormControl sx={{ flex: 1 }}>
+          <Typography variant="subtitle1" sx={{mb: 1}}>文字大小設定</Typography>
+          <Box sx={{display: 'flex', gap: 1, mb: 1}}>
+            <FormControl sx={{flex: 1}}>
               <InputLabel id="title-text-size-label">標題</InputLabel>
               <Select
                 labelId="title-text-size-label"
@@ -369,7 +369,7 @@ const GeneralDisplaySettings = () => {
               </Select>
             </FormControl>
 
-            <FormControl sx={{ flex: 1 }}>
+            <FormControl sx={{flex: 1}}>
               <InputLabel id="content-text-size-label">內容</InputLabel>
               <Select
                 labelId="content-text-size-label"
@@ -385,7 +385,7 @@ const GeneralDisplaySettings = () => {
               </Select>
             </FormControl>
 
-            <FormControl sx={{ flex: 1 }}>
+            <FormControl sx={{flex: 1}}>
               <InputLabel id="note-text-size-label">備註</InputLabel>
               <Select
                 labelId="note-text-size-label"

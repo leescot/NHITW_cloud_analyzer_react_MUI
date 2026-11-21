@@ -1,9 +1,9 @@
 // settingsManager.js
 // 統一管理所有設置相關的函數
 
-import { DEFAULT_SETTINGS } from "../config/defaultSettings";
-import { DEFAULT_LAB_TESTS } from "../config/labTests";
-import { DEFAULT_IMAGE_TESTS } from "../config/imageTests";
+import {DEFAULT_SETTINGS} from "../config/defaultSettings";
+import {DEFAULT_LAB_TESTS} from "../config/labTests";
+import {DEFAULT_IMAGE_TESTS} from "../config/imageTests";
 
 /**
  * 從 Chrome storage 加載所有設置
