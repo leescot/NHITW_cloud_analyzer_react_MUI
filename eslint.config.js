@@ -27,25 +27,29 @@ export default [
       // 引用推薦的語法檢測規則
       // ref: https://eslint.org/docs/latest/rules/
       ...js.configs.recommended.rules,
+      'no-irregular-whitespace': ['error', {'skipTemplates': true}],
+      'no-prototype-builtins': 'off',
+      'no-unused-vars': 'off',
+      'no-useless-escape': 'off',
 
       // 引用客製化推薦程式碼風格規則，及做一些微調
       // ref: https://eslint.style/rules
       ...stylisticCustomized.rules,
-      "@stylistic/arrow-parens": "off",  // 取消強制箭頭函數加括號
-      "@stylistic/brace-style": "off",  // 取消強制處理花括號前後換行
-      "@stylistic/comma-dangle": "off",  // 取消強制多行物件尾部加逗點
-      "@stylistic/eol-last": "off",  // 取消強制檔尾換行
-      "@stylistic/indent": "off",  // 取消強制使用2空格縮排
-      "@stylistic/indent-binary-ops": "off",  // 取消強制二元運算子縮排
-      "@stylistic/max-statements-per-line": "off",  // 取消回報一行多陳述
-      "@stylistic/multiline-ternary": "off",  // 取消強制三元運算子分行
-      "@stylistic/no-mixed-operators": "off",  // 取消強制混合運算使用括號
-      "@stylistic/no-multi-spaces": ["error", { ignoreEOLComments: true }],  // 禁止多重空格，但允許行尾註解前使用
-      "@stylistic/no-multiple-empty-lines": ['error', { max: 2, maxBOF: 0, maxEOF: 0 }],  // 空行最多2個
-      "@stylistic/object-curly-spacing": "off",  // 取消強制物件花括號內加空格
-      "@stylistic/operator-linebreak": "off",  // 取消強制運算符號置於行首
-      "@stylistic/quote-props": "off",  // 取消強制處理物件屬性的雙引號
-      "@stylistic/quotes": "off",  // 取消強制字串使用雙引號
+      '@stylistic/arrow-parens': 'off',  // 取消強制箭頭函數加括號
+      '@stylistic/brace-style': 'off',  // 取消強制處理花括號前後換行
+      '@stylistic/comma-dangle': 'off',  // 取消強制多行物件尾部加逗點
+      '@stylistic/eol-last': 'off',  // 取消強制檔尾換行
+      '@stylistic/indent': 'off',  // 取消強制使用2空格縮排
+      '@stylistic/indent-binary-ops': 'off',  // 取消強制二元運算子縮排
+      '@stylistic/max-statements-per-line': 'off',  // 取消回報一行多陳述
+      '@stylistic/multiline-ternary': 'off',  // 取消強制三元運算子分行
+      '@stylistic/no-mixed-operators': 'off',  // 取消強制混合運算使用括號
+      '@stylistic/no-multi-spaces': ['error', {ignoreEOLComments: true}],  // 禁止多重空格，但允許行尾註解前使用
+      '@stylistic/no-multiple-empty-lines': ['error', {max: 2, maxBOF: 0, maxEOF: 0}],  // 空行最多2個
+      '@stylistic/object-curly-spacing': ['error', 'never'],  // 強制物件花括號內不加空格
+      '@stylistic/operator-linebreak': 'off',  // 取消強制運算符號置於行首
+      '@stylistic/quote-props': 'off',  // 取消強制處理物件屬性的雙引號
+      '@stylistic/quotes': 'off',  // 取消強制字串使用雙引號
     },
   },
   {
@@ -61,11 +65,11 @@ export default [
       },
       parserOptions: {
         ecmaVersion: 'latest',
-        ecmaFeatures: { jsx: true },
+        ecmaFeatures: {jsx: true},
         sourceType: 'module',
       },
     },
-    settings: { react: { version: '18.3' } },
+    settings: {react: {version: '18.3'}},
     plugins: {
       react,
       'react-hooks': reactHooks,
@@ -75,11 +79,11 @@ export default [
       ...react.configs.recommended.rules,
       ...react.configs['jsx-runtime'].rules,
       ...reactHooks.configs.recommended.rules,
+      'react/jsx-key': 'warn',
       'react/jsx-no-target-blank': 'off',
-      'react-refresh/only-export-components': [
-        'warn',
-        { allowConstantExport: true },
-      ],
+      'react/no-unescaped-entities': 'off',
+      'react/prop-types': 'off',
+      'react-refresh/only-export-components': ['warn', {allowConstantExport: true}],
     },
   },
   {
